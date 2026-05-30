@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: #07050f;
+  color: #e2e8f0;
+  margin: 0;
+  padding: 0;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.glass {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+}
+
+.glass-strong {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(20px);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-purple {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.15);
+}
+
+.glow-blue {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
+}
+
+.node-card {
+  transition: all 0.2s ease;
+}
+.node-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
+}
+
+.flow-line {
+  stroke: rgba(139, 92, 246, 0.4);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  animation: dash 20s linear infinite;
+}
+
+@keyframes dash {
+  to { stroke-dashoffset: -200; }
+}
+
+.tab-active {
+  background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(59,130,246,0.2));
+  border-color: rgba(139,92,246,0.5);
+  color: white;
+}
+
+.pulse-dot {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

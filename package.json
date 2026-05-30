@@ -1,0 +1,29 @@
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@types/nodemailer": "^8.0.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "mysql2": "^3.22.2",
+    "nodemailer": "^8.0.9",
+    "plotly.js": "^3.4.0",
+    "razorpay": "^2.9.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-plotly.js": "^2.6.0",
+    "react-router-dom": "^7.13.2",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@types/plotly.js": "^3.0.10",
+    "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.19"
+  }
+}
