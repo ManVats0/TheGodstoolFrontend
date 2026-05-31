@@ -1,0 +1,9 @@
+@"
+node_modules
+.env
+credentials.env
+__pycache__
+uploads
+user_tokens
+venv
+"@ | Out-File -FilePath .gitignore -Encoding utf8
