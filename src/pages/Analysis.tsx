@@ -471,7 +471,7 @@ import { API_BASE } from '../config'
           setLoading(false)
           return
         }
-        const gateRes = await fetch('http://localhost:4000/api/ai-usage', {
+        const gateRes = await fetch('${API_BASE}/api/ai-usage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
         })
