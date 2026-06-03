@@ -1218,15 +1218,25 @@ setAnalyzing(false)
           }
         }
 
-        if (!lastResult) {
-          setCleaning(false)
-          return
+        if (!lastResult || typeof lastResult !== 'object') {
+          console.error("Invalid response from backend:", lastResult);
+          alert('Cleaning returned invalid data. Check backend logs.');
+          setCleaning(false);
+          return;
         }
 
-        // Ensure result has required shape fields
-        if (!lastResult.original_shape) {
-          lastResult.original_shape = [0, 0]
-        }
+        // Deep safety check: Ensure fields exist before rendering
+        const safeResult = {
+            ...lastResult,
+            original_shape: lastResult.original_shape || [0, 0],
+            cleaned_shape: lastResult.cleaned_shape || [0, 0],
+            options_used: lastResult.options_used || {},
+            download_url: lastResult.download_url || ''
+        };
+
+        setResult(safeResult);
+        setAnalysisTab('success' as any);
+
         if (!lastResult.cleaned_shape) {
           lastResult.cleaned_shape = [0, 0]
         }
@@ -1500,7 +1510,7 @@ setAnalyzing(false)
       )
     }
 
-    if (analysisTab === 'success' && result) {
+    if (analysisTab === 'success' && result && result.original_shape && result.cleaned_shape) {
       const previewData = result.preview_data || []
       const previewCols = result.preview_columns || (previewData[0] ? Object.keys(previewData[0]) : [])
       return (
