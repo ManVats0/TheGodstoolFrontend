@@ -424,11 +424,15 @@ import { API_BASE } from '../config'
     sampleData,
     // _activeFile,
     activeSourceName,
+    setCustomCleanOps,
+    setOptions,
   }: {
     colInfo: any[]
     sampleData: any[]
     activeFile: File | null
     activeSourceName: string
+    setCustomCleanOps: React.Dispatch<React.SetStateAction<{key: string, label: string, instruction: string}[]>>
+    setOptions: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
   }) {
     void colInfo
     const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
@@ -497,8 +501,18 @@ const response = await fetch(`${API_BASE}/api/ai-clean`, {
   }),
 })
 const aiData = await response.json()
+if (aiData.success) {
+  const opKey = `ai_custom_${Date.now()}`
+  const newOp = {
+    key: opKey,
+    label: trimmed,
+    instruction: trimmed,
+  }
+  setCustomCleanOps(prev => [...prev, newOp])
+  setOptions(prev => ({ ...prev, [opKey]: true }))
+}
 const assistantText = aiData.success
-  ? `${aiData.explanation}\n\n**Steps selected:** ${aiData.steps.join(', ')}`
+  ? `${aiData.explanation}\n\n✅ Added as a new cleaning step below — click **Run Cleaning** to apply!`
   : '⚠️ ' + (aiData.error || 'AI unavailable')
         setMessages(prev => [...prev, { role: 'assistant', content: assistantText }])
       } catch (err) {
@@ -692,9 +706,10 @@ const assistantText = aiData.success
     const [showEditSource, setShowEditSource] = useState(false)
     const [imputationMethod, setImputationMethod] = useState('none')
     const [options, setOptions] = useState<Record<string, boolean>>({
-      remove_duplicates: false, remove_empty_rows: false, standardize_text: false,
-      fix_dates: false, handle_outliers: false, fill_missing: false
-    })
+  remove_duplicates: false, remove_empty_rows: false, standardize_text: false,
+  fix_dates: false, handle_outliers: false, fill_missing: false
+})
+const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string, instruction: string}[]>([])
 
     // Fullscreen state
     const [fullscreenTable, setFullscreenTable] = useState<{
@@ -1161,19 +1176,59 @@ setAnalyzing(false)
     const runClean = useCallback(async () => {
       if (!activeFile) return
       setCleaning(true)
-      const formData = new FormData()
-      formData.append('file', activeFile)
-      Object.entries(options).forEach(([k, v]) => formData.append(k, String(v)))
-      formData.append('imputation_method', imputationMethod)
+
+      const activeCustomOps = customCleanOps.filter(op => options[op.key])
+
       try {
-        const res = await fetch(`${API_BASE}/api/clean-data`, { method: 'POST', body: formData })
-        const data = await res.json()
-        setResult(data)
+        let fileToClean = activeFile
+        let lastResult: any = null
+
+        // Run standard cleaning first if any standard options selected
+        const standardOptions = Object.fromEntries(
+          Object.entries(options).filter(([k]) => !k.startsWith('ai_custom_'))
+        )
+        const hasStandardOps = Object.values(standardOptions).some(Boolean)
+
+        if (hasStandardOps) {
+          const formData = new FormData()
+          formData.append('file', fileToClean)
+          Object.entries(standardOptions).forEach(([k, v]) => formData.append(k, String(v)))
+          formData.append('imputation_method', imputationMethod)
+          const res = await fetch(`${API_BASE}/api/clean-data`, { method: 'POST', body: formData })
+          lastResult = await res.json()
+          // Download the cleaned file to pass to next step
+          if (lastResult.download_url) {
+            const csvRes = await fetch(`${API_BASE}${lastResult.download_url}`)
+            const blob = await csvRes.blob()
+            fileToClean = new File([blob], 'intermediate.csv', { type: 'text/csv' })
+          }
+        }
+
+        // Run each custom AI op sequentially
+        for (const op of activeCustomOps) {
+          const formData = new FormData()
+          formData.append('file', fileToClean)
+          formData.append('instruction', op.instruction)
+          const res = await fetch(`${API_BASE}/api/ai-custom-clean`, { method: 'POST', body: formData })
+          lastResult = await res.json()
+          if (lastResult.success && lastResult.download_url) {
+            const csvRes = await fetch(`${API_BASE}${lastResult.download_url}`)
+            const blob = await csvRes.blob()
+            fileToClean = new File([blob], 'intermediate.csv', { type: 'text/csv' })
+          }
+        }
+
+        if (!lastResult) {
+          setCleaning(false)
+          return
+        }
+
+        setResult(lastResult)
         setAnalysisTab('success' as any)
         addAuditLog({
           id: crypto.randomUUID(), time: new Date().toLocaleString(),
           action: 'clean', entity_type: 'csv_file', entity_id: crypto.randomUUID(),
-          details: `Cleaned: ${activeFile.name} · ${data.original_shape[0]} → ${data.cleaned_shape[0]} rows`,
+          details: `Cleaned: ${activeFile.name} · ${lastResult.original_shape?.[0]} → ${lastResult.cleaned_shape?.[0]} rows`,
           user: 'local_user'
         })
       } catch {
@@ -1181,7 +1236,7 @@ setAnalyzing(false)
       } finally {
         setCleaning(false)
       }
-    }, [activeFile, options, imputationMethod])
+    }, [activeFile, options, imputationMethod, customCleanOps])
 
     const handleEditSourceConfirm = useCallback((sourceName: string, destinationName: string) => {
       setShowEditSource(false)
@@ -2320,6 +2375,8 @@ const getPreviewFullscreenData = () => {
                 sampleData={sample}
                 activeFile={activeFile}
                 activeSourceName={activeSourceName}
+                setCustomCleanOps={setCustomCleanOps}
+                setOptions={setOptions}
               />
             )}
 
@@ -2378,7 +2435,12 @@ const getPreviewFullscreenData = () => {
 
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {CLEANING_OPTIONS.map(({ key, label, desc, issueKey }) => {
+              {[...CLEANING_OPTIONS, ...customCleanOps.map(op => ({
+                key: op.key,
+                label: `✨ ${op.label}`,
+                desc: 'AI-generated cleaning step',
+                issueKey: ''
+              }))].map(({ key, label, desc, issueKey }) => {
                 const detected = analysis.issues?.[issueKey]
                 const checked = options[key]
                 return (
