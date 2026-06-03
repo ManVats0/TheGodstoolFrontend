@@ -1223,6 +1223,14 @@ setAnalyzing(false)
           return
         }
 
+        // Ensure result has required shape fields
+        if (!lastResult.original_shape) {
+          lastResult.original_shape = [0, 0]
+        }
+        if (!lastResult.cleaned_shape) {
+          lastResult.cleaned_shape = [0, 0]
+        }
+
         setResult(lastResult)
         setAnalysisTab('success' as any)
         addAuditLog({
