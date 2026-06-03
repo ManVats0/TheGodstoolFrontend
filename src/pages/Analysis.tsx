@@ -430,6 +430,7 @@ import { API_BASE } from '../config'
     activeFile: File | null
     activeSourceName: string
   }) {
+    void colInfo
     const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
       {
         role: 'assistant',
@@ -444,10 +445,6 @@ import { API_BASE } from '../config'
     useEffect(() => {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
-
-    const schemaContext = colInfo.map(c =>
-      `${c.column} (${c.dtype}, ${c.null} nulls, ${c.unique} unique values, sample: "${c.sample}")`
-    ).join('\n')
 
     const sampleContext = sampleData.slice(0, 3).map((row, i) =>
       `Row ${i + 1}: ${JSON.stringify(row)}`
@@ -491,38 +488,18 @@ import { API_BASE } from '../config'
           return
         }
 
-        const systemPrompt = `You are an expert data cleaning assistant embedded inside a data quality tool called "The God's Tool".
-
-  The user is working with a dataset called: ${activeSourceName}
-
-  DATASET SCHEMA:
-  ${schemaContext}
-
-  SAMPLE ROWS:
-  ${sampleContext}
-
-  Your job is to interpret the user's natural language data cleaning command and produce:
-  1. A clear explanation of what you understood
-  2. Python pandas code to perform the operation
-  3. The equivalent SQL (if applicable)
-  4. A warning if the operation is potentially destructive or irreversible
-
-  Format your response clearly with sections. Use code blocks with language tags.
-  Always preserve the original data — show how to create a cleaned copy.
-  Be concise but complete. If the command is ambiguous, ask one clarifying question.`
-
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1000,
-            system: systemPrompt,
-            messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-          }),
-        })
-        const aiData = await response.json()
-        const assistantText = aiData.content?.[0]?.text || 'Sorry, I could not process that request.'
+const response = await fetch(`${API_BASE}/api/ai-clean`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+  body: JSON.stringify({
+    instructions: trimmed,
+    csv_preview: sampleContext,
+  }),
+})
+const aiData = await response.json()
+const assistantText = aiData.success
+  ? `${aiData.explanation}\n\n**Steps selected:** ${aiData.steps.join(', ')}`
+  : '⚠️ ' + (aiData.error || 'AI unavailable')
         setMessages(prev => [...prev, { role: 'assistant', content: assistantText }])
       } catch (err) {
         setMessages(prev => [...prev, {
