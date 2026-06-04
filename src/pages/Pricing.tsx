@@ -66,7 +66,7 @@ export default function Pricing() {
     if (!token) { navigate('/'); return }
 
     try {
-      const res = await fetch('${import.meta.env.VITE_AUTH_URL}/api/subscribe', {
+      const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ planKey })
@@ -82,7 +82,7 @@ export default function Pricing() {
         name: "The God's Tool",
         description: PLANS.find(p => p.key === planKey)?.name + ' Plan',
         handler: async (response: any) => {
-          const verifyRes = await fetch('${import.meta.env.VITE_AUTH_URL}/api/verify-payment', {
+          const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
             body: JSON.stringify({ ...response, planKey })
