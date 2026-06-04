@@ -110,7 +110,7 @@ const [forgotError, setForgotError] = useState('')
       }
       // Fetch plan
       try {
-        const planRes = await fetch('${import.meta.env.VITE_AUTH_URL}/api/plan', {
+        const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
           headers: { Authorization: `Bearer ${data.token}` }
         })
         const planData = await planRes.json()
@@ -164,7 +164,7 @@ const [forgotError, setForgotError] = useState('')
           localStorage.setItem('datapro_token', data.token)
           localStorage.setItem('datapro_email', data.email)
           try {
-            const planRes = await fetch('${import.meta.env.VITE_AUTH_URL}/api/plan', {
+            const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
               headers: { Authorization: `Bearer ${data.token}` }
             })
             const planData = await planRes.json()
