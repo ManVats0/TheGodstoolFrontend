@@ -1210,43 +1210,47 @@ setAnalyzing(false)
           formData.append('file', fileToClean)
           formData.append('instruction', op.instruction)
           const res = await fetch(`${API_BASE}/api/ai-custom-clean`, { method: 'POST', body: formData })
-          lastResult = await res.json()
-          if (lastResult.success && lastResult.download_url) {
+          const aiResult = await res.json()
+          if (aiResult.success && aiResult.download_url) {
+            lastResult = {
+              ...(lastResult || {}),
+              ...aiResult,
+              original_shape: lastResult?.original_shape || aiResult.original_shape || [0, 0],
+              cleaned_shape: aiResult.cleaned_shape || lastResult?.cleaned_shape || [0, 0],
+              options_used: {
+                ...(lastResult?.options_used || {}),
+                [op.label]: true,
+              },
+            }
             const csvRes = await fetch(`${API_BASE}${lastResult.download_url}`)
             const blob = await csvRes.blob()
             fileToClean = new File([blob], 'intermediate.csv', { type: 'text/csv' })
           }
         }
 
-        if (!lastResult || typeof lastResult !== 'object') {
-          console.error("Invalid response from backend:", lastResult);
-          alert('Cleaning returned invalid data. Check backend logs.');
-          setCleaning(false);
-          return;
+        if (!lastResult) {
+          alert('No cleaning operation produced a result.')
+          setCleaning(false)
+          return
         }
 
-        // Deep safety check: Ensure fields exist before rendering
         const safeResult = {
-            ...lastResult,
-            original_shape: lastResult.original_shape || [0, 0],
-            cleaned_shape: lastResult.cleaned_shape || [0, 0],
-            options_used: lastResult.options_used || {},
-            download_url: lastResult.download_url || ''
-        };
-
-        setResult(safeResult);
-        setAnalysisTab('success' as any);
-
-        if (!lastResult.cleaned_shape) {
-          lastResult.cleaned_shape = [0, 0]
+          preview_data: [],
+          preview_columns: [],
+          options_used: {},
+          code_used: '',
+          ...lastResult,
+          original_shape: lastResult.original_shape ?? [0, 0],
+          cleaned_shape: lastResult.cleaned_shape ?? [0, 0],
+          download_url: lastResult.download_url ?? '',
         }
 
-        setResult(lastResult)
+        setResult(safeResult)
         setAnalysisTab('success' as any)
         addAuditLog({
           id: crypto.randomUUID(), time: new Date().toLocaleString(),
           action: 'clean', entity_type: 'csv_file', entity_id: crypto.randomUUID(),
-          details: `Cleaned: ${activeFile.name} · ${lastResult.original_shape?.[0]} → ${lastResult.cleaned_shape?.[0]} rows`,
+          details: `Cleaned: ${activeFile.name} · ${safeResult.original_shape[0]} → ${safeResult.cleaned_shape[0]} rows`,
           user: 'local_user'
         })
       } catch {
