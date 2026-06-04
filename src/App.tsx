@@ -128,7 +128,7 @@ const [forgotError, setForgotError] = useState('')
   const handleForgotPassword = async () => {
     if (!forgotEmail.trim()) { setForgotError('Please enter your email.'); return }
     try {
-      const res = await fetch('${import.meta.env.VITE_AUTH_URL}/api/forgot-password', {
+      const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: forgotEmail })
@@ -149,7 +149,7 @@ const [forgotError, setForgotError] = useState('')
       callback: async (response: any) => {
         try {
           const payload = JSON.parse(atob(response.credential.split('.')[1]))
-          const backendRes = await fetch('${import.meta.env.VITE_AUTH_URL}/api/google', {
+          const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
