@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const PLANS = [
@@ -59,6 +59,16 @@ export default function Pricing() {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    document.body.appendChild(script)
+    return () => {
+      document.body.removeChild(script)
+    }
+  }, [])
+
   const handleSubscribe = async (planKey: string) => {
     setError('')
     setLoading(planKey)
@@ -110,7 +120,6 @@ export default function Pricing() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
-      <script src="https://checkout.razorpay.com/v1/checkout.js" />
 
       <div style={{ textAlign: 'center', marginBottom: '48px' }}>
         <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
