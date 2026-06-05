@@ -182,18 +182,6 @@ const [forgotError, setForgotError] = useState('')
     ;(window as any).google.accounts.id.prompt()
   }
 
-  if (location.pathname === '/reset-password') return (
-    <Routes>
-      <Route path="/reset-password" element={<ResetPassword />} />
-    </Routes>
-  )
-
-  if (location.pathname === '/pricing') return (
-    <Routes>
-      <Route path="/pricing" element={<Pricing />} />
-    </Routes>
-  )
-
 if (!entered) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '24px', position: 'relative', overflow: 'hidden',
       background: '#0a0a1a',
@@ -591,7 +579,7 @@ if (!entered) return (
               <span style={{ color: '#4ade80', fontFamily: 'monospace', fontSize: '0.78rem', background: 'rgba(74,222,128,0.1)', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>No credit card</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
-              {['✓ CSV & Google Sheets upload', '✓ Data analysis & cleaning', '✗ Other data sources (locked)', '✗ AI features (locked)'].map(f => (
+              {['✓ CSV upload', '✓ Google Sheets', '✓ Google Analytics', '✓ Data analysis & cleaning', '✗ Other data sources (locked)', '✗ AI features (locked)'].map(f => (
                 <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: f.startsWith('✗') ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)' }}>{f}</div>
               ))}
             </div>
