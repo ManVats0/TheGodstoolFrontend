@@ -182,6 +182,10 @@ const [forgotError, setForgotError] = useState('')
     ;(window as any).google.accounts.id.prompt()
   }
 
+if (location.pathname === '/reset-password') return <Routes><Route path="/reset-password" element={<ResetPassword />} /></Routes>
+
+if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
+
 if (!entered) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '24px', position: 'relative', overflow: 'hidden',
       background: '#0a0a1a',
