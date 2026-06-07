@@ -182,7 +182,8 @@ const [forgotError, setForgotError] = useState('')
     ;(window as any).google.accounts.id.prompt()
   }
 
-if (location.pathname === '/reset-password') return <Routes><Route path="/reset-password" element={<ResetPassword />} /></Routes>
+if (location.pathname === '/privacy.html') { window.location.href = '/privacy.html'; return null; }
+if (location.pathname === '/terms.html') { window.location.href = '/terms.html'; return null; }
 
 if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
 
@@ -561,9 +562,9 @@ if (!entered) return (
 
             <p style={{ color: '#334155', fontSize: '0.72rem', textAlign: 'center', margin: 0, fontFamily: 'monospace', lineHeight: 1.6 }}>
   By continuing you agree to The God's Tool's{' '}
-  <a href="/terms.html" style={{ color: '#38bdf8' }}>Terms of Service</a>
-  {' '}and{' '}
-  <a href="/privacy.html" style={{ color: '#38bdf8' }}>Privacy Policy</a>.
+  <a href="/terms.html" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Terms of Service</a>
+{' '}and{' '}
+<a href="/privacy.html" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Privacy Policy</a>
 </p>
           </div>
         </div>
