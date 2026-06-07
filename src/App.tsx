@@ -1,5 +1,7 @@
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 import { useState, useEffect } from 'react'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
@@ -185,7 +187,10 @@ const [forgotError, setForgotError] = useState('')
 if (location.pathname === '/privacy.html') { window.location.href = '/privacy.html'; return null; }
 if (location.pathname === '/terms.html') { window.location.href = '/terms.html'; return null; }
 
+if (location.pathname === '/reset-password') return <Routes><Route path="/reset-password" element={<ResetPassword />} /></Routes>
 if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
+if (location.pathname === '/privacy') return <Routes><Route path="/privacy" element={<Privacy />} /></Routes>
+if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
 
 if (!entered) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '24px', position: 'relative', overflow: 'hidden',
@@ -562,9 +567,9 @@ if (!entered) return (
 
             <p style={{ color: '#334155', fontSize: '0.72rem', textAlign: 'center', margin: 0, fontFamily: 'monospace', lineHeight: 1.6 }}>
   By continuing you agree to The God's Tool's{' '}
-  <a href="/terms.html" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Terms of Service</a>
+  <a href="/terms" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Terms of Service</a>
 {' '}and{' '}
-<a href="/privacy.html" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Privacy Policy</a>
+<a href="/privacy" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Privacy Policy</a>
 </p>
           </div>
         </div>
