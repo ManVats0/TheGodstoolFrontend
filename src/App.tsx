@@ -560,8 +560,11 @@ if (!entered) return (
             </div>
 
             <p style={{ color: '#334155', fontSize: '0.72rem', textAlign: 'center', margin: 0, fontFamily: 'monospace', lineHeight: 1.6 }}>
-              By continuing you agree to The God's Tool's Terms of Service and Privacy Policy.
-            </p>
+  By continuing you agree to The God's Tool's{' '}
+  <a href="/terms.html" style={{ color: '#38bdf8' }}>Terms of Service</a>
+  {' '}and{' '}
+  <a href="/privacy.html" style={{ color: '#38bdf8' }}>Privacy Policy</a>.
+</p>
           </div>
         </div>
       )}
