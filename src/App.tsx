@@ -2,6 +2,7 @@ import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
+import About from './pages/About'
 import { useState, useEffect } from 'react'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
@@ -191,6 +192,7 @@ if (location.pathname === '/reset-password') return <Routes><Route path="/reset-
 if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
 if (location.pathname === '/privacy') return <Routes><Route path="/privacy" element={<Privacy />} /></Routes>
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
+if (location.pathname === '/about') return <Routes><Route path="/about" element={<About />} /></Routes>
 
 if (!entered) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '24px', position: 'relative', overflow: 'hidden',
@@ -366,9 +368,24 @@ if (!entered) return (
           </button>
 
           {/* Bottom formula */}
-          <div style={{ fontFamily: 'Georgia, serif', color: '#4f3fa0', fontSize: '0.85rem', opacity: 0.45, letterSpacing: '0.08em' }}>
-            ∇²ψ + k²ψ = 0 &nbsp;&nbsp; ∮ B · dA = 0
-          </div>
+<div style={{ fontFamily: 'Georgia, serif', color: '#4f3fa0', fontSize: '0.85rem', opacity: 0.45, letterSpacing: '0.08em' }}>
+  ∇²ψ + k²ψ = 0 &nbsp;&nbsp; ∮ B · dA = 0
+</div>
+
+{/* Public app description for Google verification */}
+<div style={{ marginTop: 48, maxWidth: 600, textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
+  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.88rem', lineHeight: 1.8, fontFamily: 'Georgia, serif' }}>
+    The God's Tool is a data intelligence and pipeline automation platform. Connect CSV files, Google Sheets, databases, and cloud warehouses — then profile, clean, and automate your data pipelines from a single browser interface.
+  </p>
+  <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.8rem', lineHeight: 1.7, fontFamily: 'monospace' }}>
+    Google Sign-In is used solely for account authentication. Google Sheets access is optional and only activated when you explicitly connect a sheet inside the app. We do not access, store, or share any Google data without your action.
+  </p>
+  <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginTop: 8 }}>
+    <a href="/privacy" style={{ color: '#7c6fff', fontSize: '0.78rem', fontFamily: 'monospace', opacity: 0.7 }}>Privacy Policy</a>
+    <a href="/terms" style={{ color: '#7c6fff', fontSize: '0.78rem', fontFamily: 'monospace', opacity: 0.7 }}>Terms of Service</a>
+    <a href="mailto:vatsaman888@gmail.com" style={{ color: '#7c6fff', fontSize: '0.78rem', fontFamily: 'monospace', opacity: 0.7 }}>Contact</a>
+  </div>
+</div>
         </div>
       ) : (
         <div style={{ position: 'relative', minHeight: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#05080f', overflow: 'hidden' }}>
