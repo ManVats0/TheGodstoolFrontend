@@ -600,9 +600,6 @@ if (!entered) return (
     )}
   </div>
 )
-
-      if (entered && userPlan === 'none') return (
-
   if (entered && userPlan === 'none') return (
     <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '24px', padding: '24px' }}>
       <div style={{ textAlign: 'center', maxWidth: '480px' }}>
