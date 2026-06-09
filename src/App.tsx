@@ -193,25 +193,416 @@ if (location.pathname === '/privacy') return <Routes><Route path="/privacy" elem
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
 
 if (!entered) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '24px', position: 'relative', overflow: 'hidden',
-      background: '#0a0a1a',
-    }}>
-      {/* Math grid background */}
-      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.13, pointerEvents: 'none' }} xmlns="http://www.w3.org/2000/svg">
+  <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: 'Georgia, serif', overflowX: 'hidden' }}>
+    <style>{`
+      @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+      @keyframes fadeUp { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes pulseGlow { 0%,100%{box-shadow:0 0 40px rgba(124,58,237,0.3)} 50%{box-shadow:0 0 80px rgba(124,58,237,0.7)} }
+      @keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
+      @keyframes rotateOrb { 0%{transform:rotate(0deg) translateX(120px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)} }
+      @keyframes gridFade { 0%,100%{opacity:0.04} 50%{opacity:0.08} }
+      .hero-title {
+        font-size: clamp(2.8rem, 7vw, 5.5rem);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 30%, #a78bfa 60%, #7c3aed 100%);
+        background-size: 300% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 6s linear infinite;
+      }
+      .nav-link {
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        font-family: monospace;
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+        transition: color 0.2s;
+        cursor: pointer;
+      }
+      .nav-link:hover { color: #a78bfa; }
+      .feature-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(167,139,250,0.12);
+        border-radius: 16px;
+        padding: 28px 24px;
+        transition: all 0.3s;
+        animation: fadeUp 0.6s ease both;
+      }
+      .feature-card:hover {
+        background: rgba(124,58,237,0.08);
+        border-color: rgba(167,139,250,0.35);
+        transform: translateY(-4px);
+      }
+      .stat-item {
+        text-align: center;
+        padding: 24px 16px;
+      }
+      .cta-btn {
+        font-family: Georgia, serif;
+        background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+        color: white;
+        border: none;
+        padding: 18px 52px;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        cursor: pointer;
+        text-transform: uppercase;
+        animation: pulseGlow 3s ease-in-out infinite;
+        transition: transform 0.2s;
+      }
+      .cta-btn:hover { transform: scale(1.04); }
+      .step-num {
+        width: 48px; height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; font-weight: 900; color: white;
+        flex-shrink: 0;
+        box-shadow: 0 0 24px rgba(124,58,237,0.5);
+      }
+      .pricing-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 32px 28px;
+        flex: 1;
+        min-width: 220px;
+        max-width: 280px;
+        transition: all 0.3s;
+      }
+      .pricing-card:hover { border-color: rgba(167,139,250,0.3); transform: translateY(-4px); }
+      .pricing-card.featured {
+        background: rgba(124,58,237,0.12);
+        border: 2px solid rgba(124,58,237,0.5);
+        position: relative;
+      }
+      .auth-input {
+        width: 100%; padding: 13px 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(99,179,237,0.18);
+        border-radius: 6px; color: #e2e8f0;
+        font-size: 0.95rem; font-family: Georgia, serif;
+        box-sizing: border-box; outline: none;
+        transition: border-color 0.2s;
+      }
+      .auth-input::placeholder { color: rgba(148,163,184,0.5); }
+      .auth-input:focus { border-color: rgba(99,179,237,0.55); }
+      .auth-btn-primary {
+        width: 100%; padding: 14px;
+        background: linear-gradient(135deg, #1a56db 0%, #1e40af 100%);
+        border: none; border-radius: 6px; color: white;
+        font-weight: 700; font-size: 0.95rem; letter-spacing: 0.08em;
+        cursor: pointer; font-family: Georgia, serif; transition: opacity 0.2s;
+      }
+      .auth-btn-primary:hover { opacity: 0.88; }
+      .auth-btn-google {
+        display: flex; align-items: center; gap: 10px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 6px; padding: 12px 20px;
+        font-size: 0.92rem; font-weight: 500; cursor: pointer;
+        width: 100%; justify-content: center; color: #cbd5e1;
+        font-family: Georgia, serif; transition: background 0.2s;
+      }
+      .auth-btn-google:hover { background: rgba(255,255,255,0.1); }
+      @keyframes indraSlide {
+        from{opacity:0;transform:translateY(24px) scale(0.97)}
+        to{opacity:1;transform:translateY(0) scale(1)}
+      }
+      @keyframes indraLightning { 0%,100%{opacity:0.5} 50%{opacity:1} }
+      @keyframes float-up { 0%{transform:translateY(0);opacity:0.18} 100%{transform:translateY(-80px);opacity:0} }
+    `}</style>
+
+    {/* ── NAVBAR ── */}
+    <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(5,3,15,0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <span style={{ fontSize: '1.3rem' }}>♔</span>
+        <span style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontWeight: 900, fontSize: '1rem', letterSpacing: '0.06em', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+        <span className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</span>
+        <span className="nav-link" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>How It Works</span>
+        <span className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</span>
+        <button onClick={handleEnter} style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', padding: '8px 20px', borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.2)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+          SIGN IN
+        </button>
+      </div>
+    </nav>
+
+    {/* ── HERO ── */}
+    <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: '120px 24px 80px', position: 'relative', overflow: 'hidden' }}>
+      {/* Grid bg */}
+      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', animation: 'gridFade 4s ease-in-out infinite' }} xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <pattern id="smallGrid" width="30" height="30" patternUnits="userSpaceOnUse">
-            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#7c6fff" strokeWidth="0.5"/>
-          </pattern>
-          <pattern id="grid" width="150" height="150" patternUnits="userSpaceOnUse">
-            <rect width="150" height="150" fill="url(#smallGrid)"/>
-            <path d="M 150 0 L 0 0 0 150" fill="none" stroke="#a78bfa" strokeWidth="1.2"/>
+          <pattern id="hgrid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#7c3aed" strokeWidth="0.4"/>
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
+        <rect width="100%" height="100%" fill="url(#hgrid)" />
       </svg>
+      {/* Orbs */}
+      <div style={{ position: 'absolute', top: '20%', left: '15%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '25%', right: '10%', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-      {/* Floating math symbols */}
-      {[
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', animation: 'fadeUp 0.8s ease both' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(167,139,250,0.25)', borderRadius: '20px', padding: '6px 18px', marginBottom: '32px', fontFamily: 'monospace', fontSize: '0.72rem', color: '#a78bfa', letterSpacing: '0.15em' }}>
+          ⚡ DATA INTELLIGENCE PLATFORM
+        </div>
+
+        <h1 className="hero-title" style={{ margin: '0 0 24px' }}>
+          The God's Tool
+        </h1>
+
+        <p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '620px', margin: '0 auto 16px', fontFamily: 'Georgia, serif' }}>
+          Connect any data source. Clean it with AI. Automate your pipelines. All from one browser tab — no engineers required.
+        </p>
+
+        <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#6d5fc7', letterSpacing: '0.1em', marginBottom: '48px', opacity: 0.7 }}>
+          CSV · Google Sheets · MySQL · PostgreSQL · BigQuery · MongoDB
+        </p>
+
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="cta-btn" onClick={handleEnter}>Enter the Platform</button>
+          <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '18px 40px', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.4)'; e.currentTarget.style.color = '#a78bfa' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}>
+            See How It Works
+          </button>
+        </div>
+      </div>
+    </section>
+
+    {/* ── STATS BAR ── */}
+    <div style={{ background: 'rgba(124,58,237,0.08)', borderTop: '1px solid rgba(167,139,250,0.1)', borderBottom: '1px solid rgba(167,139,250,0.1)', padding: '0 24px' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {[
+          { val: '20+', label: 'Languages Supported' },
+          { val: '∞', label: 'Data Sources' },
+          { val: 'AI', label: 'Powered Cleaning' },
+          { val: '1', label: 'Browser Tab' },
+        ].map((s, i) => (
+          <div key={i} className="stat-item" style={{ padding: '28px 40px' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 900, background: 'linear-gradient(135deg, #e9d5ff, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 }}>{s.val}</div>
+            <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', marginTop: '6px', textTransform: 'uppercase' }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* ── FEATURES ── */}
+    <section id="features" style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
+      <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+        <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
+        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Everything your data needs.</h2>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>One platform. Zero compromises.</p>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+        {[
+          { icon: '⚡', title: 'AI-Powered Cleaning', desc: 'Detect nulls, fix formats, remove duplicates, and standardize columns — automatically. Claude AI does the heavy lifting.', delay: '0s' },
+          { icon: '🔌', title: 'Connect Anything', desc: 'CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, GA4 — plug in any source in seconds.', delay: '0.1s' },
+          { icon: '🔄', title: 'Pipeline Automation', desc: 'Build no-code data flows that run on a schedule. Transform, join, filter, and export without writing a line.', delay: '0.2s' },
+          { icon: '📊', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.3s' },
+          { icon: '🔒', title: 'Secure by Default', desc: 'Your data never leaves your session without permission. Encrypted in transit, zero third-party sharing.', delay: '0.4s' },
+          { icon: '🌐', title: 'Multi-Language NLP', desc: 'Built for India. Process text across 20+ languages including Hindi, Tamil, Bengali, and more.', delay: '0.5s' },
+        ].map((f, i) => (
+          <div key={i} className="feature-card" style={{ animationDelay: f.delay }}>
+            <div style={{ fontSize: '2rem', marginBottom: '16px', filter: 'drop-shadow(0 0 12px rgba(124,58,237,0.5))' }}>{f.icon}</div>
+            <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.05rem', fontWeight: 700, marginBottom: '10px', color: 'rgba(255,255,255,0.9)' }}>{f.title}</div>
+            <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.7 }}>{f.desc}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* ── HOW IT WORKS ── */}
+    <section id="how" style={{ padding: '100px 24px', background: 'rgba(124,58,237,0.04)', borderTop: '1px solid rgba(167,139,250,0.07)', borderBottom: '1px solid rgba(167,139,250,0.07)' }}>
+      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>The Process</div>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Three steps to clean data.</h2>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          {[
+            { n: '1', title: 'Connect Your Source', body: 'Upload a CSV, paste a Google Sheet link, or connect your database. The God\'s Tool recognizes your schema instantly.' },
+            { n: '2', title: 'Let AI Clean & Profile', body: 'Our AI scans every column, flags issues, suggests fixes, and applies transformations — all reviewable before you confirm.' },
+            { n: '3', title: 'Automate & Export', body: 'Set a pipeline schedule, push to your warehouse, or download clean data. Your workflow, fully automated.' },
+          ].map((step, i) => (
+            <div key={i} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+              <div className="step-num">{step.n}</div>
+              <div style={{ paddingTop: '8px' }}>
+                <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>{step.title}</div>
+                <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.75 }}>{step.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ── PRICING ── */}
+    <section id="pricing" style={{ padding: '100px 24px' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Pricing</div>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Start free. Scale when ready.</h2>
+        </div>
+        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {[
+            { name: 'Free', price: '$0', period: 'forever', features: ['CSV & Google Sheets', 'GA4 connector', 'Basic analysis', 'Data cleaning'], featured: false },
+            { name: 'Solo', price: '$9', period: '/month', features: ['Everything in Free', 'All DB connectors', 'AI cleaning (100 runs)', 'Pipeline automation'], featured: true },
+            { name: 'Pro', price: '$29', period: '/month', features: ['Everything in Solo', 'Unlimited AI runs', 'Multi-user access', 'Priority support'], featured: false },
+          ].map((plan, i) => (
+            <div key={i} className={`pricing-card${plan.featured ? ' featured' : ''}`}>
+              {plan.featured && <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontFamily: 'monospace', fontSize: '0.65rem', letterSpacing: '0.15em', padding: '4px 16px', borderRadius: '20px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>}
+              <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.1rem', fontWeight: 700, marginBottom: '8px' }}>{plan.name}</div>
+              <div style={{ marginBottom: '24px' }}>
+                <span style={{ fontSize: '2.2rem', fontWeight: 900, background: 'linear-gradient(135deg, #e9d5ff, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{plan.price}</span>
+                <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginLeft: '4px' }}>{plan.period}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+                {plan.features.map(f => (
+                  <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                    <span style={{ color: '#7c3aed', flexShrink: 0 }}>✓</span>{f}
+                  </div>
+                ))}
+              </div>
+              <button onClick={handleEnter} style={{ width: '100%', padding: '11px', borderRadius: '6px', border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.12)', background: plan.featured ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(255,255,255,0.04)', color: 'white', fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'opacity 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
+                Get Started
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ── FOOTER ── */}
+    <footer style={{ padding: '48px 24px 32px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
+        <span style={{ fontSize: '1.2rem' }}>♔</span>
+        <span style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontWeight: 900, fontSize: '0.95rem', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
+      </div>
+      <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', marginBottom: '20px', lineHeight: 1.8 }}>
+        Google Sign-In is used solely for account authentication. Google Sheets access is optional and only activated when you explicitly connect a sheet. We do not access, store, or share any Google data without your action.
+      </p>
+      <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '28px' }}>
+        <a href="/privacy" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Privacy Policy</a>
+        <a href="/terms" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Terms of Service</a>
+        <a href="mailto:vatsaman888@gmail.com" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Contact</a>
+      </div>
+      <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2025 The God's Tool · Built for data professionals</div>
+    </footer>
+
+    {/* ── INDRA POPUP ── */}
+    {showIndra && (
+      <div style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 999, width: '320px', background: 'linear-gradient(145deg, #0a0820 0%, #110d2e 60%, #0d1a3a 100%)', border: '1px solid rgba(99,179,237,0.25)', borderRadius: '12px', boxShadow: '0 0 40px rgba(66,153,225,0.15), 0 8px 32px rgba(0,0,0,0.6)', overflow: 'hidden', animation: 'indraSlide 0.5s cubic-bezier(0.16,1,0.3,1)' }}>
+        <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
+          <img src="https://i.postimg.cc/DfcCXhSJ/Indra.png" alt="Indra" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', filter: 'brightness(0.75) saturate(1.4) contrast(1.1)' }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, #0a0820 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(66,153,225,0.18) 0%, transparent 70%)', animation: 'indraLightning 2.5s ease-in-out infinite' }} />
+          <div style={{ position: 'absolute', bottom: '8px', left: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '1.1rem' }}>⚡</span>
+            <span style={{ fontFamily: 'Georgia, serif', color: '#90cdf4', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.15em', textShadow: '0 0 12px rgba(66,153,225,0.8)' }}>INDRA</span>
+            <span style={{ fontFamily: 'Georgia, serif', color: '#63b3ed', fontSize: '0.65rem', opacity: 0.7, letterSpacing: '0.1em' }}>GOD OF RAIN & THUNDER</span>
+          </div>
+        </div>
+        <div style={{ padding: '14px 16px 16px' }}>
+          <p style={{ fontFamily: 'Georgia, serif', fontSize: '0.82rem', lineHeight: 1.7, color: '#a0c4e8', margin: 0, fontStyle: 'italic' }}>
+            "I used this tool in the 1990s to identify vulnerable areas that needed rain. Now — due to the sins of people — I follow no rules. To rain or not to rain... is simply my choice."
+          </p>
+          <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+            <button onClick={() => setShowIndra(false)} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(99,179,237,0.3)', color: '#63b3ed', padding: '5px 16px', borderRadius: '4px', fontSize: '0.75rem', letterSpacing: '0.1em', cursor: 'pointer' }}>Understood</button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* ── LOGIN MODAL ── */}
+    {showLogin && (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,8,15,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '400px', margin: '0 16px', background: 'rgba(10,15,28,0.95)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '12px', padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          {/* Floating SQL particles */}
+          {['SELECT *','JOIN','GROUP BY','WHERE','AVG()','COUNT(*)'].map((word, i) => (
+            <div key={i} style={{ position: 'absolute', left: `${8 + (i * 15) % 80}%`, top: `${65 + (i * 8) % 30}%`, fontFamily: 'monospace', fontSize: '0.65rem', color: '#38bdf8', opacity: 0.1, pointerEvents: 'none', animation: `float-up ${3 + (i % 3)}s ease-in ${i * 0.6}s infinite`, userSelect: 'none' }}>{word}</div>
+          ))}
+          <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(30,64,175,0.25)', border: '1px solid rgba(99,179,237,0.2)', marginBottom: '14px' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
+              </svg>
+            </div>
+            <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.5rem', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.04em' }}>The God's Tool</div>
+            <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#38bdf8', letterSpacing: '0.2em', marginTop: '6px', opacity: 0.7 }}>DATA · INTELLIGENCE · PIPELINE</div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            {[['∞','Data Sources'],['⚡','Real-time'],['🔒','Encrypted']].map(([icon, label]) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(30,64,175,0.15)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '20px', padding: '4px 12px', fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+                <span style={{ fontSize: '0.8rem' }}>{icon}</span>{label}
+              </div>
+            ))}
+          </div>
+          <div style={{ borderTop: '1px solid rgba(99,179,237,0.1)' }} />
+          <button onClick={handleGoogleLogin} className="auth-btn-google">
+            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            Continue with Google
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
+            <span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>OR</span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
+          </div>
+          <input type="email" placeholder="you@example.com" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="auth-input" />
+          <input type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} className="auth-input" />
+          {loginError && (
+            <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>⚠ {loginError}</div>
+          )}
+          <button onClick={() => handleLogin()} className="auth-btn-primary">{isRegisterMode ? 'CREATE ACCOUNT' : 'ACCESS THE TOOL'}</button>
+          {!isRegisterMode && !showForgot && (
+            <div style={{ textAlign: 'center' }}>
+              <span onClick={() => { setShowForgot(true); setForgotMsg(''); setForgotError('') }} style={{ color: '#38bdf8', fontSize: '0.78rem', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>Forgot password?</span>
+            </div>
+          )}
+          {showForgot && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: 'rgba(30,64,175,0.08)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '8px', padding: '16px' }}>
+              <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontFamily: 'monospace' }}>Enter your email to receive a reset link:</div>
+              <input type="email" placeholder="you@example.com" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} className="auth-input" />
+              {forgotError && <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>⚠ {forgotError}</div>}
+              {forgotMsg && <div style={{ color: '#86efac', fontSize: '0.78rem', fontFamily: 'monospace' }}>✓ {forgotMsg}</div>}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={handleForgotPassword} className="auth-btn-primary" style={{ flex: 1, padding: '10px' }}>Send Reset Link</button>
+                <button onClick={() => setShowForgot(false)} style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid rgba(99,179,237,0.2)', borderRadius: '6px', color: '#94a3b8', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.85rem' }}>Cancel</button>
+              </div>
+            </div>
+          )}
+          <div style={{ textAlign: 'center' }}>
+            {isRegisterMode ? (
+              <><span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>Already have an account? </span><span onClick={() => { setIsRegisterMode(false); setLoginError('') }} style={{ color: '#38bdf8', fontSize: '0.78rem', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>Sign in</span></>
+            ) : (
+              <><span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>Don't have an account? </span><span onClick={() => { setIsRegisterMode(true); setLoginError('') }} style={{ color: '#38bdf8', fontSize: '0.78rem', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>Register</span></>
+            )}
+          </div>
+          <p style={{ color: '#334155', fontSize: '0.72rem', textAlign: 'center', margin: 0, fontFamily: 'monospace', lineHeight: 1.6 }}>
+            By continuing you agree to The God's Tool's{' '}
+            <a href="/terms" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Terms of Service</a>{' '}and{' '}
+            <a href="/privacy" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Privacy Policy</a>
+          </p>
+          <button onClick={() => setShowLogin(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '1.2rem', cursor: 'pointer', lineHeight: 1 }}>✕</button>
+        </div>
+      </div>
+    )}
+  </div>
+)
+
+      {/* Floating math symbols - legacy block removed */}
+      {false && [
         { t: '∞', x: '8%', y: '12%', s: '2.8rem', o: 0.18 },
         { t: 'Σ', x: '88%', y: '8%', s: '3rem', o: 0.15 },
         { t: 'π', x: '5%', y: '78%', s: '2.4rem', o: 0.18 },
