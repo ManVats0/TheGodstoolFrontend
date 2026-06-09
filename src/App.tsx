@@ -601,27 +601,6 @@ if (!entered) return (
   </div>
 )
 
-      {/* Floating math symbols - legacy block removed */}
-      {false && [
-        { t: '∞', x: '8%', y: '12%', s: '2.8rem', o: 0.18 },
-        { t: 'Σ', x: '88%', y: '8%', s: '3rem', o: 0.15 },
-        { t: 'π', x: '5%', y: '78%', s: '2.4rem', o: 0.18 },
-        { t: '∇', x: '91%', y: '80%', s: '2.6rem', o: 0.15 },
-        { t: '∂', x: '50%', y: '6%', s: '2rem', o: 0.12 },
-        { t: 'Ω', x: '22%', y: '90%', s: '2.2rem', o: 0.13 },
-        { t: '√', x: '75%', y: '88%', s: '2.6rem', o: 0.14 },
-        { t: 'λ', x: '15%', y: '45%', s: '2rem', o: 0.11 },
-        { t: '∫', x: '85%', y: '42%', s: '2.8rem', o: 0.13 },
-        { t: 'φ', x: '60%', y: '15%', s: '2rem', o: 0.12 },
-        { t: 'Δ', x: '38%', y: '82%', s: '2.2rem', o: 0.13 },
-        { t: '⊗', x: '70%', y: '55%', s: '1.8rem', o: 0.10 },
-      ].map((s, i) => (
-        <div key={i} style={{ position: 'absolute', left: s.x, top: s.y, fontSize: s.s, color: '#c4b5fd', opacity: s.o, fontFamily: 'Georgia, serif', pointerEvents: 'none', userSelect: 'none' }}>{s.t}</div>
-      ))}
-
-      {/* Glowing orb behind title */}
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -60%)', width: '420px', height: '420px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.18) 0%, rgba(79,70,229,0.08) 50%, transparent 75%)', pointerEvents: 'none' }} />
-
       {/* Indra popup */}
       {showIndra && (
         <div style={{
