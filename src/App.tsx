@@ -383,10 +383,10 @@ if (!entered) return (
     <div style={{ background: 'rgba(124,58,237,0.08)', borderTop: '1px solid rgba(167,139,250,0.1)', borderBottom: '1px solid rgba(167,139,250,0.1)', padding: '0 24px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[
-          { val: '20+', label: 'Languages Supported' },
           { val: '∞', label: 'Data Sources' },
+          { val: '🔍', label: 'Schema Detector' },
           { val: 'AI', label: 'Powered Cleaning' },
-          { val: '1', label: 'Browser Tab' },
+          { val: '1', label: 'Everything in Browser Tab' },
         ].map((s, i) => (
           <div key={i} className="stat-item" style={{ padding: '28px 40px' }}>
             <div style={{ fontSize: '2rem', fontWeight: 900, background: 'linear-gradient(135deg, #e9d5ff, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 }}>{s.val}</div>
