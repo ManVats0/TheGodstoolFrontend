@@ -446,6 +446,42 @@ if (!entered) return (
       </div>
     </section>
 
+    {/* ── ALERT SECTION ── */}
+    <section style={{ padding: '100px 24px', maxWidth: '820px', margin: '0 auto' }}>
+      <div style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: '20px', padding: '56px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '220px', height: '220px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '20px', padding: '6px 18px', marginBottom: '28px', fontFamily: 'monospace', fontSize: '0.72rem', color: '#f87171', letterSpacing: '0.15em' }}>
+            🔔 ANOMALY ALERTS
+          </div>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 900, margin: '0 0 20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+            We wake up before your Saturdays do.
+          </h2>
+          <p style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, maxWidth: '580px', margin: '0 auto 40px' }}>
+            Something went sideways in your pipeline at 2 AM — your data drifted, a schema broke, row counts dropped to zero. Before your senior even opens Slack on Monday morning, <span style={{ color: '#a78bfa', fontStyle: 'italic' }}>you already know, you already fixed it, and you already moved on.</span>
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px', textAlign: 'left' }}>
+            {[
+              { icon: '📉', title: 'Data drift detected', desc: 'Unusual volume drops, column nulls spiking, distribution shifts — caught the moment they happen.' },
+              { icon: '🔗', title: 'Pipeline failures', desc: 'A connector went silent, a cron job missed its window, a schema changed upstream. You hear it first.' },
+              { icon: '🧬', title: 'Schema anomalies', desc: 'New columns appeared, data types flipped, a table got truncated. Alerts land in your inbox instantly.' },
+            ].map((item, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(167,139,250,0.1)', borderRadius: '12px', padding: '20px' }}>
+                <div style={{ fontSize: '1.4rem', marginBottom: '10px' }}>{item.icon}</div>
+                <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '0.92rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: '6px' }}>{item.title}</div>
+                <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.7 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'rgba(10,15,28,0.7)', border: '1px solid rgba(99,179,237,0.2)', borderRadius: '10px', padding: '16px 24px', fontFamily: 'monospace', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'left' }}>
+            <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>📬</span>
+            <span><span style={{ color: '#38bdf8' }}>alert@thegodstool.com</span> → <span style={{ color: '#86efac' }}>you@company.com</span><br/><span style={{ opacity: 0.55, fontSize: '0.72rem' }}>Sat 07:14 AM · "Row count in orders_fact dropped 94% since last run."</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     {/* ── PRICING ── */}
     <section id="pricing" style={{ padding: '100px 24px' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
