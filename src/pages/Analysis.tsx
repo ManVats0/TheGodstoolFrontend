@@ -49,6 +49,216 @@ import { API_BASE } from '../config'
   }
   `
 
+  function SaveToSourceButton({ result, activeSourceName, sources, API_BASE }: {
+    result: any
+    activeSourceName: string
+    sources: any[]
+    API_BASE: string
+  }) {
+    const [saving, setSaving] = React.useState(false)
+    const [saveMsg, setSaveMsg] = React.useState('')
+
+    const sourceObj = sources.find((s: any) => s.name === activeSourceName)
+    const srcType = sourceObj?.type ? String(sourceObj.type) : ''
+
+    // Only show for non-CSV, non-catalog, writable sources
+    const labelMap: Record<string, string> = {
+      sheets:   'Save to Google Sheet',
+      mysql:    'Save to MySQL',
+      postgres: 'Save to PostgreSQL',
+      bigquery: 'Save to BigQuery',
+      mongodb:  'Save to MongoDB',
+      aws:      'Save to AWS',
+      cloudsql: 'Save to Cloud SQL',
+    }
+
+    if (!srcType || !labelMap[srcType]) return null
+
+    const label = labelMap[srcType]
+
+    const handleSave = async () => {
+      const confirmed = window.confirm(
+        `⚠️ This will replace your existing data in the original source:\n\n"${activeSourceName}"\n\nwith the cleaned version. This cannot be undone.\n\nAre you sure?`
+      )
+      if (!confirmed) return
+
+      setSaving(true)
+      setSaveMsg('')
+
+      try {
+        // Download the cleaned CSV blob from backend
+        const csvRes = await fetch(`${API_BASE}${result.download_url}`)
+        if (!csvRes.ok) { setSaveMsg('❌ Could not download cleaned file.'); setSaving(false); return }
+        const blob = await csvRes.blob()
+        const formData = new FormData()
+        formData.append('file', new File([blob], 'cleaned.csv', { type: 'text/csv' }))
+        formData.append('source_type', srcType)
+        formData.append('source_name', activeSourceName)
+
+        if (srcType === 'sheets') {
+          const storedSession = localStorage.getItem('datapro_session') || ''
+          if (storedSession) formData.append('session_id', storedSession)
+          if (sourceObj?.sheetId) formData.append('sheet_id', sourceObj.sheetId)
+          if (sourceObj?.tab) formData.append('tab', sourceObj.tab)
+        }
+
+        else if (srcType === 'mysql') {
+          const savedMySQL = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
+          const atIdx = activeSourceName.lastIndexOf('@')
+          const host = atIdx >= 0 ? activeSourceName.slice(atIdx + 1) : ''
+          const beforeAt = atIdx >= 0 ? activeSourceName.slice(0, atIdx) : activeSourceName
+          const dotIdx = beforeAt.indexOf('.')
+          const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+          const table = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+          const conn = savedMySQL.find((c: any) =>
+            c.database === database &&
+            (c.host === host || (c.host === 'localhost' && host === '127.0.0.1') || (c.host === '127.0.0.1' && host === 'localhost'))
+          )
+          if (!conn) { setSaveMsg('❌ MySQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          formData.append('mysql_host', conn.host)
+          formData.append('mysql_port', conn.port)
+          formData.append('mysql_user', conn.user)
+          formData.append('mysql_password', conn.password)
+          formData.append('mysql_database', conn.database)
+          formData.append('mysql_ssl', String(conn.ssl))
+          formData.append('mysql_table', table)
+        }
+
+        else if (srcType === 'postgres') {
+          const savedPG = JSON.parse(localStorage.getItem('datapro_postgres_connections') || '[]')
+          const atIdx = activeSourceName.lastIndexOf('@')
+          const host = atIdx >= 0 ? activeSourceName.slice(atIdx + 1) : ''
+          const beforeAt = atIdx >= 0 ? activeSourceName.slice(0, atIdx) : activeSourceName
+          const dotIdx = beforeAt.indexOf('.')
+          const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+          const table = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+          const conn = savedPG.find((c: any) =>
+            c.database === database &&
+            (c.host === host || (c.host === 'localhost' && host === '127.0.0.1') || (c.host === '127.0.0.1' && host === 'localhost'))
+          )
+          if (!conn) { setSaveMsg('❌ PostgreSQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          formData.append('mysql_host', conn.host)
+          formData.append('mysql_port', conn.port)
+          formData.append('mysql_user', conn.user)
+          formData.append('mysql_password', conn.password)
+          formData.append('mysql_database', conn.database)
+          formData.append('mysql_ssl', String(conn.ssl))
+          formData.append('mysql_table', table)
+        }
+
+        else if (srcType === 'bigquery') {
+          const parts = activeSourceName.split('.')
+          const project = parts[0] || ''
+          const dataset = parts[1] || ''
+          const table = parts[2] || ''
+          const savedBQ = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
+          const conn = savedBQ.find((c: any) => c.project === project && c.dataset === dataset)
+          if (!conn) { setSaveMsg('❌ BigQuery connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          formData.append('bq_key_json', conn.key_json)
+          formData.append('bq_project', project)
+          formData.append('bq_dataset', dataset)
+          formData.append('bq_table', table)
+        }
+
+        else if (srcType === 'mongodb') {
+          const atIdx = activeSourceName.lastIndexOf('@')
+          const beforeAt = atIdx >= 0 ? activeSourceName.slice(0, atIdx) : activeSourceName
+          const dotIdx = beforeAt.indexOf('.')
+          const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+          const collection = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+          const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
+          const conn = savedMongo.find((c: any) => c.database === database)
+          if (!conn) { setSaveMsg('❌ MongoDB connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          formData.append('mongo_uri', conn.uri)
+          formData.append('mongo_database', conn.database)
+          formData.append('mongo_collection', collection)
+        }
+
+        else if (srcType === 'aws') {
+          const savedAWS = JSON.parse(localStorage.getItem('datapro_aws_connections') || '[]')
+          const conn = savedAWS.find((c: any) => {
+            if (c.service === 's3') return activeSourceName.startsWith(`s3://${c.bucket}`)
+            if (c.service === 'dynamodb') return activeSourceName.includes(`@dynamodb.${c.region}`)
+            const atIdx = activeSourceName.lastIndexOf('@')
+            const host = atIdx >= 0 ? activeSourceName.slice(atIdx + 1) : ''
+            const beforeAt = atIdx >= 0 ? activeSourceName.slice(0, atIdx) : activeSourceName
+            const dotIdx = beforeAt.indexOf('.')
+            const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+            return c.host === host && c.database === database
+          })
+          if (!conn) { setSaveMsg('❌ AWS connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          formData.append('aws_service', conn.service)
+          formData.append('aws_region', conn.region)
+          formData.append('aws_access_key_id', conn.accessKeyId)
+          formData.append('aws_secret_access_key', conn.secretAccessKey)
+          formData.append('aws_bucket', conn.bucket || '')
+          formData.append('aws_host', conn.host || '')
+          formData.append('aws_port', conn.port || '')
+          formData.append('aws_user', conn.user || '')
+          formData.append('aws_password', conn.password || '')
+          formData.append('aws_database', conn.database || '')
+          const atIdx = activeSourceName.lastIndexOf('@')
+          const beforeAt = atIdx >= 0 ? activeSourceName.slice(0, atIdx) : activeSourceName
+          const dotIdx = beforeAt.indexOf('.')
+          const awsTable = conn.service === 's3'
+            ? activeSourceName.replace(`s3://${conn.bucket}/`, '')
+            : dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : beforeAt
+          formData.append('aws_table', awsTable)
+        }
+
+        else if (srcType === 'cloudsql') {
+          const savedCSQL = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
+          const atIdx = activeSourceName.lastIndexOf('@')
+          const beforeAt = atIdx >= 0 ? activeSourceName.slice(0, atIdx) : activeSourceName
+          const dotIdx = beforeAt.indexOf('.')
+          const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+          const table = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+          const projectPart = atIdx >= 0 ? activeSourceName.slice(atIdx + 1).replace('cloudsql.', '') : ''
+          const conn = savedCSQL.find((c: any) => c.database === database && c.project === projectPart)
+          if (!conn) { setSaveMsg('❌ Cloud SQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          formData.append('mysql_host', conn.instanceConnectionName)
+          formData.append('mysql_port', conn.port)
+          formData.append('mysql_user', conn.user)
+          formData.append('mysql_password', conn.password)
+          formData.append('mysql_database', conn.database)
+          formData.append('mysql_ssl', 'true')
+          formData.append('mysql_table', table)
+          formData.append('db_type', conn.dbType || 'postgres')
+        }
+
+        const res = await fetch(`${API_BASE}/api/write-to-source`, { method: 'POST', body: formData })
+        const data = await res.json()
+        if (data.success) {
+          setSaveMsg(`✅ Saved successfully! ${data.rows_written ? `${data.rows_written} rows written.` : ''}`)
+        } else {
+          setSaveMsg(`❌ Failed: ${data.error || 'Unknown error'}`)
+        }
+      } catch {
+        setSaveMsg('❌ Could not reach backend.')
+      } finally {
+        setSaving(false)
+      }
+    }
+
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="py-3 px-8 rounded-xl font-bold text-white disabled:opacity-50"
+          style={{ background: 'linear-gradient(135deg, #0ea5e9, #0369a1)' }}
+        >
+          {saving ? '⏳ Saving...' : label}
+        </button>
+        {saveMsg && (
+          <p className="text-xs font-semibold text-center" style={{ color: saveMsg.startsWith('✅') ? '#4ade80' : '#f87171' }}>
+            {saveMsg}
+          </p>
+        )}
+      </div>
+    )
+  }
+
   function Pill({ children, color }: { children: React.ReactNode; color: string }) {
     return (
       <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
@@ -1560,21 +1770,27 @@ setAnalyzing(false)
                 ))}
               </div>
             </div>
-            <div className="flex gap-3 justify-center">
-              <a
+<div className="flex gap-3 justify-center flex-wrap">
+              
                 href={`${API_BASE}${result.download_url}`}
                 className="py-3 px-8 rounded-xl font-bold text-white text-center"
                 style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)' }}
               >
                 Download Cleaned CSV
               </a>
-              <a
+              
                 href={`${API_BASE}${analysis?.original_file}`}
                 className="py-3 px-8 rounded-xl font-semibold text-center"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
               >
                 Download Original
               </a>
+              <SaveToSourceButton
+                result={result}
+                activeSourceName={activeSourceName}
+                sources={sources}
+                API_BASE={API_BASE}
+              />
               <button
                 onClick={() => setAnalysisTab('preview')}
                 className="py-3 px-6 rounded-xl font-semibold"
