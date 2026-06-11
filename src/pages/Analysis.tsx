@@ -1771,14 +1771,14 @@ setAnalyzing(false)
               </div>
             </div>
 <div className="flex gap-3 justify-center flex-wrap">
-              
+  <a
                 href={`${API_BASE}${result.download_url}`}
                 className="py-3 px-8 rounded-xl font-bold text-white text-center"
                 style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)' }}
               >
                 Download Cleaned CSV
               </a>
-              
+              <a
                 href={`${API_BASE}${analysis?.original_file}`}
                 className="py-3 px-8 rounded-xl font-semibold text-center"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
