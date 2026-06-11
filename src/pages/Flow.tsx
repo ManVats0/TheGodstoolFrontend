@@ -1273,18 +1273,19 @@ CONFIRM: <one sentence describing what will happen>
 
 If the instruction is unclear, ask ONE clarifying question instead, without the LABEL/CONFIRM format.`
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const token = localStorage.getItem('datapro_token') || ''
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://bubbly-empathy-production-7977.up.railway.app'}/api/ai-clean`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 300,
-          system: systemPrompt,
-          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+          instructions: trimmed,
+          csv_preview: sampleContext + '\n\nSchema:\n' + schemaContext,
+          system_override: systemPrompt,
         }),
       })
-      const data = await response.json()
-      const text = data.content?.[0]?.text || ''
+      const aiData = await response.json()
+      const rawText = aiData.explanation || ''
+      const text = rawText.includes('LABEL:') ? rawText : (aiData.success ? `LABEL: ${trimmed.slice(0, 40)}\nCONFIRM: ${rawText}` : '')
       const labelMatch = text.match(/LABEL:\s*(.+)/i)
       const confirmMatch = text.match(/CONFIRM:\s*(.+)/i)
       if (labelMatch && confirmMatch) {
