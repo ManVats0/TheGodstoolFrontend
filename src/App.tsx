@@ -410,7 +410,7 @@ if (!entered) return (
           { icon: '🔄', title: 'Pipeline Automation', desc: 'Build no-code data flows that run on a schedule. Transform, join, filter, and export without writing a line.', delay: '0.2s' },
           { icon: '📊', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.3s' },
           { icon: '🔒', title: 'Secure by Default', desc: 'Your data never leaves your session without permission. Encrypted in transit, zero third-party sharing.', delay: '0.4s' },
-          { icon: '🌐', title: 'Multi-Language NLP', desc: 'Built for India. Process text across 20+ languages including Hindi, Tamil, Bengali, and more.', delay: '0.5s' },
+          { icon: '🔒', title: 'Secure Tunneling', desc: 'Connect private databases behind firewalls — no public IP or firewall changes needed. A lightweight agent runs locally and bridges your backend securely.', delay: '0.5s' },
         ].map((f, i) => (
           <div key={i} className="feature-card" style={{ animationDelay: f.delay }}>
             <div style={{ fontSize: '2rem', marginBottom: '16px', filter: 'drop-shadow(0 0 12px rgba(124,58,237,0.5))' }}>{f.icon}</div>
