@@ -446,6 +446,36 @@ if (!entered) return (
       </div>
     </section>
 
+{/* ── DEMO VIDEO ── */}
+    <section style={{ padding: '100px 24px', background: 'rgba(79,70,229,0.04)', borderTop: '1px solid rgba(167,139,250,0.07)', borderBottom: '1px solid rgba(167,139,250,0.07)' }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>See It In Action</div>
+        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.02em' }}>Watch the AI clean your data live.</h2>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.75, marginBottom: '48px', maxWidth: '560px', margin: '0 auto 48px' }}>Upload a messy CSV. Watch the platform detect issues, suggest fixes, and produce clean output — in seconds.</p>
+        <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.2)', boxShadow: '0 0 60px rgba(124,58,237,0.15)' }}>
+          <iframe
+            src="https://www.youtube.com/embed/Zbjpoh1oCsw?autoplay=0&rel=0&modestbranding=1"
+            title="The God's Tool — AI Data Analysis Demo"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', marginTop: '40px', flexWrap: 'wrap' }}>
+          {[
+            { icon: '📥', text: 'Upload any CSV or sheet' },
+            { icon: '🤖', text: 'AI detects every issue' },
+            { icon: '✅', text: 'One-click clean export' },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)' }}>
+              <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+              {item.text}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
     {/* ── ALERT SECTION ── */}
     <section style={{ padding: '100px 24px', maxWidth: '820px', margin: '0 auto' }}>
       <div style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: '20px', padding: '56px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
