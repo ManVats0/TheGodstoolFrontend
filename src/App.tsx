@@ -456,7 +456,7 @@ if (!entered) return (
 <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.2)', boxShadow: '0 0 60px rgba(124,58,237,0.15)', background: '#000' }}>
           {demoPlaying ? (
             <iframe
-              src="https://www.youtube-nocookie.com/embed/Zbjpoh1oCsw?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&iv_load_policy=3"
+              src="https://www.youtube-nocookie.com/embed/Mbpo07Lw5So?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&iv_load_policy=3"
               title="The God's Tool Demo"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -466,7 +466,7 @@ if (!entered) return (
           ) : (
             <div onClick={() => setDemoPlaying(true)} style={{ position: 'absolute', inset: 0, cursor: 'pointer' }}>
               <img
-                src="https://img.youtube.com/vi/Zbjpoh1oCsw/maxresdefault.jpg"
+                src="https://img.youtube.com/vi/Mbpo07Lw5So/maxresdefault.jpg"
                 alt="Demo Video"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://img.youtube.com/vi/Mbpo07Lw5So/hqdefault.jpg' }}
