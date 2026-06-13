@@ -469,7 +469,7 @@ if (!entered) return (
                 src="https://img.youtube.com/vi/Zbjpoh1oCsw/maxresdefault.jpg"
                 alt="Demo Video"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
-                onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://img.youtube.com/vi/Zbjpoh1oCsw/hqdefault.jpg' }}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://img.youtube.com/vi/Mbpo07Lw5So/hqdefault.jpg' }}
               />
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(255,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 32px rgba(255,0,0,0.5)' }}>
