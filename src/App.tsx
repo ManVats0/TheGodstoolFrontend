@@ -452,14 +452,20 @@ if (!entered) return (
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>See It In Action</div>
         <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.02em' }}>Watch the AI clean your data live.</h2>
         <p style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.75, marginBottom: '48px', maxWidth: '560px', margin: '0 auto 48px' }}>Upload a messy CSV. Watch the platform detect issues, suggest fixes, and produce clean output — in seconds.</p>
-        <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.2)', boxShadow: '0 0 60px rgba(124,58,237,0.15)' }}>
-          <iframe
-            src="https://www.youtube.com/embed/Zbjpoh1oCsw?autoplay=0&rel=0&modestbranding=1"
-            title="The God's Tool — AI Data Analysis Demo"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+<div
+          onClick={() => window.open('https://www.youtube.com/watch?v=Zbjpoh1oCsw', '_blank')}
+          style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.2)', boxShadow: '0 0 60px rgba(124,58,237,0.15)', cursor: 'pointer', background: '#000' }}>
+          <img
+            src={`https://img.youtube.com/vi/Zbjpoh1oCsw/maxresdefault.jpg`}
+            alt="Demo Video"
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://img.youtube.com/vi/Zbjpoh1oCsw/hqdefault.jpg' }}
           />
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(255,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 32px rgba(255,0,0,0.5)', transition: 'transform 0.2s' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>▶ WATCH DEMO · OPENS YOUTUBE</div>
         </div>
         <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', marginTop: '40px', flexWrap: 'wrap' }}>
           {[
