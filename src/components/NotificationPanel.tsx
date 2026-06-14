@@ -37,9 +37,24 @@ export default function NotificationPanel({ onClose }: { onClose: () => void }) 
     else setAnalysisTab('preview')
   }
 
-  const handleEmailOk = () => {
-    setNotifyEmail(emailInput)
-    setEmailSaved(true)
+  const handleEmailOk = async () => {
+    if (!emailInput.trim()) return
+    try {
+      const res = await fetch(`${import.meta.env.VITE_AUTH_URL || 'http://localhost:4000'}/api/save-alert-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput.trim() })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        console.error('Failed:', data.error)
+        return
+      }
+      setNotifyEmail(emailInput)
+      setEmailSaved(true)
+    } catch {
+      console.error('Cannot connect to server.')
+    }
   }
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
