@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
+import { API_BASE } from '../config'
 
 const TRANSFORMATIONS = [
   { id: 'remove_duplicates', label: 'Remove Duplicates', icon: '🗑️', desc: 'Drop identical rows',   color: '#ef4444' },
@@ -833,20 +834,20 @@ function GSheetsModal({ onClose, onConnect }: {
     const init = async () => {
       try {
         // Use /check which also silently auto-refreshes expired tokens
-        const status = await fetch('http://127.0.0.1:8000/api/auth/google/check', { credentials: 'include' }).then(r => r.json())
+        const status = await fetch(`${API_BASE}/api/auth/google/check`, { credentials: 'include' }).then(r => r.json())
         if (!status.authenticated) return
 
         setAuthEmail(status.email)
 
         // Show cached data instantly — no spinner
-        const cachedData = await fetch('http://127.0.0.1:8000/api/auth/google/sheets/cached', { credentials: 'include' }).then(r => r.json())
+        const cachedData = await fetch(`${API_BASE}/api/auth/google/sheets/cached`, { credentials: 'include' }).then(r => r.json())
         if (cachedData.sheets?.length > 0) {
           setRealSheets(cachedData.sheets)
           setStep('picker')
         }
 
         // Refresh list silently in background
-        fetch('http://127.0.0.1:8000/api/auth/google/sheets', { credentials: 'include' })
+        fetch(`${API_BASE}/api/auth/google/sheets`, { credentials: 'include' })
           .then(r => r.json())
           .then(fresh => {
             if (fresh.sheets?.length > 0) {
@@ -883,7 +884,7 @@ function GSheetsModal({ onClose, onConnect }: {
 const handleAuth = async () => {
   setLoading(true)
   try {
-    const res = await fetch('http://127.0.0.1:8000/api/auth/google/url', { credentials: 'include' })
+    const res = await fetch(`${API_BASE}/api/auth/google/url`, { credentials: 'include' })
     const urlData = await res.json()
     const url = urlData.url
     const newSessionId = urlData.session_id || ''
@@ -901,7 +902,7 @@ const popup = window.open(url, 'google-auth', 'width=500,height=600')
       window.removeEventListener('message', handleMsg)
       const sid = event.data?.sessionId || storedSession
       if (sid) localStorage.setItem('datapro_session', sid)
-      const sheetsRes = await fetch('http://127.0.0.1:8000/api/auth/google/sheets', {
+      const sheetsRes = await fetch(`${API_BASE}/api/auth/google/sheets`, {
         credentials: 'include',
         headers: { 'X-Session-ID': sid }
       })
@@ -916,7 +917,7 @@ const popup = window.open(url, 'google-auth', 'width=500,height=600')
     const poll = setInterval(async () => {
       if (done) return
       try {
-        const statusRes = await fetch('http://127.0.0.1:8000/api/auth/google/check', {
+        const statusRes = await fetch(`${API_BASE}/api/auth/google/check`, {
           credentials: 'include',
           headers: storedSession ? { 'X-Session-ID': storedSession } : {}
         })
@@ -927,7 +928,7 @@ const popup = window.open(url, 'google-auth', 'width=500,height=600')
           window.removeEventListener('message', handleMsg)
           try { popup?.close() } catch {}
           setAuthEmail(status.email)
-          const sheetsRes = await fetch('http://127.0.0.1:8000/api/auth/google/sheets', {
+          const sheetsRes = await fetch(`${API_BASE}/api/auth/google/sheets`, {
             credentials: 'include',
             headers: storedSession ? { 'X-Session-ID': storedSession } : {}
           })
@@ -1274,7 +1275,7 @@ CONFIRM: <one sentence describing what will happen>
 If the instruction is unclear, ask ONE clarifying question instead, without the LABEL/CONFIRM format.`
 
       const token = localStorage.getItem('datapro_token') || ''
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://bubbly-empathy-production-7977.up.railway.app'}/api/ai-clean`, {
+      const response = await fetch(`${API_BASE}/api/ai-clean`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
