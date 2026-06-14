@@ -1014,6 +1014,397 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
     }, [activeSourceName, pipelineOutputFile])
     // this effect fires and re-runs automatically.
 
+    // ── Scan ALL connected sources for notifications (throttled to 1/hour) ──
+    const allSourcesScanStartedRef = useRef(false)
+    useEffect(() => {
+      if (allSourcesScanStartedRef.current) return
+      if (sources.length === 0) return
+      const lastScan = useStore.getState().lastSourcesScanAt || 0
+      const ONE_HOUR = 60 * 60 * 1000
+      if (Date.now() - lastScan < ONE_HOUR) return
+      allSourcesScanStartedRef.current = true
+      useStore.getState().setLastSourcesScanAt(Date.now())
+      scanAllSourcesForNotifications()
+    }, [sources.length])
+
+    const fetchSourceAsCSVFile = useCallback(async (src: any): Promise<File | null> => {
+      try {
+        if (src.type === 'csv' || src.type === 'sheets') {
+          return src.file || null
+        }
+        if (src.type === 'rest') {
+          const savedRestMeta = JSON.parse(localStorage.getItem('datapro_rest_connections') || '[]')
+          const withoutProto = src.name.replace('rest:', '')
+          const conn = savedRestMeta.find((c: any) => {
+            const connHost = (c.base_url || '').replace(/https?:\/\//, '').replace(/\/$/, '')
+            return withoutProto.startsWith(connHost)
+          })
+          if (!conn) return null
+          const connHost = (conn.base_url || '').replace(/https?:\/\//, '').replace(/\/$/, '')
+          const endpoint = withoutProto.slice(connHost.length) || '/'
+          const fetchRes = await fetch(`${API_BASE}/api/rest/fetch-endpoint`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              base_url: conn.base_url, endpoint, headers: conn.headers || {},
+              verify_ssl: conn.verify_ssl, data_path: conn.data_path || '',
+              method: conn.method || 'GET', timeout: conn.timeout || 30,
+            }),
+          })
+          const fetchData = await fetchRes.json()
+          if (!fetchData.download_url) return null
+          const csvRes = await fetch(`${API_BASE}${fetchData.download_url}`)
+          const blob = await csvRes.blob()
+          return new File([blob], `${src.name}.csv`, { type: 'text/csv' })
+        }
+        if (src.type === 'aws') {
+          const savedAWS = JSON.parse(localStorage.getItem('datapro_aws_connections') || '[]')
+          const srcName = src.name
+          const awsConn = savedAWS.find((c: any) => {
+            if (c.service === 's3') return srcName.startsWith(`s3://${c.bucket}`)
+            if (c.service === 'dynamodb') return srcName.includes(`@dynamodb.${c.region}`)
+            if (c.service === 'cost-explorer') return srcName.startsWith('cost-explorer:') && srcName.includes(`@${c.region}`)
+            const atIdx = srcName.lastIndexOf('@')
+            const host = atIdx >= 0 ? srcName.slice(atIdx + 1) : ''
+            const beforeAt = atIdx >= 0 ? srcName.slice(0, atIdx) : srcName
+            const dotIdx = beforeAt.indexOf('.')
+            const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+            return c.host === host && c.database === database
+          })
+          if (!awsConn) return null
+          let awsTable = ''
+          if (awsConn.service === 's3') awsTable = srcName.replace(`s3://${awsConn.bucket}/`, '')
+          else if (awsConn.service === 'dynamodb') awsTable = srcName.split('@')[0]
+          else if (awsConn.service === 'cost-explorer') awsTable = srcName.replace('cost-explorer:', '').split('@')[0]
+          else {
+            const atIdx = srcName.lastIndexOf('@')
+            const beforeAt = atIdx >= 0 ? srcName.slice(0, atIdx) : srcName
+            const dotIdx = beforeAt.indexOf('.')
+            awsTable = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : beforeAt
+          }
+          const fetchRes = await fetch(`${API_BASE}/api/aws/fetch-table`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...awsConn, service: awsConn.service, table: awsTable }),
+          })
+          const fetchData = await fetchRes.json()
+          if (!fetchData.download_url) return null
+          const csvRes = await fetch(`${API_BASE}${fetchData.download_url}`)
+          const blob = await csvRes.blob()
+          return new File([blob], `${src.name}.csv`, { type: 'text/csv' })
+        }
+        if ((src.type as string) === 'databricks') {
+          const savedDB = JSON.parse(localStorage.getItem('datapro_databricks_connections') || '[]')
+          const atIdx = src.name.lastIndexOf('@')
+          const srcHost = atIdx >= 0 ? src.name.slice(atIdx + 1) : ''
+          const beforeAt = atIdx >= 0 ? src.name.slice(0, atIdx) : src.name
+          const parts = beforeAt.split('.')
+          const catalog = parts.length >= 3 ? parts[0] : 'hive_metastore'
+          const schema  = parts.length >= 3 ? parts[1] : (parts[0] || 'default')
+          const table   = parts.length >= 3 ? parts[2] : (parts[1] || '')
+          const dbConn = savedDB.find((c: any) => c.host === srcHost)
+          if (!dbConn) return null
+          const fetchRes = await fetch(`${API_BASE}/api/databricks/fetch-table`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ host: dbConn.host, token: dbConn.token, http_path: dbConn.http_path, catalog, schema, table }),
+          })
+          const fetchData = await fetchRes.json()
+          if (!fetchData.download_url) return null
+          const csvRes = await fetch(`${API_BASE}${fetchData.download_url}`)
+          const blob = await csvRes.blob()
+          return new File([blob], `${src.name}.csv`, { type: 'text/csv' })
+        }
+        if ((src.type as string) === 'ga4') {
+          const savedGA4Meta = JSON.parse(localStorage.getItem('datapro_ga4_connections') || '[]')
+          const withoutProto = src.name.replace('ga4:', '')
+          const slashIdx = withoutProto.indexOf('/')
+          const propertyId = slashIdx >= 0 ? withoutProto.slice(0, slashIdx) : withoutProto
+          const reportName = slashIdx >= 0 ? withoutProto.slice(slashIdx + 1) : ''
+          const ga4Conn = savedGA4Meta.find((c: any) => c.propertyId === propertyId)
+          if (!ga4Conn) return null
+          const fetchRes = await fetch(`${API_BASE}/api/ga4/fetch-report`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              key_json: ga4Conn.keyJson, property_id: ga4Conn.propertyId,
+              metrics: ga4Conn.metrics || 'sessions,activeUsers,newUsers,screenPageViews',
+              dimensions: ga4Conn.dimensions || 'date,sessionDefaultChannelGroup',
+              start_date: ga4Conn.startDate || '30daysAgo', end_date: ga4Conn.endDate || 'today',
+              report_name: reportName,
+            }),
+          })
+          const fetchData = await fetchRes.json()
+          if (!fetchData.download_url) return null
+          const csvRes = await fetch(`${API_BASE}${fetchData.download_url}`)
+          const blob = await csvRes.blob()
+          return new File([blob], `${src.name}.csv`, { type: 'text/csv' })
+        }
+        if ((src.type as string) === 'gcs') {
+          const savedGCSMeta = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
+          const withoutProto = src.name.replace('gcs://', '')
+          const slashIdx = withoutProto.indexOf('/')
+          const bucket = slashIdx >= 0 ? withoutProto.slice(0, slashIdx) : withoutProto
+          const file = slashIdx >= 0 ? withoutProto.slice(slashIdx + 1) : ''
+          const conn = savedGCSMeta.find((c: any) => String(c.bucket) === bucket)
+          if (!conn) return null
+          const fetchRes = await fetch(`${API_BASE}/api/gcs/fetch-file`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key_json: conn.keyJson, project: conn.project, bucket, file }),
+          })
+          const fetchData = await fetchRes.json()
+          if (!fetchData.download_url) return null
+          const csvRes = await fetch(`${API_BASE}${fetchData.download_url}`)
+          const blob = await csvRes.blob()
+          return new File([blob], `${src.name}.csv`, { type: 'text/csv' })
+        }
+        if ((src.type as string) === 'cloudsql') {
+          const savedCSQLMeta = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
+          const atIdx = src.name.lastIndexOf('@')
+          const beforeAt = atIdx >= 0 ? src.name.slice(0, atIdx) : src.name
+          const dotIdx = beforeAt.indexOf('.')
+          const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+          const table = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+          const projectPart = atIdx >= 0 ? src.name.slice(atIdx + 1).replace('cloudsql.', '') : ''
+          const conn = savedCSQLMeta.find((c: any) => c.database === database && c.project === projectPart)
+          if (!conn) return null
+          const endpoint = conn.dbType === 'mysql' ? '/api/mysql/fetch-table' : '/api/postgres/fetch-table'
+          const fetchRes = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              host: conn.instanceConnectionName, port: conn.port, user: conn.user,
+              password: conn.password, database: conn.database, ssl: true, table,
+            }),
+          })
+          const fetchData = await fetchRes.json()
+          if (!fetchData.download_url) return null
+          const csvRes = await fetch(`${API_BASE}${fetchData.download_url}`)
+          const blob = await csvRes.blob()
+          return new File([blob], `${src.name}.csv`, { type: 'text/csv' })
+        }
+        return null
+      } catch {
+        return null
+      }
+    }, [])
+
+    const scanAllSourcesForNotifications = useCallback(async () => {
+      const savedEmail = localStorage.getItem('datapro_alert_email') || notifyEmail
+
+      for (const src of sources) {
+        try {
+          const formData = new FormData()
+          let usesDirectSourceType = false
+
+          if (src.type === 'csv' || src.type === 'sheets') {
+            if (!src.file) continue
+            formData.append('file', src.file)
+          } else if (src.type === 'mysql') {
+            const savedMySQL = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
+            const atIndex = src.name.lastIndexOf('@')
+            const host = atIndex !== -1 ? src.name.slice(atIndex + 1) : ''
+            const beforeAt = atIndex !== -1 ? src.name.slice(0, atIndex) : src.name
+            const dotIndex = beforeAt.indexOf('.')
+            const database = dotIndex !== -1 ? beforeAt.slice(0, dotIndex) : beforeAt
+            const table = dotIndex !== -1 ? beforeAt.slice(dotIndex + 1) : ''
+            const conn = savedMySQL.find((c: any) =>
+              c.database === database && (c.host === host || (c.host === 'localhost' && host === '127.0.0.1') || (c.host === '127.0.0.1' && host === 'localhost'))
+            )
+            if (!conn) continue
+            usesDirectSourceType = true
+            formData.append('source_type', 'mysql')
+            formData.append('mysql_host', conn.host)
+            formData.append('mysql_port', conn.port)
+            formData.append('mysql_user', conn.user)
+            formData.append('mysql_password', conn.password)
+            formData.append('mysql_database', conn.database)
+            formData.append('mysql_ssl', String(conn.ssl))
+            formData.append('mysql_table', table)
+          } else if (src.type === 'postgres') {
+            const savedPG = JSON.parse(localStorage.getItem('datapro_postgres_connections') || '[]')
+            const atIndex = src.name.lastIndexOf('@')
+            const host = atIndex !== -1 ? src.name.slice(atIndex + 1) : ''
+            const beforeAt = atIndex !== -1 ? src.name.slice(0, atIndex) : src.name
+            const dotIndex = beforeAt.indexOf('.')
+            const database = dotIndex !== -1 ? beforeAt.slice(0, dotIndex) : beforeAt
+            const table = dotIndex !== -1 ? beforeAt.slice(dotIndex + 1) : ''
+            const conn = savedPG.find((c: any) =>
+              c.database === database && (c.host === host || (c.host === 'localhost' && host === '127.0.0.1') || (c.host === '127.0.0.1' && host === 'localhost'))
+            )
+            if (!conn) continue
+            usesDirectSourceType = true
+            formData.append('source_type', 'postgres')
+            formData.append('mysql_host', conn.host)
+            formData.append('mysql_port', conn.port)
+            formData.append('mysql_user', conn.user)
+            formData.append('mysql_password', conn.password)
+            formData.append('mysql_database', conn.database)
+            formData.append('mysql_ssl', String(conn.ssl))
+            formData.append('mysql_table', table)
+          } else if (src.type === 'mongodb') {
+            const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
+            const atIdx = src.name.lastIndexOf('@')
+            const beforeAt = atIdx >= 0 ? src.name.slice(0, atIdx) : src.name
+            const dotIdx = beforeAt.indexOf('.')
+            const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+            const collection = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+            const conn = savedMongo.find((c: any) => c.database === database)
+            if (!conn) continue
+            usesDirectSourceType = true
+            formData.append('source_type', 'mongodb')
+            formData.append('mysql_host', conn.uri)
+            formData.append('mysql_user', conn.database)
+            formData.append('mysql_database', conn.database)
+            formData.append('mysql_table', collection || conn.collection || conn.collections?.[0] || '')
+          } else if (src.type === 'bigquery') {
+            const parts = src.name.split('.')
+            const project = parts[0] || ''
+            const dataset = parts[1] || ''
+            const table = parts[2] || ''
+            const savedBQ = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
+            const conn = savedBQ.find((c: any) => c.project === project && c.dataset === dataset)
+            if (!conn) continue
+            usesDirectSourceType = true
+            formData.append('source_type', 'bigquery')
+            formData.append('bq_key_json', conn.key_json)
+            formData.append('bq_project', project)
+            formData.append('bq_dataset', dataset)
+            formData.append('bq_table', table)
+          } else {
+            // AWS, GCS, Cloud SQL, Databricks, REST, GA4 — fetch as CSV then send as file
+            const csvFile = await fetchSourceAsCSVFile(src)
+            if (!csvFile) continue
+            formData.append('file', csvFile)
+          }
+
+          if (!usesDirectSourceType && !formData.has('file') && !formData.has('source_type')) continue
+
+          formData.append('notify_email', savedEmail || '')
+          formData.append('alert_staleness', String(alertConditions.staleness))
+          formData.append('alert_schema', String(alertConditions.schema))
+          formData.append('alert_anomalies', String(alertConditions.anomalies))
+          formData.append('alert_flow', String(alertConditions.flow))
+
+          const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
+          const data = await res.json()
+          if (data.notifications?.length) {
+            addNotifications(data.notifications.map((n: any) => ({ ...n, sourceName: src.name })))
+          }
+        } catch {
+          // Skip this source silently — don't block others
+        }
+      }
+    }, [sources, notifyEmail, alertConditions, addNotifications, fetchSourceAsCSVFile])
+
+    // ── Scan ALL connected sources for notifications (runs once on mount) ───
+    const allSourcesScannedRef = useRef(false)
+    useEffect(() => {
+      if (allSourcesScannedRef.current) return
+      if (sources.length === 0) return
+      allSourcesScannedRef.current = true
+      scanAllSourcesForNotificationsOnMount()
+    }, [sources.length])
+
+    const scanAllSourcesForNotificationsOnMount = useCallback(async () => {
+      for (const src of sources) {
+        try {
+          const formData = new FormData()
+
+          if (src.type === 'csv' || src.type === 'sheets') {
+            if (!src.file) continue
+            formData.append('file', src.file)
+          } else if (src.type === 'mysql') {
+            const savedMySQL = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
+            const atIndex = src.name.lastIndexOf('@')
+            const host = atIndex !== -1 ? src.name.slice(atIndex + 1) : ''
+            const beforeAt = atIndex !== -1 ? src.name.slice(0, atIndex) : src.name
+            const dotIndex = beforeAt.indexOf('.')
+            const database = dotIndex !== -1 ? beforeAt.slice(0, dotIndex) : beforeAt
+            const table = dotIndex !== -1 ? beforeAt.slice(dotIndex + 1) : ''
+            const conn = savedMySQL.find((c: any) =>
+              c.database === database && (c.host === host || (c.host === 'localhost' && host === '127.0.0.1') || (c.host === '127.0.0.1' && host === 'localhost'))
+            )
+            if (!conn) continue
+            formData.append('source_type', 'mysql')
+            formData.append('mysql_host', conn.host)
+            formData.append('mysql_port', conn.port)
+            formData.append('mysql_user', conn.user)
+            formData.append('mysql_password', conn.password)
+            formData.append('mysql_database', conn.database)
+            formData.append('mysql_ssl', String(conn.ssl))
+            formData.append('mysql_table', table)
+          } else if (src.type === 'postgres') {
+            const savedPG = JSON.parse(localStorage.getItem('datapro_postgres_connections') || '[]')
+            const atIndex = src.name.lastIndexOf('@')
+            const host = atIndex !== -1 ? src.name.slice(atIndex + 1) : ''
+            const beforeAt = atIndex !== -1 ? src.name.slice(0, atIndex) : src.name
+            const dotIndex = beforeAt.indexOf('.')
+            const database = dotIndex !== -1 ? beforeAt.slice(0, dotIndex) : beforeAt
+            const table = dotIndex !== -1 ? beforeAt.slice(dotIndex + 1) : ''
+            const conn = savedPG.find((c: any) =>
+              c.database === database && (c.host === host || (c.host === 'localhost' && host === '127.0.0.1') || (c.host === '127.0.0.1' && host === 'localhost'))
+            )
+            if (!conn) continue
+            formData.append('source_type', 'postgres')
+            formData.append('mysql_host', conn.host)
+            formData.append('mysql_port', conn.port)
+            formData.append('mysql_user', conn.user)
+            formData.append('mysql_password', conn.password)
+            formData.append('mysql_database', conn.database)
+            formData.append('mysql_ssl', String(conn.ssl))
+            formData.append('mysql_table', table)
+          } else if (src.type === 'mongodb') {
+            const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
+            const atIdx = src.name.lastIndexOf('@')
+            const beforeAt = atIdx >= 0 ? src.name.slice(0, atIdx) : src.name
+            const dotIdx = beforeAt.indexOf('.')
+            const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+            const collection = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+            const conn = savedMongo.find((c: any) => c.database === database)
+            if (!conn) continue
+            formData.append('source_type', 'mongodb')
+            formData.append('mysql_host', conn.uri)
+            formData.append('mysql_user', conn.database)
+            formData.append('mysql_database', conn.database)
+            formData.append('mysql_table', collection || conn.collection || conn.collections?.[0] || '')
+          } else if (src.type === 'bigquery') {
+            const parts = src.name.split('.')
+            const project = parts[0] || ''
+            const dataset = parts[1] || ''
+            const table = parts[2] || ''
+            const savedBQ = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
+            const conn = savedBQ.find((c: any) => c.project === project && c.dataset === dataset)
+            if (!conn) continue
+            formData.append('source_type', 'bigquery')
+            formData.append('bq_key_json', conn.key_json)
+            formData.append('bq_project', project)
+            formData.append('bq_dataset', dataset)
+            formData.append('bq_table', table)
+          } else {
+            // Skip source types we can't silently re-fetch (rest, aws, ga4, databricks, gcs, cloudsql)
+            continue
+          }
+
+          const savedEmail = localStorage.getItem('datapro_alert_email') || notifyEmail
+          formData.append('notify_email', savedEmail || '')
+          formData.append('alert_staleness', String(alertConditions.staleness))
+          formData.append('alert_schema', String(alertConditions.schema))
+          formData.append('alert_anomalies', String(alertConditions.anomalies))
+          formData.append('alert_flow', String(alertConditions.flow))
+
+          const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
+          const data = await res.json()
+          if (data.notifications?.length) {
+            addNotifications(data.notifications.map((n: any) => ({ ...n, sourceName: src.name })))
+          }
+        } catch {
+          // Skip silently — don't block other sources from being scanned
+        }
+      }
+    }, [sources, notifyEmail, alertConditions, addNotifications])
+
     useEffect(() => {
       const issueToKey: Record<string, string> = {
         duplicates: 'remove_duplicates', empty_rows: 'remove_empty_rows',
@@ -1369,7 +1760,9 @@ setAnalyzing(false)
         setAnalysisTab('preview')
         setFilterIssue('All')
         setFilterCol('All')
-        if (data.notifications?.length) addNotifications(data.notifications)
+        if (data.notifications?.length) {
+          addNotifications(data.notifications.map((n: any) => ({ ...n, sourceName: activeSourceName })))
+        }
         addAuditLog({
           id: crypto.randomUUID(), time: new Date().toLocaleString(),
           action: 'analyze', entity_type: 'csv_file', entity_id: crypto.randomUUID(),
@@ -1384,13 +1777,31 @@ setAnalyzing(false)
     }, [activeFile, activeSourceName, pipelineOutputFile, notifyEmail, alertConditions])
 
     const runClean = useCallback(async () => {
-      if (!activeFile) return
+      // For DB/cloud sources, activeFile is null but we have a fetched preview
+      // from analysis.sample_data — fetch the original file via the analyze endpoint's download link
+      let fileToClean: File | null = activeFile
+
+      if (!fileToClean && analysis?.original_file) {
+        try {
+          const origRes = await fetch(`${API_BASE}${analysis.original_file}`)
+          const blob = await origRes.blob()
+          fileToClean = new File([blob], `${activeSourceName || 'source'}.csv`, { type: 'text/csv' })
+        } catch {
+          alert('Could not load source data for cleaning. Try re-analyzing first.')
+          return
+        }
+      }
+
+      if (!fileToClean) {
+        alert('No data available to clean. Try re-analyzing first.')
+        return
+      }
+
       setCleaning(true)
 
       const activeCustomOps = customCleanOps.filter(op => options[op.key])
 
       try {
-        let fileToClean = activeFile
         let lastResult: any = null
 
         // Run standard cleaning first if any standard options selected
@@ -1460,7 +1871,7 @@ setAnalyzing(false)
         addAuditLog({
           id: crypto.randomUUID(), time: new Date().toLocaleString(),
           action: 'clean', entity_type: 'csv_file', entity_id: crypto.randomUUID(),
-          details: `Cleaned: ${activeFile.name} · ${safeResult.original_shape[0]} → ${safeResult.cleaned_shape[0]} rows`,
+          details: `Cleaned: ${fileToClean.name} · ${safeResult.original_shape[0]} → ${safeResult.cleaned_shape[0]} rows`,
           user: 'local_user'
         })
       } catch {
@@ -1468,7 +1879,7 @@ setAnalyzing(false)
       } finally {
         setCleaning(false)
       }
-    }, [activeFile, options, imputationMethod, customCleanOps])
+    }, [activeFile, analysis, activeSourceName, options, imputationMethod, customCleanOps])
 
     const handleEditSourceConfirm = useCallback((sourceName: string, destinationName: string) => {
       setShowEditSource(false)
