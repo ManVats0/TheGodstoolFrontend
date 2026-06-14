@@ -8,6 +8,7 @@ export interface Notification {
   severity: 'warning' | 'error' | 'info'
   link?: string
   timestamp: number
+  sourceName?: string
 }
 
 export interface AuditLog {
@@ -141,6 +142,9 @@ interface AppState {
   alertConditions: Record<string, boolean>
   setAlertCondition: (key: string, val: boolean) => void
 
+  lastSourcesScanAt: number
+  setLastSourcesScanAt: (t: number) => void
+
   auditLogs: AuditLog[]
   addAuditLog: (log: AuditLog) => void
 
@@ -206,10 +210,15 @@ export const useStore = create<AppState>((set) => ({
   setActiveDestinationName: (n) => set({ activeDestinationName: n }),
 
   notifications: [],
-  addNotifications: (newOnes) => set((s) => ({
-    notifications: [...newOnes.map(n => ({ ...n, timestamp: Date.now() })), ...s.notifications],
-    readIds: new Set()
-  })),
+  addNotifications: (newOnes) => set((s) => {
+    // Deduplicate: skip notifications whose (type + title + message) already exists
+    const existingKeys = new Set(s.notifications.map(n => `${n.type}|${n.title}|${n.message}`))
+    const deduped = newOnes.filter(n => !existingKeys.has(`${n.type}|${n.title}|${n.message}`))
+    return {
+      notifications: [...deduped.map(n => ({ ...n, timestamp: Date.now() })), ...s.notifications],
+      // readIds preserved — do NOT reset, so old notifications stay read
+    }
+  }),
 
   readIds: new Set(),
   markRead: (id) => set((s) => ({ readIds: new Set([...s.readIds, id]) })),
@@ -233,6 +242,9 @@ export const useStore = create<AppState>((set) => ({
   setAlertCondition: (key, val) => set((s) => ({
     alertConditions: { ...s.alertConditions, [key]: val }
   })),
+
+  lastSourcesScanAt: 0,
+  setLastSourcesScanAt: (t: number) => set({ lastSourcesScanAt: t }),
 
   auditLogs: [],
   addAuditLog: (log) => set((s) => ({ auditLogs: [log, ...s.auditLogs] })),
