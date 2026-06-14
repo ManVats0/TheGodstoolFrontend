@@ -1851,7 +1851,7 @@ if (mysqlConn) {
     // ── If source is a Google Sheet, fetch it as CSV first ───────────────
     if (sourceObj?.type === 'sheets') {
       try {
-        const sheetRes = await fetch('http://127.0.0.1:8000/api/sheets/to-csv', {
+        const sheetRes = await fetch(`${API_BASE}/api/sheets/to-csv`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1862,7 +1862,7 @@ if (mysqlConn) {
         })
         const sheetData = await sheetRes.json()
         if (sheetData.download_url) {
-          const csvRes = await fetch(`http://127.0.0.1:8000${sheetData.download_url}`)
+          const csvRes = await fetch(`${API_BASE}${sheetData.download_url}`)
           const blob = await csvRes.blob()
           fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
           console.log('[Pipeline] Fetched Google Sheet as CSV:', sheetData.rows, 'rows')
