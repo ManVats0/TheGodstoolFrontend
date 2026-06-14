@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
+import { API_BASE } from '../config'
 
 const SEV = {
   warning: { dot: '#f97316', label: 'Warning', bg: 'rgba(249,115,22,0.1)', text: '#fb923c' },
@@ -23,34 +24,52 @@ export default function NotificationPanel({ onClose }: { onClose: () => void }) 
     setAnalysisTab
   } = useStore()
 
-  const [emailInput, setEmailInput] = useState(notifyEmail)
-  const [emailSaved, setEmailSaved] = useState(!!notifyEmail)
+  const [emailInput, setEmailInput] = useState(notifyEmail || localStorage.getItem('datapro_alert_email') || '')
+  const [emailSaved, setEmailSaved] = useState(!!notifyEmail || !!localStorage.getItem('datapro_alert_email'))
+
+  useEffect(() => {
+    const saved = localStorage.getItem('datapro_alert_email')
+    if (saved && !notifyEmail) {
+      setNotifyEmail(saved)
+      setEmailInput(saved)
+      setEmailSaved(true)
+    }
+  }, [])
 
   const unread = notifications.filter(n => !readIds.has(n.id)).length
 
   const handleClick = (n: any) => {
     markRead(n.id)
     onClose()
+    // Switch to the source this notification was generated for, if known
+    if (n.sourceName) {
+      const { sources, switchActiveSource } = useStore.getState()
+      const sourceObj = sources.find((s: any) => s.name === n.sourceName)
+      if (sourceObj && useStore.getState().activeSourceName !== n.sourceName) {
+        switchActiveSource(sourceObj.file ?? null, sourceObj.name)
+      }
+    }
     navigate('/analysis')
     if (n.link === 'timeseries') setAnalysisTab('timeseries')
     else if (n.link === 'problems') setAnalysisTab('problems')
     else setAnalysisTab('preview')
   }
 
-  const handleEmailOk = async () => {
+const handleEmailOk = async () => {
     if (!emailInput.trim()) return
     try {
-      const res = await fetch(`${import.meta.env.VITE_AUTH_URL || 'http://localhost:4000'}/api/save-alert-email`, {
+      const res = await fetch(`${API_BASE}/api/save-alert-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailInput.trim() })
+        body: JSON.stringify({ email: emailInput.trim(), source_name: 'default' })
       })
       const data = await res.json()
-      if (!res.ok) {
+      if (!res.ok || data.error) {
         console.error('Failed:', data.error)
         return
       }
-      setNotifyEmail(emailInput)
+      setNotifyEmail(emailInput.trim())
+      localStorage.setItem('datapro_alert_email', emailInput.trim())
       setEmailSaved(true)
     } catch {
       console.error('Cannot connect to server.')
