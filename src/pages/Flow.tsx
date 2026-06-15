@@ -1912,6 +1912,12 @@ if (fileToUse) {
     if (pipeline.transformations.find(t => t.id === 'ai_clean')) {
       formData.append('ai_clean', 'true')
     }
+    const customInstructions = pipeline.transformations
+      .filter(t => t.id.startsWith('ai_custom_') && (t as any).instruction)
+      .map(t => (t as any).instruction)
+    if (customInstructions.length > 0) {
+      formData.append('ai_custom_instructions', JSON.stringify(customInstructions))
+    }
     const writeModeVal = pipeline.destinationMode || 'replace'
     formData.append('write_mode', writeModeVal)
 
@@ -4146,6 +4152,7 @@ setTimeout(() => {
               label: label,
               icon: '🤖',
               desc: instruction.length > 60 ? instruction.slice(0, 57) + '...' : instruction,
+              instruction: instruction,
               color: '#ec4899',
               type: 'ai_custom',
               applied: false,
