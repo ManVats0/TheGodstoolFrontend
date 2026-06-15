@@ -1851,9 +1851,14 @@ if (mysqlConn) {
     // ── If source is a Google Sheet, fetch it as CSV first ───────────────
     if (sourceObj?.type === 'sheets') {
       try {
+        const storedSessionSheet = localStorage.getItem('datapro_session') || ''
         const sheetRes = await fetch(`${API_BASE}/api/sheets/to-csv`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(storedSessionSheet ? { 'X-Session-ID': storedSessionSheet } : {}),
+          },
           body: JSON.stringify({
             sheetId:   sourceObj.sheetId || '',
             sheetName: sourceObj.name,
@@ -1933,7 +1938,7 @@ if (writeModeVal === 'append') {
   }
 }
 
-        const res = await fetch('/api/clean-data', { method: 'POST', body: formData })
+        const res = await fetch(`${API_BASE}/api/clean-data`, { method: 'POST', body: formData })
         data = await res.json()
 
         // ── Fetch the cleaned file and store it ──────────────────────────
@@ -3241,8 +3246,8 @@ setTimeout(() => {
   transformations.forEach(t => { const k = TRANSFORM_TO_CLEAN[t.id]; if (k) formData.append(k, 'true') })
   formData.append('write_mode', destinationMode)
   try {
-    const res = await fetch('/api/clean-data', { method: 'POST', body: formData })
-    const data = await res.json()
+    const res = await fetch(`${API_BASE}/api/clean-data`, { method: 'POST', body: formData })
+        data = await res.json()
     if (data.download_url) {
       const fileRes = await fetch(`http://127.0.0.1:8000${data.download_url}`)
       const blob = await fileRes.blob()
@@ -3536,10 +3541,10 @@ setTimeout(() => {
   formData.append('file', activeFile)
   transformations.forEach(t => { const k = TRANSFORM_TO_CLEAN[t.id]; if (k) formData.append(k, 'true') })
   try {
-    const res = await fetch('/api/clean-data', { method: 'POST', body: formData })
+    const res = await fetch(`${API_BASE}/api/clean-data`, { method: 'POST', body: formData })
     const data = await res.json()
     if (data.download_url) {
-      const fileRes = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+      const fileRes = await fetch(`${API_BASE}${data.download_url}`)
       const blob = await fileRes.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
