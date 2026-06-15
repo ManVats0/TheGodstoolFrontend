@@ -1649,7 +1649,7 @@ if (!mysqlConn) {
 if (mysqlConn) {
   const tableToFetch = srcTable || mysqlConn.table || mysqlConn.tables?.[0] || ''
   console.log('[Pipeline] Fetching MySQL table:', tableToFetch, 'from', srcDatabase, '@', srcHost)
-  const mysqlRes = await fetch('http://127.0.0.1:8000/api/mysql/fetch-table', {
+  const mysqlRes = await fetch(`${API_BASE}/api/mysql/fetch-table`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -1664,7 +1664,7 @@ if (mysqlConn) {
   })
           const mysqlData = await mysqlRes.json()
           if (mysqlData.download_url) {
-            const csvRes = await fetch(`http://127.0.0.1:8000${mysqlData.download_url}`)
+            const csvRes = await fetch(`${API_BASE}${mysqlData.download_url}`)
             const blob = await csvRes.blob()
             fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
             console.log('[Pipeline] Fetched MySQL table as CSV:', mysqlData.rows, 'rows')
@@ -1713,7 +1713,7 @@ if (mysqlConn) {
         if (pgConn) {
           const tableToFetch = srcTable || pgConn.table || pgConn.tables?.[0] || ''
           console.log('[Pipeline] Fetching PostgreSQL table:', tableToFetch, 'from', srcDatabase, '@', srcHost)
-          const pgRes = await fetch('http://127.0.0.1:8000/api/postgres/fetch-table', {
+          const pgRes = await fetch(`${API_BASE}/api/postgres/fetch-table`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1728,7 +1728,7 @@ if (mysqlConn) {
           })
           const pgData = await pgRes.json()
           if (pgData.download_url) {
-            const csvRes = await fetch(`http://127.0.0.1:8000${pgData.download_url}`)
+            const csvRes = await fetch(`${API_BASE}${pgData.download_url}`)
             const blob = await csvRes.blob()
             fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
             console.log('[Pipeline] Fetched PostgreSQL table as CSV:', pgData.rows, 'rows')
@@ -1770,7 +1770,7 @@ if (mysqlConn) {
         const bqConn = savedBQ.find((c: any) => c.project === srcProject && c.dataset === srcDataset)
         if (bqConn) {
           const tableToFetch = srcTable || bqConn.table || bqConn.tables?.[0] || ''
-          const bqRes = await fetch('http://127.0.0.1:8000/api/bigquery/fetch-table', {
+          const bqRes = await fetch(`${API_BASE}/api/bigquery/fetch-table`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1782,7 +1782,7 @@ if (mysqlConn) {
           })
           const bqData = await bqRes.json()
           if (bqData.download_url) {
-            const csvRes = await fetch(`http://127.0.0.1:8000${bqData.download_url}`)
+            const csvRes = await fetch(`${API_BASE}${bqData.download_url}`)
             const blob = await csvRes.blob()
             fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
             console.log('[Pipeline] Fetched BigQuery table as CSV:', bqData.rows, 'rows')
@@ -1806,7 +1806,7 @@ if (mysqlConn) {
         if (mongoConn) {
           const collToFetch = srcCollection || mongoConn.collection || mongoConn.collections?.[0] || ''
           console.log('[Pipeline] Fetching MongoDB collection:', collToFetch, 'from', srcDatabase)
-          const mongoRes = await fetch('http://127.0.0.1:8000/api/mongo/fetch-collection', {
+          const mongoRes = await fetch(`${API_BASE}/api/mongo/fetch-collection`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1817,7 +1817,7 @@ if (mysqlConn) {
           })
           const mongoData = await mongoRes.json()
           if (mongoData.download_url) {
-            const csvRes = await fetch(`http://127.0.0.1:8000${mongoData.download_url}`)
+            const csvRes = await fetch(`${API_BASE}${mongoData.download_url}`)
             const blob = await csvRes.blob()
             fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
             console.log('[Pipeline] Fetched MongoDB collection as CSV:', mongoData.rows, 'rows')
@@ -1943,7 +1943,7 @@ if (writeModeVal === 'append') {
 
         // ── Fetch the cleaned file and store it ──────────────────────────
         if (data.download_url) {
-          const fileRes = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+          const fileRes = await fetch(`${API_BASE}${data.download_url}`)
           const blob = await fileRes.blob()
           const outputFile = new File([blob], pipeline.destinationName, { type: 'text/csv' })
 
@@ -1998,7 +1998,7 @@ if (actualRowsIn > 0 || data?.download_url) {
 // ── Push to Google Sheets if connected ───────────────────────────────────────
     if (activeGsheets && data?.download_url) {
       try {
-        const sheetRes = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+        const sheetRes = await fetch(`${API_BASE}${data.download_url}`)
         if (!sheetRes.ok) throw new Error('Could not download cleaned CSV')
         const csvText = await sheetRes.text()
 
@@ -2006,7 +2006,7 @@ if (actualRowsIn > 0 || data?.download_url) {
           console.error('[GSheets] Empty CSV — skipping sheet update')
         } else {
           const storedSession = localStorage.getItem('datapro_session') || ''
-          const updateRes = await fetch('http://127.0.0.1:8000/api/update-gsheet', {
+          const updateRes = await fetch(`${API_BASE}/api/update-gsheet`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -2047,14 +2047,14 @@ if (actualRowsIn > 0 || data?.download_url) {
 
 if (mysqlDestConn && data?.download_url) {
   try {
-    const csvRes2 = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+    const csvRes2 = await fetch(`${API_BASE}${data.download_url}`)
     if (csvRes2.ok) {
       const csvText2 = await csvRes2.text()
       // Use the source table name for destination (append _cleaned suffix server-side)
       // Extract dest table from pipeline destinationId: "database.table_cleaned@host"
 const destTable = mysqlDestConn.table || mysqlDestConn.tables?.[0] || ''
 console.log('[Pipeline] Writing to MySQL table (overwrite in-place):', destTable)
-      const writeRes = await fetch('http://127.0.0.1:8000/api/mysql/write-table', {
+      const writeRes = await fetch(`${API_BASE}/api/mysql/write-table`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2093,12 +2093,12 @@ if (writeData.success) {
 
     if (pgDestConn && data?.download_url) {
       try {
-        const csvRes3 = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+        const csvRes3 = await fetch(`${API_BASE}${data.download_url}`)
         if (csvRes3.ok) {
           const csvText3 = await csvRes3.text()
           const destTable3 = pgDestConn.table || pgDestConn.tables?.[0] || ''
           console.log('[Pipeline] Writing to PostgreSQL table:', destTable3)
-          const writeRes3 = await fetch('http://127.0.0.1:8000/api/postgres/write-table', {
+          const writeRes3 = await fetch(`${API_BASE}/api/postgres/write-table`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -2136,12 +2136,12 @@ if (writeData.success) {
 
     if (bqDestConn && data?.download_url) {
       try {
-        const csvRes4 = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+        const csvRes4 = await fetch(`${API_BASE}${data.download_url}`)
         if (csvRes4.ok) {
           const csvText4 = await csvRes4.text()
           const destTable4 = bqDestConn.table || bqDestConn.tables?.[0] || ''
           console.log('[Pipeline] Writing to BigQuery table:', destTable4)
-          const writeRes4 = await fetch('http://127.0.0.1:8000/api/bigquery/write-table', {
+          const writeRes4 = await fetch(`${API_BASE}/api/bigquery/write-table`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -2175,12 +2175,12 @@ if (writeData.success) {
 
     if (awsDestConn && data?.download_url) {
       try {
-        const csvRes6 = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+        const csvRes6 = await fetch(`${API_BASE}${data.download_url}`)
         if (csvRes6.ok) {
           const csvText6 = await csvRes6.text()
           const destItem6 = awsDestConn.table || awsDestConn.tables?.[0] || ''
           console.log('[Pipeline] Writing to AWS', awsDestConn.service, ':', destItem6)
-          const writeRes6 = await fetch('http://127.0.0.1:8000/api/aws/write-table', {
+          const writeRes6 = await fetch(`${API_BASE}/api/aws/write-table`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -2213,12 +2213,12 @@ if (writeData.success) {
 
     if (mongoDestConn && data?.download_url) {
       try {
-        const csvRes5 = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+        const csvRes5 = await fetch(`${API_BASE}${data.download_url}`)
         if (csvRes5.ok) {
           const csvText5 = await csvRes5.text()
           const destColl5 = mongoDestConn.collection || mongoDestConn.collections?.[0] || ''
           console.log('[Pipeline] Writing to MongoDB collection:', destColl5)
-          const writeRes5 = await fetch('http://127.0.0.1:8000/api/mongo/write-collection', {
+          const writeRes5 = await fetch(`${API_BASE}/api/mongo/write-collection`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -3247,9 +3247,9 @@ setTimeout(() => {
   formData.append('write_mode', destinationMode)
   try {
     const res = await fetch(`${API_BASE}/api/clean-data`, { method: 'POST', body: formData })
-        data = await res.json()
+        const data = await res.json()
     if (data.download_url) {
-      const fileRes = await fetch(`http://127.0.0.1:8000${data.download_url}`)
+      const fileRes = await fetch(`${API_BASE}${data.download_url}`)
       const blob = await fileRes.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
