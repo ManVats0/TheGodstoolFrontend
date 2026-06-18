@@ -1848,6 +1848,182 @@ if (mysqlConn) {
       }
     }
 
+    // ── If source is AWS, fetch table/file as CSV first ──────────────────
+    if (sourceObj?.type === 'aws') {
+      try {
+        const savedAWS = JSON.parse(localStorage.getItem('datapro_aws_connections') || '[]')
+        const srcName = sourceObj.name || ''
+        const awsConn = savedAWS.find((c: any) => {
+          if (c.service === 's3') return srcName.startsWith(`s3://${c.bucket}`)
+          if (c.service === 'dynamodb') return srcName.includes(`@dynamodb.${c.region}`)
+          const atIdx = srcName.lastIndexOf('@')
+          const host = atIdx >= 0 ? srcName.slice(atIdx + 1) : ''
+          const beforeAt = atIdx >= 0 ? srcName.slice(0, atIdx) : srcName
+          const dotIdx = beforeAt.indexOf('.')
+          const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+          return c.host === host && c.database === database
+        })
+        if (awsConn) {
+          let awsTable = ''
+          if (awsConn.service === 's3') awsTable = srcName.replace(`s3://${awsConn.bucket}/`, '')
+          else if (awsConn.service === 'dynamodb') awsTable = srcName.split('@')[0]
+          else {
+            const atIdx = srcName.lastIndexOf('@')
+            const beforeAt = atIdx >= 0 ? srcName.slice(0, atIdx) : srcName
+            const dotIdx = beforeAt.indexOf('.')
+            awsTable = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : beforeAt
+          }
+          console.log('[Pipeline] Fetching AWS', awsConn.service, ':', awsTable)
+          const awsRes = await fetch(`${API_BASE}/api/aws/fetch-table`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...awsConn, service: awsConn.service, table: awsTable }),
+          })
+          const awsData = await awsRes.json()
+          if (awsData.download_url) {
+            const csvRes = await fetch(`${API_BASE}${awsData.download_url}`)
+            const blob = await csvRes.blob()
+            fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
+            console.log('[Pipeline] Fetched AWS data as CSV:', awsData.rows, 'rows')
+          } else {
+            console.error('[Pipeline] AWS fetch failed:', awsData.error)
+          }
+        } else {
+          console.error('[Pipeline] No matching AWS connection found for', srcName)
+        }
+      } catch (e) {
+        console.error('[Pipeline] AWS fetch failed:', e)
+        const realLog: PipelineLogEntry = {
+          ...log,
+          status: 'failed',
+          duration: Date.now() - new Date(log.timestamp).getTime(),
+          steps: pipeline.transformations.map(t => ({
+            name: t.label,
+            status: 'failed' as const,
+            duration: 0,
+            message: `AWS fetch failed: ${String(e)}`,
+          })),
+        }
+        const updated = savedPipelines.map(p =>
+          p.id === pipeline.id
+            ? { ...p, lastRun: realLog.timestamp, runCount: p.runCount + 1, logs: [realLog, ...p.logs].slice(0, 50) }
+            : p
+        )
+        persistPipelines(updated)
+        return realLog
+      }
+    }
+
+    // ── If source is GCS, fetch file as CSV first ────────────────────────
+    if ((sourceObj?.type as string) === 'gcs') {
+      try {
+        const savedGCS = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
+        const srcName = sourceObj.name || ''
+        const withoutProto = srcName.replace('gcs://', '')
+        const slashIdx = withoutProto.indexOf('/')
+        const bucket = slashIdx >= 0 ? withoutProto.slice(0, slashIdx) : withoutProto
+        const gcsFile = slashIdx >= 0 ? withoutProto.slice(slashIdx + 1) : ''
+        const gcsConn = savedGCS.find((c: any) => String(c.bucket) === bucket)
+        if (gcsConn) {
+          console.log('[Pipeline] Fetching GCS file:', gcsFile, 'from bucket', bucket)
+          const gcsRes = await fetch(`${API_BASE}/api/gcs/fetch-file`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key_json: gcsConn.keyJson, project: gcsConn.project, bucket, file: gcsFile }),
+          })
+          const gcsData = await gcsRes.json()
+          if (gcsData.download_url) {
+            const csvRes = await fetch(`${API_BASE}${gcsData.download_url}`)
+            const blob = await csvRes.blob()
+            fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
+            console.log('[Pipeline] Fetched GCS file as CSV:', gcsData.rows, 'rows')
+          } else {
+            console.error('[Pipeline] GCS fetch failed:', gcsData.error)
+          }
+        } else {
+          console.error('[Pipeline] No matching GCS connection found for bucket', bucket)
+        }
+      } catch (e) {
+        console.error('[Pipeline] GCS fetch failed:', e)
+        const realLog: PipelineLogEntry = {
+          ...log,
+          status: 'failed',
+          duration: Date.now() - new Date(log.timestamp).getTime(),
+          steps: pipeline.transformations.map(t => ({
+            name: t.label,
+            status: 'failed' as const,
+            duration: 0,
+            message: `GCS fetch failed: ${String(e)}`,
+          })),
+        }
+        const updated = savedPipelines.map(p =>
+          p.id === pipeline.id
+            ? { ...p, lastRun: realLog.timestamp, runCount: p.runCount + 1, logs: [realLog, ...p.logs].slice(0, 50) }
+            : p
+        )
+        persistPipelines(updated)
+        return realLog
+      }
+    }
+
+    // ── If source is Cloud SQL, fetch table as CSV first ─────────────────
+    if ((sourceObj?.type as string) === 'cloudsql') {
+      try {
+        const savedCSQL = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
+        const srcName = sourceObj.name || ''
+        const atIdx = srcName.lastIndexOf('@')
+        const beforeAt = atIdx >= 0 ? srcName.slice(0, atIdx) : srcName
+        const dotIdx = beforeAt.indexOf('.')
+        const srcDatabase = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+        const srcTable = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+        const projectPart = atIdx >= 0 ? srcName.slice(atIdx + 1).replace('cloudsql.', '') : ''
+        const csqlConn = savedCSQL.find((c: any) => c.database === srcDatabase && c.project === projectPart)
+        if (csqlConn) {
+          const endpoint = csqlConn.dbType === 'mysql' ? '/api/mysql/fetch-table' : '/api/postgres/fetch-table'
+          console.log('[Pipeline] Fetching Cloud SQL table:', srcTable, 'from', srcDatabase)
+          const csqlRes = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              host: csqlConn.instanceConnectionName, port: csqlConn.port, user: csqlConn.user,
+              password: csqlConn.password, database: csqlConn.database, ssl: true, table: srcTable,
+            }),
+          })
+          const csqlData = await csqlRes.json()
+          if (csqlData.download_url) {
+            const csvRes = await fetch(`${API_BASE}${csqlData.download_url}`)
+            const blob = await csvRes.blob()
+            fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
+            console.log('[Pipeline] Fetched Cloud SQL table as CSV:', csqlData.rows, 'rows')
+          } else {
+            console.error('[Pipeline] Cloud SQL fetch failed:', csqlData.error)
+          }
+        } else {
+          console.error('[Pipeline] No matching Cloud SQL connection found for', srcDatabase, projectPart)
+        }
+      } catch (e) {
+        console.error('[Pipeline] Cloud SQL fetch failed:', e)
+        const realLog: PipelineLogEntry = {
+          ...log,
+          status: 'failed',
+          duration: Date.now() - new Date(log.timestamp).getTime(),
+          steps: pipeline.transformations.map(t => ({
+            name: t.label,
+            status: 'failed' as const,
+            duration: 0,
+            message: `Cloud SQL fetch failed: ${String(e)}`,
+          })),
+        }
+        const updated = savedPipelines.map(p =>
+          p.id === pipeline.id
+            ? { ...p, lastRun: realLog.timestamp, runCount: p.runCount + 1, logs: [realLog, ...p.logs].slice(0, 50) }
+            : p
+        )
+        persistPipelines(updated)
+        return realLog
+      }
+    }
+
     // ── If source is a Google Sheet, fetch it as CSV first ───────────────
     if (sourceObj?.type === 'sheets') {
       try {
