@@ -1520,13 +1520,94 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         if (!mongoConn) {
           console.error('❌ No MongoDB connection found for', { database })
           alert(`MongoDB connection not found for ${database}. Please reconnect in Sources.`)
+          setAnalyzing(false)
+          return
+        }
+        const mongoCollection = collection || mongoConn.collection || mongoConn.collections?.[0] || ''
+        if (!mongoCollection) {
+          alert(`No collection specified for MongoDB source "${activeSourceName}". Please reconnect in Sources.`)
+          setAnalyzing(false)
           return
         }
         formData.append('source_type', 'mongodb')
         formData.append('mysql_host', mongoConn.uri)
         formData.append('mysql_user', mongoConn.database)
         formData.append('mysql_database', mongoConn.database)
-        formData.append('mysql_table', collection || mongoConn.collection || mongoConn.collections?.[0] || '')
+        formData.append('mysql_table', mongoCollection)
+      } else if ((sourceObj2?.type as string) === 'gcs') {
+        const savedGCSMeta = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
+        const withoutProto = activeSourceName.replace('gcs://', '')
+        const slashIdx = withoutProto.indexOf('/')
+        const bucket = slashIdx >= 0 ? withoutProto.slice(0, slashIdx) : withoutProto
+        const gcsFile = slashIdx >= 0 ? withoutProto.slice(slashIdx + 1) : ''
+        const conn = savedGCSMeta.find((c: any) => String(c.bucket) === bucket)
+        if (!conn) {
+          alert(`GCS connection not found for bucket ${bucket}. Please reconnect in Sources.`)
+          setAnalyzing(false)
+          return
+        }
+        try {
+          const fetchRes = await fetch(`${API_BASE}/api/gcs/fetch-file`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key_json: conn.keyJson, project: conn.project, bucket, file: gcsFile }),
+          })
+          const fetchData = await fetchRes.json()
+          if (fetchData.download_url) {
+            const csvRes = await fetch(`${API_BASE}${fetchData.download_url}`)
+            const blob = await csvRes.blob()
+            const realFile = new File([blob], `${activeSourceName}.csv`, { type: 'text/csv' })
+            formData.append('file', realFile)
+          } else {
+            alert(`GCS fetch failed: ${fetchData.error}`)
+            setAnalyzing(false)
+            return
+          }
+        } catch (e) {
+          alert(`GCS fetch error: ${e}`)
+          setAnalyzing(false)
+          return
+        }
+      } else if ((sourceObj2?.type as string) === 'cloudsql') {
+        const savedCSQLMeta = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
+        const atIdx = activeSourceName.lastIndexOf('@')
+        const beforeAt = atIdx >= 0 ? activeSourceName.slice(0, atIdx) : activeSourceName
+        const dotIdx = beforeAt.indexOf('.')
+        const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
+        const table = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
+        const projectPart = atIdx >= 0 ? activeSourceName.slice(atIdx + 1).replace('cloudsql.', '') : ''
+        const conn = savedCSQLMeta.find((c: any) => c.database === database && c.project === projectPart)
+        if (!conn) {
+          alert(`Cloud SQL connection not found for ${database}. Please reconnect in Sources.`)
+          setAnalyzing(false)
+          return
+        }
+        const endpoint = conn.dbType === 'mysql' ? '/api/mysql/fetch-table' : '/api/postgres/fetch-table'
+        try {
+          const fetchRes = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              host: conn.instanceConnectionName, port: conn.port, user: conn.user,
+              password: conn.password, database: conn.database, ssl: true, table,
+            }),
+          })
+          const fetchData = await fetchRes.json()
+          if (fetchData.download_url) {
+            const csvRes = await fetch(`${API_BASE}${fetchData.download_url}`)
+            const blob = await csvRes.blob()
+            const realFile = new File([blob], `${activeSourceName}.csv`, { type: 'text/csv' })
+            formData.append('file', realFile)
+          } else {
+            alert(`Cloud SQL fetch failed: ${fetchData.error}`)
+            setAnalyzing(false)
+            return
+          }
+        } catch (e) {
+          alert(`Cloud SQL fetch error: ${e}`)
+          setAnalyzing(false)
+          return
+        }
       } 
       
       else if (sourceObj2?.type === 'bigquery') {
