@@ -1487,6 +1487,24 @@ export default function Flow() {
     setAwsDestinationState(val)
   }
 
+  const [gcsDestination, setGcsDestination] = useState<any | null>(() => {
+    try { return JSON.parse(localStorage.getItem('datapro_gcs_dest') || 'null') } catch { return null }
+  })
+  const setGcsDest = (val: any | null) => {
+    if (val) localStorage.setItem('datapro_gcs_dest', JSON.stringify(val))
+    else localStorage.removeItem('datapro_gcs_dest')
+    setGcsDestination(val)
+  }
+
+  const [cloudsqlDestination, setCloudsqlDestination] = useState<any | null>(() => {
+    try { return JSON.parse(localStorage.getItem('datapro_cloudsql_dest') || 'null') } catch { return null }
+  })
+  const setCsqlDest = (val: any | null) => {
+    if (val) localStorage.setItem('datapro_cloudsql_dest', JSON.stringify(val))
+    else localStorage.removeItem('datapro_cloudsql_dest')
+    setCloudsqlDestination(val)
+  }
+
   const [mongoDestination, setMongoDestination] = useState<any | null>(() => {
     try { return JSON.parse(localStorage.getItem('datapro_mongo_dest') || 'null') } catch { return null } 
   })
@@ -1517,6 +1535,8 @@ export default function Flow() {
     (bqDestination ? `${bqDestination.project}.${bqDestination.dataset}.${bqDestination.table || bqDestination.tables?.[0] || '?'}` : null) ||
     (mongoDestination ? `${mongoDestination.database}.${mongoDestination.collection || mongoDestination.collections?.[0] || '?'}@mongo` : null) ||
     (awsDestinationState ? (awsDestinationState.service === 's3' ? `s3://${awsDestinationState.bucket}/${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}` : awsDestinationState.service === 'dynamodb' ? `${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}@dynamodb.${awsDestinationState.region}` : `${awsDestinationState.database}.${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}@${awsDestinationState.host}`) : null) ||
+    (gcsDestination ? `gcs://${gcsDestination.bucket}/${gcsDestination.file || gcsDestination.files?.[0] || '?'}` : null) ||
+    (cloudsqlDestination ? `${cloudsqlDestination.database}.${cloudsqlDestination.table || cloudsqlDestination.tables?.[0] || '?'}@cloudsql.${cloudsqlDestination.project}` : null) ||
     destinationName
   const existingPipeline = savedPipelines.find(p => p.sourceId === selectedSourceId && p.destinationId === effectiveDestination)
 
@@ -2164,6 +2184,8 @@ const activeMongoDestConn = (() => { try { const v = localStorage.getItem('datap
 const activePgDest = (() => { try { const v = localStorage.getItem('datapro_postgres_dest'); return v ? JSON.parse(v) : null } catch { return null } })()
 const activeBqDest = (() => { try { const v = localStorage.getItem('datapro_bigquery_dest'); return v ? JSON.parse(v) : null } catch { return null } })()
 const activeAwsDest = (() => { try { const v = localStorage.getItem('datapro_aws_dest'); return v ? JSON.parse(v) : null } catch { return null } })()
+const activeGcsDest = (() => { try { const v = localStorage.getItem('datapro_gcs_dest'); return v ? JSON.parse(v) : null } catch { return null } })()
+const activeCsqlDest = (() => { try { const v = localStorage.getItem('datapro_cloudsql_dest'); return v ? JSON.parse(v) : null } catch { return null } })()
 const actualRowsIn = data?.original_shape?.[0] ?? 0
 const actualRowsOut = data?.cleaned_shape?.[0] ?? 0
 if (actualRowsIn > 0 || data?.download_url) {
@@ -2173,7 +2195,7 @@ if (actualRowsIn > 0 || data?.download_url) {
     rowsOut: actualRowsOut,
     rowsAffected: actualRowsIn - actualRowsOut,
     mode: pipeline.destinationMode,
-    destinationType: isGsheets ? 'sheets' : activeMysqlDest ? 'mysql' : activePgDest ? 'postgres' : activeBqDest ? 'bigquery' : activeMongoDestConn ? 'mongodb' : activeAwsDest ? 'aws' : 'csv',
+    destinationType: isGsheets ? 'sheets' : activeMysqlDest ? 'mysql' : activePgDest ? 'postgres' : activeBqDest ? 'bigquery' : activeMongoDestConn ? 'mongodb' : activeAwsDest ? 'aws' : activeGcsDest ? 'gcs' : activeCsqlDest ? 'cloudsql' : 'csv',
   })
 }
 
@@ -2421,6 +2443,90 @@ if (writeData.success) {
         }
       } catch (e) {
         console.error('MongoDB write-back failed:', e)
+      }
+    }
+
+    // ── Write back to GCS if destination is GCS ──────────────────────────
+    const gcsDestConn = (() => {
+      try {
+        const v = localStorage.getItem('datapro_gcs_dest')
+        return v ? JSON.parse(v) : null
+      } catch { return null }
+    })()
+
+    if (gcsDestConn && data?.download_url) {
+      try {
+        const csvRes7 = await fetch(`${API_BASE}${data.download_url}`)
+        if (csvRes7.ok) {
+          const csvText7 = await csvRes7.text()
+          const destFile7 = gcsDestConn.file || gcsDestConn.files?.[0] || ''
+          console.log('[Pipeline] Writing to GCS file:', destFile7)
+          const writeRes7 = await fetch(`${API_BASE}/api/gcs/write-file`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              key_json: gcsDestConn.keyJson,
+              project: gcsDestConn.project,
+              bucket: gcsDestConn.bucket,
+              file: destFile7,
+              csvData: csvText7,
+              mode: pipeline.destinationMode,
+            }),
+          })
+          const writeData7 = await writeRes7.json()
+          if (writeData7.success) {
+            console.log(`✅ GCS file "${writeData7.file}" updated: ${writeData7.rows_written} rows`)
+          } else {
+            console.error('[GCS write-back] failed:', writeData7.error)
+            alert(`⚠️ GCS write failed: ${writeData7.error}`)
+          }
+        }
+      } catch (e) {
+        console.error('GCS write-back failed:', e)
+      }
+    }
+
+    // ── Write back to Cloud SQL if destination is Cloud SQL ──────────────
+    const csqlDestConn = (() => {
+      try {
+        const v = localStorage.getItem('datapro_cloudsql_dest')
+        return v ? JSON.parse(v) : null
+      } catch { return null }
+    })()
+
+    if (csqlDestConn && data?.download_url) {
+      try {
+        const csvRes8 = await fetch(`${API_BASE}${data.download_url}`)
+        if (csvRes8.ok) {
+          const csvText8 = await csvRes8.text()
+          const destTable8 = csqlDestConn.table || csqlDestConn.tables?.[0] || ''
+          const endpoint8 = csqlDestConn.dbType === 'mysql' ? '/api/mysql/write-table' : '/api/postgres/write-table'
+          console.log('[Pipeline] Writing to Cloud SQL table:', destTable8)
+          const writeRes8 = await fetch(`${API_BASE}${endpoint8}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              host: csqlDestConn.instanceConnectionName,
+              port: csqlDestConn.port,
+              user: csqlDestConn.user,
+              password: csqlDestConn.password,
+              database: csqlDestConn.database,
+              table: destTable8,
+              ssl: true,
+              csvData: csvText8,
+              mode: pipeline.destinationMode,
+            }),
+          })
+          const writeData8 = await writeRes8.json()
+          if (writeData8.success) {
+            console.log(`✅ Cloud SQL table "${writeData8.table}" updated: ${writeData8.rows_written} rows`)
+          } else {
+            console.error('[Cloud SQL write-back] failed:', writeData8.error)
+            alert(`⚠️ Cloud SQL write failed: ${writeData8.error}`)
+          }
+        }
+      } catch (e) {
+        console.error('Cloud SQL write-back failed:', e)
       }
     }
 
@@ -2831,7 +2937,9 @@ setTimeout(() => {
     const isActive =
       type === 'Google Sheets' ? !!gsheetsConnected :
       type === 'AWS' ? !!awsDestinationState :
-      type === 'CSV' ? (!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState) :
+      type === 'GCS' ? !!gcsDestination :
+      type === 'Cloud SQL' ? !!cloudsqlDestination :
+      type === 'CSV' ? (!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination) :
       type === 'MySQL' ? !!mysqlDestination :
       type === 'PostgreSQL' ? !!pgDestination :
       type === 'BigQuery' ? !!bqDestination :
@@ -2840,7 +2948,7 @@ setTimeout(() => {
       <button key={type}
         onClick={() => {
           if (type === 'Google Sheets' && !gsheetsConnected) { setGsheetsPickerFor('dest'); setShowGSheetsPicker(true) }
-          if (type === 'CSV') { setGsheetsConnected(null); setMysqlDest(null); setMongoDest(null) }
+          if (type === 'CSV') { setGsheetsConnected(null); setMysqlDest(null); setMongoDest(null); setPgDest(null); setBqDest(null); setAwsDest(null); setGcsDest(null); setCsqlDest(null) }
           if (type === 'MongoDB' as any && !mongoDestination) {
             const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
             if (savedMongo.length > 0) {
@@ -2862,25 +2970,30 @@ setTimeout(() => {
               alert('No AWS connections saved. Add one in Data Sources first.')
             }
           }
-          if (type === 'GCS') {
+          if (type === 'GCS' && !gcsDestination) {
             const savedGCS = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
             if (savedGCS.length > 0) {
-              setDestinationName(`gcs://${savedGCS[0].bucket}/${savedGCS[0].files?.[0] || savedGCS[0].file || ''}`)
-              setDestinationEdited(true)
+              setGcsDest(savedGCS[0])
             } else {
               alert('No Cloud Storage connections saved. Add one in Data Sources first.')
             }
           }
-          if (type === 'Cloud SQL') {
+          if (type === 'GCS' && gcsDestination) {
+            setGcsDest(null)
+          }
+
+          if (type === 'Cloud SQL' && !cloudsqlDestination) {
             const savedCSQLConns = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
             if (savedCSQLConns.length > 0) {
-              const c = savedCSQLConns[0]
-              setDestinationName(`${c.database}.${c.table || c.tables?.[0] || '?'}@cloudsql.${c.project}`)
-              setDestinationEdited(true)
+              setCsqlDest(savedCSQLConns[0])
             } else {
               alert('No Cloud SQL connections saved. Add one in Data Sources first.')
             }
           }
+          if (type === 'Cloud SQL' && cloudsqlDestination) {
+            setCsqlDest(null)
+          }
+
           if (type === 'MySQL' && !mysqlDestination) {
             const saved = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
             if (saved.length > 0) setMysqlDest(saved[0])
@@ -3232,6 +3345,126 @@ setTimeout(() => {
                 </div>
               )}
 
+              {/* GCS destination connected pill + file selector */}
+              {gcsDestination && (() => {
+                const savedGCSConns = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
+                const allGcsFiles: string[] = gcsDestination.files?.length
+                  ? gcsDestination.files
+                  : [gcsDestination.file].filter(Boolean)
+                return (
+                  <div className="mb-2 space-y-2">
+                    <div className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background:'rgba(66,133,244,0.08)', border:'1px solid rgba(66,133,244,0.25)' }}>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#4285F4" strokeWidth="1.5" strokeLinejoin="round"/>
+                        </svg>
+                        <span className="text-xs font-bold text-white break-all">
+                          ☁️ gcs://{gcsDestination.bucket}/{gcsDestination.file || gcsDestination.files?.[0] || '?'}
+                        </span>
+                      </div>
+                      <button onClick={() => setGcsDest(null)} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
+                    </div>
+                    {savedGCSConns.length > 1 && (
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={gcsDestination.bucket}
+                          onChange={e => {
+                            const chosen = savedGCSConns.find((c: any) => c.bucket === e.target.value)
+                            if (chosen) setGcsDest(chosen)
+                          }}
+                          className="w-full text-xs text-white rounded-xl px-3 py-2 outline-none appearance-none"
+                          style={{ background:'rgba(66,133,244,0.08)', border:'1px solid rgba(66,133,244,0.3)', paddingRight:'28px', cursor:'pointer' }}
+                        >
+                          {savedGCSConns.map((c: any) => (
+                            <option key={c.id} value={c.bucket} style={{ background:'#0d0a1a' }}>{c.bucket}</option>
+                          ))}
+                        </select>
+                        <div style={{ position:'absolute', right:'8px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                          <svg width="10" height="10" fill="none" stroke="rgba(66,133,244,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                      </div>
+                    )}
+                    {allGcsFiles.length > 0 && (
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={gcsDestination.file || allGcsFiles[0]}
+                          onChange={e => setGcsDest({ ...gcsDestination, file: e.target.value })}
+                          className="w-full text-xs text-white rounded-xl px-3 py-2 outline-none appearance-none"
+                          style={{ background:'rgba(66,133,244,0.06)', border:'1px solid rgba(66,133,244,0.2)', paddingRight:'28px', cursor:'pointer' }}
+                        >
+                          {allGcsFiles.map((f: string) => (
+                            <option key={f} value={f} style={{ background:'#0d0a1a' }}>{f}</option>
+                          ))}
+                        </select>
+                        <div style={{ position:'absolute', right:'8px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                          <svg width="10" height="10" fill="none" stroke="rgba(66,133,244,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
+{/* Cloud SQL destination connected pill + table selector */}
+              {cloudsqlDestination && (() => {
+                const savedCSQLConns = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
+                const allCsqlTables: string[] = cloudsqlDestination.tables?.length
+                  ? cloudsqlDestination.tables
+                  : [cloudsqlDestination.table].filter(Boolean)
+                return (
+                  <div className="mb-2 space-y-2">
+                    <div className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background:'rgba(52,168,83,0.08)', border:'1px solid rgba(52,168,83,0.25)' }}>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <svg width="13" height="13" fill="none" stroke="#34A853" strokeWidth="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                        <span className="text-xs font-bold text-white break-all">
+                          🔷 {cloudsqlDestination.database}.{cloudsqlDestination.table || cloudsqlDestination.tables?.[0] || '?'} @ cloudsql.{cloudsqlDestination.project}
+                        </span>
+                      </div>
+                      <button onClick={() => setCsqlDest(null)} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
+                    </div>
+                    {savedCSQLConns.length > 1 && (
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={`${cloudsqlDestination.database}@${cloudsqlDestination.project}`}
+                          onChange={e => {
+                            const chosen = savedCSQLConns.find((c: any) => `${c.database}@${c.project}` === e.target.value)
+                            if (chosen) setCsqlDest(chosen)
+                          }}
+                          className="w-full text-xs text-white rounded-xl px-3 py-2 outline-none appearance-none"
+                          style={{ background:'rgba(52,168,83,0.08)', border:'1px solid rgba(52,168,83,0.3)', paddingRight:'28px', cursor:'pointer' }}
+                        >
+                          {savedCSQLConns.map((c: any) => (
+                            <option key={c.id} value={`${c.database}@${c.project}`} style={{ background:'#0d0a1a' }}>
+                              {c.database}@{c.project}
+                            </option>
+                          ))}
+                        </select>
+                        <div style={{ position:'absolute', right:'8px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                          <svg width="10" height="10" fill="none" stroke="rgba(52,168,83,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                      </div>
+                    )}
+                    {allCsqlTables.length > 0 && (
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={cloudsqlDestination.table || allCsqlTables[0]}
+                          onChange={e => setCsqlDest({ ...cloudsqlDestination, table: e.target.value })}
+                          className="w-full text-xs text-white rounded-xl px-3 py-2 outline-none appearance-none"
+                          style={{ background:'rgba(52,168,83,0.06)', border:'1px solid rgba(52,168,83,0.2)', paddingRight:'28px', cursor:'pointer' }}
+                        >
+                          {allCsqlTables.map((tbl: string) => (
+                            <option key={tbl} value={tbl} style={{ background:'#0d0a1a' }}>{tbl}</option>
+                          ))}
+                        </select>
+                        <div style={{ position:'absolute', right:'8px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                          <svg width="10" height="10" fill="none" stroke="rgba(52,168,83,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
 {/* Write mode toggle — always visible for all destination types */}
               <div className="flex gap-2 mt-2">
                 {(['replace', 'append'] as const).map(mode => (
@@ -3270,7 +3503,7 @@ setTimeout(() => {
                 </div>
                 ) : null}
               {/* Combobox with ✕ clear button — only show for CSV destination */}
-              {!gsheetsConnected && !mysqlDestination && !pgDestination && (
+              {!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination && (
                 <DestinationSelect
                   value={destinationName}
                   onChange={v => { setDestinationName(v); setDestinationEdited(true) }}
