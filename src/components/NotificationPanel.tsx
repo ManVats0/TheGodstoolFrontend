@@ -33,7 +33,19 @@ export default function NotificationPanel({ onClose }: { onClose: () => void }) 
       setNotifyEmail(saved)
       setEmailInput(saved)
       setEmailSaved(true)
+      return
     }
+    fetch(`${API_BASE}/api/get-alert-email`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.email) {
+          setNotifyEmail(d.email)
+          setEmailInput(d.email)
+          setEmailSaved(true)
+          localStorage.setItem('datapro_alert_email', d.email)
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const unread = notifications.filter(n => !readIds.has(n.id)).length
