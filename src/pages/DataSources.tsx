@@ -205,19 +205,7 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
             setGsheetsStep('picker')
           }
 
-          fetch(`${API_BASE}/api/auth/google/sheets`, {
-            credentials: 'include',
-            headers: storedSession ? { 'X-Session-ID': storedSession } : {}
-          })
-            .then(r => r.json())
-            .then(fresh => {
-              if (fresh.sheets?.length > 0) {
-                setRealSheets(fresh.sheets)
-                setGsheetsStep('picker')
-              }
-            })
-            .catch(() => {})
-        } catch {
+          } catch {
           // No internet or backend not running — fail silently
         }
       }
@@ -632,6 +620,46 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
   }
 }
 
+const openGooglePicker = async () => {
+      try {
+        const storedSession = localStorage.getItem('datapro_session') || ''
+        const res = await fetch(`${API_BASE}/api/auth/google/picker-token`, {
+          credentials: 'include',
+          headers: storedSession ? { 'X-Session-ID': storedSession } : {}
+        })
+        const data = await res.json()
+        if (!data.access_token) {
+          setGsheetsError('Please sign in with Google first.')
+          return
+        }
+
+        const anyWindow = window as any
+        anyWindow.gapi.load('picker', () => {
+          const view = new anyWindow.google.picker.DocsView(anyWindow.google.picker.ViewId.SPREADSHEETS)
+            .setMimeTypes('application/vnd.google-apps.spreadsheet')
+
+          const picker = new anyWindow.google.picker.PickerBuilder()
+            .addView(view)
+            .setOAuthToken(data.access_token)
+            .setCallback((pickerData: any) => {
+              if (pickerData.action === anyWindow.google.picker.Action.PICKED) {
+                const file = pickerData.docs[0]
+                setRealSheets(prev => {
+                  const exists = prev.find(s => s.id === file.id)
+                  if (exists) return prev
+                  return [...prev, { id: file.id, name: file.name, tabs: ['Sheet1'], tabCount: 1, modifiedTime: file.lastEditedUtc || '' }]
+                })
+                handleSheetSelect(file.name)
+              }
+            })
+            .build()
+          picker.setVisible(true)
+        })
+      } catch {
+        setGsheetsError('Could not open file picker. Try again.')
+      }
+    }
+
     const fetchSheetsAfterAuth = async (sessionId?: string) => {
   try {
     setGsheetsProgress(70)
@@ -668,22 +696,11 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
     setGsheetsProgress(85)
     setGsheetsProgressLabel('Step 3/3: Loading your spreadsheets…')
 
-    const sheetsRes = await fetch(`${API_BASE}/api/auth/google/sheets`, {
-      credentials: 'include',
-      headers: storedSession ? { 'X-Session-ID': storedSession } : {}
-    })
-    const sheetsData = await sheetsRes.json()
-
-    if (sheetsData.sheets !== undefined) {
-      setRealSheets(sheetsData.sheets)
-      setGsheetsProgress(100)
-      setSelectedSheet('')
-      setSelectedTab('')
-      setTimeout(() => setGsheetsStep('picker'), 400)
-    } else {
-      setGsheetsError(sheetsData.error || 'Failed to load sheets')
-      setGsheetsStep('auth')
-    }
+    setGsheetsProgress(100)
+    setRealSheets([])
+    setSelectedSheet('')
+    setSelectedTab('')
+    setTimeout(() => setGsheetsStep('picker'), 400)
   } catch {
     setGsheetsError('Failed to load sheets. Try again.')
     setGsheetsStep('auth')
@@ -983,6 +1000,16 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
       setGsheetsError('')
       setGsheetsSearch('')
     } 
+
+    // Load Google Picker library once
+  useEffect(() => {
+    if (!document.getElementById('google-picker-script')) {
+      const script = document.createElement('script')
+      script.id = 'google-picker-script'
+      script.src = 'https://apis.google.com/js/api.js'
+      document.head.appendChild(script)
+    }
+  }, [])
 
 // Google Analytics Frontend Tracking Initialization
   useEffect(() => {
@@ -1712,6 +1739,12 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
                           </button>
                         )}
                       </div>
+
+<button onClick={openGooglePicker}
+                        className="w-full mb-3 py-2.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2"
+                        style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.4)', cursor: 'pointer' }}>
+                        📁 Choose a Spreadsheet from Drive
+                      </button>
 
                       <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
                         {gsheetsSearch
