@@ -10,9 +10,9 @@ const STEPS_MYSQL = [
   },
   {
     n: 2,
-    title: 'Save the agent script',
-    body: 'Copy the agent.py file from the repo root (it is listed in the codebase as document 2). Save it anywhere on your machine, for example ~/datapro/agent.py.',
-    code: '# The file is already in your project root as agent.py\ncp agent.py ~/datapro/agent.py',
+    title: 'Download the agent script',
+    body: 'Click the button below to download agent.py to your computer. Save it somewhere you can find it, like your Desktop or Downloads folder.',
+    code: '',
   },
   {
     n: 3,
@@ -56,9 +56,9 @@ const STEPS_MONGODB: typeof STEPS_MYSQL = [
   },
   {
     n: 2,
-    title: 'Save the agent script',
-    body: 'Copy agent.py from the repo root and save it on your machine.',
-    code: '# The file is already in your project root as agent.py\ncp agent.py ~/datapro/agent.py',
+    title: 'Download the agent script',
+    body: 'Click the button below to download agent.py to your computer. Save it somewhere you can find it, like your Desktop or Downloads folder.',
+    code: '',
   },
   {
     n: 3,
@@ -95,9 +95,9 @@ const STEPS_BIGQUERY: typeof STEPS_MYSQL = [
   },
   {
     n: 2,
-    title: 'Save the agent script',
-    body: 'Copy agent.py from the repo root and save it on your machine.',
-    code: 'cp agent.py ~/datapro/agent.py',
+    title: 'Download the agent script',
+    body: 'Click the button below to download agent.py to your computer. Save it somewhere you can find it, like your Desktop or Downloads folder.',
+    code: '',
   },
   {
     n: 3,
@@ -134,9 +134,9 @@ const STEPS_DATABRICKS: typeof STEPS_MYSQL = [
   },
   {
     n: 2,
-    title: 'Save the agent script',
-    body: 'Copy agent.py from the repo root and save it on your machine.',
-    code: 'cp agent.py ~/datapro/agent.py',
+    title: 'Download the agent script',
+    body: 'Click the button below to download agent.py to your computer. Save it somewhere you can find it, like your Desktop or Downloads folder.',
+    code: '',
   },
   {
     n: 3,
@@ -173,9 +173,9 @@ const STEPS_REDSHIFT: typeof STEPS_MYSQL = [
   },
   {
     n: 2,
-    title: 'Save the agent script',
-    body: 'Copy agent.py from the repo root and save it on your machine.',
-    code: 'cp agent.py ~/datapro/agent.py',
+    title: 'Download the agent script',
+    body: 'Click the button below to download agent.py to your computer. Save it somewhere you can find it, like your Desktop or Downloads folder.',
+    code: '',
   },
   {
     n: 3,
@@ -379,6 +379,17 @@ export default function Tunneling() {
                   </span>
                 ))}
               </div>
+
+              {step.n === 2 && (
+                <a
+                  href="/agent.py"
+                  download="agent.py"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+                  style={{ background: meta.accentBg, border: `1px solid ${meta.accentBorder}`, color: meta.accent }}
+                >
+                  ⬇ Download agent.py
+                </a>
+              )}
 
               {step.code && (
                 <div
