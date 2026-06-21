@@ -1,5 +1,6 @@
 import { useState, JSX } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE } from '../config'
 
 const STEPS_MYSQL = [
   {
@@ -382,7 +383,7 @@ export default function Tunneling() {
 
               {step.n === 2 && (
                 <a
-                  href="/agent.py"
+                  href={`${API_BASE}/download/agent.py`}
                   download="agent.py"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
                   style={{ background: meta.accentBg, border: `1px solid ${meta.accentBorder}`, color: meta.accent }}
