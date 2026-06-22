@@ -821,7 +821,6 @@ export default function Documentation() {
 
         <div style={{ marginTop: 'auto', padding: '16px 20px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', margin: 0, lineHeight: 1.6 }}>
-            Cosmic DataPro<br />Platform Reference
           </p>
         </div>
       </aside>
