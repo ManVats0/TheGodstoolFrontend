@@ -1959,7 +1959,7 @@ if (mysqlConn) {
     }
 
     // ── If source is GCS, fetch file as CSV first ────────────────────────
-    if ((sourceObj?.type as string) === 'gcs') {
+    if (sourceObj && (sourceObj.type as string) === 'gcs') {
       try {
         const savedGCS = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
         const srcName = sourceObj?.name || ''
@@ -2017,7 +2017,7 @@ if (mysqlConn) {
     }
 
     // ── If source is Cloud SQL, fetch table as CSV first ─────────────────
-    if ((sourceObj?.type as string) === 'cloudsql') {
+    if (sourceObj && (sourceObj.type as string) === 'cloudsql') {
       try {
         const savedCSQL = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
         const srcName = sourceObj?.name || ''
