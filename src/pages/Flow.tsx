@@ -1652,9 +1652,9 @@ useEffect(() => {
         const savedMySQL = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
         // sourceObj.name format: "database.table@host"
         // Format: "database.table@host" or "database.table1.table2@host"
-const atIdx = (sourceObj.name || '').lastIndexOf('@')
-const srcHost = atIdx >= 0 ? sourceObj.name.slice(atIdx + 1) : ''
-const beforeAt = atIdx >= 0 ? sourceObj.name.slice(0, atIdx) : sourceObj.name || ''
+const atIdx = (sourceObj?.name || '').lastIndexOf('@')
+const srcHost = atIdx >= 0 ? (sourceObj?.name || '').slice(atIdx + 1) : ''
+const beforeAt = atIdx >= 0 ? (sourceObj?.name || '').slice(0, atIdx) : sourceObj?.name || ''
 const dotIdx = beforeAt.indexOf('.')
 const srcDatabase = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
 const srcTable = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
@@ -1709,6 +1709,12 @@ if (mysqlConn) {
       : p
   )
   persistPipelines(updated)
+  addAuditLog({
+    id: crypto.randomUUID(), time: new Date().toLocaleString(),
+    action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+    details: `Pipeline "${pipeline.name}" failed · MySQL fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+    user: 'local_user'
+  })
   return realLog
 }
     } // ← closes: if (sourceObj?.type === 'mysql')
@@ -1717,9 +1723,9 @@ if (mysqlConn) {
     if (sourceObj?.type === 'postgres') {
       try {
         const savedPG = JSON.parse(localStorage.getItem('datapro_postgres_connections') || '[]')
-        const atIdx = (sourceObj.name || '').lastIndexOf('@')
-        const srcHost = atIdx >= 0 ? sourceObj.name.slice(atIdx + 1) : ''
-        const beforeAt = atIdx >= 0 ? sourceObj.name.slice(0, atIdx) : sourceObj.name || ''
+        const atIdx = (sourceObj?.name || '').lastIndexOf('@')
+        const srcHost = atIdx >= 0 ? (sourceObj?.name || '').slice(atIdx + 1) : ''
+        const beforeAt = atIdx >= 0 ? (sourceObj?.name || '').slice(0, atIdx) : sourceObj?.name || ''
         const dotIdx = beforeAt.indexOf('.')
         const srcDatabase = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
         const srcTable = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
@@ -1775,6 +1781,12 @@ if (mysqlConn) {
             : p
         )
         persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" failed · PostgreSQL fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+          user: 'local_user'
+        })
         return realLog
       }
     }
@@ -1783,7 +1795,7 @@ if (mysqlConn) {
     if (sourceObj?.type === 'bigquery') {
       try {
         const savedBQ = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
-        const parts = (sourceObj.name || '').split('.')
+        const parts = (sourceObj?.name || '').split('.')
         const srcProject = parts[0] || ''
         const srcDataset = parts[1] || ''
         const srcTable   = parts[2] || ''
@@ -1817,8 +1829,8 @@ if (mysqlConn) {
     if (sourceObj?.type === 'mongodb') {
       try {
         const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
-        const atIdx = (sourceObj.name || '').lastIndexOf('@')
-        const beforeAt = atIdx >= 0 ? sourceObj.name.slice(0, atIdx) : sourceObj.name || ''
+        const atIdx = (sourceObj?.name || '').lastIndexOf('@')
+        const beforeAt = atIdx >= 0 ? (sourceObj?.name || '').slice(0, atIdx) : sourceObj?.name || ''
         const dotIdx = beforeAt.indexOf('.')
         const srcDatabase = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
         const srcCollection = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
@@ -1864,6 +1876,12 @@ if (mysqlConn) {
             : p
         )
         persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" failed · MongoDB fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+          user: 'local_user'
+        })
         return realLog
       }
     }
@@ -1872,7 +1890,7 @@ if (mysqlConn) {
     if (sourceObj?.type === 'aws') {
       try {
         const savedAWS = JSON.parse(localStorage.getItem('datapro_aws_connections') || '[]')
-        const srcName = sourceObj.name || ''
+        const srcName = sourceObj?.name || ''
         const awsConn = savedAWS.find((c: any) => {
           if (c.service === 's3') return srcName.startsWith(`s3://${c.bucket}`)
           if (c.service === 'dynamodb') return srcName.includes(`@dynamodb.${c.region}`)
@@ -1930,6 +1948,12 @@ if (mysqlConn) {
             : p
         )
         persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" failed · AWS fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+          user: 'local_user'
+        })
         return realLog
       }
     }
@@ -1938,7 +1962,7 @@ if (mysqlConn) {
     if ((sourceObj?.type as string) === 'gcs') {
       try {
         const savedGCS = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
-        const srcName = sourceObj.name || ''
+        const srcName = sourceObj?.name || ''
         const withoutProto = srcName.replace('gcs://', '')
         const slashIdx = withoutProto.indexOf('/')
         const bucket = slashIdx >= 0 ? withoutProto.slice(0, slashIdx) : withoutProto
@@ -1982,6 +2006,12 @@ if (mysqlConn) {
             : p
         )
         persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" failed · GCS fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+          user: 'local_user'
+        })
         return realLog
       }
     }
@@ -1990,7 +2020,7 @@ if (mysqlConn) {
     if ((sourceObj?.type as string) === 'cloudsql') {
       try {
         const savedCSQL = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
-        const srcName = sourceObj.name || ''
+        const srcName = sourceObj?.name || ''
         const atIdx = srcName.lastIndexOf('@')
         const beforeAt = atIdx >= 0 ? srcName.slice(0, atIdx) : srcName
         const dotIdx = beforeAt.indexOf('.')
@@ -2040,6 +2070,12 @@ if (mysqlConn) {
             : p
         )
         persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" failed · Cloud SQL fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+          user: 'local_user'
+        })
         return realLog
       }
     }
@@ -2056,9 +2092,9 @@ if (mysqlConn) {
             ...(storedSessionSheet ? { 'X-Session-ID': storedSessionSheet } : {}),
           },
           body: JSON.stringify({
-            sheetId:   sourceObj.sheetId || '',
-            sheetName: sourceObj.name,
-            tab:       sourceObj.tab || 'Sheet1',
+            sheetId:   sourceObj?.sheetId || '',
+            sheetName: sourceObj?.name,
+            tab:       sourceObj?.tab || 'Sheet1',
           }),
         })
         const sheetData = await sheetRes.json()
@@ -2095,6 +2131,12 @@ if (!fileToUse) {
       : p
   )
   persistPipelines(updated)
+  addAuditLog({
+    id: crypto.randomUUID(), time: new Date().toLocaleString(),
+    action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+    details: `Pipeline "${pipeline.name}" failed · no source data could be fetched · triggered by ${triggeredBy}`,
+    user: 'local_user'
+  })
   return failLog
 }
 if (fileToUse) {
