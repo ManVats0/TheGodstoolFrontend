@@ -14,6 +14,7 @@ import AuditLogs from './pages/AuditLogs'
 import { useStore } from './store'
 import Documentation from './pages/Documentation'
 import Tunneling from './pages/Tunneling'
+import Contact from './pages/Contact'
 
 export default function App() {
   const [showNotif, setShowNotif] = useState(false)
@@ -192,6 +193,7 @@ if (location.pathname === '/reset-password') return <Routes><Route path="/reset-
 if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
 if (location.pathname === '/privacy') return <Routes><Route path="/privacy" element={<Privacy />} /></Routes>
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
+if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
 
 if (!entered) return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: 'Georgia, serif', overflowX: 'hidden' }}>
@@ -579,7 +581,7 @@ if (!entered) return (
       <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '28px' }}>
         <a href="/privacy" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Privacy Policy</a>
         <a href="/terms" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Terms of Service</a>
-        <a href="mailto:vatsaman888@gmail.com" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Contact</a>
+        <a href="/contact" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Contact</a>
       </div>
       <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2025 The God's Tool · Built for data professionals</div>
     </footer>
