@@ -15,6 +15,7 @@ import { useStore } from './store'
 import Documentation from './pages/Documentation'
 import Tunneling from './pages/Tunneling'
 import Contact from './pages/Contact'
+import Feedback from './pages/Feedback'
 
 export default function App() {
   const [showNotif, setShowNotif] = useState(false)
@@ -194,6 +195,7 @@ if (location.pathname === '/pricing') return <Routes><Route path="/pricing" elem
 if (location.pathname === '/privacy') return <Routes><Route path="/privacy" element={<Privacy />} /></Routes>
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
+if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
 
 if (!entered) return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: 'Georgia, serif', overflowX: 'hidden' }}>
