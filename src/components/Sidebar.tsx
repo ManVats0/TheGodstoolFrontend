@@ -11,15 +11,15 @@ interface SidebarProps {
 export default function Sidebar({ onOpenNotif, unread, isExpanded, onToggleExpand, onLogout }: SidebarProps) {
   const location = useLocation();
 
-  const navItems = [
+const navItems = [
     { path: '/sources', icon: '🔌', label: 'Sources' },
     { path: '/catalog', icon: '🗂️', label: 'Catalog' },
     { path: '/flow', icon: '⚙️', label: 'Pipeline Flow' },
     { path: '/analysis', icon: '📊', label: 'Analysis' },
     { path: '/audit', icon: '📜', label: 'Audit Logs' },
     { path: '/docs', icon: '📖', label: 'Cosmic Documentation' },
-    { path: '/tunneling', icon: '🔐', label: 'Tunneling' }
-    { path: '/feedback', icon: '💬', label: 'Give Feedback' }
+    { path: '/tunneling', icon: '🔐', label: 'Tunneling' },
+    { path: '/feedback', icon: '💬', label: 'Give Feedback' },
   ]
 
   return (
