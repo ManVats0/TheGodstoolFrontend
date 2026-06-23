@@ -19,6 +19,7 @@ export default function Sidebar({ onOpenNotif, unread, isExpanded, onToggleExpan
     { path: '/audit', icon: '📜', label: 'Audit Logs' },
     { path: '/docs', icon: '📖', label: 'Cosmic Documentation' },
     { path: '/tunneling', icon: '🔐', label: 'Tunneling' }
+    { path: '/feedback', icon: '💬', label: 'Give Feedback' }
   ]
 
   return (
