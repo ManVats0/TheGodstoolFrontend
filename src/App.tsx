@@ -107,8 +107,8 @@ const [forgotError, setForgotError] = useState('')
       localStorage.setItem('datapro_email', data.email)
       // Founder bypass
       if (data.email === 'vatsaman888@gmail.com') {
-        localStorage.setItem('datapro_plan', 'pro_yearly')
-        setUserPlan('pro_yearly')
+        localStorage.setItem('datapro_plan', 'enterprise')
+        setUserPlan('enterprise')
         setEntered(true)
         setShowLogin(false)
         return
@@ -734,7 +734,11 @@ if (!entered) return (
           </div>
         </div>
 
-        <span onClick={() => { localStorage.removeItem('datapro_logged_in'); localStorage.removeItem('datapro_plan'); setUserPlan('none'); setEntered(false); setShowLogin(false); }} style={{ color: '#475569', fontFamily: 'monospace', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}>
+        <span onClick={() => {
+          const token = localStorage.getItem('datapro_token')
+          if (token) fetch(`${import.meta.env.VITE_AUTH_URL}/api/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {})
+          localStorage.removeItem('datapro_logged_in'); localStorage.removeItem('datapro_plan'); setUserPlan('none'); setEntered(false); setShowLogin(false);
+        }} style={{ color: '#475569', fontFamily: 'monospace', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}>
           Sign out
         </span>
       </div>
@@ -748,7 +752,11 @@ if (!entered) return (
   unread={unread} 
   isExpanded={sidebarExpanded}
   onToggleExpand={() => setSidebarExpanded(!sidebarExpanded)}
-  onLogout={() => { localStorage.removeItem('datapro_logged_in'); localStorage.removeItem('datapro_plan'); setUserPlan('none'); setEntered(false); setShowLogin(false); }}
+  onLogout={() => {
+    const token = localStorage.getItem('datapro_token')
+    if (token) fetch(`${import.meta.env.VITE_AUTH_URL}/api/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {})
+    localStorage.removeItem('datapro_logged_in'); localStorage.removeItem('datapro_plan'); setUserPlan('none'); setEntered(false); setShowLogin(false);
+  }}
 />
       
       <main className={`flex-1 min-h-screen overflow-auto transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-16'}`}>
