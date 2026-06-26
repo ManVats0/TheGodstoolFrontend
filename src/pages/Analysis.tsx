@@ -921,6 +921,28 @@ const assistantText = aiData.success
 })
 const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string, instruction: string}[]>([])
 
+    // ── Approach 2: Staleness Tracking ──
+    const [staleness, setStaleness] = useState<{
+      isStale: boolean
+      hoursOld: number
+      showWarning: boolean
+    }>({
+      isStale: false,
+      hoursOld: 0,
+      showWarning: false,
+    })
+    const [, setAnalysisMetadata] = useState<{
+      sourceId: string
+      analysisTimestamp: number
+      lastRowId: number | null
+      rowsAnalyzed: number
+    }>({
+      sourceId: '',
+      analysisTimestamp: 0,
+      lastRowId: null,
+      rowsAnalyzed: 0,
+    })
+
     // Fullscreen state
     const [fullscreenTable, setFullscreenTable] = useState<{
       title: string
@@ -1015,17 +1037,35 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
     // this effect fires and re-runs automatically.
 
     // ── Scan ALL connected sources for notifications (throttled to 1/hour) ──
-    const allSourcesScanStartedRef = useRef(false)
+    // ── Check staleness on page load / source change ──
     useEffect(() => {
-      if (allSourcesScanStartedRef.current) return
-      if (sources.length === 0) return
-      const lastScan = useStore.getState().lastSourcesScanAt || 0
-      const ONE_HOUR = 60 * 60 * 1000
-      if (Date.now() - lastScan < ONE_HOUR) return
-      allSourcesScanStartedRef.current = true
-      useStore.getState().setLastSourcesScanAt(Date.now())
-      scanAllSourcesForNotifications()
-    }, [sources.length])
+      if (!activeSourceName || !analysis) return
+
+      // Load metadata from localStorage
+      const savedMeta = localStorage.getItem(`analysis_meta_${activeSourceName}`)
+      if (!savedMeta) return
+
+      try {
+        const meta = JSON.parse(savedMeta)
+        const now = Date.now()
+        const analysisAgeMs = now - meta.analysisTimestamp
+        const analysisAgeHours = analysisAgeMs / (1000 * 60 * 60)
+        const ONE_DAY_HOURS = 24
+
+        // Mark as stale if >24 hours
+        const isStale = analysisAgeHours > ONE_DAY_HOURS
+
+        setStaleness({
+          isStale,
+          hoursOld: Math.round(analysisAgeHours),
+          showWarning: isStale,
+        })
+
+        setAnalysisMetadata(meta)
+      } catch {
+        // Silent fail — continue with old data
+      }
+    }, [activeSourceName, analysis])
 
     const fetchSourceAsCSVFile = useCallback(async (src: any): Promise<File | null> => {
       try {
@@ -1837,6 +1877,25 @@ setAnalyzing(false)
         const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
         const data = await res.json()
         setAnalysis(data)
+
+        // ── Approach 2: Save analysis metadata ──
+        const now = Date.now()
+        const newMeta = {
+          sourceId: activeSourceName,
+          analysisTimestamp: now,
+          lastRowId: data.last_row_id || null,
+          rowsAnalyzed: data.rows_analyzed || 0,
+        }
+        setAnalysisMetadata(newMeta)
+        localStorage.setItem(`analysis_meta_${activeSourceName}`, JSON.stringify(newMeta))
+
+        // Reset staleness warning when analysis is fresh
+        setStaleness({
+          isStale: false,
+          hoursOld: 0,
+          showWarning: false,
+        })
+
         analysisSourceRef.current = activeSourceName
         setAnalysisTab('preview')
         setFilterIssue('All')
@@ -2630,23 +2689,48 @@ const getPreviewFullscreenData = () => {
               Download Original
             </a>
             <button
-              onClick={runAnalysis}
+              onClick={() => runAnalysis()}
               className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ background: 'rgba(124,58,237,0.25)', border: '1px solid rgba(124,58,237,0.35)' }}
+              title={staleness.isStale ? `Last analyzed ${staleness.hoursOld} hours ago` : 'Re-analyze fresh data'}
             >
-              Re-analyze
+              {staleness.isStale ? '🔄 Re-analyze' : 'Re-analyze'}
             </button>
           </div>
         </div>
 
-        {/* Insight banner */}
-        <div
-          className="rounded-2xl px-6 py-4 flex items-start gap-3"
-          style={{ background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.15)' }}
-        >
-          <span style={{ color: '#60a5fa', fontSize: '16px', marginTop: '1px' }}>💡</span>
-          <p className="text-sm" style={{ color: '#bfdbfe' }}>{analysis.insight}</p>
-        </div>
+        {/* Staleness Warning Banner */}
+        {staleness.showWarning && (
+          <div
+            className="rounded-2xl px-6 py-4 flex items-center justify-between"
+            style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}
+          >
+            <div className="flex items-center gap-3">
+              <span style={{ fontSize: '18px' }}>⏰</span>
+              <div>
+                <p style={{ color: '#fbbf24', fontWeight: 'bold', fontSize: '14px', margin: 0 }}>
+                  Analysis is {staleness.hoursOld} hours old
+                </p>
+                <p style={{ color: 'rgba(251,191,36,0.6)', fontSize: '12px', marginTop: '3px', margin: 0 }}>
+                  Your database has been updated. Refresh to analyze only new data added since then.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => runAnalysis()}
+              className="px-5 py-2.5 rounded-xl font-semibold text-white flex-shrink-0 whitespace-nowrap transition-all"
+              style={{
+                background: 'rgba(234,179,8,0.25)',
+                border: '1px solid rgba(234,179,8,0.4)',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(234,179,8,0.35)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(234,179,8,0.25)')}
+            >
+              Refresh Now
+            </button>
+          </div>
+        )}
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
