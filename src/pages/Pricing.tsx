@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+type Cycle = 'monthly' | 'yearly'
+
 const PLANS = [
   {
-    key: 'solo',
-    name: 'Solo',
-    price: '₹749',
-    period: '/month',
-    ai: false,
-    aiLabel: 'No AI access',
+    key: 'lite',
+    name: 'Lite',
+    monthlyPrice: '₹774',
+    yearlyPrice: '₹8,256',
+    aiPerDay: 4,
+    userLimit: 1,
     features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'],
     color: '#6366f1',
     bg: 'rgba(99,102,241,0.08)',
@@ -17,40 +19,52 @@ const PLANS = [
   {
     key: 'starter',
     name: 'Starter',
-    price: '₹12,470',
-    period: '/year',
-    ai: true,
-    aiLabel: '⚡ 500 AI transforms/day',
-    features: ['Everything in Solo', '500 AI transforms/day', 'Email support'],
+    monthlyPrice: '₹1,634',
+    yearlyPrice: '₹17,114',
+    aiPerDay: 35,
+    userLimit: 1,
+    features: ['Everything in Lite', '35 AI transforms/day', 'Email support'],
     color: '#22d3ee',
     bg: 'rgba(34,211,238,0.08)',
     border: 'rgba(34,211,238,0.25)',
     badge: 'Best Value',
   },
   {
-    key: 'pro_monthly',
+    key: 'pro',
     name: 'Pro',
-    price: '₹1,579',
-    period: '/month',
-    ai: true,
-    aiLabel: '⚡ 5,000 AI transforms/day',
-    features: ['Everything in Starter', '5,000 AI transforms/day', 'Priority support'],
+    monthlyPrice: '₹3,354',
+    yearlyPrice: '₹36,034',
+    aiPerDay: 110,
+    userLimit: 5,
+    features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'],
     color: '#a78bfa',
     bg: 'rgba(124,58,237,0.12)',
     border: 'rgba(124,58,237,0.4)',
     highlight: true,
   },
   {
-    key: 'pro_yearly',
-    name: 'Pro Yearly',
-    price: '₹15,790',
-    period: '/year',
-    ai: true,
-    aiLabel: '⚡ 10,000 AI transforms/day',
-    features: ['Everything in Pro', '10,000 AI transforms/day', 'Priority support'],
+    key: 'team',
+    name: 'Team',
+    monthlyPrice: '₹6,794',
+    yearlyPrice: '₹72,154',
+    aiPerDay: 150,
+    userLimit: 15,
+    features: ['Everything in Pro', '150 AI transforms/day', '15 concurrent logins', 'Priority support'],
     color: '#34d399',
     bg: 'rgba(52,211,153,0.08)',
     border: 'rgba(52,211,153,0.25)',
+  },
+  {
+    key: 'enterprise',
+    name: 'Enterprise',
+    monthlyPrice: '₹42,914',
+    yearlyPrice: '₹4,11,940',
+    aiPerDay: 500,
+    userLimit: 100,
+    features: ['Everything in Team', '500 AI transforms/day', '100 concurrent logins', 'Dedicated support'],
+    color: '#fbbf24',
+    bg: 'rgba(251,191,36,0.08)',
+    border: 'rgba(251,191,36,0.25)',
   },
 ]
 
@@ -58,6 +72,7 @@ export default function Pricing() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [cycle, setCycle] = useState<Cycle>('monthly')
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -79,7 +94,7 @@ export default function Pricing() {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planKey })
+        body: JSON.stringify({ planKey, billingCycle: cycle })
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to create subscription'); setLoading(null); return }
@@ -95,7 +110,7 @@ export default function Pricing() {
           const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ ...response, planKey })
+            body: JSON.stringify({ ...response, planKey, billingCycle: cycle })
           })
           const verifyData = await verifyRes.json()
           if (verifyData.success) {
@@ -121,7 +136,7 @@ export default function Pricing() {
   return (
     <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
 
-      <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
         <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
           Unlock The God's Tool
         </div>
@@ -130,13 +145,28 @@ export default function Pricing() {
         </p>
       </div>
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '4px' }}>
+        <button
+          onClick={() => setCycle('monthly')}
+          style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.8rem', letterSpacing: '0.05em', background: cycle === 'monthly' ? 'rgba(124,58,237,0.35)' : 'transparent', color: cycle === 'monthly' ? 'white' : 'rgba(255,255,255,0.5)' }}
+        >
+          Monthly
+        </button>
+        <button
+          onClick={() => setCycle('yearly')}
+          style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.8rem', letterSpacing: '0.05em', background: cycle === 'yearly' ? 'rgba(124,58,237,0.35)' : 'transparent', color: cycle === 'yearly' ? 'white' : 'rgba(255,255,255,0.5)' }}
+        >
+          Yearly
+        </button>
+      </div>
+
       {error && (
         <div style={{ marginBottom: '24px', background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: '10px', padding: '12px 20px', color: '#fca5a5', fontSize: '0.875rem', fontFamily: 'monospace' }}>
           ⚠ {error}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '20px', maxWidth: '1000px', width: '100%' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', maxWidth: '1200px', width: '100%' }}>
         {PLANS.map(plan => (
           <div key={plan.key} style={{
             background: plan.highlight ? 'rgba(124,58,237,0.12)' : plan.bg,
@@ -157,14 +187,18 @@ export default function Pricing() {
 
             <div>
               <div style={{ color: plan.color, fontWeight: 700, fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{plan.name}</div>
-              <div style={{ color: 'white', fontWeight: 900, fontSize: '2rem', fontFamily: 'Georgia, serif', lineHeight: 1.1, marginTop: '6px' }}>
-                {plan.price}
-                <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{plan.period}</span>
+              <div style={{ color: 'white', fontWeight: 900, fontSize: '1.8rem', fontFamily: 'Georgia, serif', lineHeight: 1.1, marginTop: '6px' }}>
+                {cycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{cycle === 'monthly' ? '/month' : '/year'}</span>
               </div>
             </div>
 
-            <div style={{ background: plan.ai ? 'rgba(52,211,153,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${plan.ai ? 'rgba(52,211,153,0.2)' : 'rgba(239,68,68,0.2)'}`, borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: plan.ai ? '#34d399' : '#f87171', fontFamily: 'monospace' }}>
-              {plan.aiLabel}
+            <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#34d399', fontFamily: 'monospace' }}>
+              ⚡ {plan.aiPerDay} AI transforms/day
+            </div>
+
+            <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#a5b4fc', fontFamily: 'monospace' }}>
+              👤 {plan.userLimit} concurrent login{plan.userLimit > 1 ? 's' : ''}
             </div>
 
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
