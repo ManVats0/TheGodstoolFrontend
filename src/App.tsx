@@ -1,6 +1,7 @@
 import logo from '../the_gods_tool_logo_3d.png'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
+import ThankYou from './pages/ThankYou'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import { useState, useEffect } from 'react'
@@ -197,6 +198,7 @@ if (location.pathname === '/privacy') return <Routes><Route path="/privacy" elem
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
 if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
+if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
 
 if (!entered) return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: 'Georgia, serif', overflowX: 'hidden' }}>
