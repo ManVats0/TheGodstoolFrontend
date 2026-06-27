@@ -107,21 +107,21 @@ export default function Pricing() {
         name: "The God's Tool",
         description: PLANS.find(p => p.key === planKey)?.name + ' Plan',
         handler: async (response: any) => {
-          const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-payment`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ ...response, planKey, billingCycle: cycle })
-          })
-          const verifyData = await verifyRes.json()
-          if (verifyData.success) {
-            localStorage.setItem('datapro_plan', planKey)
-            navigate('/')
-            window.location.reload()
-          } else {
-            setError('Payment verified failed. Contact support.')
-          }
-          setLoading(null)
-        },
+  const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-payment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ ...response, planKey, billingCycle: cycle })
+  })
+  const verifyData = await verifyRes.json()
+  if (verifyData.success) {
+    localStorage.setItem('datapro_plan', planKey)
+    // ← CHANGED: Redirect to thank you page instead of home
+    window.location.href = '/thank-you'
+  } else {
+    setError('Payment verified failed. Contact support.')
+  }
+  setLoading(null)
+},
         modal: { ondismiss: () => setLoading(null) },
         prefill: { email: localStorage.getItem('datapro_email') || '' },
         theme: { color: '#7c3aed' }
