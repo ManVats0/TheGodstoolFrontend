@@ -1345,7 +1345,8 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       if (sources.length === 0) return
       allSourcesScannedRef.current = true
       scanAllSourcesForNotificationsOnMount()
-    }, [sources.length])
+      scanAllSourcesForNotifications()
+    }, [sources.length, notifyEmail, alertConditions, addNotifications, fetchSourceAsCSVFile])
 
     const scanAllSourcesForNotificationsOnMount = useCallback(async () => {
       for (const src of sources) {
