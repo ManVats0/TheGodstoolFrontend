@@ -546,8 +546,9 @@ if (!entered) return (
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
           {[
             { name: 'Free', price: '$0', period: 'forever', features: ['CSV & Google Sheets', 'GA4 connector', 'Basic analysis', 'Data cleaning'], featured: false },
-            { name: 'Solo', price: '$9', period: '/month', features: ['Everything in Free', 'All DB connectors', 'AI cleaning (100 runs)', 'Pipeline automation'], featured: true },
-            { name: 'Pro', price: '$29', period: '/month', features: ['Everything in Solo', 'Unlimited AI runs', 'Multi-user access', 'Priority support'], featured: false },
+            { name: 'Starter', price: '$20', period: '/month', features: ['Everything in Free', 'All DB connectors', 'AI cleaning (35 runs/day)', 'Pipeline automation', 'Email support'], featured: false },
+            { name: 'Pro', price: '$40', period: '/month', features: ['Everything in Starter', 'Unlimited AI runs', 'Multi-user access (5)', 'Priority support', 'Secure tunneling'], featured: true },
+            { name: 'Team', price: '$82', period: '/month', features: ['Everything in Pro', '15 concurrent logins', 'Advanced analytics', 'Dedicated Slack channel', 'SLA guarantee'], featured: false },
           ].map((plan, i) => (
             <div key={i} className={`pricing-card${plan.featured ? ' featured' : ''}`}>
               {plan.featured && <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontFamily: 'monospace', fontSize: '0.65rem', letterSpacing: '0.15em', padding: '4px 16px', borderRadius: '20px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>}
