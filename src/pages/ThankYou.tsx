@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 export default function ThankYou() {
   const navigate = useNavigate()
 
-  useEffect(() => {
+useEffect(() => {
     // Verify user is logged in and has a plan
     const userPlan = localStorage.getItem('datapro_plan')
     const isLoggedIn = localStorage.getItem('datapro_logged_in')
@@ -12,9 +12,24 @@ export default function ThankYou() {
     if (!isLoggedIn || !userPlan || userPlan === 'none') {
       // If somehow they got here without proper state, redirect to home
       window.location.href = '/'
+      return
+    }
+
+    // Fire Trackdesk "sale" conversion — guarded to fire only once per payment
+    const conversionAlreadyFired = sessionStorage.getItem('trackdesk_conversion_fired')
+    if (!conversionAlreadyFired) {
+      const paidAmount = localStorage.getItem('datapro_amount') // CONFIRM: is this the correct key?
+      if (window.trackdesk && paidAmount) {
+        window.trackdesk("thegodstool", "conversion", {
+          conversionType: "sale",
+          amount: { value: paidAmount }
+        })
+        sessionStorage.setItem('trackdesk_conversion_fired', 'true')
+      }
     }
   }, [])
 
+  
   const handleContinue = () => {
     // Navigate to the main app (Data Sources)
     // This will render the app with sidebar since user has plan now
