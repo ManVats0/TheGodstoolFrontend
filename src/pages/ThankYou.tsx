@@ -15,7 +15,7 @@ useEffect(() => {
       return
     }
 
-    // Fire Trackdesk "sale" conversion — guarded to fire only once per payment
+    // Fire Trackdesk "sale" + "lead" conversions — guarded to fire only once per payment
     const conversionAlreadyFired = sessionStorage.getItem('trackdesk_conversion_fired')
     if (!conversionAlreadyFired) {
       const paidAmount = localStorage.getItem('datapro_amount') // CONFIRM: is this the correct key?
@@ -23,6 +23,9 @@ useEffect(() => {
         window.trackdesk("thegodstool", "conversion", {
           conversionType: "sale",
           amount: { value: paidAmount }
+        })
+        window.trackdesk("thegodstool", "conversion", {
+          conversionType: "lead"
         })
         sessionStorage.setItem('trackdesk_conversion_fired', 'true')
       }
