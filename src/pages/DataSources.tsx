@@ -789,7 +789,7 @@ const openGooglePicker = async () => {
 
   const source = {
     id: crypto.randomUUID(),
-    name: data.sheet_name,
+    name: sheet.name,
     type: 'sheets' as const,
     file: realFile,
     filename: data.filename,
@@ -798,7 +798,7 @@ const openGooglePicker = async () => {
     tab: tabToImport,         // ← store the tab name
   }
   addSource(source)
-  switchActiveSource(realFile, data.sheet_name)
+  switchActiveSource(realFile, sheet.name)
 
         addAuditLog({
           id: crypto.randomUUID(),
@@ -806,7 +806,7 @@ const openGooglePicker = async () => {
           action: 'add_source',
           entity_type: 'data_source',
           entity_id: source.id,
-          details: `Connected Google Sheet: ${data.sheet_name} · ${data.rows} rows · ${data.cols} cols`,
+          details: `Connected Google Sheet: ${sheet.name} · ${data.rows} rows · ${data.cols} cols`,
           user: 'local_user',
         })
         setShowGSheetsFlow(false)
