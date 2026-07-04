@@ -1865,6 +1865,10 @@ setAnalyzing(false)
           return
         }
         formData.append('file', sourceObj2.file)
+      } else if (!sourceObj2 || sourceObj2.type === 'csv') {
+        alert('CSV file not found in memory. Please re-upload the CSV from Data Sources — the file needs to be re-attached after a page refresh or source switch.')
+        setAnalyzing(false)
+        return
       } else {
         formData.append('source_name', activeSourceName)
         formData.append('source_type', 'sheets')
