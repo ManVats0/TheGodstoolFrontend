@@ -170,6 +170,14 @@ const [forgotError, setForgotError] = useState('')
           localStorage.setItem('datapro_logged_in', '1')
           localStorage.setItem('datapro_token', data.token)
           localStorage.setItem('datapro_email', data.email)
+          // Founder bypass
+          if (data.email === 'vatsaman888@gmail.com') {
+            localStorage.setItem('datapro_plan', 'enterprise')
+            setUserPlan('enterprise')
+            setEntered(true)
+            setShowLogin(false)
+            return
+          }
           try {
             const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
               headers: { Authorization: `Bearer ${data.token}` }
