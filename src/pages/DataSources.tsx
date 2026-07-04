@@ -179,7 +179,7 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
     const [gsheetsEmail, setGsheetsEmail] = useState('')
     const [gsheetsProgress, setGsheetsProgress] = useState(0)
     const [gsheetsProgressLabel, setGsheetsProgressLabel] = useState('')
-    const [selectedSheet, setSelectedSheet] = useState('')
+    const [selectedSheetId, setSelectedSheetId] = useState('')
     const [gsheetsError, setGsheetsError] = useState('')
     const fileRef = useRef<HTMLInputElement>(null)
 
@@ -525,11 +525,11 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
       ? realSheets.filter(s => s.name.toLowerCase().includes(gsheetsSearch.toLowerCase()))
       : realSheets
     // Auto-select first tab whenever a sheet is picked
-    const handleSheetSelect = (sheetName: string) => {
-      setSelectedSheet(sheetName)
-      const sheet = realSheets.find(s => s.name === sheetName)
+    const handleSheetSelect = (sheetId: string) => {
+      setSelectedSheetId(sheetId)
+      const sheet = realSheets.find(s => s.id === sheetId)
       if (!sheet) {
-        console.error('Sheet not found in realSheets:', sheetName, realSheets)
+        console.error('Sheet not found in realSheets:', sheetId, realSheets)
         return
       }
       console.log('Selected sheet:', sheet.id, sheet.name, sheet.tabs)
@@ -649,7 +649,8 @@ const openGooglePicker = async () => {
                   if (exists) return prev
                   return [...prev, { id: file.id, name: file.name, tabs: ['Sheet1'], tabCount: 1, modifiedTime: file.lastEditedUtc || '' }]
                 })
-                handleSheetSelect(file.name)
+                setSelectedSheetId(file.id)
+                setSelectedTab('Sheet1')
               }
             })
             .build()
@@ -698,7 +699,7 @@ const openGooglePicker = async () => {
 
     setGsheetsProgress(100)
     setRealSheets([])
-    setSelectedSheet('')
+    setSelectedSheetId('')
     setSelectedTab('')
     setTimeout(() => setGsheetsStep('picker'), 400)
   } catch {
@@ -708,10 +709,10 @@ const openGooglePicker = async () => {
 }
 
     const confirmGSheet = async () => {
-      if (!selectedSheet) return
-      const sheet = realSheets.find(s => s.name === selectedSheet)
+      if (!selectedSheetId) return
+      const sheet = realSheets.find(s => s.id === selectedSheetId)
       if (!sheet) {
-        setGsheetsError(`Could not find sheet "${selectedSheet}" in your list. Please close and reopen the dialog.`)
+        setGsheetsError('Could not find the selected sheet in your list. Please close and reopen the dialog.')
         return
       }
       if (!sheet.id) {
@@ -810,7 +811,7 @@ const openGooglePicker = async () => {
         })
         setShowGSheetsFlow(false)
         setGsheetsStep('auth')
-        setSelectedSheet('')
+        setSelectedSheetId('')
         setSelectedTab('')
         setGsheetsProgress(0)
         setTab('existing')
@@ -994,7 +995,7 @@ const openGooglePicker = async () => {
     const closeGSheets = () => {
       setShowGSheetsFlow(false)
       setGsheetsStep('auth')
-      setSelectedSheet('')
+      setSelectedSheetId('')
       setSelectedTab('')
       setGsheetsProgress(0)
       setGsheetsError('')
@@ -1760,11 +1761,11 @@ const handleLockedSource = () => {
                         <div className="space-y-2 max-h-56 overflow-auto">
                           {filteredRealSheets.map(sheet => (
                             <div key={sheet.id || sheet.name}
-                              onClick={() => handleSheetSelect(sheet.name)}
+                              onClick={() => handleSheetSelect(sheet.id)}
                               className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all"
                               style={{
-                                background: selectedSheet === sheet.name ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.03)',
-                                border: `1px solid ${selectedSheet === sheet.name ? 'rgba(52,211,153,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                                background: selectedSheetId === sheet.id ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${selectedSheetId === sheet.id ? 'rgba(52,211,153,0.35)' : 'rgba(255,255,255,0.07)'}`,
                               }}>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                                 <rect x="3" y="2" width="18" height="20" rx="2" fill="#34A853" fillOpacity="0.2" stroke="#34A853" strokeWidth="1.5"/>
@@ -1779,7 +1780,7 @@ const handleLockedSource = () => {
                                   {sheet.modifiedTime ? ` · ${new Date(sheet.modifiedTime).toLocaleDateString()}` : ''}
                                 </p>
                               </div>
-                              {selectedSheet === sheet.name && <span style={{ color: '#34d399', fontSize: '16px' }}>✓</span>}
+                              {selectedSheetId === sheet.id && <span style={{ color: '#34d399', fontSize: '16px' }}>✓</span>}
                             </div>
                           ))}
                         </div>
@@ -1787,8 +1788,8 @@ const handleLockedSource = () => {
                     </div>
 
                     {/* Tab picker — only shows real tabs from the API */}
-                    {selectedSheet && (() => {
-                      const sheet = realSheets.find(s => s.name === selectedSheet)
+                    {selectedSheetId && (() => {
+                      const sheet = realSheets.find(s => s.id === selectedSheetId)
                       const tabs = sheet?.tabs ?? []
                       if (tabs.length === 0) return null
                       return (
@@ -1818,14 +1819,17 @@ const handleLockedSource = () => {
                       )
                     })()}
 
-                    <button onClick={confirmGSheet} disabled={!selectedSheet || !selectedTab}
+                    <button onClick={confirmGSheet} disabled={!selectedSheetId || !selectedTab}
                       className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40 transition-all"
-                      style={{ background: 'linear-gradient(135deg, #34A853, #0d9488)', border: 'none', cursor: selectedSheet && selectedTab ? 'pointer' : 'not-allowed' }}>
-                      {!selectedSheet
-                        ? 'Select a spreadsheet above'
-                        : !selectedTab
-                          ? 'Select a worksheet tab above'
-                          : `Select & Import "${selectedSheet.length > 24 ? selectedSheet.slice(0, 24) + '…' : selectedSheet}" → ${selectedTab}`}
+                      style={{ background: 'linear-gradient(135deg, #34A853, #0d9488)', border: 'none', cursor: selectedSheetId && selectedTab ? 'pointer' : 'not-allowed' }}>
+                      {(() => {
+                        const selectedSheetName = realSheets.find(s => s.id === selectedSheetId)?.name || ''
+                        return !selectedSheetId
+                          ? 'Select a spreadsheet above'
+                          : !selectedTab
+                            ? 'Select a worksheet tab above'
+                            : `Select & Import "${selectedSheetName.length > 24 ? selectedSheetName.slice(0, 24) + '…' : selectedSheetName}" → ${selectedTab}`
+                      })()}
                     </button>
                   </>
                 )}
