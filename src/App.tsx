@@ -380,12 +380,16 @@ if (!entered) return (
           Connect any data source. Clean it with AI. Automate your pipelines. All from one browser tab — no engineers required.
         </p>
 
-        <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#6d5fc7', letterSpacing: '0.1em', marginBottom: '48px', opacity: 0.7 }}>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#6d5fc7', letterSpacing: '0.1em', marginBottom: '20px', opacity: 0.7 }}>
           CSV · Google Sheets · MySQL · PostgreSQL · BigQuery · MongoDB
         </p>
 
+        <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginBottom: '48px' }}>
+          Free forever plan · No credit card required · Setup in under 2 minutes
+        </p>
+
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="cta-btn" onClick={handleEnter}>Enter the Platform</button>
+          <button className="cta-btn" onClick={handleEnter}>Start Cleaning Data Free</button>
           <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '18px 40px', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.4)'; e.currentTarget.style.color = '#a78bfa' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}>
@@ -418,6 +422,7 @@ if (!entered) return (
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
         <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Everything your data needs.</h2>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>One platform. Zero compromises.</p>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Built by a data professional with 4+ years of enterprise pipeline experience.</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
@@ -505,6 +510,9 @@ if (!entered) return (
             </div>
           ))}
         </div>
+        <div style={{ marginTop: '48px' }}>
+          <button className="cta-btn" onClick={handleEnter}>Try It Free — No Card Needed</button>
+        </div>
       </div>
     </section>
 
@@ -575,7 +583,7 @@ if (!entered) return (
               <button onClick={handleEnter} style={{ width: '100%', padding: '11px', borderRadius: '6px', border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.12)', background: plan.featured ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(255,255,255,0.04)', color: 'white', fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'opacity 0.2s' }}
                 onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
-                Get Started
+                {plan.name === 'Free' ? 'Start Free' : plan.featured ? 'Start Pro Trial' : 'Get Started'}
               </button>
             </div>
           ))}
