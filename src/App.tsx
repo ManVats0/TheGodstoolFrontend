@@ -558,6 +558,9 @@ if (!entered) return (
         <div style={{ textAlign: 'center', marginBottom: '64px' }}>
           <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Pricing</div>
           <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Start free. Scale when ready.</h2>
+          <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#fbbf24', marginTop: '16px', letterSpacing: '0.05em' }}>
+            ⏳ Lock in current pricing — rates increase soon
+          </p>
         </div>
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
           {[
@@ -589,6 +592,18 @@ if (!entered) return (
             </div>
           ))}
         </div>
+        <p style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '32px' }}>
+          💳 Cancel anytime · 🔒 7-day money-back guarantee on all paid plans
+        </p>
+      </div>
+    </section>
+
+    {/* ── FINAL CTA ── */}
+    <section style={{ padding: '80px 24px', textAlign: 'center', borderTop: '1px solid rgba(167,139,250,0.08)' }}>
+      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+        <h2 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.02em' }}>Still deciding?</h2>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', marginBottom: '32px' }}>Try it free — no credit card needed. Upgrade only when you're ready.</p>
+        <button className="cta-btn" onClick={handleEnter}>Start Free Now</button>
       </div>
     </section>
 
