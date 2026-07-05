@@ -397,6 +397,10 @@ if (!entered) return (
           </button>
         </div>
       </div>
+      <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', animation: 'float 2s ease-in-out infinite' }}>
+        <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em' }}>SCROLL TO EXPLORE</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
     </section>
 
     {/* ── STATS BAR ── */}
