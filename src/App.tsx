@@ -39,6 +39,8 @@ const [showForgot, setShowForgot] = useState(false)
 const [forgotEmail, setForgotEmail] = useState('')
 const [forgotMsg, setForgotMsg] = useState('')
 const [forgotError, setForgotError] = useState('')
+const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+const [isLoginLoading, setIsLoginLoading] = useState(false)
 
   useEffect(() => {
     if (location.pathname !== '/docs') {
@@ -92,6 +94,7 @@ const [forgotError, setForgotError] = useState('')
       setLoginError('Please enter email and password.')
       return
     }
+    setIsLoginLoading(true)
     try {
       const endpoint = isRegisterMode ? 'register' : 'login'
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/${endpoint}`, {
@@ -129,6 +132,8 @@ const [forgotError, setForgotError] = useState('')
       setShowLogin(false)
     } catch (err) {
       setLoginError('Cannot connect to server. Make sure backend is running.')
+    } finally {
+      setIsLoginLoading(false)
     }
   }
 
@@ -150,6 +155,7 @@ const [forgotError, setForgotError] = useState('')
   }
 
  const handleGoogleLogin = () => {
+    setIsGoogleLoading(true)
     const clientId = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
     ;(window as any).google.accounts.id.initialize({
       client_id: clientId,
@@ -166,7 +172,7 @@ const [forgotError, setForgotError] = useState('')
             })
           })
           const data = await backendRes.json()
-          if (!backendRes.ok) { setLoginError(data.error || 'Google login failed'); return }
+          if (!backendRes.ok) { setLoginError(data.error || 'Google login failed'); setIsGoogleLoading(false); return }
           localStorage.setItem('datapro_logged_in', '1')
           localStorage.setItem('datapro_token', data.token)
           localStorage.setItem('datapro_email', data.email)
@@ -191,10 +197,15 @@ const [forgotError, setForgotError] = useState('')
           setShowLogin(false)
         } catch {
           setLoginError('Google login failed. Try again.')
+          setIsGoogleLoading(false)
         }
       }
     })
-    ;(window as any).google.accounts.id.prompt()
+    ;(window as any).google.accounts.id.prompt((notification: any) => {
+      if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.() || notification?.isDismissedMoment?.()) {
+        setIsGoogleLoading(false)
+      }
+    })
   }
 
 if (location.pathname === '/privacy.html') { window.location.href = '/privacy.html'; return null; }
@@ -326,6 +337,9 @@ if (!entered) return (
         font-family: Georgia, serif; transition: background 0.2s;
       }
       .auth-btn-google:hover { background: rgba(255,255,255,0.1); }
+      .auth-btn-primary:disabled, .auth-btn-google:disabled { opacity: 0.65; cursor: not-allowed; }
+      .btn-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
       @keyframes indraSlide {
         from{opacity:0;transform:translateY(24px) scale(0.97)}
         to{opacity:1;transform:translateY(0) scale(1)}
@@ -677,9 +691,11 @@ if (!entered) return (
             ))}
           </div>
           <div style={{ borderTop: '1px solid rgba(99,179,237,0.1)' }} />
-          <button onClick={handleGoogleLogin} className="auth-btn-google">
-            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-            Continue with Google
+          <button onClick={handleGoogleLogin} className="auth-btn-google" disabled={isGoogleLoading}>
+            {isGoogleLoading ? <span className="btn-spinner" /> : (<>
+              <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              Continue with Google
+            </>)}
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
@@ -691,7 +707,7 @@ if (!entered) return (
           {loginError && (
             <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>⚠ {loginError}</div>
           )}
-          <button onClick={() => handleLogin()} className="auth-btn-primary">{isRegisterMode ? 'CREATE ACCOUNT' : 'ACCESS THE TOOL'}</button>
+          <button onClick={() => handleLogin()} className="auth-btn-primary" disabled={isLoginLoading}>{isLoginLoading ? <span className="btn-spinner" /> : (isRegisterMode ? 'CREATE ACCOUNT' : 'ACCESS THE TOOL')}</button>
           {!isRegisterMode && !showForgot && (
             <div style={{ textAlign: 'center' }}>
               <span onClick={() => { setShowForgot(true); setForgotMsg(''); setForgotError('') }} style={{ color: '#38bdf8', fontSize: '0.78rem', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>Forgot password?</span>
