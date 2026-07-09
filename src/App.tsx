@@ -19,6 +19,20 @@ import Tunneling from './pages/Tunneling'
 import Contact from './pages/Contact'
 import Feedback from './pages/Feedback'
 
+const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
+
+function redirectToGoogleOAuth() {
+  const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/google/callback`
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: 'openid email profile',
+    prompt: 'select_account'
+  })
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+}
+
 export default function App() {
   const [showNotif, setShowNotif] = useState(false)
   const navigate = useNavigate()
@@ -83,6 +97,41 @@ const [isLoginLoading, setIsLoginLoading] = useState(false)
     window.addEventListener('message', handler)
     return () => window.removeEventListener('message', handler)
   }, [])
+
+  useEffect(() => {
+    if (location.pathname !== '/auth/callback') return
+    const params = new URLSearchParams(location.search)
+    const token = params.get('token')
+    const email = params.get('email')
+    if (!token || !email) {
+      navigate('/', { replace: true })
+      return
+    }
+    localStorage.setItem('datapro_logged_in', '1')
+    localStorage.setItem('datapro_token', token)
+    localStorage.setItem('datapro_email', email)
+    if (email === 'vatsaman888@gmail.com') {
+      localStorage.setItem('datapro_plan', 'enterprise')
+      setUserPlan('enterprise')
+      setEntered(true)
+      navigate('/', { replace: true })
+      return
+    }
+    fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(planData => {
+        const plan = planData.plan || 'none'
+        localStorage.setItem('datapro_plan', plan)
+        setUserPlan(plan)
+      })
+      .catch(() => { /* ignore */ })
+      .finally(() => {
+        setEntered(true)
+        navigate('/', { replace: true })
+      })
+  }, [location.pathname])
 
   const [showIndra, setShowIndra] = useState(true)
   const [demoPlaying, setDemoPlaying] = useState(false)
@@ -156,9 +205,8 @@ const [isLoginLoading, setIsLoginLoading] = useState(false)
 
  const handleGoogleLogin = () => {
     setIsGoogleLoading(true)
-    const clientId = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
     ;(window as any).google.accounts.id.initialize({
-      client_id: clientId,
+      client_id: GOOGLE_CLIENT_ID,
       callback: async (response: any) => {
         try {
           const payload = JSON.parse(atob(response.credential.split('.')[1]))
@@ -202,7 +250,11 @@ const [isLoginLoading, setIsLoginLoading] = useState(false)
       }
     })
     ;(window as any).google.accounts.id.prompt((notification: any) => {
-      if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.() || notification?.isDismissedMoment?.()) {
+      if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
+        redirectToGoogleOAuth()
+        return
+      }
+      if (notification?.isDismissedMoment?.()) {
         setIsGoogleLoading(false)
       }
     })
@@ -218,6 +270,12 @@ if (location.pathname === '/terms') return <Routes><Route path="/terms" element=
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
 if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
 if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
+
+if (location.pathname === '/auth/callback') return (
+  <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '1rem' }}>
+    Signing you in…
+  </div>
+)
 
 if (!entered) return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: 'Georgia, serif', overflowX: 'hidden' }}>
