@@ -1,36 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-    <!-- <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script> -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The God's Tool</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-055T35RX1D"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-055T35RX1D');
-    </script>
-    <!-- End Google Analytics -->
+  <!-- SEO -->
+  <title>AI Data Cleaning & ETL Tool | The God's Tool</title>
+  <meta name="description" content="Connect MySQL, PostgreSQL, BigQuery, MongoDB & more. Clean your data with AI and automate pipelines — no engineers required. Free forever plan, no credit card." />
+  <link rel="canonical" href="https://thegodstool.com/" />
+  <meta name="robots" content="index, follow" />
 
-    <link rel="icon" type="image/png" href="/the_gods_tool_logo_3d.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AI Data Cleaning & ETL Tool | The God's Tool" />
+  <meta property="og:description" content="Connect any data source. Clean it with AI. Automate your pipelines. No engineers required — free forever plan." />
+  <meta property="og:url" content="https://thegodstool.com/" />
+  <meta property="og:image" content="https://thegodstool.com/og-image.png" />
+  <meta property="og:site_name" content="The God's Tool" />
 
-    <!-- Trackdesk tracker begin -->
-    <script async src="//cdn.trackdesk.com/tracking.js"></script>
-    <script>
-      (function(t,d,k){(t[k]=t[k]||[]).push(d);t[d]=t[d]||t[k].f||function(){(t[d].q=t[d].q||[]).push(arguments)}})(window,"trackdesk","TrackdeskObject");
-      trackdesk("thegodstool", "click");
-    </script>
-    <!-- Trackdesk tracker end -->
-  </head>
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AI Data Cleaning & ETL Tool | The God's Tool" />
+  <meta name="twitter:description" content="Connect any data source. Clean it with AI. Automate your pipelines. No engineers required." />
+  <meta name="twitter:image" content="https://thegodstool.com/og-image.png" />
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-055T35RX1D"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-055T35RX1D');
+  </script>
+  <!-- End Google Analytics -->
+
+  <link rel="icon" type="image/png" href="/the_gods_tool_logo_3d.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Trackdesk tracker begin -->
+  <script async src="//cdn.trackdesk.com/tracking.js"></script>
+  <script>
+    (function(t,d,k){(t[k]=t[k]||[]).push(d);t[d]=t[d]||t[k].f||function(){(t[d].q=t[d].q||[]).push(arguments)}})(window,"trackdesk","TrackdeskObject");
+    trackdesk("thegodstool", "click");
+  </script>
+  <!-- Trackdesk tracker end -->
+
+  <!-- Structured data: Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "The God's Tool",
+    "url": "https://thegodstool.com",
+    "logo": "https://thegodstool.com/the_gods_tool_logo_3d.png"
+  }
+  </script>
+
+  <!-- Structured data: SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "The God's Tool",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "description": "AI-powered ETL and data cleaning platform. Connect any data source, clean it with AI, and automate pipelines without engineers.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- Structured data: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What data sources does The God's Tool connect to?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The God's Tool connects to CSV, Google Sheets, MySQL, PostgreSQL, MongoDB, BigQuery, AWS RDS, S3, DynamoDB, Redshift, Google Cloud Storage, Cloud SQL, Databricks, REST APIs, GA4, and more."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a free plan?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The Free plan includes CSV and Google Sheets upload, GA4 connection, and basic data analysis and cleaning, with no credit card required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does AI-powered data cleaning work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The platform automatically detects null values, formatting inconsistencies, and duplicates, then suggests fixes you can review and approve before applying them to your dataset."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need engineering experience to use it?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. The God's Tool is designed for no-code use — you can connect sources, clean data, and build pipelines entirely from the browser without writing code."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is my data secure?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Data is encrypted in transit and is not shared with third parties without explicit action from the user, such as connecting a Google Sheet."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
