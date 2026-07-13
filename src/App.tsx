@@ -444,6 +444,9 @@ if (!entered) return (
           ⚡ DATA INTELLIGENCE PLATFORM
         </div>
 
+        <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>
+          AI-Powered Data Cleaning & ETL Automation
+        </p>
         <h1 className="hero-title" style={{ margin: '0 0 24px' }}>
           The God's Tool
         </h1>
