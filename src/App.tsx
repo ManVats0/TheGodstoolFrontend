@@ -1,4 +1,4 @@
-import logo from '../the_gods_tool_logo_3d.png'
+import logo from '../the_gods_tool_logo_3d.webp'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
@@ -409,7 +409,7 @@ if (!entered) return (
     {/* ── NAVBAR ── */}
     <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(5,3,15,0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <img src={logo} alt="logo" style={{ height: '28px', width: '28px' }} />
+        <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '28px', width: '28px' }} /> 
         <span style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontWeight: 900, fontSize: '1rem', letterSpacing: '0.06em', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
@@ -686,7 +686,7 @@ if (!entered) return (
     {/* ── FOOTER ── */}
     <footer style={{ padding: '48px 24px 32px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
-        <img src={logo} alt="logo" style={{ height: '24px', width: '24px' }} />
+        <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '24px', width: '24px' }} />
         <span style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontWeight: 900, fontSize: '0.95rem', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
       </div>
       <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', marginBottom: '20px', lineHeight: 1.8 }}>
