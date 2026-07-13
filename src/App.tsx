@@ -1,4 +1,4 @@
-import logo from '../the_gods_tool_logo_3d.webp'
+import logo from '../the_gods_tool_logo_3d.png'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
