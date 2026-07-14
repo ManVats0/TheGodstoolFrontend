@@ -1,147 +1,94 @@
-import React from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FAQ | The God's Tool</title>
+<meta name="description" content="Frequently asked questions about The God's Tool — AI-powered data cleaning, security, pricing, setup, and team usage." />
+<link rel="canonical" href="https://thegodstool.com/faq.html" />
+<style>
+  body { background: #05030f; color: #e2e8f0; font-family: Georgia, serif; max-width: 760px; margin: 0 auto; padding: 60px 24px 100px; line-height: 1.7; }
+  h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 40px; color: #ffffff; }
+  .tag { display: inline-block; font-family: monospace; font-size: 0.7rem; color: #a78bfa; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  h2 { font-size: 1.1rem; font-weight: 700; margin: 0 0 10px; color: #ffffff; }
+  p { font-family: monospace; font-size: 0.85rem; color: rgba(255,255,255,0.65); margin: 0 0 36px; }
+  a { color: #a78bfa; }
+</style>
+</head>
+<body>
 
-interface FAQItem {
-  tag: string;
-  question: string;
-  answer: string;
-}
+<h1>Frequently Asked Questions</h1>
 
-const faqItems: FAQItem[] = [
-  {
-    tag: "Data quality",
-    question: "Can it actually clean truly messy data, or does it just guess?",
-    answer:
-      "It handles real-world messiness — inconsistent headers, merged cells, mismatched date and number formats, stray whitespace, mixed encodings — without you defining a schema first. It infers structure from the data itself, and flags anything it isn't confident about instead of silently guessing, so you can review or correct those rows before they go anywhere.",
-  },
-  {
-    tag: "Security",
-    question: "Is it safe to give this access to my database credentials?",
-    answer:
-      "Credentials are encrypted at rest and in transit, and connections default to least-privilege, read-only access where your database supports it. Nothing is stored in plaintext logs, and you can revoke access at any time from your account settings.",
-  },
-  {
-    tag: "Comparison",
-    question: "How is this different from Zapier, Airbyte, or Fivetran?",
-    answer:
-      "Zapier is built for app-to-app event automation, not deep data transformation. Airbyte and Fivetran move data reliably between sources and warehouses, but assume you'll clean and model it downstream. This tool is built for the step before that: turning messy source data into something usable, with no SQL required.",
-  },
-  {
-    tag: "Setup",
-    question: "Do I need to know SQL or Python to use this?",
-    answer:
-      "No. Connecting a source, cleaning data, and setting up a sync are all built to be done through the interface, with no code required. Advanced steps support custom logic for edge cases the UI doesn't cover.",
-  },
-  {
-    tag: "Data quality",
-    question: "Can it handle duplicate rows and inconsistent date formats automatically?",
-    answer:
-      "Yes. Duplicate detection catches exact and near-matches, not just identical rows, and date parsing normalizes common variations into a consistent format you choose. Genuinely ambiguous cases are flagged rather than silently resolved.",
-  },
-  {
-    tag: "Data quality",
-    question: "Will it break my existing spreadsheet formulas or formatting?",
-    answer:
-      "It writes to a copy or a defined output range rather than overwriting your source file, and doesn't touch cells outside what it's asked to work on.",
-  },
-  {
-    tag: "Security",
-    question: "Can I connect a private database that's behind a firewall?",
-    answer:
-      "Yes — you don't need to expose your database publicly. Private connections are supported without opening it up to the open internet.",
-  },
-  {
-    tag: "Reliability",
-    question:
-      "What happens if my data source's schema changes later — does the pipeline break silently?",
-    answer:
-      "No — a schema change triggers a notification rather than a silent failure, so you find out from an alert instead of from downstream data quietly being wrong.",
-  },
-  {
-    tag: "Reliability",
-    question: "Does it support real-time sync, or only scheduled/batch runs?",
-    answer:
-      "Both scheduled and on-demand syncs are supported, so you can choose the cadence that fits your workflow.",
-  },
-  {
-    tag: "Team",
-    question: "Can non-technical teammates use this without me setting everything up for them?",
-    answer:
-      "Yes. Once a connection and initial cleaning rules exist, teammates can run syncs, review flagged rows, and make basic adjustments without touching configuration.",
-  },
-  {
-    tag: "Pricing",
-    question: "How much data can I process on the free plan before hitting a limit?",
-    answer:
-      "The free plan is meant to be enough to properly try the tool on a real dataset before you need to think about upgrading. See the pricing page for current limits.",
-  },
-  {
-    tag: "Team",
-    question: "Does this replace a data analyst or engineer, or just make their job easier?",
-    answer:
-      "It removes the repetitive, low-judgment parts of the job — manual cleaning, format wrangling, one-off scripts — not the parts that require judgment. Most teams use it to free up time for higher-value work, not to replace the person doing it.",
-  },
-];
+<div><span class="tag">Data quality</span>
+<h2>Can it actually clean truly messy data, or does it just guess?</h2>
+<p>It handles real-world messiness — inconsistent headers, merged cells, mismatched date and number formats, stray whitespace, mixed encodings — without you defining a schema first. It infers structure from the data itself, and flags anything it isn't confident about instead of silently guessing, so you can review or correct those rows before they go anywhere.</p></div>
 
-// Schema.org FAQPage structured data — this is what search engines and
-// AI answer engines (ChatGPT, Perplexity, Google AI Overviews) parse
-// directly, regardless of your visual accordion styling.
-const faqJsonLd = {
+<div><span class="tag">Security</span>
+<h2>Is it safe to give this access to my database credentials?</h2>
+<p>Credentials are encrypted at rest and in transit, and connections default to least-privilege, read-only access where your database supports it. Nothing is stored in plaintext logs, and you can revoke access at any time from your account settings.</p></div>
+
+<div><span class="tag">Comparison</span>
+<h2>How is this different from Zapier, Airbyte, or Fivetran?</h2>
+<p>Zapier is built for app-to-app event automation, not deep data transformation. Airbyte and Fivetran move data reliably between sources and warehouses, but assume you'll clean and model it downstream. This tool is built for the step before that: turning messy source data into something usable, with no SQL required.</p></div>
+
+<div><span class="tag">Setup</span>
+<h2>Do I need to know SQL or Python to use this?</h2>
+<p>No. Connecting a source, cleaning data, and setting up a sync are all built to be done through the interface, with no code required. Advanced steps support custom logic for edge cases the UI doesn't cover.</p></div>
+
+<div><span class="tag">Data quality</span>
+<h2>Can it handle duplicate rows and inconsistent date formats automatically?</h2>
+<p>Yes. Duplicate detection catches exact and near-matches, not just identical rows, and date parsing normalizes common variations into a consistent format you choose. Genuinely ambiguous cases are flagged rather than silently resolved.</p></div>
+
+<div><span class="tag">Data quality</span>
+<h2>Will it break my existing spreadsheet formulas or formatting?</h2>
+<p>It writes to a copy or a defined output range rather than overwriting your source file, and doesn't touch cells outside what it's asked to work on.</p></div>
+
+<div><span class="tag">Security</span>
+<h2>Can I connect a private database that's behind a firewall?</h2>
+<p>Yes — you don't need to expose your database publicly. Private connections are supported without opening it up to the open internet.</p></div>
+
+<div><span class="tag">Reliability</span>
+<h2>What happens if my data source's schema changes later — does the pipeline break silently?</h2>
+<p>No — a schema change triggers a notification rather than a silent failure, so you find out from an alert instead of from downstream data quietly being wrong.</p></div>
+
+<div><span class="tag">Reliability</span>
+<h2>Does it support real-time sync, or only scheduled/batch runs?</h2>
+<p>Both scheduled and on-demand syncs are supported, so you can choose the cadence that fits your workflow.</p></div>
+
+<div><span class="tag">Team</span>
+<h2>Can non-technical teammates use this without me setting up everything for them?</h2>
+<p>Yes. Once a connection and initial cleaning rules exist, teammates can run syncs, review flagged rows, and make basic adjustments without touching configuration.</p></div>
+
+<div><span class="tag">Pricing</span>
+<h2>How much data can I process on the free plan before hitting a limit?</h2>
+<p>The free plan is meant to be enough to properly try the tool on a real dataset before you need to think about upgrading. See the <a href="/pricing">pricing page</a> for current limits.</p></div>
+
+<div><span class="tag">Team</span>
+<h2>Does this replace a data analyst or engineer, or just make their job easier?</h2>
+<p>It removes the repetitive, low-judgment parts of the job — manual cleaning, format wrangling, one-off scripts — not the parts that require judgment. Most teams use it to free up time for higher-value work, not to replace the person doing it.</p></div>
+
+<p><a href="/">← Back to The God's Tool</a></p>
+
+<script type="application/ld+json">
+{
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: faqItems.map((item) => ({
-    "@type": "Question",
-    name: item.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: item.answer,
-    },
-  })),
-};
-
-export default function FAQ() {
-  return (
-    <section
-      id="faq"
-      aria-labelledby="faq-heading"
-      className="mx-auto max-w-3xl px-6 py-20"
-    >
-      {/* JSON-LD structured data for SEO / GEO crawlers */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
-
-      <p className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-teal-700">
-        <span className="inline-block h-px w-5 bg-teal-700" />
-        Questions &amp; Answers
-      </p>
-      <h2 id="faq-heading" className="mb-3 text-3xl font-bold tracking-tight sm:text-4xl">
-        Frequently asked questions
-      </h2>
-      <p className="mb-10 max-w-prose text-slate-600">
-        Everything people usually ask before connecting a data source.
-      </p>
-
-      <div className="divide-y divide-slate-200 border-t border-slate-200">
-        {faqItems.map((item, i) => (
-          <details key={i} className="group py-5" {...(i === 0 ? { open: true } : {})}>
-            <summary className="flex cursor-pointer list-none items-start justify-between gap-5">
-              <div className="flex flex-col gap-2">
-                <span className="w-fit rounded bg-amber-50 px-2 py-0.5 font-mono text-[10.5px] uppercase tracking-wide text-amber-800">
-                  {item.tag}
-                </span>
-                <span className="font-semibold text-slate-900">{item.question}</span>
-              </div>
-              <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-300 text-slate-500 transition-transform group-open:rotate-180 group-open:border-teal-700 group-open:bg-teal-700 group-open:text-white">
-                +
-              </span>
-            </summary>
-            <p className="mt-4 max-w-prose text-[15px] leading-relaxed text-slate-600">
-              {item.answer}
-            </p>
-          </details>
-        ))}
-      </div>
-    </section>
-  );
+  "mainEntity": [
+    { "@type": "Question", "name": "Can it actually clean truly messy data, or does it just guess?", "acceptedAnswer": { "@type": "Answer", "text": "It handles real-world messiness — inconsistent headers, merged cells, mismatched date and number formats, stray whitespace, mixed encodings — without you defining a schema first. It infers structure from the data itself, and flags anything it isn't confident about instead of silently guessing, so you can review or correct those rows before they go anywhere." } },
+    { "@type": "Question", "name": "Is it safe to give this access to my database credentials?", "acceptedAnswer": { "@type": "Answer", "text": "Credentials are encrypted at rest and in transit, and connections default to least-privilege, read-only access where your database supports it. Nothing is stored in plaintext logs, and you can revoke access at any time from your account settings." } },
+    { "@type": "Question", "name": "How is this different from Zapier, Airbyte, or Fivetran?", "acceptedAnswer": { "@type": "Answer", "text": "Zapier is built for app-to-app event automation, not deep data transformation. Airbyte and Fivetran move data reliably between sources and warehouses, but assume you'll clean and model it downstream. This tool is built for the step before that: turning messy source data into something usable, with no SQL required." } },
+    { "@type": "Question", "name": "Do I need to know SQL or Python to use this?", "acceptedAnswer": { "@type": "Answer", "text": "No. Connecting a source, cleaning data, and setting up a sync are all built to be done through the interface, with no code required. Advanced steps support custom logic for edge cases the UI doesn't cover." } },
+    { "@type": "Question", "name": "Can it handle duplicate rows and inconsistent date formats automatically?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Duplicate detection catches exact and near-matches, not just identical rows, and date parsing normalizes common variations into a consistent format you choose. Genuinely ambiguous cases are flagged rather than silently resolved." } },
+    { "@type": "Question", "name": "Will it break my existing spreadsheet formulas or formatting?", "acceptedAnswer": { "@type": "Answer", "text": "It writes to a copy or a defined output range rather than overwriting your source file, and doesn't touch cells outside what it's asked to work on." } },
+    { "@type": "Question", "name": "Can I connect a private database that's behind a firewall?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — you don't need to expose your database publicly. Private connections are supported without opening it up to the open internet." } },
+    { "@type": "Question", "name": "What happens if my data source's schema changes later — does the pipeline break silently?", "acceptedAnswer": { "@type": "Answer", "text": "No — a schema change triggers a notification rather than a silent failure, so you find out from an alert instead of from downstream data quietly being wrong." } },
+    { "@type": "Question", "name": "Does it support real-time sync, or only scheduled/batch runs?", "acceptedAnswer": { "@type": "Answer", "text": "Both scheduled and on-demand syncs are supported, so you can choose the cadence that fits your workflow." } },
+    { "@type": "Question", "name": "Can non-technical teammates use this without me setting up everything for them?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Once a connection and initial cleaning rules exist, teammates can run syncs, review flagged rows, and make basic adjustments without touching configuration." } },
+    { "@type": "Question", "name": "How much data can I process on the free plan before hitting a limit?", "acceptedAnswer": { "@type": "Answer", "text": "The free plan is meant to be enough to properly try the tool on a real dataset before you need to think about upgrading. See the pricing page for current limits." } },
+    { "@type": "Question", "name": "Does this replace a data analyst or engineer, or just make their job easier?", "acceptedAnswer": { "@type": "Answer", "text": "It removes the repetitive, low-judgment parts of the job — manual cleaning, format wrangling, one-off scripts — not the parts that require judgment. Most teams use it to free up time for higher-value work, not to replace the person doing it." } }
+  ]
 }
+</script>
+
+</body>
+</html>
