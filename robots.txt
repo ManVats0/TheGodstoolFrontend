@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /sources
+Disallow: /catalog
+Disallow: /flow
+Disallow: /analysis
+Disallow: /audit
+Disallow: /docs
+Disallow: /tunneling
+Disallow: /reset-password
+Disallow: /auth/callback
+
+Sitemap: https://thegodstool.com/sitemap.xml
