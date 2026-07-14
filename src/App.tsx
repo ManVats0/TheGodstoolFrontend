@@ -4,7 +4,7 @@ import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
-import Faq from './pages/Faq'
+// import Faq from './pages/Faq'
 import { useState, useEffect } from 'react'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
@@ -268,7 +268,7 @@ if (location.pathname === '/reset-password') return <Routes><Route path="/reset-
 if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
 if (location.pathname === '/privacy') return <Routes><Route path="/privacy" element={<Privacy />} /></Routes>
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
-if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
+// if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
 if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
 if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
