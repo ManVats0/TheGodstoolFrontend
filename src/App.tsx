@@ -23,7 +23,7 @@ import Feedback from './pages/Feedback'
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
 function redirectToGoogleOAuth() {
-  const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/google/callback`
+  const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/auth/google/callback`
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: redirectUri,
