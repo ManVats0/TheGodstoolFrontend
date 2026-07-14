@@ -696,6 +696,7 @@ if (!entered) return (
         Google Sign-In is used solely for account authentication. Google Sheets access is optional and only activated when you explicitly connect a sheet. We do not access, store, or share any Google data without your action.
       </p>
       <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '28px' }}>
+        <a href="/faq.html" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>FAQ</a>
         <a href="/privacy" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Privacy Policy</a>
         <a href="/terms" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Terms of Service</a>
         <a href="/contact" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Contact</a>
