@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp serve.json dist/serve.json && cp privacy.html dist/privacy.html && cp terms.html dist/terms.html",    "preview": "vite preview"
+    "build": "vite build && cp serve.json dist/serve.json && cp privacy.html dist/privacy.html && cp terms.html dist/terms.html && cp faq.html dist/faq.html",    "preview": "vite preview"
   },
   "dependencies": {
     "@types/nodemailer": "^8.0.0",
