@@ -2,7 +2,7 @@ import logo from '../the_gods_tool_logo_3d.png'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
-import Privacy from './pages/Privacy'
+// import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 // import Faq from './pages/Faq'
 import { useState, useEffect } from 'react'
@@ -266,7 +266,7 @@ if (location.pathname === '/terms.html') { window.location.href = '/terms.html';
 
 if (location.pathname === '/reset-password') return <Routes><Route path="/reset-password" element={<ResetPassword />} /></Routes>
 if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
-if (location.pathname === '/privacy') return <Routes><Route path="/privacy" element={<Privacy />} /></Routes>
+if (location.pathname === '/privacy') { window.location.href = '/privacy.html'; return null; }
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
 // if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
