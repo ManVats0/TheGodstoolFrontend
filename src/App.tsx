@@ -453,9 +453,12 @@ if (!entered) return (
           The God's Tool
         </h1>
 
-        <p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '620px', margin: '0 auto 16px', fontFamily: 'Georgia, serif' }}>
-          Connect any data source. Clean it with AI. Automate your pipelines. All from one browser tab — no engineers required.
-        </p>
+        <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.35rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, maxWidth: '620px', margin: '0 auto 12px', fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
+  Create pipelines effortlessly.
+</p>
+<p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '620px', margin: '0 auto 16px', fontFamily: 'Georgia, serif' }}>
+  Connect any data source. Clean it with AI. All from one browser tab — no engineers required.
+</p>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#6d5fc7', letterSpacing: '0.1em', marginBottom: '20px', opacity: 0.7 }}>
           CSV · Google Sheets · MySQL · PostgreSQL · BigQuery · MongoDB
@@ -717,7 +720,7 @@ if (!entered) return (
           <div style={{ position: 'absolute', bottom: '8px', left: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '1.1rem' }}>⚡</span>
             <span style={{ fontFamily: 'Georgia, serif', color: '#90cdf4', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.15em', textShadow: '0 0 12px rgba(66,153,225,0.8)' }}>INDRA</span>
-            <span style={{ fontFamily: 'Georgia, serif', color: '#63b3ed', fontSize: '0.65rem', opacity: 0.7, letterSpacing: '0.1em' }}>GOD OF RAIN & THUNDER</span>
+<span style={{ fontFamily: 'Georgia, serif', color: '#63b3ed', fontSize: '0.65rem', opacity: 0.7, letterSpacing: '0.1em' }}>GOD OF RAIN</span>
           </div>
         </div>
         <div style={{ padding: '14px 16px 16px' }}>
