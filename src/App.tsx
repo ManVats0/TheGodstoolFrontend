@@ -450,12 +450,10 @@ if (!entered) return (
           AI-Powered Data Cleaning & ETL Automation
         </p>
         <h1 className="hero-title" style={{ margin: '0 0 24px' }}>
-          The God's Tool
+          Create pipelines effortlessly
         </h1>
 
-        <p style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.35rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, maxWidth: '620px', margin: '0 auto 12px', fontFamily: 'Georgia, serif', fontStyle: 'italic' }}>
-  Create pipelines effortlessly.
-</p>
+        {/* */}
 <p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '620px', margin: '0 auto 16px', fontFamily: 'Georgia, serif' }}>
   Connect any data source. Clean it with AI. All from one browser tab — no engineers required.
 </p>
@@ -719,7 +717,7 @@ if (!entered) return (
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(66,153,225,0.18) 0%, transparent 70%)', animation: 'indraLightning 2.5s ease-in-out infinite' }} />
           <div style={{ position: 'absolute', bottom: '8px', left: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '1.1rem' }}>⚡</span>
-            <span style={{ fontFamily: 'Georgia, serif', color: '#90cdf4', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.15em', textShadow: '0 0 12px rgba(66,153,225,0.8)' }}>INDRA</span>
+            {/* <span style={{ fontFamily: 'Georgia, serif', color: '#90cdf4', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.15em', textShadow: '0 0 12px rgba(66,153,225,0.8)' }}>INDRA</span> */}
 <span style={{ fontFamily: 'Georgia, serif', color: '#63b3ed', fontSize: '0.65rem', opacity: 0.7, letterSpacing: '0.1em' }}>GOD OF RAIN</span>
           </div>
         </div>
