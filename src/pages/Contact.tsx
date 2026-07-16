@@ -130,8 +130,14 @@ export default function Contact() {
 
             <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem', fontFamily: 'monospace', margin: 0 }}>
               Or email us directly at{' '}
-              <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa', textDecoration: 'none' }}>
-                contact@thegodstool.com
+              <a href="mailto:support@thegodstool.com" style={{ color: '#a78bfa', textDecoration: 'none' }}>
+                support@thegodstool.com
+              </a>
+            </p>
+            <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.78rem', fontFamily: 'monospace', margin: '8px 0 0' }}>
+              Phone/WhatsApp:{' '}
+              <a href="tel:+919138133002" style={{ color: '#a78bfa', textDecoration: 'none' }}>
+                +91 91381 33002
               </a>
             </p>
           </div>
