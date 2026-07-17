@@ -56,6 +56,8 @@ const [forgotMsg, setForgotMsg] = useState('')
 const [forgotError, setForgotError] = useState('')
 const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 const [isLoginLoading, setIsLoginLoading] = useState(false)
+const [showForceLogout, setShowForceLogout] = useState(false)
+const [pendingGooglePayload, setPendingGooglePayload] = useState<{ email: string; googleId: string; name: string } | null>(null)
 
   useEffect(() => {
     if (location.pathname !== '/docs') {
@@ -155,8 +157,10 @@ const [isLoginLoading, setIsLoginLoading] = useState(false)
       const data = await res.json()
       if (!res.ok) {
         setLoginError(data.error || (isRegisterMode ? 'Registration failed' : 'Login failed'))
+        setShowForceLogout(res.status === 429 && !isRegisterMode)
         return
       }
+      setShowForceLogout(false)
       localStorage.setItem('datapro_logged_in', '1')
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
@@ -181,6 +185,45 @@ const [isLoginLoading, setIsLoginLoading] = useState(false)
       setEntered(true)
       setShowLogin(false)
     } catch (err) {
+      setLoginError('Cannot connect to server. Make sure backend is running.')
+    } finally {
+      setIsLoginLoading(false)
+    }
+  }
+
+  const handleForceLogin = async () => {
+    setIsLoginLoading(true)
+    try {
+      const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword, forceLogout: true })
+      })
+      const data = await res.json()
+      if (!res.ok) { setLoginError(data.error || 'Login failed'); return }
+      setShowForceLogout(false)
+      localStorage.setItem('datapro_logged_in', '1')
+      localStorage.setItem('datapro_token', data.token)
+      localStorage.setItem('datapro_email', data.email)
+      if (data.email === 'vatsaman888@gmail.com') {
+        localStorage.setItem('datapro_plan', 'enterprise')
+        setUserPlan('enterprise')
+        setEntered(true)
+        setShowLogin(false)
+        return
+      }
+      try {
+        const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
+          headers: { Authorization: `Bearer ${data.token}` }
+        })
+        const planData = await planRes.json()
+        const plan = planData.plan || 'none'
+        localStorage.setItem('datapro_plan', plan)
+        setUserPlan(plan)
+      } catch { /* ignore */ }
+      setEntered(true)
+      setShowLogin(false)
+    } catch {
       setLoginError('Cannot connect to server. Make sure backend is running.')
     } finally {
       setIsLoginLoading(false)
@@ -221,7 +264,16 @@ const [isLoginLoading, setIsLoginLoading] = useState(false)
             })
           })
           const data = await backendRes.json()
-          if (!backendRes.ok) { setLoginError(data.error || 'Google login failed'); setIsGoogleLoading(false); return }
+          if (!backendRes.ok) {
+            setLoginError(data.error || 'Google login failed')
+            if (backendRes.status === 429) {
+              setPendingGooglePayload({ email: payload.email, googleId: payload.sub, name: payload.name })
+              setShowForceLogout(true)
+            }
+            setIsGoogleLoading(false)
+            return
+          }
+          setShowForceLogout(false)
           localStorage.setItem('datapro_logged_in', '1')
           localStorage.setItem('datapro_token', data.token)
           localStorage.setItem('datapro_email', data.email)
@@ -259,6 +311,47 @@ const [isLoginLoading, setIsLoginLoading] = useState(false)
         setIsGoogleLoading(false)
       }
     })
+  }
+
+  const handleForceGoogleLogin = async () => {
+    if (!pendingGooglePayload) return
+    setIsGoogleLoading(true)
+    try {
+      const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...pendingGooglePayload, forceLogout: true })
+      })
+      const data = await backendRes.json()
+      if (!backendRes.ok) { setLoginError(data.error || 'Google login failed'); return }
+      setShowForceLogout(false)
+      setPendingGooglePayload(null)
+      localStorage.setItem('datapro_logged_in', '1')
+      localStorage.setItem('datapro_token', data.token)
+      localStorage.setItem('datapro_email', data.email)
+      if (data.email === 'vatsaman888@gmail.com') {
+        localStorage.setItem('datapro_plan', 'enterprise')
+        setUserPlan('enterprise')
+        setEntered(true)
+        setShowLogin(false)
+        return
+      }
+      try {
+        const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
+          headers: { Authorization: `Bearer ${data.token}` }
+        })
+        const planData = await planRes.json()
+        const plan = planData.plan || 'none'
+        localStorage.setItem('datapro_plan', plan)
+        setUserPlan(plan)
+      } catch { /* ignore */ }
+      setEntered(true)
+      setShowLogin(false)
+    } catch {
+      setLoginError('Cannot connect to server. Make sure backend is running.')
+    } finally {
+      setIsGoogleLoading(false)
+    }
   }
 
 if (location.pathname === '/privacy.html') { window.location.href = '/privacy.html'; return null; }
@@ -772,6 +865,16 @@ if (!entered) return (
           <input type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} className="auth-input" />
           {loginError && (
             <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>⚠ {loginError}</div>
+          )}
+          {showForceLogout && (
+            <button
+              onClick={() => (pendingGooglePayload ? handleForceGoogleLogin() : handleForceLogin())}
+              className="auth-btn-primary"
+              disabled={isLoginLoading || isGoogleLoading}
+              style={{ background: 'linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%)' }}
+            >
+              {(isLoginLoading || isGoogleLoading) ? <span className="btn-spinner" /> : 'Log out oldest device & sign in here'}
+            </button>
           )}
           <button onClick={() => handleLogin()} className="auth-btn-primary" disabled={isLoginLoading}>{isLoginLoading ? <span className="btn-spinner" /> : (isRegisterMode ? 'CREATE ACCOUNT' : 'ACCESS THE TOOL')}</button>
           {!isRegisterMode && !showForgot && (
