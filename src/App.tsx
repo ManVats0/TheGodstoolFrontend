@@ -136,7 +136,6 @@ const [pendingGooglePayload, setPendingGooglePayload] = useState<{ email: string
       })
   }, [location.pathname])
 
-  const [showIndra, setShowIndra] = useState(true)
   const [demoPlaying, setDemoPlaying] = useState(false)
   const handleEnter = () => setShowLogin(true)
 
@@ -800,30 +799,6 @@ if (!entered) return (
       </div>
       <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2025 The God's Tool · Built for data professionals</div>
     </footer>
-
-    {/* ── INDRA POPUP ── */}
-    {showIndra && (
-      <div style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 999, width: '320px', background: 'linear-gradient(145deg, #0a0820 0%, #110d2e 60%, #0d1a3a 100%)', border: '1px solid rgba(99,179,237,0.25)', borderRadius: '12px', boxShadow: '0 0 40px rgba(66,153,225,0.15), 0 8px 32px rgba(0,0,0,0.6)', overflow: 'hidden', animation: 'indraSlide 0.5s cubic-bezier(0.16,1,0.3,1)' }}>
-        <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
-          <img src="https://i.postimg.cc/DfcCXhSJ/Indra.png" alt="Indra" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', filter: 'brightness(0.75) saturate(1.4) contrast(1.1)' }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, #0a0820 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(66,153,225,0.18) 0%, transparent 70%)', animation: 'indraLightning 2.5s ease-in-out infinite' }} />
-          <div style={{ position: 'absolute', bottom: '8px', left: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '1.1rem' }}>⚡</span>
-            {/* <span style={{ fontFamily: 'Georgia, serif', color: '#90cdf4', fontSize: '1rem', fontWeight: 700, letterSpacing: '0.15em', textShadow: '0 0 12px rgba(66,153,225,0.8)' }}>INDRA</span> */}
-<span style={{ fontFamily: 'Georgia, serif', color: '#63b3ed', fontSize: '0.65rem', opacity: 0.7, letterSpacing: '0.1em' }}>GOD OF RAIN</span>
-          </div>
-        </div>
-        <div style={{ padding: '14px 16px 16px' }}>
-          <p style={{ fontFamily: 'Georgia, serif', fontSize: '0.82rem', lineHeight: 1.7, color: '#a0c4e8', margin: 0, fontStyle: 'italic' }}>
-            "I used this tool in the 1990s to identify vulnerable areas that needed rain. Now — due to the sins of people — I follow no rules. To rain or not to rain... is simply my choice."
-          </p>
-          <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={() => setShowIndra(false)} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(99,179,237,0.3)', color: '#63b3ed', padding: '5px 16px', borderRadius: '4px', fontSize: '0.75rem', letterSpacing: '0.1em', cursor: 'pointer' }}>Understood</button>
-          </div>
-        </div>
-      </div>
-    )}
 
     {/* ── LOGIN MODAL ── */}
     {showLogin && (
