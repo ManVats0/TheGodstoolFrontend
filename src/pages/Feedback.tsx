@@ -46,7 +46,7 @@ export default function Feedback() {
   return (
     <div style={{ padding: '32px 24px', maxWidth: '520px', margin: '0 auto' }}>
       <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 900, margin: '0 0 8px', color: 'white' }}>Give Feedback</h1>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 900, margin: '0 0 8px', color: 'white' }}>Feedback/Support</h1>
         <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem', margin: 0 }}>
           Help us improve. Your feedback goes directly to the team.
         </p>
