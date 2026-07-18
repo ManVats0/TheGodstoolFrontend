@@ -5,6 +5,7 @@ export default function Feedback() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [honeypot, setHoneypot] = useState('')
+  const [file, setFile] = useState<File | null>(null)
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
@@ -20,14 +21,24 @@ export default function Feedback() {
       setStatus('error')
       return
     }
+    if (file && file.size > 8 * 1024 * 1024) {
+      setErrorMsg('Attachment must be under 8MB.')
+      setStatus('error')
+      return
+    }
 
     setStatus('loading')
     setErrorMsg('')
     try {
+      const formData = new FormData()
+      formData.append('name', form.name)
+      formData.append('email', form.email)
+      formData.append('feedback', form.feedback)
+      if (file) formData.append('attachment', file)
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: formData,
       })
       const data = await res.json()
       if (!res.ok || !data.success) {
@@ -37,6 +48,7 @@ export default function Feedback() {
       }
       setStatus('sent')
       setForm({ name: '', email: '', feedback: '' })
+      setFile(null)
     } catch {
       setErrorMsg('Cannot connect to server.')
       setStatus('error')
@@ -74,6 +86,13 @@ export default function Feedback() {
             placeholder="Your feedback..." value={form.feedback}
             onChange={(e) => setForm({ ...form, feedback: e.target.value })}
             style={{ width: '100%', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: '8px', color: '#e2e8f0', fontFamily: 'Georgia, serif', outline: 'none', minHeight: '100px', resize: 'vertical' }}
+          />
+
+          <input
+            type="file"
+            accept=".png,.jpg,.jpeg,.pdf,.csv"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: '8px', color: '#94a3b8', fontFamily: 'Georgia, serif', fontSize: '0.85rem' }}
           />
 
           <input
