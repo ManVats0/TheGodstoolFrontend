@@ -381,7 +381,7 @@ if (!entered) return (
       @keyframes rotateOrb { 0%{transform:rotate(0deg) translateX(120px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)} }
       @keyframes gridFade { 0%,100%{opacity:0.04} 50%{opacity:0.08} }
       .hero-title {
-        font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+        font-size: clamp(1.7rem, 4.2vw, 3.1rem);
         font-weight: 900;
         letter-spacing: -0.02em;
         line-height: 1.05;
@@ -424,9 +424,9 @@ if (!entered) return (
         background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
         color: white;
         border: none;
-        padding: 18px 52px;
+        padding: 13px 38px;
         border-radius: 6px;
-        font-size: 1rem;
+        font-size: 0.88rem;
         font-weight: 700;
         letter-spacing: 0.15em;
         cursor: pointer;
@@ -534,7 +534,7 @@ if (!entered) return (
     </nav>
 
     {/* ── HERO ── */}
-    <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: '120px 24px 80px', position: 'relative', overflow: 'hidden' }}>
+    <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: '85px 24px 40px', position: 'relative', overflow: 'hidden' }}>
       {/* Grid bg */}
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', animation: 'gridFade 4s ease-in-out infinite' }} xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -549,46 +549,46 @@ if (!entered) return (
       <div style={{ position: 'absolute', bottom: '25%', right: '10%', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', animation: 'fadeUp 0.8s ease both' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(167,139,250,0.25)', borderRadius: '20px', padding: '6px 18px', marginBottom: '32px', fontFamily: 'monospace', fontSize: '0.72rem', color: '#a78bfa', letterSpacing: '0.15em' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(167,139,250,0.25)', borderRadius: '20px', padding: '5px 16px', marginBottom: '18px', fontFamily: 'monospace', fontSize: '0.68rem', color: '#a78bfa', letterSpacing: '0.15em' }}>
           ⚡ ETL SOFTWARE
         </div>
 
-        <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '8px', textTransform: 'uppercase' }}>
           AI Powered All-in-One Data Pipeline Tool
         </p>
-        <h1 className="hero-title" style={{ margin: '0 0 24px' }}>
+        <h1 className="hero-title" style={{ margin: '0 0 14px' }}>
           Create ETL pipelines effortlessly
         </h1>
 
         {/* */}
-<p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '620px', margin: '0 auto 16px', fontFamily: 'Georgia, serif' }}>
+<p style={{ fontSize: 'clamp(0.88rem, 1.5vw, 1.02rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, maxWidth: '600px', margin: '0 auto 10px', fontFamily: 'Georgia, serif' }}>
   Connect any data source. Clean it with AI. All from one browser tab — no engineers required.
 </p>
 
-        <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#6d5fc7', letterSpacing: '0.1em', marginBottom: '20px', opacity: 0.7 }}>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#6d5fc7', letterSpacing: '0.1em', marginBottom: '12px', opacity: 0.7 }}>
           CSV · Google Sheets · MySQL · PostgreSQL · BigQuery · MongoDB
         </p>
 
-        <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginBottom: '48px' }}>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', marginBottom: '22px' }}>
           Test Free With Google Sheets · No credit card required · Setup in under 20 seconds
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="cta-btn" onClick={handleEnter}>Start Cleaning Data Free</button>
-          <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '18px 40px', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
+          <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '13px 32px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.4)'; e.currentTarget.style.color = '#a78bfa' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}>
             See How It Works
           </button>
         </div>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.32)', marginTop: '24px', letterSpacing: '0.05em' }}>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '14px', letterSpacing: '0.05em' }}>
           🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems
         </p>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.32)', marginTop: '10px', letterSpacing: '0.05em' }}>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
           ✅ Google OAuth Verified
         </p>
       </div>
-      <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', animation: 'float 2s ease-in-out infinite' }}>
+      <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '14px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', animation: 'float 2s ease-in-out infinite' }}>
         <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em' }}>SCROLL TO EXPLORE</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
       </div>
