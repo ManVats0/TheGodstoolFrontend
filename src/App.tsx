@@ -581,6 +581,9 @@ if (!entered) return (
             See How It Works
           </button>
         </div>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.32)', marginTop: '24px', letterSpacing: '0.05em' }}>
+          🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems
+        </p>
       </div>
       <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', animation: 'float 2s ease-in-out infinite' }}>
         <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em' }}>SCROLL TO EXPLORE</span>
@@ -611,7 +614,7 @@ if (!entered) return (
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
         <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Modern Data Stack (MDS) Orchestrator for your data needs.</h2>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>One platform. Zero compromises.</p>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Built by a data professional with 4+ years of enterprise pipeline experience.</p>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
