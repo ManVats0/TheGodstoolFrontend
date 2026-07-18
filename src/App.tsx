@@ -584,6 +584,9 @@ if (!entered) return (
         <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.32)', marginTop: '24px', letterSpacing: '0.05em' }}>
           🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems
         </p>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.32)', marginTop: '10px', letterSpacing: '0.05em' }}>
+          ✅ Google OAuth Verified
+        </p>
       </div>
       <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', animation: 'float 2s ease-in-out infinite' }}>
         <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em' }}>SCROLL TO EXPLORE</span>
@@ -855,7 +858,7 @@ if (!entered) return (
             <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#38bdf8', letterSpacing: '0.2em', marginTop: '6px', opacity: 0.7 }}>DATA · INTELLIGENCE · PIPELINE</div>
           </div>
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {[['✅','Google OAuth Verified'],['∞','Data Sources'],['⚡','Real-time'],['🔒','Encrypted']].map(([icon, label]) => (
+            {[['∞','Data Sources'],['⚡','Real-time'],['🔒','Encrypted']].map(([icon, label]) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(30,64,175,0.15)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '20px', padding: '4px 12px', fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'monospace' }}>
                 <span style={{ fontSize: '0.8rem' }}>{icon}</span>{label}
               </div>
