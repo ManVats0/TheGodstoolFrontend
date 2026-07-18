@@ -19,7 +19,7 @@ const navItems = [
     { path: '/audit', icon: '📜', label: 'Audit Logs' },
     { path: '/docs', icon: '📖', label: 'Cosmic Documentation' },
     { path: '/tunneling', icon: '🔐', label: 'Tunneling' },
-    { path: '/feedback', icon: '💬', label: 'Give Feedback' },
+    { path: '/feedback', icon: '💬', label: 'Feedback / Support' },
   ]
 
   return (
