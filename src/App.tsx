@@ -658,7 +658,7 @@ if (!entered) return (
           ))}
         </div>
         <div style={{ textAlign: 'center', marginTop: '48px' }}>
-          <button className="cta-btn-outline" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Cancel Anytime</button>
+          <button className="cta-btn" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Cancel Anytime</button>
         </div>
       </div>
     </section>
