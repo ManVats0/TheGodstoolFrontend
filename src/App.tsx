@@ -812,6 +812,18 @@ if (!entered) return (
       <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', marginBottom: '20px', lineHeight: 1.8 }}>
         Google Sign-In is used solely for account authentication. Google Sheets access is optional and only activated when you explicitly connect a sheet. We do not access, store, or share any Google data without your action.
       </p>
+      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '24px' }}>
+        <a href="https://www.youtube.com/@TheGodsTool-DataPipeline" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s', display: 'inline-flex' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#a78bfa' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.51 3.5 12 3.5 12 3.5s-7.51 0-9.38.56A3.02 3.02 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.12 2.14c1.87.56 9.38.56 9.38.56s7.51 0 9.38-.56a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8ZM9.75 15.5v-7l6.27 3.5-6.27 3.5Z"/></svg>
+        </a>
+        <a href="https://x.com/TheGodsToojsg0" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s', display: 'inline-flex' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#a78bfa' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.9L4.2 22H1l8.2-9.3L.8 2h7.3l5 6.4L18.9 2Zm-1.2 18h1.9L7.4 4H5.3l12.4 16Z"/></svg>
+        </a>
+      </div>
       <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '28px' }}>
         <a href="/faq.html" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>FAQ</a>
         <a href="/privacy" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Privacy Policy</a>
@@ -819,7 +831,7 @@ if (!entered) return (
         <a href="/refund.html" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Refund Policy</a>
         <a href="/contact" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Contact</a>
       </div>
-      <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2025 The God's Tool · Built for data professionals</div>
+      <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2026 The God's Tool · Built for data professionals</div>
     </footer>
 
     {/* ── LOGIN MODAL ── */}
