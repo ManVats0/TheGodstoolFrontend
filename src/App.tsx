@@ -381,7 +381,7 @@ if (!entered) return (
       @keyframes rotateOrb { 0%{transform:rotate(0deg) translateX(120px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)} }
       @keyframes gridFade { 0%,100%{opacity:0.04} 50%{opacity:0.08} }
       .hero-title {
-        font-size: clamp(2.8rem, 7vw, 5.5rem);
+        font-size: clamp(2.2rem, 5.5vw, 4.2rem);
         font-weight: 900;
         letter-spacing: -0.02em;
         line-height: 1.05;
