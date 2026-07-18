@@ -435,6 +435,21 @@ if (!entered) return (
         transition: transform 0.2s;
       }
       .cta-btn:hover { transform: scale(1.04); }
+      .cta-btn-outline {
+        font-family: Georgia, serif;
+        background: transparent;
+        color: #a78bfa;
+        border: 1px solid rgba(167,139,250,0.4);
+        padding: 16px 44px;
+        border-radius: 6px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.2s;
+      }
+      .cta-btn-outline:hover { background: rgba(124,58,237,0.15); transform: scale(1.03); }
       .step-num {
         width: 48px; height: 48px;
         border-radius: 50%;
@@ -535,14 +550,14 @@ if (!entered) return (
 
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', animation: 'fadeUp 0.8s ease both' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(167,139,250,0.25)', borderRadius: '20px', padding: '6px 18px', marginBottom: '32px', fontFamily: 'monospace', fontSize: '0.72rem', color: '#a78bfa', letterSpacing: '0.15em' }}>
-          ⚡ DATA INTELLIGENCE PLATFORM
+          ⚡ ETL SOFTWARE
         </div>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '12px', textTransform: 'uppercase' }}>
-          AI-Powered Data Cleaning & ETL Automation
+          AI Powered All-in-One Data Pipeline Tool
         </p>
         <h1 className="hero-title" style={{ margin: '0 0 24px' }}>
-          Create pipelines effortlessly
+          Create ETL pipelines effortlessly
         </h1>
 
         {/* */}
@@ -578,7 +593,7 @@ if (!entered) return (
       <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[
           { val: '∞', label: 'Data Sources' },
-          { val: '🔍', label: 'Schema Detector' },
+          { val: '🔍', label: 'Schema Change Detector' },
           { val: 'AI', label: 'Powered Cleaning' },
           { val: '1', label: 'Everything in Browser Tab' },
         ].map((s, i) => (
@@ -594,18 +609,22 @@ if (!entered) return (
     <section id="features" style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '64px' }}>
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
-        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Everything your data needs.</h2>
+        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Modern Data Stack (MDS) Orchestrator for your data needs.</h2>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>One platform. Zero compromises.</p>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Built by a data professional with 4+ years of enterprise pipeline experience.</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
-          { icon: '⚡', title: 'AI-Powered Cleaning', desc: 'Detect nulls, fix formats, remove duplicates, and standardize columns — automatically. Claude AI does the heavy lifting.', delay: '0s' },
+          { icon: '⚡', title: 'AI-Powered Cleaning', desc: 'Detect nulls, fix formats, remove duplicates, and standardize columns — automatically. Or just write in plain English to generate a cleaning step. Claude AI does the heavy lifting.', delay: '0s' },
           { icon: '🔌', title: 'Connect Anything', desc: 'CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, GA4 — plug in any source in seconds.', delay: '0.1s' },
           { icon: '🔄', title: 'Pipeline Automation', desc: 'Build no-code data flows that run on a schedule. Transform, join, filter, and export without writing a line.', delay: '0.2s' },
           { icon: '📊', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.3s' },
           { icon: '🔒', title: 'Secure by Default', desc: 'Your data never leaves your session without permission. Encrypted in transit, zero third-party sharing.', delay: '0.4s' },
           { icon: '🔒', title: 'Secure Tunneling', desc: 'Connect private databases behind firewalls — no public IP or firewall changes needed. A lightweight agent runs locally and bridges your backend securely.', delay: '0.5s' },
+          { icon: '⏱️', title: 'Schedule Your Runs', desc: 'Schedule jobs from every 5 seconds to a custom date & time — your call.', delay: '0.6s' },
+          { icon: '🚨', title: 'Issue Detector', desc: 'Auto-detects issues in your data before they break downstream.', delay: '0.7s' },
+          { icon: '🎯', title: 'Advanced Filter', desc: 'Pinpoint exactly which raw number is causing the problem with the problem filter.', delay: '0.8s' },
+          { icon: '📖', title: 'Analyse', desc: 'Free analysis on every connected data source — a full data dictionary and data info, ready for you.', delay: '0.9s' },
         ].map((f, i) => (
           <div key={i} className="feature-card" style={{ animationDelay: f.delay }}>
             <div style={{ fontSize: '2rem', marginBottom: '16px', filter: 'drop-shadow(0 0 12px rgba(124,58,237,0.5))' }}>{f.icon}</div>
@@ -637,6 +656,9 @@ if (!entered) return (
               </div>
             </div>
           ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '48px' }}>
+          <button className="cta-btn-outline" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Cancel Anytime</button>
         </div>
       </div>
     </section>
