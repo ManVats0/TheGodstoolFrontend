@@ -570,7 +570,7 @@ if (!entered) return (
         </p>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginBottom: '48px' }}>
-          Free forever plan · No credit card required · Setup in under 2 minutes
+          Test Free With Google Sheets · No credit card required · Setup in under 20 seconds
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
