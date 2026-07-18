@@ -582,7 +582,7 @@ if (!entered) return (
           </button>
         </div>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '14px', letterSpacing: '0.05em' }}>
-          🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems
+          🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale data systems
         </p>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
           ✅ Google OAuth Verified
@@ -617,7 +617,7 @@ if (!entered) return (
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
         <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Modern Data Stack (MDS) Orchestrator for your data needs.</h2>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>One platform. Zero compromises.</p>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
