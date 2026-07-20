@@ -594,7 +594,7 @@ if (!entered) return (
 
         {/* */}
 <p style={{ fontSize: 'clamp(0.88rem, 1.5vw, 1.02rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, maxWidth: '600px', margin: '0 auto 10px', fontFamily: 'Georgia, serif' }}>
-  Connect any data source. Clean it with AI. All from one browser tab — no engineers required.
+  Tell it what you need. It builds the pipeline.
 </p>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#6d5fc7', letterSpacing: '0.1em', marginBottom: '12px', opacity: 0.7 }}>
