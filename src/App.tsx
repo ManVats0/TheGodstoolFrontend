@@ -875,7 +875,7 @@ if (!entered) return (
     {/* ── LOGIN MODAL ── */}
     {showLogin && (
       <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,8,15,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
-        <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '400px', margin: '0 16px', background: 'rgba(10,15,28,0.95)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '12px', padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '400px', margin: '0 16px', background: 'rgba(10,15,28,0.95)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '12px', padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: '18px', maxHeight: '90vh', overflowY: 'auto' }}>
           {/* Floating SQL particles */}
           {['SELECT *','JOIN','GROUP BY','WHERE','AVG()','COUNT(*)'].map((word, i) => (
             <div key={i} style={{ position: 'absolute', left: `${8 + (i * 15) % 80}%`, top: `${65 + (i * 8) % 30}%`, fontFamily: 'monospace', fontSize: '0.65rem', color: '#38bdf8', opacity: 0.1, pointerEvents: 'none', animation: `float-up ${3 + (i % 3)}s ease-in ${i * 0.6}s infinite`, userSelect: 'none' }}>{word}</div>
