@@ -34,6 +34,20 @@ function redirectToGoogleOAuth() {
   window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
 }
 
+function getPasswordStrength(pw: string) {
+  let score = 0
+  if (pw.length >= 8) score++
+  if (pw.length >= 12) score++
+  if (/[A-Z]/.test(pw)) score++
+  if (/[0-9]/.test(pw)) score++
+  if (/[^A-Za-z0-9]/.test(pw)) score++
+  if (!pw) return { label: '', color: 'transparent', pct: 0 }
+  if (score <= 1) return { label: 'Weak', color: '#f87171', pct: 25 }
+  if (score <= 3) return { label: 'Okay', color: '#fbbf24', pct: 55 }
+  if (score === 4) return { label: 'Good', color: '#4ade80', pct: 80 }
+  return { label: 'Strong', color: '#22c55e', pct: 100 }
+}
+
 export default function App() {
   const [showNotif, setShowNotif] = useState(false)
   const navigate = useNavigate()
@@ -58,6 +72,10 @@ const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 const [isLoginLoading, setIsLoginLoading] = useState(false)
 const [showForceLogout, setShowForceLogout] = useState(false)
 const [pendingGooglePayload, setPendingGooglePayload] = useState<{ email: string; googleId: string; name: string } | null>(null)
+const [regName, setRegName] = useState('')
+const [regNickname, setRegNickname] = useState('')
+const [confirmPassword, setConfirmPassword] = useState('')
+const [regFeeling, setRegFeeling] = useState('')
 
   useEffect(() => {
     if (location.pathname !== '/docs') {
@@ -137,13 +155,27 @@ const [pendingGooglePayload, setPendingGooglePayload] = useState<{ email: string
   }, [location.pathname])
 
   const [demoPlaying, setDemoPlaying] = useState(false)
-  const handleEnter = () => setShowLogin(true)
+  const handleEnter = (mode: 'login' | 'register' = 'register') => {
+    setShowLogin(true)
+    setIsRegisterMode(mode === 'register')
+    setLoginError('')
+  }
 
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault()
     if (!loginEmail.trim() || !loginPassword.trim()) {
       setLoginError('Please enter email and password.')
       return
+    }
+    if (isRegisterMode) {
+      if (loginPassword !== confirmPassword) {
+        setLoginError('Passwords do not match.')
+        return
+      }
+      if (getPasswordStrength(loginPassword).pct < 55) {
+        setLoginError('Please choose a stronger password.')
+        return
+      }
     }
     setIsLoginLoading(true)
     try {
@@ -525,7 +557,7 @@ if (!entered) return (
         <span className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</span>
         <span className="nav-link" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>How It Works</span>
         <span className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</span>
-        <button onClick={handleEnter} style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', padding: '8px 20px', borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}
+        <button onClick={() => handleEnter('login')} style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', padding: '8px 20px', borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.2)' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
           SIGN IN
@@ -574,7 +606,7 @@ if (!entered) return (
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="cta-btn" onClick={handleEnter}>Start Cleaning Data Free</button>
+          <button className="cta-btn" onClick={() => handleEnter('register')}>Start Cleaning Data Free</button>
           <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '13px 32px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.4)'; e.currentTarget.style.color = '#a78bfa' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}>
@@ -582,7 +614,7 @@ if (!entered) return (
           </button>
         </div>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '14px', letterSpacing: '0.05em' }}>
-          🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale data systems
+          🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems
         </p>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
           ✅ Google OAuth Verified
@@ -617,7 +649,7 @@ if (!entered) return (
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
         <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Modern Data Stack (MDS) Orchestrator for your data needs.</h2>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>One platform. Zero compromises.</p>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
@@ -713,7 +745,7 @@ if (!entered) return (
           ))}
         </div>
         <div style={{ marginTop: '48px' }}>
-          <button className="cta-btn" onClick={handleEnter}>Try It Free — No Card Needed</button>
+          <button className="cta-btn" onClick={() => handleEnter('register')}>Try It Free — No Card Needed</button>
         </div>
       </div>
     </section>
@@ -786,7 +818,7 @@ if (!entered) return (
                   </div>
                 ))}
               </div>
-              <button onClick={handleEnter} style={{ width: '100%', padding: '11px', borderRadius: '6px', border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.12)', background: plan.featured ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(255,255,255,0.04)', color: 'white', fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'opacity 0.2s' }}
+              <button onClick={() => handleEnter('register')} style={{ width: '100%', padding: '11px', borderRadius: '6px', border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.12)', background: plan.featured ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(255,255,255,0.04)', color: 'white', fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'opacity 0.2s' }}
                 onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
                 {plan.name === 'Free' ? 'Start Free' : plan.featured ? 'Start Pro Trial' : 'Get Started'}
@@ -805,7 +837,7 @@ if (!entered) return (
       <div style={{ maxWidth: '640px', margin: '0 auto' }}>
         <h2 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.02em' }}>Still deciding?</h2>
         <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', marginBottom: '32px' }}>Try it free — no credit card needed. Upgrade only when you're ready.</p>
-        <button className="cta-btn" onClick={handleEnter}>Start Free Now</button>
+        <button className="cta-btn" onClick={() => handleEnter('register')}>Start Free Now</button>
       </div>
     </section>
 
@@ -878,6 +910,57 @@ if (!entered) return (
           </div>
           <input type="email" placeholder="you@example.com" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="auth-input" />
           <input type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} className="auth-input" />
+
+          {isRegisterMode && (
+            <>
+              <input type="text" placeholder="Your name (what your office HR calls you)" value={regName} onChange={e => setRegName(e.target.value)} className="auth-input" />
+              <input type="text" placeholder="Nickname (what your classmates call you)" value={regNickname} onChange={e => setRegNickname(e.target.value)} className="auth-input" />
+              <input type="password" placeholder="Repeat password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="auth-input" />
+
+              {loginPassword && (
+                <div style={{ marginTop: '-8px' }}>
+                  <div style={{ height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${getPasswordStrength(loginPassword).pct}%`, background: getPasswordStrength(loginPassword).color, transition: 'width 0.25s ease, background 0.25s ease' }} />
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: getPasswordStrength(loginPassword).color, marginTop: '4px' }}>
+                    {getPasswordStrength(loginPassword).label}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>
+                  How are you feeling right now?
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { emoji: '🔥', label: 'Excited' },
+                    { emoji: '😌', label: 'Calm' },
+                    { emoji: '😬', label: 'Nervous' },
+                    { emoji: '🧠', label: 'Curious' },
+                    { emoji: '😤', label: 'Determined' },
+                  ].map(f => (
+                    <button
+                      key={f.label}
+                      type="button"
+                      onClick={() => setRegFeeling(f.label)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        background: regFeeling === f.label ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.04)',
+                        border: regFeeling === f.label ? '1px solid rgba(167,139,250,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '20px', padding: '6px 12px',
+                        fontFamily: 'monospace', fontSize: '0.75rem', color: '#e2e8f0',
+                        cursor: 'pointer', transition: 'all 0.15s'
+                      }}
+                    >
+                      <span>{f.emoji}</span>{f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
           {loginError && (
             <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>⚠ {loginError}</div>
           )}
