@@ -614,7 +614,7 @@ if (!entered) return (
           </button>
         </div>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '14px', letterSpacing: '0.05em' }}>
-          🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems
+          🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and complex data systems
         </p>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
           ✅ Google OAuth Verified
