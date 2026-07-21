@@ -2,16 +2,13 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 type Cycle = 'monthly' | 'yearly'
-type Currency = 'INR' | 'USD'
 
 const PLANS = [
   {
     key: 'lite',
     name: 'Lite',
-    monthlyPriceINR: '₹774',
-    yearlyPriceINR: '₹8,256',
-    monthlyPriceUSD: '$9',
-    yearlyPriceUSD: '$99',
+    monthlyPrice: '₹774',
+    yearlyPrice: '₹8,256',
     aiPerDay: 4,
     userLimit: 1,
     features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'],
@@ -22,10 +19,8 @@ const PLANS = [
   {
     key: 'starter',
     name: 'Starter',
-    monthlyPriceINR: '₹1,634',
-    yearlyPriceINR: '₹17,114',
-    monthlyPriceUSD: '$19',
-    yearlyPriceUSD: '$199',
+    monthlyPrice: '₹1,634',
+    yearlyPrice: '₹17,114',
     aiPerDay: 35,
     userLimit: 1,
     features: ['Everything in Lite', '35 AI transforms/day', 'Email support'],
@@ -37,10 +32,8 @@ const PLANS = [
   {
     key: 'pro',
     name: 'Pro',
-    monthlyPriceINR: '₹3,354',
-    yearlyPriceINR: '₹36,034',
-    monthlyPriceUSD: '$39',
-    yearlyPriceUSD: '$399',
+    monthlyPrice: '₹3,354',
+    yearlyPrice: '₹36,034',
     aiPerDay: 110,
     userLimit: 5,
     features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'],
@@ -52,10 +45,8 @@ const PLANS = [
   {
     key: 'team',
     name: 'Team',
-    monthlyPriceINR: '₹6,794',
-    yearlyPriceINR: '₹72,154',
-    monthlyPriceUSD: '$79',
-    yearlyPriceUSD: '$799',
+    monthlyPrice: '₹6,794',
+    yearlyPrice: '₹72,154',
     aiPerDay: 150,
     userLimit: 15,
     features: ['Everything in Pro', '150 AI transforms/day', '15 concurrent logins', 'Priority support'],
@@ -66,10 +57,8 @@ const PLANS = [
   {
     key: 'enterprise',
     name: 'Enterprise',
-    monthlyPriceINR: '₹42,914',
-    yearlyPriceINR: '₹4,11,940',
-    monthlyPriceUSD: '$499',
-    yearlyPriceUSD: '$4,999',
+    monthlyPrice: '₹42,914',
+    yearlyPrice: '₹4,11,940',
     aiPerDay: 500,
     userLimit: 100,
     features: ['Everything in Team', '500 AI transforms/day', '100 concurrent logins', 'Dedicated support'],
@@ -79,12 +68,22 @@ const PLANS = [
   },
 ]
 
+// Plans/cycles that exceed Razorpay's current transaction cap (₹50k domestic, ₹30k international).
+// These route to Contact Sales instead of checkout. Remove entries here once Razorpay raises the limit.
+const CONTACT_SALES_ONLY: Record<string, Cycle[]> = {
+  enterprise: ['monthly', 'yearly'],
+  team: ['yearly'],
+}
+
+function requiresContactSales(planKey: string, cycle: Cycle) {
+  return CONTACT_SALES_ONLY[planKey]?.includes(cycle) ?? false
+}
+
 export default function Pricing() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [cycle, setCycle] = useState<Cycle>('monthly')
-  const [currency, setCurrency] = useState<Currency>('INR')
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -96,37 +95,19 @@ export default function Pricing() {
     }
   }, [])
 
-  useEffect(() => {
-    const detectCurrency = async () => {
-      try {
-        const controller = new AbortController()
-        const timeout = setTimeout(() => controller.abort(), 3000)
-        const res = await fetch('https://ipapi.co/json/', { signal: controller.signal })
-        clearTimeout(timeout)
-        const data = await res.json()
-        if (data?.country_code) {
-          if (data.country_code !== 'IN') setCurrency('USD')
-          return
-        }
-      } catch { /* try fallback below */ }
-
-      try {
-        const controller2 = new AbortController()
-        const timeout2 = setTimeout(() => controller2.abort(), 3000)
-        const res2 = await fetch('https://ipwho.is/', { signal: controller2.signal })
-        clearTimeout(timeout2)
-        const data2 = await res2.json()
-        if (data2?.country_code && data2.country_code !== 'IN') {
-          setCurrency('USD')
-        }
-      } catch { /* both failed — default to INR, manual toggle still works */ }
-    }
-
-    detectCurrency()
-  }, [])
-
   const handleSubscribe = async (planKey: string) => {
     setError('')
+
+    // ── Payment cap guard ───────────────────────────────────────────────
+    // Razorpay checkout is skipped for plan/cycle combos above the current
+    // transaction cap. The Razorpay code below is untouched and still runs
+    // normally for every other plan — this only intercepts the capped ones.
+    if (requiresContactSales(planKey, cycle)) {
+      navigate(`/contact?intent=sales&plan=${planKey}&billing=${cycle}`)
+      return
+    }
+    // ────────────────────────────────────────────────────────────────────
+
     setLoading(planKey)
     const token = localStorage.getItem('datapro_token')
     if (!token) { navigate('/'); return }
@@ -135,7 +116,7 @@ export default function Pricing() {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planKey, billingCycle: cycle, currency })
+        body: JSON.stringify({ planKey, billingCycle: cycle })
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to create subscription'); setLoading(null); return }
@@ -151,11 +132,12 @@ export default function Pricing() {
   const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-payment`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ ...response, planKey, billingCycle: cycle, currency })
+    body: JSON.stringify({ ...response, planKey, billingCycle: cycle })
   })
   const verifyData = await verifyRes.json()
   if (verifyData.success) {
     localStorage.setItem('datapro_plan', planKey)
+    // ← CHANGED: Redirect to thank you page instead of home
     window.location.href = '/thank-you'
   } else {
     setError('Payment verified failed. Contact support.')
@@ -185,7 +167,7 @@ export default function Pricing() {
         </p>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '4px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '4px' }}>
         <button
           onClick={() => setCycle('monthly')}
           style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.8rem', letterSpacing: '0.05em', background: cycle === 'monthly' ? 'rgba(124,58,237,0.35)' : 'transparent', color: cycle === 'monthly' ? 'white' : 'rgba(255,255,255,0.5)' }}
@@ -200,13 +182,6 @@ export default function Pricing() {
         </button>
       </div>
 
-      <button
-        onClick={() => setCurrency(c => c === 'INR' ? 'USD' : 'INR')}
-        style={{ marginBottom: '32px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '20px', padding: '5px 16px', color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace', fontSize: '0.72rem', cursor: 'pointer', letterSpacing: '0.05em' }}
-      >
-        {currency === 'INR' ? '₹ INR · switch to $ USD' : '$ USD · switch to ₹ INR'}
-      </button>
-
       {error && (
         <div style={{ marginBottom: '24px', background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: '10px', padding: '12px 20px', color: '#fca5a5', fontSize: '0.875rem', fontFamily: 'monospace' }}>
           ⚠ {error}
@@ -214,12 +189,7 @@ export default function Pricing() {
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', maxWidth: '1200px', width: '100%' }}>
-        {PLANS.map(plan => {
-          const price = currency === 'INR'
-            ? (cycle === 'monthly' ? plan.monthlyPriceINR : plan.yearlyPriceINR)
-            : (cycle === 'monthly' ? plan.monthlyPriceUSD : plan.yearlyPriceUSD)
-
-          return (
+        {PLANS.map(plan => (
           <div key={plan.key} style={{
             background: plan.highlight ? 'rgba(124,58,237,0.12)' : plan.bg,
             border: `1px solid ${plan.border}`,
@@ -240,7 +210,7 @@ export default function Pricing() {
             <div>
               <div style={{ color: plan.color, fontWeight: 700, fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{plan.name}</div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '1.8rem', fontFamily: 'Georgia, serif', lineHeight: 1.1, marginTop: '6px' }}>
-                {price}
+                {cycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{cycle === 'monthly' ? '/month' : '/year'}</span>
               </div>
             </div>
@@ -281,11 +251,10 @@ export default function Pricing() {
                 transition: 'opacity 0.2s'
               }}
             >
-              {loading === plan.key ? 'Opening...' : 'Subscribe'}
+              {loading === plan.key ? 'Opening...' : (requiresContactSales(plan.key, cycle) ? 'Contact Sales' : 'Subscribe')}
             </button>
           </div>
-          )
-        })}
+        ))}
       </div>
 
       <button
