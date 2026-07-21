@@ -182,6 +182,7 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
     const [selectedSheetId, setSelectedSheetId] = useState('')
     const [gsheetsError, setGsheetsError] = useState('')
     const fileRef = useRef<HTMLInputElement>(null)
+    const dropZoneRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
       // On every page load: silently check + refresh token, show cached sheets instantly
@@ -1298,7 +1299,10 @@ const handleLockedSource = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
                 style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}
-                onClick={() => fileRef.current?.click()}
+                onClick={() => {
+                  dropZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  fileRef.current?.click()
+                }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">📄</div>
@@ -1506,6 +1510,7 @@ const handleLockedSource = () => {
             </div>
             {/* CSV Upload area */}
             <div
+              ref={dropZoneRef}
               className="rounded-2xl p-12 text-center transition-all cursor-pointer"
               style={{
                 background: dragging ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.02)',
