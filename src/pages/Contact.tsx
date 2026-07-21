@@ -1,14 +1,54 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+
+const PLAN_LABELS: Record<string, string> = {
+  lite: 'Lite', starter: 'Starter', pro: 'Pro', team: 'Team', enterprise: 'Enterprise'
+}
 
 export default function Contact() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [honeypot, setHoneypot] = useState('')
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+  // Prefill from a logged-in user landing here via a "Contact Sales" link
+  useEffect(() => {
+    const intent = searchParams.get('intent')
+    const planParam = searchParams.get('plan')
+    const billingParam = searchParams.get('billing')
+    const storedEmail = localStorage.getItem('datapro_email')
+    const token = localStorage.getItem('datapro_token')
+
+    const planLabel = planParam ? (PLAN_LABELS[planParam] || planParam) : ''
+    const prefillMessage =
+      intent === 'sales' && planLabel
+        ? `Hi, I'm interested in the ${planLabel} plan${billingParam ? ` (${billingParam} billing)` : ''}. I'd love to get set up with something powerful for my data pipeline — please share the next steps.`
+        : ''
+
+    setForm(prev => ({
+      ...prev,
+      email: storedEmail || prev.email,
+      message: prefillMessage || prev.message,
+    }))
+
+    if (token) {
+      fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.name) {
+            setForm(prev => ({ ...prev, name: data.name }))
+          }
+        })
+        .catch(() => { /* silently ignore — form still usable blank */ })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSubmit = async () => {
     if (honeypot) return // bot caught
