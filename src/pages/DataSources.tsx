@@ -538,11 +538,8 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
 
     const handleFile = (f: File) => {
       setPendingFile(f)
-      // Bring the drop zone into view — deferred so it runs after React
-      // re-renders with the "Ready to analyze" content, giving accurate layout to scroll to
-      requestAnimationFrame(() => {
-        dropZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      })
+      // Bring the drop zone into view so the "Ready to analyze" confirmation is visible
+      dropZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
 
     const startGoogleOAuth = async () => {
