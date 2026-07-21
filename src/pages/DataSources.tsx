@@ -538,8 +538,6 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
 
     const handleFile = (f: File) => {
       setPendingFile(f)
-      // Bring the drop zone into view so the "Ready to analyze" confirmation is visible
-      dropZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
 
     const startGoogleOAuth = async () => {
@@ -1508,7 +1506,6 @@ const handleLockedSource = () => {
             </div>
             {/* CSV Upload area */}
             <div
-              ref={dropZoneRef}
               className="rounded-2xl p-12 text-center transition-all cursor-pointer"
               style={{
                 background: dragging ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.02)',
