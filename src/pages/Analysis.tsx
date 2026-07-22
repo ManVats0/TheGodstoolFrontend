@@ -1880,7 +1880,22 @@ setAnalyzing(false)
       formData.append('alert_flow', String(alertConditions.flow))
       try {
         const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
-        const data = await res.json()
+        const rawText = await res.text()
+        let data: any
+        try {
+          data = JSON.parse(rawText)
+        } catch {
+          console.error('[Analyze] Non-JSON response:', res.status, rawText)
+          alert(`Analysis failed! Server returned ${res.status}. Check console for details.`)
+          setAnalyzing(false)
+          return
+        }
+        if (data.error) {
+          console.error('[Analyze] Backend error:', data.error)
+          alert(`Analysis failed: ${data.error}`)
+          setAnalyzing(false)
+          return
+        }
         setAnalysis(data)
 
         // ── Approach 2: Save analysis metadata ──
@@ -1914,8 +1929,9 @@ setAnalyzing(false)
           details: `Analyzed: ${activeFile?.name ?? activeSourceName} · ${data.dataset_info?.rows?.toLocaleString()} rows · Quality: ${data.quality_score}%`,
           user: 'local_user'
         })
-      } catch {
-        alert('Analysis failed! Make sure backend is running.')
+      } catch (e) {
+        console.error('[Analyze] Network/fetch error:', e)
+        alert(`Analysis failed: ${String(e)}`)
       } finally {
         setAnalyzing(false)
       }
