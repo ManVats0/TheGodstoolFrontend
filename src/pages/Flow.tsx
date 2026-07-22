@@ -1646,6 +1646,10 @@ export default function Flow() {
   const [preview, setPreview] = useState<ClientPreview | null>(null)
   const [previewLoading,          setPreviewLoading]          = useState(false)
   const [copiedSQL,               setCopiedSQL]               = useState(false)
+  const [editableSQL,             setEditableSQL]             = useState('')
+  const [sqlDrawerPreview,        setSqlDrawerPreview]        = useState<any>(null)
+  const [sqlDrawerError,          setSqlDrawerError]          = useState('')
+  const [sqlDrawerLoading,        setSqlDrawerLoading]        = useState(false)
   const [pipelineRun,             setPipelineRun]             = useState<any>(null)
   const [baseline,                setBaseline]                = useState<any>(null)
   const [learnedRules,            setLearnedRules]            = useState<any[]>([])
@@ -1674,6 +1678,8 @@ const [_gsheetsSource, _setGsheetsSource] = useState<{ email: string; sheetName:
     buildUnifiedSQL(tableName, transformations.map(t => t.id), analysis?.issues || {}),
     [transformations, analysis, tableName]
   )
+
+  useEffect(() => { setEditableSQL(unifiedSQL); setSqlDrawerPreview(null); setSqlDrawerError('') }, [unifiedSQL])
 
   useEffect(() => { if (!activeSource) return; loadPipelineData() }, [activeSource?.name])
   // AFTER:
@@ -2882,7 +2888,55 @@ setTimeout(() => {
     setShowScheduleModal(undefined)
   }
 
-  const copySQL = () => { navigator.clipboard.writeText(unifiedSQL); setCopiedSQL(true); setTimeout(() => setCopiedSQL(false), 2000) }
+  const copySQL = () => { navigator.clipboard.writeText(editableSQL); setCopiedSQL(true); setTimeout(() => setCopiedSQL(false), 2000) }
+
+  const runSqlDrawerPreview = async () => {
+    if (!activeFile) { setSqlDrawerError('No active file loaded to preview against.'); return }
+    setSqlDrawerLoading(true)
+    setSqlDrawerError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', activeFile)
+      formData.append('sql', editableSQL)
+      formData.append('preview_only', 'true')
+      const res = await fetch(`${API_BASE}/api/sql-clean`, { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.success) {
+        setSqlDrawerPreview(data)
+      } else {
+        setSqlDrawerPreview(null)
+        setSqlDrawerError(data.error || 'Query failed')
+      }
+    } catch (e) {
+      setSqlDrawerPreview(null)
+      setSqlDrawerError(String(e))
+    } finally {
+      setSqlDrawerLoading(false)
+    }
+  }
+
+  const addSqlDrawerToPipeline = () => {
+    if (!sqlDrawerPreview) return
+    const customTransform = {
+      id: `sql_custom_${Date.now()}`,
+      label: 'SQL Query',
+      icon: '🗄️',
+      desc: editableSQL.length > 60 ? editableSQL.slice(0, 57) + '...' : editableSQL,
+      sql: editableSQL,
+      color: '#0ea5e9',
+      type: 'sql_custom',
+      applied: false,
+    }
+    addTransformation(customTransform)
+    addAuditLog({
+      id: crypto.randomUUID(), time: new Date().toLocaleString(),
+      action: 'add_transformation', entity_type: 'transformation',
+      entity_id: customTransform.id,
+      details: `Added SQL transformation from editor`,
+      user: 'local_user',
+    })
+    setShowSQLDrawer(false)
+  }
 
   const runStatus    = pipelineRun?.status || 'GREEN'
   const driftScore   = pipelineRun?.driftScore || 0
@@ -4445,13 +4499,57 @@ setTimeout(() => {
           <div className="absolute inset-0" style={{ background:'rgba(0,0,0,0.6)' }} />
           <div className="relative flex flex-col shadow-2xl" style={{ width:'600px', height:'100%', background:'#0a0714', borderLeft:'1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-              <div><h2 className="font-bold text-white text-sm">Unified SQL Pipeline</h2><p className="text-xs mt-0.5" style={{ color:'rgba(255,255,255,0.35)' }}>Table: <span style={{ color:'#818cf8' }}>{tableName}</span></p></div>
+              <div><h2 className="font-bold text-white text-sm">SQL Pipeline Editor</h2><p className="text-xs mt-0.5" style={{ color:'rgba(255,255,255,0.35)' }}>Table: <span style={{ color:'#818cf8' }}>{tableName}</span> · edit freely, then run a live preview</p></div>
               <div className="flex items-center gap-2">
                 <button onClick={copySQL} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold" style={{ background:copiedSQL?'rgba(34,197,94,0.15)':'rgba(99,102,241,0.15)', border:copiedSQL?'1px solid rgba(34,197,94,0.3)':'1px solid rgba(99,102,241,0.3)', color:copiedSQL?'#4ade80':'#818cf8' }}>{copiedSQL?'✓ Copied!':'Copy SQL'}</button>
                 <button onClick={() => setShowSQLDrawer(false)} style={{ color:'rgba(255,255,255,0.35)', fontSize:'18px' }}>✕</button>
               </div>
             </div>
-            <div className="flex-1 overflow-auto p-5"><pre className="p-5 text-xs overflow-auto leading-relaxed rounded-2xl" style={{ background:'rgba(0,0,0,0.5)', color:'#a5f3fc', fontFamily:"'JetBrains Mono','Fira Code','Courier New',monospace", whiteSpace:'pre-wrap', border:'1px solid rgba(99,102,241,0.2)' }}>{unifiedSQL}</pre></div>
+            <div className="flex-1 overflow-auto p-5 space-y-3">
+              <textarea
+                value={editableSQL}
+                onChange={e => { setEditableSQL(e.target.value); setSqlDrawerPreview(null); setSqlDrawerError('') }}
+                spellCheck={false}
+                rows={14}
+                className="w-full p-5 text-xs leading-relaxed rounded-2xl outline-none resize-none font-mono"
+                style={{ background:'rgba(0,0,0,0.5)', color:'#a5f3fc', fontFamily:"'JetBrains Mono','Fira Code','Courier New',monospace", whiteSpace:'pre-wrap', border:'1px solid rgba(99,102,241,0.2)' }}
+              />
+              <div className="flex gap-2">
+                <button onClick={runSqlDrawerPreview} disabled={sqlDrawerLoading} className="px-4 py-2 rounded-xl text-xs font-bold text-white disabled:opacity-40" style={{ background:'rgba(14,165,233,0.3)', border:'1px solid rgba(14,165,233,0.5)' }}>
+                  {sqlDrawerLoading ? 'Running…' : '▶ Run Preview'}
+                </button>
+                <button onClick={() => { setEditableSQL(unifiedSQL); setSqlDrawerPreview(null); setSqlDrawerError('') }} className="px-4 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.5)' }}>
+                  ↺ Reset to Auto-Generated
+                </button>
+              </div>
+              {sqlDrawerError && <div className="rounded-xl px-4 py-3 text-xs" style={{ background:'rgba(239,68,68,0.1)', color:'#f87171', border:'1px solid rgba(239,68,68,0.25)' }}>{sqlDrawerError}</div>}
+              {sqlDrawerPreview && (
+                <div className="rounded-xl overflow-hidden" style={{ border:'1px solid rgba(52,211,153,0.25)' }}>
+                  <div className="px-3 py-2 text-xs" style={{ background:'rgba(52,211,153,0.08)', color:'#34d399' }}>
+                    {sqlDrawerPreview.original_shape[0].toLocaleString()} → {sqlDrawerPreview.cleaned_shape[0].toLocaleString()} rows
+                  </div>
+                  <div className="overflow-auto" style={{ maxHeight:'220px' }}>
+                    <table className="w-full text-xs" style={{ color:'rgba(255,255,255,0.65)' }}>
+                      <thead><tr>{sqlDrawerPreview.preview_columns.map((c: string) => <th key={c} className="p-2 text-left" style={{ color:'rgba(255,255,255,0.7)' }}>{c}</th>)}</tr></thead>
+                      <tbody>{sqlDrawerPreview.preview_data.slice(0,10).map((row: any, i: number) => (
+                        <tr key={i}>{sqlDrawerPreview.preview_columns.map((c: string) => <td key={c} className="p-2">{String(row[c])}</td>)}</tr>
+                      ))}</tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="px-5 pb-5 flex gap-3">
+              <button onClick={() => setShowSQLDrawer(false)} className="flex-1 py-3 rounded-xl font-semibold text-sm" style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.5)' }}>Close</button>
+              <button
+                onClick={addSqlDrawerToPipeline}
+                disabled={!sqlDrawerPreview}
+                className="flex-1 py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40"
+                style={{ background:'linear-gradient(135deg, #0ea5e9, #2563eb)' }}
+              >
+                Add to Pipeline
+              </button>
+            </div>
           </div>
         </div>
       )}
