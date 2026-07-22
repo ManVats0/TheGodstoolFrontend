@@ -1429,6 +1429,94 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
   )
 }
 // ─────────────────────────────────────────────────────────────────────────────
+
+function SQLEditorModal({ activeSourceName, colInfo, onConfirm, onClose }: {
+  activeSourceName: string
+  colInfo: any[]
+  onConfirm: (sql: string) => void
+  onClose: () => void
+}) {
+  const [sql, setSql] = useState(`SELECT *\nFROM source\nWHERE 1=1`)
+  const [preview, setPreview] = useState<any>(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { activeFile } = useStore()
+
+  const runPreview = async () => {
+    if (!activeFile) return
+    setLoading(true); setError('')
+    const formData = new FormData()
+    formData.append('file', activeFile)
+    formData.append('sql', sql)
+    formData.append('preview_only', 'true')
+    try {
+      const res = await fetch(`${API_BASE}/api/sql-clean`, { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.success) setPreview(data)
+      else setError(data.error || 'Query failed')
+    } catch (e) { setError(String(e)) }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.85)' }} onClick={onClose}>
+      <div className="rounded-2xl w-full max-w-2xl flex flex-col" style={{ background:'#0d0a1a', border:'1px solid rgba(14,165,233,0.3)', maxHeight:'85vh' }} onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+          <div>
+            <h3 className="font-bold text-white text-sm">🗄️ Write SQL</h3>
+            <p className="text-xs" style={{ color:'rgba(255,255,255,0.4)' }}>Table name: <code style={{ color:'#38bdf8' }}>source</code> · {activeSourceName}</p>
+          </div>
+          <button onClick={onClose} style={{ color:'rgba(255,255,255,0.35)', fontSize:'18px' }}>✕</button>
+        </div>
+        <div className="p-5 space-y-3 flex-1 overflow-auto">
+          <p className="text-xs" style={{ color:'rgba(255,255,255,0.4)' }}>
+            Columns: {colInfo.slice(0, 12).map((c: any) => c.column).join(', ')}{colInfo.length > 12 ? '…' : ''}
+          </p>
+          <textarea
+            value={sql}
+            onChange={e => setSql(e.target.value)}
+            rows={8}
+            className="w-full text-xs text-white rounded-xl px-4 py-3 outline-none font-mono"
+            style={{ background:'rgba(0,0,0,0.4)', border:'1px solid rgba(14,165,233,0.3)' }}
+          />
+          <div className="flex gap-2">
+            <button onClick={runPreview} disabled={loading} className="px-4 py-2 rounded-xl text-xs font-bold text-white disabled:opacity-40" style={{ background:'rgba(14,165,233,0.3)', border:'1px solid rgba(14,165,233,0.5)' }}>
+              {loading ? 'Running…' : '▶ Run Preview'}
+            </button>
+          </div>
+          {error && <div className="rounded-xl px-4 py-3 text-xs" style={{ background:'rgba(239,68,68,0.1)', color:'#f87171', border:'1px solid rgba(239,68,68,0.25)' }}>{error}</div>}
+          {preview && (
+            <div className="rounded-xl overflow-hidden" style={{ border:'1px solid rgba(52,211,153,0.25)' }}>
+              <div className="px-3 py-2 text-xs" style={{ background:'rgba(52,211,153,0.08)', color:'#34d399' }}>
+                {preview.original_shape[0].toLocaleString()} → {preview.cleaned_shape[0].toLocaleString()} rows
+              </div>
+              <div className="overflow-auto" style={{ maxHeight:'220px' }}>
+                <table className="w-full text-xs" style={{ color:'rgba(255,255,255,0.65)' }}>
+                  <thead><tr>{preview.preview_columns.map((c: string) => <th key={c} className="p-2 text-left" style={{ color:'rgba(255,255,255,0.7)' }}>{c}</th>)}</tr></thead>
+                  <tbody>{preview.preview_data.slice(0,10).map((row: any, i: number) => (
+                    <tr key={i}>{preview.preview_columns.map((c: string) => <td key={c} className="p-2">{String(row[c])}</td>)}</tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="px-5 pb-5 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl font-semibold text-sm" style={{ background:'rgba(255,255,255,0.04)', color:'rgba(255,255,255,0.5)' }}>Cancel</button>
+          <button
+            onClick={() => onConfirm(sql)}
+            disabled={!preview}
+            className="flex-1 py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40"
+            style={{ background:'linear-gradient(135deg, #0ea5e9, #2563eb)' }}
+          >
+            Add to Pipeline
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Flow() {
   const navigate = useNavigate()
   const { sources, transformations, analysis, activeFile, addTransformation, removeTransformation, addAuditLog, setAnalysisTab, setPendingCleanOptions, switchActiveSource, setActiveDestinationName, setPipelineOutputFile, setLastPipelineRunAt, gsheetsDestination, setGsheetsDestination } = useStore()
@@ -1450,6 +1538,7 @@ export default function Flow() {
   const [showGSheetsPicker, setShowGSheetsPicker] = useState(false)
   const [gsheetsPickerFor,  setGsheetsPickerFor]  = useState<'source'|'dest'>('dest')
   const [showAICustomModal, setShowAICustomModal] = useState(false)
+  const [showSQLModal, setShowSQLModal] = useState(false)
 
   const [mysqlDestination, setMysqlDestination] = useState<any | null>(() => {
     try { return JSON.parse(localStorage.getItem('datapro_mysql_dest') || 'null') } catch { return null }
@@ -2141,12 +2230,21 @@ if (!fileToUse) {
 }
 if (fileToUse) {
   try {
-    const formData = new FormData()
-    formData.append('file', fileToUse)
-    pipeline.transformations.forEach(t => {
-      const key = TRANSFORM_TO_CLEAN[t.id]
-      if (key) formData.append(key, 'true')
-    })
+    const sqlTransform = pipeline.transformations.find(t => t.id.startsWith('sql_custom_'))
+
+    if (sqlTransform) {
+      const formData = new FormData()
+      formData.append('file', fileToUse)
+      formData.append('sql', (sqlTransform as any).sql)
+      const res = await fetch(`${API_BASE}/api/sql-clean`, { method: 'POST', body: formData })
+      data = await res.json()
+    } else {
+      const formData = new FormData()
+      formData.append('file', fileToUse)
+      pipeline.transformations.forEach(t => {
+        const key = TRANSFORM_TO_CLEAN[t.id]
+        if (key) formData.append(key, 'true')
+      })
     if (pipeline.transformations.find(t => t.id === 'ai_clean')) {
       formData.append('ai_clean', 'true')
     }
@@ -2215,6 +2313,7 @@ try {
   console.error('Post-run preview failed:', e)
 }
         }
+      }
       } catch (e) {
         console.error('Pipeline backend call failed:', e)
       }
@@ -2642,6 +2741,26 @@ const fetchPreview = useCallback(async () => {
   if (!activeFile) return
   setPreviewLoading(true)
   try {
+    const sqlT = transformations.find(t => t.id.startsWith('sql_custom_'))
+    if (sqlT) {
+      const formData = new FormData()
+      formData.append('file', activeFile)
+      formData.append('sql', (sqlT as any).sql)
+      formData.append('preview_only', 'true')
+      const res = await fetch(`${API_BASE}/api/sql-clean`, { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.success) {
+        setPreview({
+          columns: data.preview_columns,
+          rows: data.preview_data,
+          totalRows: data.cleaned_shape[0],
+          rowsRemoved: data.original_shape[0] - data.cleaned_shape[0],
+          sourceRows: data.original_shape[0],
+        })
+      } else setPreview(null)
+      setPreviewLoading(false)
+      return
+    }
     const text = await activeFile.text()
     const { headers, rows } = parseCSV(text)
     const transformed = applyTransforms(headers, rows, transformations.map(t => t.id))
@@ -4426,14 +4545,16 @@ setTimeout(() => {
             <p className="text-xs mb-5" style={{ color:'rgba(255,255,255,0.35)' }}>Select a transform. You'll be sent to Analysis with it pre-ticked after saving the pipeline.</p>
             <div className="grid grid-cols-2 gap-3">
               {TRANSFORMATIONS.map(t => {
-                const added=!!transformations.find(x => x.id===t.id)
-                const isAICustom = t.id === 'ai_custom'
-                return (
-                  <div key={t.id} onClick={() => {
-                    if (added) return
-                    if (isAICustom) { setShowTransformPicker(false); setShowAICustomModal(true) }
-                    else addT(t)
-                  }} className="p-4 rounded-xl transition-all"
+  const added=!!transformations.find(x => x.id===t.id)
+  const isAICustom = t.id === 'ai_custom'
+  const isSQL = t.id === 'use_sql'
+  return (
+    <div key={t.id} onClick={() => {
+      if (added) return
+      if (isAICustom) { setShowTransformPicker(false); setShowAICustomModal(true) }
+      else if (isSQL) { setShowTransformPicker(false); setShowSQLModal(true) }
+      else addT(t)
+    }} className="p-4 rounded-xl transition-all"
                     style={{ background:added?'rgba(34,197,94,0.06)':'rgba(255,255,255,0.03)', border:added?'1px solid rgba(34,197,94,0.2)':`1px solid ${t.color}20`, cursor:added?'default':'pointer', opacity:added?0.6:1 }}
                     onMouseEnter={e => { if (!added) e.currentTarget.style.background=`${t.color}10` }}
                     onMouseLeave={e => { if (!added) e.currentTarget.style.background='rgba(255,255,255,0.03)' }}>
@@ -4617,6 +4738,36 @@ setTimeout(() => {
               user: 'local_user',
             })
             setShowAICustomModal(false)
+          }}
+        />
+      )}
+
+      {/* SQL EDITOR MODAL */}
+      {showSQLModal && (
+        <SQLEditorModal
+          activeSourceName={activeSource?.name || 'dataset'}
+          colInfo={analysis?.col_info || []}
+          onClose={() => setShowSQLModal(false)}
+          onConfirm={(sql) => {
+            const customTransform = {
+              id: `sql_custom_${Date.now()}`,
+              label: 'SQL Query',
+              icon: '🗄️',
+              desc: sql.length > 60 ? sql.slice(0, 57) + '...' : sql,
+              sql,
+              color: '#0ea5e9',
+              type: 'sql_custom',
+              applied: false,
+            }
+            addTransformation(customTransform)
+            addAuditLog({
+              id: crypto.randomUUID(), time: new Date().toLocaleString(),
+              action: 'add_transformation', entity_type: 'transformation',
+              entity_id: customTransform.id,
+              details: `Added SQL transformation`,
+              user: 'local_user',
+            })
+            setShowSQLModal(false)
           }}
         />
       )}
