@@ -125,14 +125,14 @@ function buildUnifiedSQL(tableName: string, transformIds: string[], detectedIssu
       const excludeList = numericCols.map(q).join(', ')
       const newCols = numericCols.map(c => {
         const col = q(c)
-        return `LEAST(\n      GREATEST(${col}, PERCENTILE_CONT(0.01) WITHIN GROUP (ORDER BY ${col}) OVER()),\n      PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY ${col}) OVER()\n    ) AS ${col}`
+        return `LEAST(\n      GREATEST(${col}, QUANTILE_CONT(${col}, 0.01) OVER()),\n      QUANTILE_CONT(${col}, 0.99) OVER()\n    ) AS ${col}`
       }).join(',\n    ')
       return `  -- Step: Cap outliers at 1st/99th percentile\n  SELECT\n    * EXCLUDE (${excludeList}),\n    ${newCols}\n  FROM ${prev}`
     },
     fill_missing: (prev) => {
       if (numericCols.length === 0 && textCols.length === 0) return `  -- Step: Fill missing values (median for numeric, mode for text)\n  SELECT *\n  FROM ${prev}`
       const excludeList = [...numericCols, ...textCols].map(q).join(', ')
-      const numericFills = numericCols.map(c => `COALESCE(${q(c)}, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ${q(c)}) OVER()) AS ${q(c)}`)
+      const numericFills = numericCols.map(c => `COALESCE(${q(c)}, MEDIAN(${q(c)}) OVER()) AS ${q(c)}`)
       const textFills = textCols.map(c => `COALESCE(${q(c)}, MODE(${q(c)}) OVER()) AS ${q(c)}`)
       const newCols = [...numericFills, ...textFills].join(',\n    ')
       return `  -- Step: Fill missing values (median for numeric, mode for text)\n  SELECT\n    * EXCLUDE (${excludeList}),\n    ${newCols}\n  FROM ${prev}`
