@@ -82,7 +82,7 @@ function OriginalDataPreview({ file }: { file: File | null }) {
   )
 }
 
-function buildUnifiedSQL(tableName: string, transformIds: string[], detectedIssues: Record<string, boolean>): string {
+function buildUnifiedSQL(tableName: string, transformIds: string[], detectedIssues: Record<string, boolean>, colInfo: any[] = []): string {
   const activeSteps: string[] = []
   const seen = new Set<string>()
   transformIds.forEach(id => {
@@ -98,20 +98,58 @@ function buildUnifiedSQL(tableName: string, transformIds: string[], detectedIssu
     if (detected) { const key = issueMap[issue]; if (key && !seen.has(key)) { seen.add(key); activeSteps.push(key) } }
   })
   if (activeSteps.length === 0) return `-- No transformations selected\nSELECT * FROM ${tableName};`
+
+  // Resolve real columns from the analyzed schema so the generated SQL is
+  // directly runnable in DuckDB — no placeholder column names.
+  const q = (col: string) => `"${String(col).replace(/"/g, '""')}"`
+  const allCols     = colInfo.map((c: any) => String(c.column))
+  const numericCols = colInfo.filter((c: any) => /int|float|double|decimal|numeric/i.test(String(c.dtype))).map((c: any) => String(c.column))
+  const textCols     = colInfo.filter((c: any) => /object|string|text|char/i.test(String(c.dtype))).map((c: any) => String(c.column))
+  const dateCols     = colInfo.filter((c: any) => /date|time/i.test(String(c.dtype))).map((c: any) => String(c.column))
+
   const stepSQL: Record<string, (prev: string) => string> = {
     remove_duplicates: (prev) => `  -- Step: Remove duplicate rows\n  SELECT DISTINCT *\n  FROM ${prev}`,
-    remove_empty_rows: (prev) => `  -- Step: Remove rows where all columns are NULL\n  SELECT *\n  FROM ${prev}\n  WHERE NOT (/* col1 IS NULL AND col2 IS NULL AND ... */)`,
-    standardize_text:  (prev) => `  -- Step: Standardize text columns (lowercase + trim)\n  SELECT\n    * EXCEPT (text_col),\n    LOWER(TRIM(text_col)) AS text_col  -- repeat per text column\n  FROM ${prev}`,
-    handle_outliers:   (prev) => `  -- Step: Cap outliers using Modified Z-Score method\n  SELECT\n    * EXCEPT (numeric_col),\n    CASE\n      WHEN numeric_col > (median + 3.5 * mad / 0.6745) THEN (median + 3.5 * mad / 0.6745)\n      WHEN numeric_col < (median - 3.5 * mad / 0.6745) THEN (median - 3.5 * mad / 0.6745)\n      ELSE numeric_col\n    END AS numeric_col  -- repeat per numeric column\n  FROM ${prev}`,
-    fill_missing:      (prev) => `  -- Step: Fill missing values (median for numeric, mode for text)\n  SELECT\n    * EXCEPT (numeric_col, text_col),\n    COALESCE(numeric_col, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY numeric_col) OVER()) AS numeric_col,\n    COALESCE(text_col, MODE() WITHIN GROUP (ORDER BY text_col) OVER()) AS text_col\n  FROM ${prev}`,
-    fix_dates:         (prev) => `  -- Step: Standardize date columns to ISO format\n  SELECT\n    * EXCEPT (date_col),\n    TRY_CAST(date_col AS DATE) AS date_col  -- repeat per date column\n  FROM ${prev}`,
+    remove_empty_rows: (prev) => {
+      if (allCols.length === 0) return `  -- Step: Remove rows where all columns are NULL\n  SELECT *\n  FROM ${prev}`
+      const anyNotNull = allCols.map(c => `${q(c)} IS NOT NULL`).join(' OR ')
+      return `  -- Step: Remove rows where all columns are NULL\n  SELECT *\n  FROM ${prev}\n  WHERE ${anyNotNull}`
+    },
+    standardize_text: (prev) => {
+      if (textCols.length === 0) return `  -- Step: Standardize text columns (lowercase + trim)\n  SELECT *\n  FROM ${prev}`
+      const excludeList = textCols.map(q).join(', ')
+      const newCols = textCols.map(c => `LOWER(TRIM(${q(c)})) AS ${q(c)}`).join(',\n    ')
+      return `  -- Step: Standardize text columns (lowercase + trim)\n  SELECT\n    * EXCLUDE (${excludeList}),\n    ${newCols}\n  FROM ${prev}`
+    },
+    handle_outliers: (prev) => {
+      if (numericCols.length === 0) return `  -- Step: Cap outliers (no numeric columns detected)\n  SELECT *\n  FROM ${prev}`
+      const excludeList = numericCols.map(q).join(', ')
+      const newCols = numericCols.map(c => {
+        const col = q(c)
+        return `LEAST(\n      GREATEST(${col}, PERCENTILE_CONT(0.01) WITHIN GROUP (ORDER BY ${col}) OVER()),\n      PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY ${col}) OVER()\n    ) AS ${col}`
+      }).join(',\n    ')
+      return `  -- Step: Cap outliers at 1st/99th percentile\n  SELECT\n    * EXCLUDE (${excludeList}),\n    ${newCols}\n  FROM ${prev}`
+    },
+    fill_missing: (prev) => {
+      if (numericCols.length === 0 && textCols.length === 0) return `  -- Step: Fill missing values (median for numeric, mode for text)\n  SELECT *\n  FROM ${prev}`
+      const excludeList = [...numericCols, ...textCols].map(q).join(', ')
+      const numericFills = numericCols.map(c => `COALESCE(${q(c)}, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ${q(c)}) OVER()) AS ${q(c)}`)
+      const textFills = textCols.map(c => `COALESCE(${q(c)}, MODE(${q(c)}) OVER()) AS ${q(c)}`)
+      const newCols = [...numericFills, ...textFills].join(',\n    ')
+      return `  -- Step: Fill missing values (median for numeric, mode for text)\n  SELECT\n    * EXCLUDE (${excludeList}),\n    ${newCols}\n  FROM ${prev}`
+    },
+    fix_dates: (prev) => {
+      if (dateCols.length === 0) return `  -- Step: Standardize date columns to ISO format\n  SELECT *\n  FROM ${prev}`
+      const excludeList = dateCols.map(q).join(', ')
+      const newCols = dateCols.map(c => `TRY_CAST(${q(c)} AS DATE) AS ${q(c)}`).join(',\n    ')
+      return `  -- Step: Standardize date columns to ISO format\n  SELECT\n    * EXCLUDE (${excludeList}),\n    ${newCols}\n  FROM ${prev}`
+    },
   }
   const stepLabels: Record<string, string> = {
     remove_duplicates: 'Deduplicated', remove_empty_rows: 'NoEmptyRows',
     standardize_text: 'TextStandardized', handle_outliers: 'OutliersCapped',
     fill_missing: 'MissingFilled', fix_dates: 'DateFixed',
   }
-  let sql = `-- ══════════════════════════════════════════════════════════\n-- Unified Data Cleaning Pipeline\n-- Source table: ${tableName}\n-- Generated by DataPipe\n-- Compatible with: PostgreSQL · BigQuery · Snowflake · DuckDB\n-- ══════════════════════════════════════════════════════════\n\nWITH\nSource AS (\n  SELECT * FROM ${tableName}\n)`
+  let sql = `-- ══════════════════════════════════════════════════════════\n-- Unified Data Cleaning Pipeline\n-- Source table: ${tableName}\n-- Generated by DataPipe\n-- Dialect: DuckDB\n-- ══════════════════════════════════════════════════════════\n\nWITH\nSource AS (\n  SELECT * FROM ${tableName}\n)`
   let lastStep = 'Source'
   activeSteps.forEach((step) => {
     const stepName = stepLabels[step] || step
@@ -1675,7 +1713,7 @@ const [_gsheetsSource, _setGsheetsSource] = useState<{ email: string; sheetName:
 
 
   const unifiedSQL = useMemo(() =>
-    buildUnifiedSQL(tableName, transformations.map(t => t.id), analysis?.issues || {}),
+    buildUnifiedSQL(tableName, transformations.map(t => t.id), analysis?.issues || {}, analysis?.col_info || []),
     [transformations, analysis, tableName]
   )
 
