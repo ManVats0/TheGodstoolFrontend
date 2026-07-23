@@ -161,6 +161,12 @@ function buildUnifiedSQL(tableName: string, transformIds: string[], detectedIssu
   return sql
 }
 
+const SEV_COLOR: Record<string, { bg: string; text: string; border: string; dot: string; label: string }> = {
+  GREEN:  { bg: 'rgba(34,197,94,0.08)',  text: '#4ade80', border: 'rgba(34,197,94,0.25)',  dot: '#22c55e', label: 'All Clear'        },
+  YELLOW: { bg: 'rgba(234,179,8,0.08)',  text: '#fbbf24', border: 'rgba(234,179,8,0.25)',  dot: '#eab308', label: 'Needs Review'     },
+  RED:    { bg: 'rgba(239,68,68,0.08)',  text: '#f87171', border: 'rgba(239,68,68,0.25)',  dot: '#ef4444', label: 'Action Required'  },
+}
+
 const KIND_LABEL: Record<string, { icon: string; plain: string }> = {
   added:       { icon: '➕', plain: 'New column appeared in your data that wasn\'t there before' },
   removed:     { icon: '➖', plain: 'A column that was previously there is now missing' },
