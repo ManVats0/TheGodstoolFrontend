@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import { API_BASE } from '../config'
+import { runSQLPreviewWasm } from '../duckdbClient'
 
 const TRANSFORMATIONS = [
   { id: 'remove_duplicates', label: 'Remove Duplicates', icon: '🗑️', desc: 'Drop identical rows',   color: '#ef4444' },
@@ -10,8 +11,9 @@ const TRANSFORMATIONS = [
   { id: 'cap_outliers',      label: 'Cap Outliers',      icon: '📊', desc: 'Modified Z-Score',      color: '#eab308' },
   { id: 'remove_empty_rows', label: 'Remove Empty Rows', icon: '🧹', desc: 'Drop all-null rows',    color: '#06b6d4' },
   { id: 'fix_dates',         label: 'Fix Dates',         icon: '📅', desc: 'Standardize formats',   color: '#22c55e' },
-  { id: 'ai_clean',          label: 'Clean with AI',     icon: '✨', desc: 'Smart AI-powered clean', color: '#a855f7' },
+    { id: 'ai_clean',          label: 'Clean with AI',     icon: '✨', desc: 'Smart AI-powered clean', color: '#a855f7' },
   { id: 'ai_custom',         label: 'AI Custom Rule',    icon: '🤖', desc: 'Natural language rule',  color: '#ec4899' },
+  { id: 'use_sql',           label: 'Write SQL',         icon: '🧮', desc: 'Full query control',     color: '#0ea5e9' },
 ]
 
 
@@ -1480,16 +1482,11 @@ function SQLEditorModal({ activeSourceName, colInfo, onConfirm, onClose }: {
   const [loading, setLoading] = useState(false)
   const { activeFile } = useStore()
 
-  const runPreview = async () => {
+   const runPreview = async () => {
     if (!activeFile) return
     setLoading(true); setError('')
-    const formData = new FormData()
-    formData.append('file', activeFile)
-    formData.append('sql', sql)
-    formData.append('preview_only', 'true')
     try {
-      const res = await fetch(`${API_BASE}/api/sql-clean`, { method: 'POST', body: formData })
-      const data = await res.json()
+      const data = await runSQLPreviewWasm(activeFile, sql)
       if (data.success) setPreview(data)
       else setError(data.error || 'Query failed')
     } catch (e) { setError(String(e)) }
@@ -2787,12 +2784,7 @@ const fetchPreview = useCallback(async () => {
   try {
     const sqlT = transformations.find(t => t.id.startsWith('sql_custom_'))
     if (sqlT) {
-      const formData = new FormData()
-      formData.append('file', activeFile)
-      formData.append('sql', (sqlT as any).sql)
-      formData.append('preview_only', 'true')
-      const res = await fetch(`${API_BASE}/api/sql-clean`, { method: 'POST', body: formData })
-      const data = await res.json()
+      const data = await runSQLPreviewWasm(activeFile, (sqlT as any).sql)
       if (data.success) {
         setPreview({
           columns: data.preview_columns,
@@ -2933,12 +2925,7 @@ setTimeout(() => {
     setSqlDrawerLoading(true)
     setSqlDrawerError('')
     try {
-      const formData = new FormData()
-      formData.append('file', activeFile)
-      formData.append('sql', editableSQL)
-      formData.append('preview_only', 'true')
-      const res = await fetch(`${API_BASE}/api/sql-clean`, { method: 'POST', body: formData })
-      const data = await res.json()
+      const data = await runSQLPreviewWasm(activeFile, editableSQL)
       if (data.success) {
         setSqlDrawerPreview(data)
       } else {
