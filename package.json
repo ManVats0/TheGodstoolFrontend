@@ -4,7 +4,8 @@
     "build": "vite build && cp serve.json dist/serve.json && cp privacy.html dist/privacy.html && cp terms.html dist/terms.html && cp faq.html dist/faq.html && cp refund.html dist/refund.html && cp robots.txt dist/robots.txt && cp sitemap.xml dist/sitemap.xml",
     "preview": "vite preview"
   },
-  "dependencies": {
+"dependencies": {
+    "@duckdb/duckdb-wasm": "^1.29.0",
     "@types/nodemailer": "^8.0.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
