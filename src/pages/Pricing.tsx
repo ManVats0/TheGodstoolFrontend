@@ -160,10 +160,10 @@ export default function Pricing() {
 
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
         <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          Unlock The God's Tool
+          Hire an AI data engineer
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
-          Choose a plan to access AI-powered data cleaning
+          Cheaper than a hire, faster than a freelancer, available every day
         </p>
       </div>
 
