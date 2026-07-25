@@ -586,7 +586,7 @@ if (!entered) return (
         </div>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '8px', textTransform: 'uppercase' }}>
-          For Teams With Limited Data Engineering Resources
+          For Teams Without a Data Engineer
         </p>
         <h1 className="hero-title" style={{ margin: '0 0 14px' }}>
           The data engineer you don't have to hire
@@ -615,6 +615,9 @@ if (!entered) return (
         </div>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '14px', letterSpacing: '0.05em' }}>
           🛡️ Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems
+        </p>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
+          ✅ Data Security Guaranteed
         </p>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
           ✅ Google OAuth Verified
