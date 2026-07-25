@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 type Cycle = 'monthly' | 'yearly'
+type Currency = 'INR' | 'USD'
 
 const PLANS = [
   {
     key: 'lite',
     name: 'Lite',
-    monthlyPrice: '₹774',
-    yearlyPrice: '₹8,256',
+    priceINR: { monthly: '₹774', yearly: '₹8,256' },
+    priceUSD: { monthly: '$19', yearly: '$199' },
     aiPerDay: 4,
     userLimit: 1,
     features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'],
@@ -19,8 +20,8 @@ const PLANS = [
   {
     key: 'starter',
     name: 'Starter',
-    monthlyPrice: '₹1,634',
-    yearlyPrice: '₹17,114',
+    priceINR: { monthly: '₹1,634', yearly: '₹17,114' },
+    priceUSD: { monthly: '$39', yearly: '$419' },
     aiPerDay: 35,
     userLimit: 1,
     features: ['Everything in Lite', '35 AI transforms/day', 'Email support'],
@@ -32,8 +33,8 @@ const PLANS = [
   {
     key: 'pro',
     name: 'Pro',
-    monthlyPrice: '₹3,354',
-    yearlyPrice: '₹36,034',
+    priceINR: { monthly: '₹3,354', yearly: '₹36,034' },
+    priceUSD: { monthly: '$79', yearly: '$849' },
     aiPerDay: 110,
     userLimit: 5,
     features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'],
@@ -45,8 +46,8 @@ const PLANS = [
   {
     key: 'team',
     name: 'Team',
-    monthlyPrice: '₹6,794',
-    yearlyPrice: '₹72,154',
+    priceINR: { monthly: '₹6,794', yearly: '₹72,154' },
+    priceUSD: { monthly: '$199', yearly: '$2,149' },
     aiPerDay: 150,
     userLimit: 15,
     features: ['Everything in Pro', '150 AI transforms/day', '15 concurrent logins', 'Priority support'],
@@ -57,8 +58,8 @@ const PLANS = [
   {
     key: 'enterprise',
     name: 'Enterprise',
-    monthlyPrice: '₹42,914',
-    yearlyPrice: '₹4,11,940',
+    priceINR: { monthly: '₹42,914', yearly: '₹4,11,940' },
+    priceUSD: { monthly: '$499', yearly: '$4,999' },
     aiPerDay: 500,
     userLimit: 100,
     features: ['Everything in Team', '500 AI transforms/day', '100 concurrent logins', 'Dedicated support'],
@@ -68,15 +69,24 @@ const PLANS = [
   },
 ]
 
-// Plans/cycles that exceed Razorpay's current transaction cap (₹50k domestic, ₹30k international).
-// These route to Contact Sales instead of checkout. Remove entries here once Razorpay raises the limit.
-const CONTACT_SALES_ONLY: Record<string, Cycle[]> = {
-  enterprise: ['monthly', 'yearly'],
-  team: ['yearly'],
+// Plans/cycles that exceed Razorpay's current transaction cap.
+// Domestic (INR) cap: ₹50,000 per transaction. International (USD) cap: ₹30,000-equivalent (~$311 at time of writing).
+// These route to Contact Sales instead of checkout. Update here if Razorpay raises either limit.
+const CONTACT_SALES_ONLY: Record<Currency, Record<string, Cycle[]>> = {
+  INR: {
+    team: ['yearly'],
+    enterprise: ['monthly', 'yearly'],
+  },
+  USD: {
+    starter: ['yearly'],
+    pro: ['yearly'],
+    team: ['yearly'],
+    enterprise: ['monthly', 'yearly'],
+  },
 }
 
-function requiresContactSales(planKey: string, cycle: Cycle) {
-  return CONTACT_SALES_ONLY[planKey]?.includes(cycle) ?? false
+function requiresContactSales(planKey: string, cycle: Cycle, currency: Currency) {
+  return CONTACT_SALES_ONLY[currency][planKey]?.includes(cycle) ?? false
 }
 
 export default function Pricing() {
@@ -84,6 +94,7 @@ export default function Pricing() {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [cycle, setCycle] = useState<Cycle>('monthly')
+  const [currency, setCurrency] = useState<Currency>('INR')
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -95,14 +106,27 @@ export default function Pricing() {
     }
   }, [])
 
+  // ── Geolocation: India sees INR, everywhere else sees USD ──────────────
+  useEffect(() => {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.country_code && data.country_code !== 'IN') {
+          setCurrency('USD')
+        }
+      })
+      .catch(() => { /* keep default INR on failure */ })
+  }, [])
+  // ─────────────────────────────────────────────────────────────────────
+
   const handleSubscribe = async (planKey: string) => {
     setError('')
 
     // ── Payment cap guard ───────────────────────────────────────────────
-    // Razorpay checkout is skipped for plan/cycle combos above the current
-    // transaction cap. The Razorpay code below is untouched and still runs
-    // normally for every other plan — this only intercepts the capped ones.
-    if (requiresContactSales(planKey, cycle)) {
+    // Razorpay checkout is skipped for plan/cycle/currency combos above the
+    // current transaction cap. The Razorpay code below is untouched and
+    // still runs normally for every other plan — this only intercepts the capped ones.
+    if (requiresContactSales(planKey, cycle, currency)) {
       navigate(`/contact?intent=sales&plan=${planKey}&billing=${cycle}`)
       return
     }
@@ -116,7 +140,7 @@ export default function Pricing() {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planKey, billingCycle: cycle })
+        body: JSON.stringify({ planKey, billingCycle: cycle, currency })
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to create subscription'); setLoading(null); return }
@@ -189,7 +213,9 @@ export default function Pricing() {
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', maxWidth: '1200px', width: '100%' }}>
-        {PLANS.map(plan => (
+        {PLANS.map(plan => {
+          const priceTable = currency === 'INR' ? plan.priceINR : plan.priceUSD
+          return (
           <div key={plan.key} style={{
             background: plan.highlight ? 'rgba(124,58,237,0.12)' : plan.bg,
             border: `1px solid ${plan.border}`,
@@ -210,7 +236,7 @@ export default function Pricing() {
             <div>
               <div style={{ color: plan.color, fontWeight: 700, fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{plan.name}</div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '1.8rem', fontFamily: 'Georgia, serif', lineHeight: 1.1, marginTop: '6px' }}>
-                {cycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
+                {cycle === 'monthly' ? priceTable.monthly : priceTable.yearly}
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{cycle === 'monthly' ? '/month' : '/year'}</span>
               </div>
             </div>
@@ -251,10 +277,11 @@ export default function Pricing() {
                 transition: 'opacity 0.2s'
               }}
             >
-              {loading === plan.key ? 'Opening...' : (requiresContactSales(plan.key, cycle) ? 'Contact Sales' : 'Subscribe')}
+              {loading === plan.key ? 'Opening...' : (requiresContactSales(plan.key, cycle, currency) ? 'Contact Sales' : 'Subscribe')}
             </button>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       <button
