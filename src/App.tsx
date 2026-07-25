@@ -586,15 +586,15 @@ if (!entered) return (
         </div>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '8px', textTransform: 'uppercase' }}>
-          AI Powered All-in-One Data Pipeline Tool
+          For Teams Without a Data Engineer
         </p>
         <h1 className="hero-title" style={{ margin: '0 0 14px' }}>
-          Create ETL pipelines effortlessly
+          The data engineer you don't have to hire
         </h1>
 
         {/* */}
 <p style={{ fontSize: 'clamp(0.88rem, 1.5vw, 1.02rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, maxWidth: '600px', margin: '0 auto 10px', fontFamily: 'Georgia, serif' }}>
-  Tell it what you need. It builds the pipeline.
+  Connect your database, sheet, or CRM. AI profiles it, cleans it, and pipelines it out — the work a data engineer would spend hours on, done in minutes.
 </p>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#6d5fc7', letterSpacing: '0.1em', marginBottom: '12px', opacity: 0.7 }}>
@@ -602,7 +602,7 @@ if (!entered) return (
         </p>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', marginBottom: '22px' }}>
-          Test Free With Google Sheets · No credit card required · Setup in under 20 seconds
+          No credit card required · Setup in under 20 seconds
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -614,7 +614,7 @@ if (!entered) return (
           </button>
         </div>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '14px', letterSpacing: '0.05em' }}>
-          🛡️ Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and complex data systems
+          🛡️ Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems
         </p>
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
           ✅ Google OAuth Verified
@@ -647,9 +647,9 @@ if (!entered) return (
     <section id="features" style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '64px' }}>
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
-        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Modern Data Stack (MDS) Orchestrator for your data needs.</h2>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>One platform. Zero compromises.</p>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with 4+ years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
+        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Everything a data engineer does. Without the data engineer.</h2>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>Connect, clean, automate — one platform, zero hires.</p>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
@@ -798,7 +798,7 @@ if (!entered) return (
         </div>
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
           {[
-            { name: 'Free', price: '$0', period: 'forever', features: ['CSV & Google Sheets', 'GA4 connector', 'Basic analysis', 'Data cleaning'], featured: false },
+            { name: 'Free', price: '$0', period: 'forever', features: ['CSV & Google Sheets', 'GA4 connector', 'Basic data profiling', 'AI cleaning: locked'], featured: false },
             { name: 'Lite', price: '$9', period: '/month', features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'], featured: false },
             { name: 'Starter', price: '$17', period: '/month', features: ['Everything in Lite', '35 AI transforms/day', 'Email support'], featured: false },
             { name: 'Pro', price: '$35', period: '/month', features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'], featured: true },
@@ -1025,7 +1025,7 @@ if (!entered) return (
               <span style={{ color: '#4ade80', fontFamily: 'monospace', fontSize: '0.78rem', background: 'rgba(74,222,128,0.1)', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>No credit card</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
-              {['✓ CSV upload', '✓ Google Sheets', '✓ Google Analytics', '✓ Data analysis & cleaning', '✗ Other data sources (locked)', '✗ AI features (locked)'].map(f => (
+              {['✓ CSV upload', '✓ Google Sheets', '✓ Google Analytics', '✓ Data profiling (view only)', '✗ AI-powered cleaning (locked)', '✗ Other data sources (locked)'].map(f => (
                 <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: f.startsWith('✗') ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)' }}>{f}</div>
               ))}
             </div>
