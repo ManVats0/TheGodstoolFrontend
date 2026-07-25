@@ -799,10 +799,10 @@ if (!entered) return (
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
           {[
             { name: 'Free', price: '$0', period: 'forever', features: ['CSV & Google Sheets', 'GA4 connector', 'Basic data profiling', 'AI cleaning: locked'], featured: false },
-            { name: 'Lite', price: '$9', period: '/month', features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'], featured: false },
-            { name: 'Starter', price: '$17', period: '/month', features: ['Everything in Lite', '35 AI transforms/day', 'Email support'], featured: false },
-            { name: 'Pro', price: '$35', period: '/month', features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'], featured: true },
-            { name: 'Team', price: '$71', period: '/month', features: ['Everything in Pro', '150 AI transforms/day', '15 concurrent logins', 'Priority support'], featured: false },
+            { name: 'Lite', price: '$19', period: '/month', features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'], featured: false },
+            { name: 'Starter', price: '$39', period: '/month', features: ['Everything in Lite', '35 AI transforms/day', 'Email support'], featured: false },
+            { name: 'Pro', price: '$79', period: '/month', features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'], featured: true },
+            { name: 'Team', price: '$199', period: '/month', features: ['Everything in Pro', '150 AI transforms/day', '15 concurrent logins', 'Priority support'], featured: false },
           ].map((plan, i) => (
             <div key={i} className={`pricing-card${plan.featured ? ' featured' : ''}`}>
               {plan.featured && <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontFamily: 'monospace', fontSize: '0.65rem', letterSpacing: '0.15em', padding: '4px 16px', borderRadius: '20px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>}
@@ -827,7 +827,7 @@ if (!entered) return (
           ))}
         </div>
         <p style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '32px' }}>
-          💳 Cancel anytime · 🔒 7-day money-back guarantee on all paid plans
+          💳 Cancel anytime · 🔒 14-day money-back guarantee on all paid plans
         </p>
       </div>
     </section>
