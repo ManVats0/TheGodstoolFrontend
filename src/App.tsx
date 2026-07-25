@@ -606,7 +606,7 @@ if (!entered) return (
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="cta-btn" onClick={() => handleEnter('register')}>Start Cleaning Data Free</button>
+          <button className="cta-btn" onClick={() => handleEnter('register')}>Connect Your First Source</button>
           <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '13px 32px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.4)'; e.currentTarget.style.color = '#a78bfa' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}>
@@ -745,7 +745,7 @@ if (!entered) return (
           ))}
         </div>
         <div style={{ marginTop: '48px' }}>
-          <button className="cta-btn" onClick={() => handleEnter('register')}>Try It Free — No Card Needed</button>
+          <button className="cta-btn" onClick={() => handleEnter('register')}>Upload a File, Watch It Work</button>
         </div>
       </div>
     </section>
@@ -791,7 +791,7 @@ if (!entered) return (
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '64px' }}>
           <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Pricing</div>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Costs less than a week of a data engineer's salary.</h2>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Priced by how much data you actually touch.</h2>
           <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#fbbf24', marginTop: '16px', letterSpacing: '0.05em' }}>
             🛡️ Priced for teams who used to budget for a hire
           </p>
@@ -835,8 +835,8 @@ if (!entered) return (
     <section style={{ padding: '80px 24px', textAlign: 'center', borderTop: '1px solid rgba(167,139,250,0.08)' }}>
       <div style={{ maxWidth: '640px', margin: '0 auto' }}>
         <h2 style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 900, margin: '0 0 16px', letterSpacing: '-0.02em' }}>Still deciding?</h2>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', marginBottom: '32px' }}>Try it free — no credit card needed. Upgrade only when you're ready.</p>
-        <button className="cta-btn" onClick={() => handleEnter('register')}>Start Free Now</button>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', marginBottom: '32px' }}>No sales call. No onboarding call. Connect a source and see what it finds.</p>
+        <button className="cta-btn" onClick={() => handleEnter('register')}>Connect a Source</button>
       </div>
     </section>
 
