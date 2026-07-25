@@ -586,7 +586,7 @@ if (!entered) return (
         </div>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '8px', textTransform: 'uppercase' }}>
-          For Teams Without a Data Engineer
+          For Teams With Limited Data Engineering Resources
         </p>
         <h1 className="hero-title" style={{ margin: '0 0 14px' }}>
           The data engineer you don't have to hire
