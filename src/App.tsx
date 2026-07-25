@@ -602,7 +602,7 @@ if (!entered) return (
         </p>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', marginBottom: '22px' }}>
-          No credit card required · Setup in under 20 seconds
+          No credit card required · Full platform access from day one
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -696,7 +696,7 @@ if (!entered) return (
           ))}
         </div>
         <div style={{ textAlign: 'center', marginTop: '48px' }}>
-          <button className="cta-btn" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Cancel Anytime</button>
+          <button className="cta-btn" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>See Plans & Pricing</button>
         </div>
       </div>
     </section>
@@ -791,9 +791,9 @@ if (!entered) return (
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '64px' }}>
           <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Pricing</div>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Start free. Scale when ready.</h2>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Costs less than a week of a data engineer's salary.</h2>
           <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#fbbf24', marginTop: '16px', letterSpacing: '0.05em' }}>
-            ⏳ Lock in current pricing — rates increase soon
+            🛡️ Priced for teams who used to budget for a hire
           </p>
         </div>
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
