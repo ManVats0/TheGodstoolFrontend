@@ -8,7 +8,7 @@ const PLANS = [
   {
     key: 'lite',
     name: 'Lite',
-    priceINR: { monthly: '₹774', yearly: '₹8,256' },
+    priceINR: { monthly: '₹1,834', yearly: '₹19,204' },
     priceUSD: { monthly: '$19', yearly: '$199' },
     aiPerDay: 4,
     userLimit: 1,
@@ -20,7 +20,7 @@ const PLANS = [
   {
     key: 'starter',
     name: 'Starter',
-    priceINR: { monthly: '₹1,634', yearly: '₹17,114' },
+    priceINR: { monthly: '₹3,764', yearly: '₹40,434' },
     priceUSD: { monthly: '$39', yearly: '$419' },
     aiPerDay: 35,
     userLimit: 1,
@@ -33,7 +33,7 @@ const PLANS = [
   {
     key: 'pro',
     name: 'Pro',
-    priceINR: { monthly: '₹3,354', yearly: '₹36,034' },
+    priceINR: { monthly: '₹7,624', yearly: '₹81,929' },
     priceUSD: { monthly: '$79', yearly: '$849' },
     aiPerDay: 110,
     userLimit: 5,
@@ -46,7 +46,7 @@ const PLANS = [
   {
     key: 'team',
     name: 'Team',
-    priceINR: { monthly: '₹6,794', yearly: '₹72,154' },
+    priceINR: { monthly: '₹19,204', yearly: '₹2,07,379' },
     priceUSD: { monthly: '$199', yearly: '$2,149' },
     aiPerDay: 150,
     userLimit: 15,
@@ -74,7 +74,8 @@ const PLANS = [
 // These route to Contact Sales instead of checkout. Update here if Razorpay raises either limit.
 const CONTACT_SALES_ONLY: Record<Currency, Record<string, Cycle[]>> = {
   INR: {
-    team: ['yearly'],
+    pro: ['yearly'],
+    team: ['monthly', 'yearly'],
     enterprise: ['monthly', 'yearly'],
   },
   USD: {
