@@ -798,7 +798,6 @@ if (!entered) return (
         </div>
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
           {[
-            { name: 'Free', price: '$0', period: 'forever', features: ['CSV & Google Sheets', 'GA4 connector', 'Basic data profiling', 'AI cleaning: locked'], featured: false },
             { name: 'Lite', price: '$19', period: '/month', features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'], featured: false },
             { name: 'Starter', price: '$39', period: '/month', features: ['Everything in Lite', '35 AI transforms/day', 'Email support'], featured: false },
             { name: 'Pro', price: '$79', period: '/month', features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'], featured: true },
