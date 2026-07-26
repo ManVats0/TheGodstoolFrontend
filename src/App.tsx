@@ -227,8 +227,13 @@ useEffect(() => {
       })
       const data = await res.json()
       if (!res.ok) {
+        if (res.status === 429 && !isRegisterMode) {
+          // Login limit reached — automatically log out oldest device and retry, no second click needed
+          await handleForceLogin()
+          return
+        }
         setLoginError(data.error || (isRegisterMode ? 'Registration failed' : 'Login failed'))
-        setShowForceLogout(res.status === 429 && !isRegisterMode)
+        setShowForceLogout(false)
         return
       }
       setShowForceLogout(false)
