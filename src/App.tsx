@@ -705,6 +705,51 @@ if (!entered) return (
       </div>
     </section>
 
+{/* ── BEFORE / AFTER SHOWCASE ── */}
+<section style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
+  <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+    <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Real Output</div>
+    <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>From messy to production-ready.</h2>
+    <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginTop: '12px' }}>37,880 rows analyzed, cleaned, and scheduled to stay clean — no code written.</p>
+  </div>
+
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#f87171', display: 'inline-block' }} />
+        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#f87171', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Before — 221 problems found</span>
+      </div>
+      <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)' }}>
+        <img src="/images/landing/analysis-before.png" alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+      </div>
+    </div>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
+        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>After — 100% dataset quality</span>
+      </div>
+      <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)' }}>
+        <img src="/images/landing/post-transform-after.png" alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+      </div>
+    </div>
+  </div>
+
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
+    <div className="feature-card">
+      <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '10px' }}>STEP 1 — PICK A TRANSFORM</div>
+      <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.12)' }}>
+        <img src="/images/landing/transform-types.png" alt="Transform options: remove duplicates, fill missing, cap outliers, AI custom rules" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+      </div>
+    </div>
+    <div className="feature-card">
+      <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '10px' }}>STEP 2 — SCHEDULE IT</div>
+      <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.12)' }}>
+        <img src="/images/landing/pipeline-schedule.png" alt="Pipeline scheduling panel with hourly, daily, and weekly automation options" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
 {/* ── DEMO VIDEO ── */}
     <section style={{ padding: '100px 24px', background: 'rgba(79,70,229,0.04)', borderTop: '1px solid rgba(167,139,250,0.07)', borderBottom: '1px solid rgba(167,139,250,0.07)' }}>
       <div style={{ maxWidth: '860px', margin: '0 auto', textAlign: 'center' }}>
