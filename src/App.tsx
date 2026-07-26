@@ -720,7 +720,7 @@ if (!entered) return (
         <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#f87171', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Before — 221 problems found</span>
       </div>
       <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)' }}>
-        <img src="/images/landing/analysis-before.png" alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+        <img src={analysisBeforeImg} alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
       </div>
     </div>
     <div>
@@ -729,26 +729,12 @@ if (!entered) return (
         <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>After — 100% dataset quality</span>
       </div>
       <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)' }}>
-        <img src="/images/landing/post-transform-after.png" alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+        <img src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
       </div>
     </div>
   </div>
 
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-    <div className="feature-card">
-      <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '10px' }}>STEP 1 — PICK A TRANSFORM</div>
-      <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.12)' }}>
-        <img src="/images/landing/transform-types.png" alt="Transform options: remove duplicates, fill missing, cap outliers, AI custom rules" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
-      </div>
-    </div>
-    <div className="feature-card">
-      <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '10px' }}>STEP 2 — SCHEDULE IT</div>
-      <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.12)' }}>
-        <img src="/images/landing/pipeline-schedule.png" alt="Pipeline scheduling panel with hourly, daily, and weekly automation options" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
 {/* ── DEMO VIDEO ── */}
     <section style={{ padding: '100px 24px', background: 'rgba(79,70,229,0.04)', borderTop: '1px solid rgba(167,139,250,0.07)', borderBottom: '1px solid rgba(167,139,250,0.07)' }}>
