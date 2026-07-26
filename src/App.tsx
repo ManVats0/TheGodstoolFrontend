@@ -1,4 +1,6 @@
 import logo from '../the_gods_tool_logo_3d.png'
+import analysisBeforeImg from './ANALYSIS SHOWCASE.png'
+import postTransformAfterImg from './post transformation overview.png'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
