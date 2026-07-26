@@ -607,7 +607,7 @@ if (!entered) return (
         </p>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', marginBottom: '22px' }}>
-          No credit card required · Full platform access from day one
+          Flexible billing · Pay via Debit, Credit, or UPI · 14-day money-back guarantee · Full platform access from day one
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
