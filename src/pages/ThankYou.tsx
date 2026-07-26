@@ -31,6 +31,23 @@ useEffect(() => {
         sessionStorage.setItem('trackdesk_conversion_fired', 'true')
       }
     }
+
+    // Fire Google Ads "Subscribe" conversion — guarded to fire only once per payment
+    // NOTE: requires the base Google tag (gtag.js) script to already be loaded
+    // globally in index.html. This only fires the conversion EVENT.
+    const googleAdsConversionAlreadyFired = sessionStorage.getItem('google_ads_conversion_fired')
+    if (!googleAdsConversionAlreadyFired) {
+      if (window.gtag) {
+        window.gtag('event', 'ads_conversion_Subscribe_1', {
+          // Optional: pass the paid amount as the conversion value if you have it
+          // value: localStorage.getItem('datapro_amount'),
+          // currency: 'INR',
+        })
+        sessionStorage.setItem('google_ads_conversion_fired', 'true')
+      } else {
+        console.warn('gtag not found — Google Ads base tag may not be loaded on this page.')
+      }
+    }
   }, [])
 
   
