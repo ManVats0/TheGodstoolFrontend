@@ -733,8 +733,8 @@ if (!entered) return (
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
         </div>
-        <div style={{ width: '100%', height: '340px', overflow: 'hidden' }}>
-          <img src={analysisBeforeImg} alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} loading="lazy" />
+        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={analysisBeforeImg} alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
         </div>
       </div>
     </div>
@@ -750,8 +750,8 @@ if (!entered) return (
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
         </div>
-        <div style={{ width: '100%', height: '340px', overflow: 'hidden' }}>
-          <img src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} loading="lazy" />
+        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
         </div>
       </div>
     </div>
