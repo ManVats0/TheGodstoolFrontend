@@ -3296,7 +3296,7 @@ setTimeout(() => {
             {/* SOURCE — native <select> */}
             <div>
               <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>📥 Source Dataset</label>
-              <div className="flex gap-2 mb-2">
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 mb-2">
 {(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL', 'Databricks', 'REST API', 'GA4'] as const).map(type => {
   const activeSourceIsGSheets = activeSource?.type === 'sheets'
   const activeSourceIsMySQL   = activeSource?.type === 'mysql'
@@ -3345,7 +3345,7 @@ setTimeout(() => {
           else alert('No GA4 sources connected. Add one in Data Sources first.')
         }
       }}
-      className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+      className="py-1.5 px-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap overflow-hidden text-ellipsis"
       style={{
   background: isSourceActive ? (type === 'MySQL' ? 'rgba(234,179,8,0.2)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.2)' : type === 'MongoDB' ? 'rgba(34,197,94,0.2)' : type === 'AWS' ? 'rgba(255,153,0,0.2)' : type === 'GCS' ? 'rgba(66,133,244,0.2)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.2)' : type === 'Databricks' ? 'rgba(255,61,0,0.2)' : type === 'REST API' ? 'rgba(20,184,166,0.2)' : type === 'GA4' ? 'rgba(251,146,60,0.2)' : 'rgba(124,58,237,0.2)') : 'rgba(255,255,255,0.03)',
       border: `1px solid ${isSourceActive ? (type === 'MySQL' ? 'rgba(234,179,8,0.5)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.5)' : type === 'MongoDB' ? 'rgba(34,197,94,0.5)' : type === 'AWS' ? 'rgba(255,153,0,0.5)' : type === 'GCS' ? 'rgba(66,133,244,0.5)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.5)' : type === 'Databricks' ? 'rgba(255,61,0,0.5)' : type === 'REST API' ? 'rgba(20,184,166,0.5)' : type === 'GA4' ? 'rgba(251,146,60,0.5)' : 'rgba(124,58,237,0.5)') : 'rgba(255,255,255,0.06)'}`,
@@ -3447,7 +3447,7 @@ setTimeout(() => {
             {/* DESTINATION — combobox with clear button + GSheets + write mode */}
             <div>
               <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>📤 Destination / Output Name</label>
-              <div className="flex gap-2 mb-2">
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 mb-2">
   {(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL', 'Databricks'] as const).map(type => {
     const isActive =
       type === 'Databricks' ? !!databricksDestination :
@@ -3545,7 +3545,7 @@ setTimeout(() => {
           }
           if (type === 'Databricks' && databricksDestination) setDbxDest(null)
         }}
-        className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+        className="py-1.5 px-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap overflow-hidden text-ellipsis"
         style={{
           background: isActive ? (type === 'Google Sheets' ? 'rgba(52,211,153,0.15)' : type === 'MySQL' ? 'rgba(234,179,8,0.15)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.15)' : type === 'BigQuery' ? 'rgba(234,88,12,0.15)' : type === 'MongoDB' ? 'rgba(34,197,94,0.15)' : type === 'GCS' ? 'rgba(66,133,244,0.15)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.15)' : type === 'Databricks' ? 'rgba(255,70,0,0.15)' : 'rgba(124,58,237,0.2)') : 'rgba(255,255,255,0.04)',
           border: `1px solid ${isActive ? (type === 'Google Sheets' ? 'rgba(52,211,153,0.4)' : type === 'MySQL' ? 'rgba(234,179,8,0.4)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.4)' : type === 'BigQuery' ? 'rgba(234,88,12,0.4)' : type === 'MongoDB' ? 'rgba(34,197,94,0.4)' : type === 'GCS' ? 'rgba(66,133,244,0.4)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.4)' : type === 'Databricks' ? 'rgba(255,70,0,0.4)' : 'rgba(124,58,237,0.5)') : 'rgba(255,255,255,0.08)'}`,
