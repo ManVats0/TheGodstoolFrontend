@@ -1629,6 +1629,15 @@ export default function Flow() {
     setCloudsqlDestination(val)
   }
 
+  const [databricksDestination, setDatabricksDestination] = useState<any | null>(() => {
+    try { return JSON.parse(localStorage.getItem('datapro_databricks_dest') || 'null') } catch { return null }
+  })
+  const setDbxDest = (val: any | null) => {
+    if (val) localStorage.setItem('datapro_databricks_dest', JSON.stringify(val))
+    else localStorage.removeItem('datapro_databricks_dest')
+    setDatabricksDestination(val)
+  }
+
   const [mongoDestination, setMongoDestination] = useState<any | null>(() => {
     try { return JSON.parse(localStorage.getItem('datapro_mongo_dest') || 'null') } catch { return null } 
   })
@@ -3046,7 +3055,7 @@ setTimeout(() => {
             <div>
               <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>📥 Source Dataset</label>
               <div className="flex gap-2 mb-2">
-{(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL'] as const).map(type => {
+{(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL', 'Databricks', 'REST API', 'GA4'] as const).map(type => {
   const activeSourceIsGSheets = activeSource?.type === 'sheets'
   const activeSourceIsMySQL   = activeSource?.type === 'mysql'
   const activeSourceIsPG      = activeSource?.type === 'postgres'
@@ -3064,7 +3073,10 @@ setTimeout(() => {
     type === 'MongoDB'        ? activeSourceIsMongo :
     type === 'AWS'            ? activeSourceIsAWS :
     type === 'GCS'            ? activeSourceIsGCS :
-    type === 'Cloud SQL'      ? activeSourceIsCloudSQL : false
+    type === 'Cloud SQL'      ? activeSourceIsCloudSQL :
+    type === 'Databricks'     ? activeSource?.type === 'databricks' :
+    type === 'REST API'       ? activeSource?.type === 'restapi' :
+    type === 'GA4'            ? activeSource?.type === 'ga4' : false
   return (
     <button key={type}
       onClick={() => {
@@ -3075,12 +3087,27 @@ setTimeout(() => {
           if (awsSrc) { setSelectedSourceId(awsSrc.name); setActiveSourceIsSheet(false) }
           else alert('No AWS sources connected. Add one in Data Sources first.')
         }
+        if (type === 'Databricks') {
+          const dbxSrc = sources.find(s => s.type === 'databricks')
+          if (dbxSrc) { setSelectedSourceId(dbxSrc.name); setActiveSourceIsSheet(false) }
+          else alert('No Databricks sources connected. Add one in Data Sources first.')
+        }
+        if (type === 'REST API') {
+          const restSrc = sources.find(s => s.type === 'restapi')
+          if (restSrc) { setSelectedSourceId(restSrc.name); setActiveSourceIsSheet(false) }
+          else alert('No REST API sources connected. Add one in Data Sources first.')
+        }
+        if (type === 'GA4') {
+          const ga4Src = sources.find(s => s.type === 'ga4')
+          if (ga4Src) { setSelectedSourceId(ga4Src.name); setActiveSourceIsSheet(false) }
+          else alert('No GA4 sources connected. Add one in Data Sources first.')
+        }
       }}
       className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
       style={{
-  background: isSourceActive ? (type === 'MySQL' ? 'rgba(234,179,8,0.2)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.2)' : type === 'MongoDB' ? 'rgba(34,197,94,0.2)' : type === 'AWS' ? 'rgba(255,153,0,0.2)' : type === 'GCS' ? 'rgba(66,133,244,0.2)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.2)' : 'rgba(124,58,237,0.2)') : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${isSourceActive ? (type === 'MySQL' ? 'rgba(234,179,8,0.5)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.5)' : type === 'MongoDB' ? 'rgba(34,197,94,0.5)' : type === 'AWS' ? 'rgba(255,153,0,0.5)' : type === 'GCS' ? 'rgba(66,133,244,0.5)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.5)' : 'rgba(124,58,237,0.5)') : 'rgba(255,255,255,0.06)'}`,
-      color: isSourceActive ? (type === 'MySQL' ? '#fbbf24' : type === 'PostgreSQL' ? '#818cf8' : type === 'MongoDB' ? '#4ade80' : type === 'AWS' ? '#FF9900' : type === 'GCS' ? '#4285F4' : type === 'Cloud SQL' ? '#34A853' : '#c4b5fd') : 'rgba(255,255,255,0.55)',
+  background: isSourceActive ? (type === 'MySQL' ? 'rgba(234,179,8,0.2)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.2)' : type === 'MongoDB' ? 'rgba(34,197,94,0.2)' : type === 'AWS' ? 'rgba(255,153,0,0.2)' : type === 'GCS' ? 'rgba(66,133,244,0.2)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.2)' : type === 'Databricks' ? 'rgba(255,61,0,0.2)' : type === 'REST API' ? 'rgba(20,184,166,0.2)' : type === 'GA4' ? 'rgba(251,146,60,0.2)' : 'rgba(124,58,237,0.2)') : 'rgba(255,255,255,0.03)',
+      border: `1px solid ${isSourceActive ? (type === 'MySQL' ? 'rgba(234,179,8,0.5)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.5)' : type === 'MongoDB' ? 'rgba(34,197,94,0.5)' : type === 'AWS' ? 'rgba(255,153,0,0.5)' : type === 'GCS' ? 'rgba(66,133,244,0.5)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.5)' : type === 'Databricks' ? 'rgba(255,61,0,0.5)' : type === 'REST API' ? 'rgba(20,184,166,0.5)' : type === 'GA4' ? 'rgba(251,146,60,0.5)' : 'rgba(124,58,237,0.5)') : 'rgba(255,255,255,0.06)'}`,
+      color: isSourceActive ? (type === 'MySQL' ? '#fbbf24' : type === 'PostgreSQL' ? '#818cf8' : type === 'MongoDB' ? '#4ade80' : type === 'AWS' ? '#FF9900' : type === 'GCS' ? '#4285F4' : type === 'Cloud SQL' ? '#34A853' : type === 'Databricks' ? '#ff3d00' : type === 'REST API' ? '#14b8a6' : type === 'GA4' ? '#fb923c' : '#c4b5fd') : 'rgba(255,255,255,0.55)',
         cursor: 'pointer',
       }}>
       {type === 'MySQL' ? (
@@ -3140,6 +3167,12 @@ setTimeout(() => {
           </svg>
           CSQL
         </span>
+      ) : type === 'Databricks' ? (
+        <span className="flex items-center justify-center gap-1">🧱 DBX</span>
+      ) : type === 'REST API' ? (
+        <span className="flex items-center justify-center gap-1">🌐 REST</span>
+      ) : type === 'GA4' ? (
+        <span className="flex items-center justify-center gap-1">📈 GA4</span>
       ) : type}
     </button>
   )
@@ -3173,8 +3206,9 @@ setTimeout(() => {
             <div>
               <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>📤 Destination / Output Name</label>
               <div className="flex gap-2 mb-2">
-  {(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL'] as const).map(type => {
+  {(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL', 'Databricks'] as const).map(type => {
     const isActive =
+      type === 'Databricks' ? !!databricksDestination :
       type === 'Google Sheets' ? !!gsheetsConnected :
       type === 'AWS' ? !!awsDestinationState :
       type === 'GCS' ? !!gcsDestination :
