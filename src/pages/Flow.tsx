@@ -2219,6 +2219,206 @@ if (mysqlConn) {
       }
     }
 
+    // ── If source is Databricks, fetch table as CSV first ────────────────
+    if (sourceObj && (sourceObj.type as string) === 'databricks') {
+      try {
+        const savedDatabricks = JSON.parse(localStorage.getItem('datapro_databricks_connections') || '[]')
+        const srcName = sourceObj?.name || ''
+        const atIdx = srcName.lastIndexOf('@')
+        const host = atIdx >= 0 ? srcName.slice(atIdx + 1) : ''
+        const beforeAt = atIdx >= 0 ? srcName.slice(0, atIdx) : srcName
+        const parts = beforeAt.split('.')
+        const catalog = parts[0] || ''
+        const schema = parts[1] || ''
+        const table = parts[2] || ''
+        const dbxConn = savedDatabricks.find((c: any) => c.host === host && c.catalog === catalog && c.schema === schema)
+        if (dbxConn) {
+          console.log('[Pipeline] Fetching Databricks table:', table, 'from', catalog, '.', schema, '@', host)
+          const dbxRes = await fetch(`${API_BASE}/api/databricks/fetch-table`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              host: dbxConn.host,
+              httpPath: dbxConn.httpPath,
+              token: dbxConn.token,
+              catalog: dbxConn.catalog,
+              schema: dbxConn.schema,
+              table,
+            }),
+          })
+          const dbxData = await dbxRes.json()
+          if (dbxData.download_url) {
+            const csvRes = await fetch(`${API_BASE}${dbxData.download_url}`)
+            const blob = await csvRes.blob()
+            fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
+            console.log('[Pipeline] Fetched Databricks table as CSV:', dbxData.rows, 'rows')
+          } else {
+            console.error('[Pipeline] Databricks fetch failed:', dbxData.error)
+          }
+        } else {
+          console.error('[Pipeline] No matching Databricks connection found for', catalog, schema, host)
+        }
+      } catch (e) {
+        console.error('[Pipeline] Databricks fetch failed:', e)
+        const realLog: PipelineLogEntry = {
+          ...log,
+          status: 'failed',
+          duration: Date.now() - new Date(log.timestamp).getTime(),
+          steps: pipeline.transformations.map(t => ({
+            name: t.label,
+            status: 'failed' as const,
+            duration: 0,
+            message: `Databricks fetch failed: ${String(e)}`,
+          })),
+        }
+        const updated = savedPipelines.map(p =>
+          p.id === pipeline.id
+            ? { ...p, lastRun: realLog.timestamp, runCount: p.runCount + 1, logs: [realLog, ...p.logs].slice(0, 50) }
+            : p
+        )
+        persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" failed · Databricks fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+          user: 'local_user'
+        })
+        return realLog
+      }
+    }
+
+    // ── If source is REST API, fetch endpoint as CSV first ───────────────
+    if (sourceObj && (sourceObj.type as string) === 'rest') {
+      try {
+        const savedRest = JSON.parse(localStorage.getItem('datapro_rest_connections') || '[]')
+        const srcName = sourceObj?.name || ''
+        const withoutProto = srcName.replace('rest:', '')
+        const restConn = savedRest.find((c: any) => {
+          const connHost = (c.base_url || '').replace(/https?:\/\//, '')
+          return withoutProto.startsWith(connHost)
+        })
+        if (restConn) {
+          const connHost = (restConn.base_url || '').replace(/https?:\/\//, '')
+          const endpoint = withoutProto.slice(connHost.length)
+          console.log('[Pipeline] Fetching REST API endpoint:', endpoint, 'from', restConn.base_url)
+          const restRes = await fetch(`${API_BASE}/api/rest/fetch-endpoint`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              base_url: restConn.base_url,
+              endpoint,
+              headers: restConn.headers || {},
+              verify_ssl: restConn.verify_ssl,
+              timeout: restConn.timeout,
+            }),
+          })
+          const restData = await restRes.json()
+          if (restData.download_url) {
+            const csvRes = await fetch(`${API_BASE}${restData.download_url}`)
+            const blob = await csvRes.blob()
+            fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
+            console.log('[Pipeline] Fetched REST API endpoint as CSV:', restData.rows, 'rows')
+          } else {
+            console.error('[Pipeline] REST API fetch failed:', restData.error)
+          }
+        } else {
+          console.error('[Pipeline] No matching REST API connection found for', srcName)
+        }
+      } catch (e) {
+        console.error('[Pipeline] REST API fetch failed:', e)
+        const realLog: PipelineLogEntry = {
+          ...log,
+          status: 'failed',
+          duration: Date.now() - new Date(log.timestamp).getTime(),
+          steps: pipeline.transformations.map(t => ({
+            name: t.label,
+            status: 'failed' as const,
+            duration: 0,
+            message: `REST API fetch failed: ${String(e)}`,
+          })),
+        }
+        const updated = savedPipelines.map(p =>
+          p.id === pipeline.id
+            ? { ...p, lastRun: realLog.timestamp, runCount: p.runCount + 1, logs: [realLog, ...p.logs].slice(0, 50) }
+            : p
+        )
+        persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" failed · REST API fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+          user: 'local_user'
+        })
+        return realLog
+      }
+    }
+
+    // ── If source is GA4, fetch report as CSV first ──────────────────────
+    if (sourceObj && (sourceObj.type as string) === 'ga4') {
+      try {
+        const savedGA4 = JSON.parse(localStorage.getItem('datapro_ga4_connections') || '[]')
+        const srcName = sourceObj?.name || ''
+        const withoutProto = srcName.replace('ga4:', '')
+        const slashIdx = withoutProto.indexOf('/')
+        const propertyId = slashIdx >= 0 ? withoutProto.slice(0, slashIdx) : withoutProto
+        const reportName = slashIdx >= 0 ? withoutProto.slice(slashIdx + 1) : ''
+        const ga4Conn = savedGA4.find((c: any) => c.propertyId === propertyId)
+        if (ga4Conn) {
+          console.log('[Pipeline] Fetching GA4 report:', reportName, 'for property', propertyId)
+          const ga4Res = await fetch(`${API_BASE}/api/ga4/fetch-report`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              key_json: ga4Conn.keyJson,
+              property_id: ga4Conn.propertyId,
+              metrics: ga4Conn.metrics,
+              dimensions: ga4Conn.dimensions,
+              start_date: ga4Conn.startDate,
+              end_date: ga4Conn.endDate,
+              report_name: reportName,
+            }),
+          })
+          const ga4Data = await ga4Res.json()
+          if (ga4Data.download_url) {
+            const csvRes = await fetch(`${API_BASE}${ga4Data.download_url}`)
+            const blob = await csvRes.blob()
+            fileToUse = new File([blob], `${sourceObj.name}.csv`, { type: 'text/csv' })
+            console.log('[Pipeline] Fetched GA4 report as CSV:', ga4Data.rows, 'rows')
+          } else {
+            console.error('[Pipeline] GA4 fetch failed:', ga4Data.error)
+          }
+        } else {
+          console.error('[Pipeline] No matching GA4 connection found for property', propertyId)
+        }
+      } catch (e) {
+        console.error('[Pipeline] GA4 fetch failed:', e)
+        const realLog: PipelineLogEntry = {
+          ...log,
+          status: 'failed',
+          duration: Date.now() - new Date(log.timestamp).getTime(),
+          steps: pipeline.transformations.map(t => ({
+            name: t.label,
+            status: 'failed' as const,
+            duration: 0,
+            message: `GA4 fetch failed: ${String(e)}`,
+          })),
+        }
+        const updated = savedPipelines.map(p =>
+          p.id === pipeline.id
+            ? { ...p, lastRun: realLog.timestamp, runCount: p.runCount + 1, logs: [realLog, ...p.logs].slice(0, 50) }
+            : p
+        )
+        persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" failed · GA4 fetch error · ${String(e)} · triggered by ${triggeredBy}`,
+          user: 'local_user'
+        })
+        return realLog
+      }
+    }
+
     // ── If source is a Google Sheet, fetch it as CSV first ───────────────
     if (sourceObj?.type === 'sheets') {
       try {
@@ -2718,6 +2918,48 @@ if (writeData.success) {
         }
       } catch (e) {
         console.error('Cloud SQL write-back failed:', e)
+      }
+    }
+
+    // ── Write back to Databricks if destination is Databricks ────────────
+    const dbxDestConn = (() => {
+      try {
+        const v = localStorage.getItem('datapro_databricks_dest')
+        return v ? JSON.parse(v) : null
+      } catch { return null }
+    })()
+
+    if (dbxDestConn && data?.download_url) {
+      try {
+        const csvRes9 = await fetch(`${API_BASE}${data.download_url}`)
+        if (csvRes9.ok) {
+          const csvText9 = await csvRes9.text()
+          const destTable9 = dbxDestConn.table || dbxDestConn.tables?.[0] || ''
+          console.log('[Pipeline] Writing to Databricks table:', destTable9)
+          const writeRes9 = await fetch(`${API_BASE}/api/databricks/write-table`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              host: dbxDestConn.host,
+              httpPath: dbxDestConn.httpPath,
+              token: dbxDestConn.token,
+              catalog: dbxDestConn.catalog,
+              schema: dbxDestConn.schema,
+              table: destTable9,
+              csvData: csvText9,
+              mode: pipeline.destinationMode,
+            }),
+          })
+          const writeData9 = await writeRes9.json()
+          if (writeData9.success) {
+            console.log(`✅ Databricks table "${writeData9.table}" updated: ${writeData9.rows_written} rows`)
+          } else {
+            console.error('[Databricks write-back] failed:', writeData9.error)
+            alert(`⚠️ Databricks write failed: ${writeData9.error}`)
+          }
+        }
+      } catch (e) {
+        console.error('Databricks write-back failed:', e)
       }
     }
 
@@ -3296,12 +3538,18 @@ setTimeout(() => {
             setBqDest(null)
             localStorage.removeItem('datapro_bigquery_dest')
           }
+          if (type === 'Databricks' && !databricksDestination) {
+            const savedDbx = JSON.parse(localStorage.getItem('datapro_databricks_connections') || '[]')
+            if (savedDbx.length > 0) setDbxDest(savedDbx[0])
+            else alert('No Databricks connections saved. Add one in Data Sources first.')
+          }
+          if (type === 'Databricks' && databricksDestination) setDbxDest(null)
         }}
         className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
         style={{
-          background: isActive ? (type === 'Google Sheets' ? 'rgba(52,211,153,0.15)' : type === 'MySQL' ? 'rgba(234,179,8,0.15)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.15)' : type === 'BigQuery' ? 'rgba(234,88,12,0.15)' : type === 'MongoDB' ? 'rgba(34,197,94,0.15)' : type === 'GCS' ? 'rgba(66,133,244,0.15)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.15)' : 'rgba(124,58,237,0.2)') : 'rgba(255,255,255,0.04)',
-          border: `1px solid ${isActive ? (type === 'Google Sheets' ? 'rgba(52,211,153,0.4)' : type === 'MySQL' ? 'rgba(234,179,8,0.4)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.4)' : type === 'BigQuery' ? 'rgba(234,88,12,0.4)' : type === 'MongoDB' ? 'rgba(34,197,94,0.4)' : type === 'GCS' ? 'rgba(66,133,244,0.4)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.4)' : 'rgba(124,58,237,0.5)') : 'rgba(255,255,255,0.08)'}`,
-          color: isActive ? (type === 'Google Sheets' ? '#34d399' : type === 'MySQL' ? '#fbbf24' : type === 'PostgreSQL' ? '#818cf8' : type === 'BigQuery' ? '#fb923c' : type === 'MongoDB' ? '#4ade80' : type === 'GCS' ? '#4285F4' : type === 'Cloud SQL' ? '#34A853' : '#c4b5fd') : 'rgba(255,255,255,0.45)',
+          background: isActive ? (type === 'Google Sheets' ? 'rgba(52,211,153,0.15)' : type === 'MySQL' ? 'rgba(234,179,8,0.15)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.15)' : type === 'BigQuery' ? 'rgba(234,88,12,0.15)' : type === 'MongoDB' ? 'rgba(34,197,94,0.15)' : type === 'GCS' ? 'rgba(66,133,244,0.15)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.15)' : type === 'Databricks' ? 'rgba(255,70,0,0.15)' : 'rgba(124,58,237,0.2)') : 'rgba(255,255,255,0.04)',
+          border: `1px solid ${isActive ? (type === 'Google Sheets' ? 'rgba(52,211,153,0.4)' : type === 'MySQL' ? 'rgba(234,179,8,0.4)' : type === 'PostgreSQL' ? 'rgba(99,102,241,0.4)' : type === 'BigQuery' ? 'rgba(234,88,12,0.4)' : type === 'MongoDB' ? 'rgba(34,197,94,0.4)' : type === 'GCS' ? 'rgba(66,133,244,0.4)' : type === 'Cloud SQL' ? 'rgba(52,168,83,0.4)' : type === 'Databricks' ? 'rgba(255,70,0,0.4)' : 'rgba(124,58,237,0.5)') : 'rgba(255,255,255,0.08)'}`,
+          color: isActive ? (type === 'Google Sheets' ? '#34d399' : type === 'MySQL' ? '#fbbf24' : type === 'PostgreSQL' ? '#818cf8' : type === 'BigQuery' ? '#fb923c' : type === 'MongoDB' ? '#4ade80' : type === 'GCS' ? '#4285F4' : type === 'Cloud SQL' ? '#34A853' : type === 'Databricks' ? '#FF4600' : '#c4b5fd') : 'rgba(255,255,255,0.45)',
           cursor: 'pointer',
         }}>
         {type === 'MySQL' ? (
@@ -3354,6 +3602,8 @@ setTimeout(() => {
             </svg>
             CSQL
           </span>
+        ) : type === 'Databricks' ? (
+          <span className="flex items-center justify-center gap-1">🧱 DBX</span>
         ) : type}
       </button>
     )
@@ -3732,6 +3982,66 @@ setTimeout(() => {
                         </select>
                         <div style={{ position:'absolute', right:'8px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
                           <svg width="10" height="10" fill="none" stroke="rgba(52,168,83,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
+{/* Databricks destination connected pill + table selector */}
+              {databricksDestination && (() => {
+                const savedDbxConns = JSON.parse(localStorage.getItem('datapro_databricks_connections') || '[]')
+                const allDbxTables: string[] = databricksDestination.tables?.length
+                  ? databricksDestination.tables
+                  : [databricksDestination.table].filter(Boolean)
+                return (
+                  <div className="mb-2 space-y-2">
+                    <div className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background:'rgba(255,70,0,0.08)', border:'1px solid rgba(255,70,0,0.25)' }}>
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span style={{ fontSize:'13px' }}>🧱</span>
+                        <span className="text-xs font-bold text-white break-all">
+                          {databricksDestination.catalog}.{databricksDestination.schema}.{databricksDestination.table || databricksDestination.tables?.[0] || '?'} @ {databricksDestination.host}
+                        </span>
+                      </div>
+                      <button onClick={() => setDbxDest(null)} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
+                    </div>
+                    {savedDbxConns.length > 1 && (
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={`${databricksDestination.catalog}.${databricksDestination.schema}@${databricksDestination.host}`}
+                          onChange={e => {
+                            const chosen = savedDbxConns.find((c: any) => `${c.catalog}.${c.schema}@${c.host}` === e.target.value)
+                            if (chosen) setDbxDest(chosen)
+                          }}
+                          className="w-full text-xs text-white rounded-xl px-3 py-2 outline-none appearance-none"
+                          style={{ background:'rgba(255,70,0,0.08)', border:'1px solid rgba(255,70,0,0.3)', paddingRight:'28px', cursor:'pointer' }}
+                        >
+                          {savedDbxConns.map((c: any) => (
+                            <option key={c.id} value={`${c.catalog}.${c.schema}@${c.host}`} style={{ background:'#0d0a1a' }}>
+                              {c.catalog}.{c.schema}@{c.host}
+                            </option>
+                          ))}
+                        </select>
+                        <div style={{ position:'absolute', right:'8px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                          <svg width="10" height="10" fill="none" stroke="rgba(255,70,0,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                      </div>
+                    )}
+                    {allDbxTables.length > 0 && (
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={databricksDestination.table || allDbxTables[0]}
+                          onChange={e => setDbxDest({ ...databricksDestination, table: e.target.value })}
+                          className="w-full text-xs text-white rounded-xl px-3 py-2 outline-none appearance-none"
+                          style={{ background:'rgba(255,70,0,0.06)', border:'1px solid rgba(255,70,0,0.2)', paddingRight:'28px', cursor:'pointer' }}
+                        >
+                          {allDbxTables.map((tbl: string) => (
+                            <option key={tbl} value={tbl} style={{ background:'#0d0a1a' }}>{tbl}</option>
+                          ))}
+                        </select>
+                        <div style={{ position:'absolute', right:'8px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                          <svg width="10" height="10" fill="none" stroke="rgba(255,70,0,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
                       </div>
                     )}
