@@ -1,6 +1,9 @@
 import logo from '../the_gods_tool_logo_3d.png'
 import analysisBeforeImg from './ANALYSIS SHOWCASE.png'
 import postTransformAfterImg from './post transformation overview.png'
+import pipelineBuilderImg from './pipeline builder.png'
+import transformTypesImg from './TYPES OF TRANSFORMATIONS OVERVIEW.png'
+import cronJobsImg from './pipeline_creation_cron_jobs.png'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
@@ -752,6 +755,56 @@ if (!entered) return (
         </div>
         <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <img src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '28px', marginTop: '28px' }}>
+    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 3, width: '44px', height: '44px', borderRadius: '50%', background: '#0d0a1a', border: '1px solid rgba(167,139,250,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(124,58,237,0.4)' }}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#a78bfa', display: 'inline-block' }} />
+        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Build — visual pipeline flow</span>
+      </div>
+      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)', background: '#0a0714', boxShadow: '0 12px 40px rgba(0,0,0,0.4)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
+        </div>
+        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={pipelineBuilderImg} alt="Visual pipeline builder showing source to destination flow" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
+        </div>
+      </div>
+    </div>
+
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
+        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Then — pick a transform &amp; schedule it</span>
+      </div>
+      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
+        </div>
+        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={transformTypesImg} alt="Transform options: remove duplicates, fill missing, cap outliers, AI custom rules" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
+        </div>
+      </div>
+      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
+        </div>
+        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={cronJobsImg} alt="Pipeline scheduling panel with cron jobs and automation options" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
         </div>
       </div>
     </div>
