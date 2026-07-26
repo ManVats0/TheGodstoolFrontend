@@ -715,28 +715,48 @@ if (!entered) return (
     <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginTop: '12px' }}>37,880 rows analyzed, cleaned, and scheduled to stay clean — no code written.</p>
   </div>
 
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+  <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '28px' }}>
+    {/* Center divider arrow — desktop only */}
+    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 3, width: '44px', height: '44px', borderRadius: '50%', background: '#0d0a1a', border: '1px solid rgba(167,139,250,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(124,58,237,0.4)' }}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
         <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#f87171', display: 'inline-block' }} />
         <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#f87171', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Before — 221 problems found</span>
       </div>
-      <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)' }}>
-        <img src={analysisBeforeImg} alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)', background: '#0a0714', boxShadow: '0 12px 40px rgba(0,0,0,0.4)' }}>
+        {/* Fake browser chrome bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
+        </div>
+        <div style={{ width: '100%', height: '340px', overflow: 'hidden' }}>
+          <img src={analysisBeforeImg} alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} loading="lazy" />
+        </div>
       </div>
     </div>
+
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
         <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
         <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>After — 100% dataset quality</span>
       </div>
-      <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)' }}>
-        <img src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: 'auto', display: 'block' }} loading="lazy" />
+      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
+        </div>
+        <div style={{ width: '100%', height: '340px', overflow: 'hidden' }}>
+          <img src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} loading="lazy" />
+        </div>
       </div>
     </div>
   </div>
-
-  </section>
+</section>
 
 {/* ── DEMO VIDEO ── */}
     <section style={{ padding: '100px 24px', background: 'rgba(79,70,229,0.04)', borderTop: '1px solid rgba(167,139,250,0.07)', borderBottom: '1px solid rgba(167,139,250,0.07)' }}>
