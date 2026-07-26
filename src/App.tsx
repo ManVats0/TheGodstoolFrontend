@@ -10,7 +10,7 @@ import ThankYou from './pages/ThankYou'
 // import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 // import Faq from './pages/Faq'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import NotificationPanel from './components/NotificationPanel'
@@ -81,6 +81,13 @@ const [regName, setRegName] = useState('')
 const [regNickname, setRegNickname] = useState('')
 const [confirmPassword, setConfirmPassword] = useState('')
 const [regFeeling, setRegFeeling] = useState('')
+const forceLogoutRef = useRef<HTMLButtonElement>(null)
+
+useEffect(() => {
+  if (showForceLogout && forceLogoutRef.current) {
+    forceLogoutRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}, [showForceLogout])
 
   useEffect(() => {
     if (location.pathname !== '/docs') {
@@ -1157,6 +1164,7 @@ if (!entered) return (
           )}
           {showForceLogout && (
             <button
+              ref={forceLogoutRef}
               onClick={() => (pendingGooglePayload ? handleForceGoogleLogin() : handleForceLogin())}
               className="auth-btn-primary"
               disabled={isLoginLoading || isGoogleLoading}
