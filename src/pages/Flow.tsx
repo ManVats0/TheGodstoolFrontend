@@ -3319,8 +3319,23 @@ setTimeout(() => {
     type === 'Databricks'     ? activeSource?.type === 'databricks' :
     type === 'REST API'       ? activeSource?.type === 'restapi' :
     type === 'GA4'            ? activeSource?.type === 'ga4' : false
+  const sourceTooltips: Record<string, string> = {
+    'CSV': 'CSV — Upload a comma-separated values file',
+    'Google Sheets': 'Google Sheets — Live-connected spreadsheet',
+    'MySQL': 'MySQL — Relational database server',
+    'PostgreSQL': 'PostgreSQL — Relational database server',
+    'BigQuery': 'BigQuery — Google Cloud data warehouse',
+    'MongoDB': 'MongoDB — NoSQL document database',
+    'AWS': 'AWS — RDS, S3, Redshift, or DynamoDB',
+    'GCS': 'Google Cloud Storage — File bucket storage',
+    'Cloud SQL': 'Cloud SQL — GCP managed PostgreSQL/MySQL',
+    'Databricks': 'Databricks — SQL Warehouse via token',
+    'REST API': 'REST API — Any HTTP/JSON endpoint',
+    'GA4': 'Google Analytics 4 — Web analytics reports',
+  }
   return (
     <button key={type}
+      title={sourceTooltips[type]}
       onClick={() => {
         if (type === 'Google Sheets' && !activeSourceIsSheet && !activeSourceIsGSheets) { setGsheetsPickerFor('source'); setShowGSheetsPicker(true) }
         if (type === 'CSV') { setActiveSourceIsSheet(false); if (sources.find(s => s.type === 'csv')) setSelectedSourceId(sources.find(s => s.type === 'csv')!.name) }
@@ -3460,8 +3475,21 @@ setTimeout(() => {
       type === 'PostgreSQL' ? !!pgDestination :
       type === 'BigQuery' ? !!bqDestination :
       type === 'MongoDB' ? !!mongoDestination : false
+    const destTooltips: Record<string, string> = {
+      'CSV': 'CSV — Downloadable cleaned file',
+      'Google Sheets': 'Google Sheets — Write cleaned data back to a sheet',
+      'MySQL': 'MySQL — Relational database server',
+      'PostgreSQL': 'PostgreSQL — Relational database server',
+      'BigQuery': 'BigQuery — Google Cloud data warehouse',
+      'MongoDB': 'MongoDB — NoSQL document database',
+      'AWS': 'AWS — RDS, S3, Redshift, or DynamoDB',
+      'GCS': 'Google Cloud Storage — File bucket storage',
+      'Cloud SQL': 'Cloud SQL — GCP managed PostgreSQL/MySQL',
+      'Databricks': 'Databricks — SQL Warehouse via token',
+    }
     return (
       <button key={type}
+        title={destTooltips[type]}
         onClick={() => {
           if (type === 'Google Sheets' && !gsheetsConnected) { setGsheetsPickerFor('dest'); setShowGSheetsPicker(true) }
           if (type === 'CSV') { setGsheetsConnected(null); setMysqlDest(null); setMongoDest(null); setPgDest(null); setBqDest(null); setAwsDest(null); setGcsDest(null); setCsqlDest(null) }
