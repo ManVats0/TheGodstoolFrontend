@@ -664,7 +664,7 @@ if (!entered) return (
 
       {/* ── SIDE SIGNUP FORM ── */}
       <form onSubmit={handleSideFormSubmit} style={{ flex: '1 1 340px', maxWidth: '380px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', backdropFilter: 'blur(6px)' }}>
-        <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.05rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '2px' }}>Get started free</div>
+        <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.05rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '2px' }}>Let's get started</div>
         <p style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 6px' }}>Fill this once — confirm on the next screen.</p>
         <input type="email" placeholder="you@example.com" value={sideEmail} onChange={e => setSideEmail(e.target.value)} className="auth-input" required />
         <input type="password" placeholder="Password" value={sidePassword} onChange={e => setSidePassword(e.target.value)} className="auth-input" required />
