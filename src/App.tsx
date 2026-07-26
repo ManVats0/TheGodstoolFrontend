@@ -160,9 +160,37 @@ const [regFeeling, setRegFeeling] = useState('')
   }, [location.pathname])
 
   const [demoPlaying, setDemoPlaying] = useState(false)
+  const [sideEmail, setSideEmail] = useState('')
+  const [sidePassword, setSidePassword] = useState('')
+  const [sideConfirmPassword, setSideConfirmPassword] = useState('')
+  const [sideName, setSideName] = useState('')
+  const [sideNickname, setSideNickname] = useState('')
+  const [sideFeeling, setSideFeeling] = useState('')
+  const [sideFormError, setSideFormError] = useState('')
   const handleEnter = (mode: 'login' | 'register' = 'register') => {
     setShowLogin(true)
     setIsRegisterMode(mode === 'register')
+    setLoginError('')
+  }
+  const handleSideFormSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    if (!sideEmail.trim() || !sidePassword.trim()) {
+      setSideFormError('Please fill in at least email and password.')
+      return
+    }
+    if (sidePassword !== sideConfirmPassword) {
+      setSideFormError('Passwords do not match.')
+      return
+    }
+    setSideFormError('')
+    setLoginEmail(sideEmail)
+    setLoginPassword(sidePassword)
+    setConfirmPassword(sideConfirmPassword)
+    setRegName(sideName)
+    setRegNickname(sideNickname)
+    setRegFeeling(sideFeeling)
+    setIsRegisterMode(true)
+    setShowLogin(true)
     setLoginError('')
   }
 
@@ -585,7 +613,8 @@ if (!entered) return (
       <div style={{ position: 'absolute', top: '20%', left: '15%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', bottom: '25%', right: '10%', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-      <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', animation: 'fadeUp 0.8s ease both' }}>
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: '1180px', width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '48px', animation: 'fadeUp 0.8s ease both' }}>
+      <div style={{ flex: '1 1 480px', maxWidth: '620px', minWidth: '300px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(167,139,250,0.25)', borderRadius: '20px', padding: '5px 16px', marginBottom: '18px', fontFamily: 'monospace', fontSize: '0.68rem', color: '#a78bfa', letterSpacing: '0.15em' }}>
           ⚡ ETL SOFTWARE
         </div>
@@ -631,6 +660,51 @@ if (!entered) return (
         <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
           ✅ Google OAuth Verified
         </p>
+      </div>
+
+      {/* ── SIDE SIGNUP FORM ── */}
+      <form onSubmit={handleSideFormSubmit} style={{ flex: '1 1 340px', maxWidth: '380px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', backdropFilter: 'blur(6px)' }}>
+        <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.05rem', fontWeight: 700, color: '#e2e8f0', marginBottom: '2px' }}>Get started free</div>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 6px' }}>Fill this once — confirm on the next screen.</p>
+        <input type="email" placeholder="you@example.com" value={sideEmail} onChange={e => setSideEmail(e.target.value)} className="auth-input" required />
+        <input type="password" placeholder="Password" value={sidePassword} onChange={e => setSidePassword(e.target.value)} className="auth-input" required />
+        <input type="password" placeholder="Repeat password" value={sideConfirmPassword} onChange={e => setSideConfirmPassword(e.target.value)} className="auth-input" required />
+        <input type="text" placeholder="Your name (what your office HR calls you)" value={sideName} onChange={e => setSideName(e.target.value)} className="auth-input" />
+        <input type="text" placeholder="Nickname (what your classmates call you)" value={sideNickname} onChange={e => setSideNickname(e.target.value)} className="auth-input" />
+        <div>
+          <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#94a3b8', marginBottom: '6px' }}>How are you feeling right now?</div>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {[
+              { emoji: '🔥', label: 'Excited' },
+              { emoji: '😌', label: 'Calm' },
+              { emoji: '😬', label: 'Nervous' },
+              { emoji: '🧠', label: 'Curious' },
+              { emoji: '😤', label: 'Determined' },
+            ].map(f => (
+              <button
+                key={f.label}
+                type="button"
+                onClick={() => setSideFeeling(f.label)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '4px',
+                  background: sideFeeling === f.label ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.04)',
+                  border: sideFeeling === f.label ? '1px solid rgba(167,139,250,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '20px', padding: '5px 10px',
+                  fontFamily: 'monospace', fontSize: '0.68rem', color: '#e2e8f0',
+                  cursor: 'pointer', transition: 'all 0.15s'
+                }}
+              >
+                <span>{f.emoji}</span>{f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {sideFormError && (
+          <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '8px 12px', color: '#fca5a5', fontSize: '0.75rem', fontFamily: 'monospace' }}>⚠ {sideFormError}</div>
+        )}
+        <button type="submit" className="auth-btn-primary" style={{ marginTop: '4px' }}>CONTINUE →</button>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.62rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>No credit card required · Takes 30 seconds</p>
+      </form>
       </div>
       <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '14px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', animation: 'float 2s ease-in-out infinite' }}>
         <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em' }}>SCROLL TO EXPLORE</span>
