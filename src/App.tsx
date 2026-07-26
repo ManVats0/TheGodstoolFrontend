@@ -662,6 +662,7 @@ if (!entered) return (
           { icon: '📊', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.3s' },
           { icon: '🔒', title: 'Secure by Default', desc: 'Your data never leaves your session without permission. Encrypted in transit, zero third-party sharing.', delay: '0.4s' },
           { icon: '🔒', title: 'Secure Tunneling', desc: 'Your database never has to leave home to get cleaned. We quietly bridge the connection so nothing sits exposed on the internet — and you never have to touch a firewall setting.', delay: '0.5s' },
+          { icon: '🗄️', title: 'Build Pipelines in SQL', desc: 'Skip the drag-and-drop if you\'d rather not. Write plain SQL in our built-in editor and get a live, editable pipeline — a real SQL interface for people who just want to do ground-level work on their data.', delay: '0.55s' },
           { icon: '⏱️', title: 'Schedule Your Runs', desc: 'Set it once, then stop thinking about it. Every 5 seconds or once a month — pick your rhythm and the tool keeps the beat, even when you\'re not watching.', delay: '0.6s' },
           { icon: '🚨', title: 'Issue Detector', desc: 'Auto-detects issues in your data before they break downstream.', delay: '0.7s' },
           { icon: '🎯', title: 'Advanced Filter', desc: 'Pinpoint exactly which raw number is causing the problem with the problem filter.', delay: '0.8s' },
