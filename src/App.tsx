@@ -1168,15 +1168,20 @@ if (!entered) return (
             <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>⚠ {loginError}</div>
           )}
           {showForceLogout && (
-            <button
-              ref={forceLogoutRef}
-              onClick={() => (pendingGooglePayload ? handleForceGoogleLogin() : handleForceLogin())}
-              className="auth-btn-primary"
-              disabled={isLoginLoading || isGoogleLoading}
-              style={{ background: 'linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%)' }}
-            >
+            <>
+              <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
+                👆 Click below again to confirm and log in here
+              </div>
+              <button
+                ref={forceLogoutRef}
+                onClick={() => (pendingGooglePayload ? handleForceGoogleLogin() : handleForceLogin())}
+                className="auth-btn-primary"
+                disabled={isLoginLoading || isGoogleLoading}
+                style={{ background: 'linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%)' }}
+              >
               {(isLoginLoading || isGoogleLoading) ? <span className="btn-spinner" /> : 'Log out oldest device & sign in here'}
-            </button>
+              </button>
+            </>
           )}
           <button onClick={() => handleLogin()} className="auth-btn-primary" disabled={isLoginLoading}>{isLoginLoading ? <span className="btn-spinner" /> : (isRegisterMode ? 'CREATE ACCOUNT' : 'ACCESS THE TOOL')}</button>
           {!isRegisterMode && !showForgot && (
