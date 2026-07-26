@@ -664,7 +664,7 @@ if (!entered) return (
 
       {/* ── SIDE SIGNUP FORM ── */}
       <form onSubmit={handleSideFormSubmit} style={{ flex: '1 1 340px', maxWidth: '380px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '7px', textAlign: 'left', backdropFilter: 'blur(6px)' }}>
-        <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>Let's get started</div>
+        <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>Get started free</div>
         <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 2px' }}>Fill this once — confirm on the next screen.</p>
         <input type="email" placeholder="you@example.com" value={sideEmail} onChange={e => setSideEmail(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px' }}>
@@ -707,7 +707,7 @@ if (!entered) return (
           <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '6px 10px', color: '#fca5a5', fontSize: '0.68rem', fontFamily: 'monospace' }}>⚠ {sideFormError}</div>
         )}
         <button type="submit" className="auth-btn-primary" style={{ padding: '9px', fontSize: '0.85rem' }}>CONTINUE →</button>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}></p>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>No credit card required · Takes 30 seconds</p>
       </form>
       </div>
       <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '14px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', animation: 'float 2s ease-in-out infinite' }}>
@@ -1231,9 +1231,8 @@ if (!entered) return (
           {/* Paid tier */}
           <div style={{ background: 'rgba(124,58,237,0.1)', border: '2px solid rgba(124,58,237,0.4)', borderRadius: '12px', padding: '20px 24px', textAlign: 'left' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ color: 'white', fontWeight: 700, fontFamily: 'Georgia, serif', fontSize: '1rem' }}>Paid Plans</span>
-              <span style={{ color: '#a78bfa', fontFamily: 'monospace', fontSize: '0.78rem' }}>from $9/mo</span>
-            </div>
+  <span style={{ color: 'white', fontWeight: 700, fontFamily: 'Georgia, serif', fontSize: '1rem' }}>Paid Plans</span>
+</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
               {['✓ All data sources (MySQL, Postgres, BigQuery…)', '✓ AI-powered data cleaning', '✓ Unlimited pipeline automation', '✓ Priority support'].map(f => (
                 <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.65)' }}>{f}</div>
