@@ -707,7 +707,7 @@ if (!entered) return (
           <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '6px 10px', color: '#fca5a5', fontSize: '0.68rem', fontFamily: 'monospace' }}>⚠ {sideFormError}</div>
         )}
         <button type="submit" className="auth-btn-primary" style={{ padding: '9px', fontSize: '0.85rem' }}>CONTINUE →</button>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>No credit card required · Takes 30 seconds</p>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}></p>
       </form>
       </div>
       <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '14px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', animation: 'float 2s ease-in-out infinite' }}>
