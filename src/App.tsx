@@ -602,9 +602,13 @@ if (!entered) return (
   Connect your database, sheet, or CRM. AI profiles it, cleans it, and pipelines it out — the work a data engineer would spend hours on, done in minutes.
 </p>
 
-        <p style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#6d5fc7', letterSpacing: '0.08em', marginBottom: '12px', opacity: 0.7, maxWidth: '640px', lineHeight: 1.8 }}>
-          CSV · Google Sheets · MySQL · PostgreSQL · BigQuery · MongoDB · AWS · Cloud Storage · Cloud SQL · Databricks · REST API · Google Analytics 4
-        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', rowGap: '6px', columnGap: '10px', marginBottom: '12px', maxWidth: '640px', margin: '0 auto 12px' }}>
+          {['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'Cloud Storage', 'Cloud SQL', 'Databricks', 'REST API', 'Google Analytics 4'].map((src, i, arr) => (
+            <span key={src} style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#6d5fc7', letterSpacing: '0.08em', opacity: 0.7, whiteSpace: 'nowrap' }}>
+              {src}{i < arr.length - 1 && <span style={{ marginLeft: '10px', opacity: 0.5 }}>·</span>}
+            </span>
+          ))}
+        </div>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', marginBottom: '22px' }}>
           No credit card required · Full platform access from day one
