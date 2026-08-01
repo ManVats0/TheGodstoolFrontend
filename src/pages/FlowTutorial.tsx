@@ -24,6 +24,7 @@ export default function GuidedTour({
   onFinish?: () => void
 }) {
   const [active, setActive] = useState(false)
+  useEffect(() => { console.log('[GuidedTour] mounted, storageKey:', storageKey, 'seen:', localStorage.getItem(storageKey)) }, [])
   const [stepIndex, setStepIndex] = useState(0)
   const [rect, setRect] = useState<DOMRect | null>(null)
 
