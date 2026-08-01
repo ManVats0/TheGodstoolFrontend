@@ -2,6 +2,20 @@
   import { useNavigate } from 'react-router-dom'
   import { useStore } from '../store'
   import { API_BASE } from '../config'
+  import GuidedTour, { TourStep } from './FlowTutorial'
+
+  const DATASOURCES_TOUR: TourStep[] = [
+  {
+    title: 'Welcome to Data Sources 👋',
+    body: 'This is where every project starts. Connect a CSV, Google Sheet, database, or API here and DataPipe will pull it in for cleaning and analysis.',
+  },
+  {
+    target: '[data-tour="tour-datasources-tabs"]',
+    title: 'Connected vs Add New',
+    body: 'Use "Connected Sources" to see everything you\'ve already linked, and "+ Add New" any time you want to bring in another dataset.',
+    placement: 'bottom',
+  },
+]
 
   const badge = (text: string, color: string) => (
     <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: `${color}20`, color }}>{text}</span>
@@ -1050,6 +1064,7 @@ const handleLockedSource = () => {
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
+      <GuidedTour steps={DATASOURCES_TOUR} storageKey="datapipe_tour_datasources_seen" />
       {/* Header */}
         <div className="mb-8 relative">
           <div className="flex items-center gap-3 mb-2">
@@ -1153,7 +1168,7 @@ const handleLockedSource = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit"
+        <div data-tour="tour-datasources-tabs" className="flex gap-1 mb-6 p-1 rounded-xl w-fit"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
           {(['existing', 'add'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
