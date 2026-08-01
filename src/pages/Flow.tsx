@@ -3,6 +3,51 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import { API_BASE } from '../config'
 import { runSQLPreviewWasm } from '../duckdbClient'
+import GuidedTour, { TourStep } from './FlowTutorial'
+
+const EMPTY_STATE_TOUR: TourStep[] = [
+  {
+    target: '[data-tour="tour-goto-sources"]',
+    title: 'Welcome to Pipeline Builder 👋',
+    body: 'Every pipeline starts with a data source. Click here to upload a CSV or connect a database, spreadsheet, or API — then come back to build your cleaning pipeline.',
+    placement: 'top',
+  },
+]
+
+const MAIN_TOUR: TourStep[] = [
+  {
+    title: 'Welcome to Pipeline Builder! 👋',
+    body: "You've got a data source connected. Let's take a 60-second tour so you know exactly how to turn it into clean, automated output.",
+  },
+  {
+    target: '[data-tour="tour-source-select"]',
+    title: 'Step 1 — Pick your source',
+    body: 'Choose which uploaded file, database table, sheet, or connected source you want to clean and transform.',
+    placement: 'bottom',
+  },
+  {
+    target: '[data-tour="tour-destination"]',
+    title: 'Step 2 — Set your destination',
+    body: 'Name your cleaned output file, or connect Google Sheets, MySQL, BigQuery, and more as a live write-back destination.',
+    placement: 'bottom',
+  },
+  {
+    target: '[data-tour="tour-add-transform"]',
+    title: 'Step 3 — Add transformations',
+    body: 'Click "+ Add Transformation" to remove duplicates, fill missing values, standardize text, cap outliers, fix dates, or write your own SQL and AI rules.',
+    placement: 'bottom',
+  },
+  {
+    target: '[data-tour="tour-pipeline-flow"]',
+    title: 'Step 4 — Watch it connect',
+    body: 'Your source, transformations, and destination link up here in real time. Once you\'ve added at least one transformation, hit "Save Pipeline" below to schedule automatic runs.',
+    placement: 'top',
+  },
+  {
+    title: "You're all set! 🎉",
+    body: 'Build your pipeline, save it, and DataPipe will keep your data clean automatically — on whatever schedule you choose.',
+  },
+]
 
 const TRANSFORMATIONS = [
   { id: 'remove_duplicates', label: 'Remove Duplicates', icon: '🗑️', desc: 'Drop identical rows',   color: '#ef4444' },
@@ -1556,6 +1601,14 @@ export default function Flow() {
   const navigate = useNavigate()
   const { sources, transformations, analysis, activeFile, addTransformation, removeTransformation, addAuditLog, setAnalysisTab, setPendingCleanOptions, switchActiveSource, setActiveDestinationName, setPipelineOutputFile, setLastPipelineRunAt, gsheetsDestination, setGsheetsDestination } = useStore()
   const [fullscreenTable, setFullscreenTable] = useState<{ title: string; subtitle?: string; columns: string[]; rows: any[]; accentColor?: string } | null>(null)
+  const [tourKey, setTourKey] = useState(0)
+  const replayTour = () => {
+    try {
+      localStorage.removeItem('datapipe_tour_main_seen')
+      localStorage.removeItem('datapipe_tour_empty_seen')
+    } catch {}
+    setTourKey(k => k + 1)
+  }
   const [savedPipelines, setSavedPipelines] = useState<SavedPipeline[]>(() => {
     try { return JSON.parse(localStorage.getItem('datapipe_pipelines') || '[]') } catch { return [] }
   })
@@ -3225,11 +3278,12 @@ setTimeout(() => {
   if (sources.length === 0) {
     return (
       <div className="p-8 max-w-5xl mx-auto">
+        <GuidedTour key={`empty-${tourKey}`} steps={EMPTY_STATE_TOUR} storageKey="datapipe_tour_empty_seen" />
         <div className="text-center py-24 rounded-2xl" style={{ background:'rgba(255,255,255,0.02)', border:'1px dashed rgba(255,255,255,0.08)' }}>
           <div className="text-5xl mb-4">🔗</div>
           <p className="text-white font-bold text-lg mb-2">No data source connected</p>
           <p className="text-sm mb-6" style={{ color:'rgba(255,255,255,0.35)' }}>Add a source first to build your pipeline</p>
-          <button onClick={() => navigate('/sources')} className="px-6 py-3 rounded-xl text-sm font-bold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)' }}>Go to Data Sources →</button>
+          <button data-tour="tour-goto-sources" onClick={() => navigate('/sources')} className="px-6 py-3 rounded-xl text-sm font-bold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)' }}>Go to Data Sources →</button>
         </div>
       </div>
     )
@@ -3237,6 +3291,7 @@ setTimeout(() => {
 
   return (
     <div className="min-h-screen" style={{ background:'#07050f' }}>
+    <GuidedTour key={`main-${tourKey}`} steps={MAIN_TOUR} storageKey="datapipe_tour_main_seen" />
     {fullscreenTable && (
         <FullscreenTable
           title={fullscreenTable.title}
@@ -3262,6 +3317,9 @@ setTimeout(() => {
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={replayTour} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.5)' }} title="Replay the guided tour">
+            🧭 Tour
+          </button>
           <button onClick={() => setShowDriftPanel(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:statusColors.bg, border:`1px solid ${statusColors.border}`, color:statusColors.text }}>
             <span className="w-2 h-2 rounded-full animate-pulse" style={{ background:statusColors.dot }} />Schema: {statusColors.label}{driftScore>0&&<span className="opacity-70">· {driftScore}% drift</span>}
           </button>
@@ -3280,7 +3338,7 @@ setTimeout(() => {
           <button onClick={() => setShowAlertModal(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', color:'#f87171' }}>
             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alert
           </button>
-          <button onClick={() => setShowTransformPicker(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)', boxShadow:'0 0 20px rgba(124,58,237,0.3)' }}>
+          <button data-tour="tour-add-transform" onClick={() => setShowTransformPicker(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)', boxShadow:'0 0 20px rgba(124,58,237,0.3)' }}>
             <span className="text-base">+</span> Add Transformation
           </button>
         </div>
@@ -3294,7 +3352,7 @@ setTimeout(() => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             {/* SOURCE — native <select> */}
-            <div>
+            <div data-tour="tour-source-select">
               <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>📥 Source Dataset</label>
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 mb-2">
 {(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL', 'Databricks', 'REST API', 'GA4'] as const).map(type => {
@@ -3460,7 +3518,7 @@ setTimeout(() => {
             </div>
 
             {/* DESTINATION — combobox with clear button + GSheets + write mode */}
-            <div>
+            <div data-tour="tour-destination">
               <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>📤 Destination / Output Name</label>
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 mb-2">
   {(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL', 'Databricks'] as const).map(type => {
@@ -4162,7 +4220,7 @@ setTimeout(() => {
         </div>
 
         {/* PIPELINE FLOW DIAGRAM */}
-        <div className="rounded-2xl p-6 overflow-x-auto" style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)' }}>
+        <div data-tour="tour-pipeline-flow" className="rounded-2xl p-6 overflow-x-auto" style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)' }}>
           <p className="text-xs font-semibold mb-5 tracking-widest uppercase" style={{ color:'rgba(255,255,255,0.25)' }}>Pipeline Flow</p>
           <div className="flex items-center gap-3 min-w-max">
             <div className="rounded-2xl p-4 flex-shrink-0" style={{ background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.25)', minWidth:'200px' }}>
