@@ -24,7 +24,6 @@ export default function GuidedTour({
   onFinish?: () => void
 }) {
   const [active, setActive] = useState(false)
-  useEffect(() => { console.log('[GuidedTour] mounted, storageKey:', storageKey, 'seen:', localStorage.getItem(storageKey)) }, [])
   const [stepIndex, setStepIndex] = useState(0)
   const [rect, setRect] = useState<DOMRect | null>(null)
 
@@ -62,18 +61,18 @@ export default function GuidedTour({
     document.querySelector(currentStep.target)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [active, stepIndex, currentStep])
 
+  const finish = useCallback(() => {
+    try { localStorage.setItem(storageKey, 'true') } catch {}
+    setActive(false)
+    onFinish?.()
+  }, [storageKey, onFinish])
+
   useEffect(() => {
     if (!active) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') finish() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [active, finish])
-
-  const finish = useCallback(() => {
-    try { localStorage.setItem(storageKey, 'true') } catch {}
-    setActive(false)
-    onFinish?.()
-  }, [storageKey, onFinish])
 
   if (!active || steps.length === 0) return null
 
