@@ -1059,13 +1059,6 @@ if (!entered) return (
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.04em' }}>The God's Tool</div>
             <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#38bdf8', letterSpacing: '0.2em', marginTop: '6px', opacity: 0.7 }}>DATA · INTELLIGENCE · PIPELINE</div>
           </div>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            {[['∞','Data Sources'],['⚡','Real-time'],['🔒','Encrypted']].map(([icon, label]) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(30,64,175,0.15)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '20px', padding: '4px 12px', fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'monospace' }}>
-                <span style={{ fontSize: '0.8rem' }}>{icon}</span>{label}
-              </div>
-            ))}
-          </div>
           <div style={{ borderTop: '1px solid rgba(99,179,237,0.1)' }} />
           <button onClick={handleGoogleLogin} className="auth-btn-google" disabled={isGoogleLoading}>
             {isGoogleLoading ? <span className="btn-spinner" /> : (<>
