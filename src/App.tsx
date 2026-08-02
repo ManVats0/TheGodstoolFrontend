@@ -568,7 +568,7 @@ if (!entered) return (
     <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(5,3,15,0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '28px', width: '28px' }} /> 
-        <span style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontWeight: 900, fontSize: '1rem', letterSpacing: '0.06em', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: '1rem', letterSpacing: '0.06em', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
         <span className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</span>
@@ -642,7 +642,7 @@ if (!entered) return (
 
       {/* ── SIDE SIGNUP FORM ── */}
       <form onSubmit={handleSideFormSubmit} style={{ flex: '1 1 340px', maxWidth: '380px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '7px', textAlign: 'left', backdropFilter: 'blur(6px)' }}>
-        <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>Get started free</div>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>Get started free</div>
         <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 2px' }}>Fill this once — confirm on the next screen.</p>
         <input type="email" placeholder="you@example.com" value={sideEmail} onChange={e => setSideEmail(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px' }}>
@@ -735,7 +735,7 @@ if (!entered) return (
         ].map((f, i) => (
           <div key={i} className="feature-card" style={{ animationDelay: f.delay }}>
             <div style={{ fontSize: '2rem', marginBottom: '16px', filter: 'drop-shadow(0 0 12px rgba(124,58,237,0.5))' }}>{f.icon}</div>
-            <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.05rem', fontWeight: 700, marginBottom: '10px', color: 'rgba(255,255,255,0.9)' }}>{f.title}</div>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.05rem', fontWeight: 700, marginBottom: '10px', color: 'rgba(255,255,255,0.9)' }}>{f.title}</div>
             <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.7 }}>{f.desc}</div>
           </div>
         ))}
@@ -758,7 +758,7 @@ if (!entered) return (
             <div key={i} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
               <div className="step-num">{step.n}</div>
               <div style={{ paddingTop: '8px' }}>
-                <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>{step.title}</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>{step.title}</div>
                 <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.75 }}>{step.body}</div>
               </div>
             </div>
@@ -943,7 +943,7 @@ if (!entered) return (
             ].map((item, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(167,139,250,0.1)', borderRadius: '12px', padding: '20px' }}>
                 <div style={{ fontSize: '1.4rem', marginBottom: '10px' }}>{item.icon}</div>
-                <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '0.92rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: '6px' }}>{item.title}</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.92rem', fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: '6px' }}>{item.title}</div>
                 <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.7 }}>{item.desc}</div>
               </div>
             ))}
@@ -975,7 +975,7 @@ if (!entered) return (
           ].map((plan, i) => (
             <div key={i} className={`pricing-card${plan.featured ? ' featured' : ''}`}>
               {plan.featured && <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontFamily: 'monospace', fontSize: '0.65rem', letterSpacing: '0.15em', padding: '4px 16px', borderRadius: '20px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>}
-              <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.1rem', fontWeight: 700, marginBottom: '8px' }}>{plan.name}</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.1rem', fontWeight: 700, marginBottom: '8px' }}>{plan.name}</div>
               <div style={{ marginBottom: '24px' }}>
                 <span style={{ fontSize: '2.2rem', fontWeight: 900, background: 'linear-gradient(135deg, #e9d5ff, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{plan.price}</span>
                 <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginLeft: '4px' }}>{plan.period}</span>
@@ -1014,7 +1014,7 @@ if (!entered) return (
     <footer style={{ padding: '48px 24px 32px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
         <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '24px', width: '24px' }} />
-        <span style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontWeight: 900, fontSize: '0.95rem', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: '0.95rem', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
       </div>
       <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', marginBottom: '20px', lineHeight: 1.8 }}>
         Google Sign-In is used solely for account authentication. Google Sheets access is optional and only activated when you explicitly connect a sheet. We do not access, store, or share any Google data without your action.
@@ -1055,7 +1055,7 @@ if (!entered) return (
                 <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
               </svg>
             </div>
-            <div style={{ fontFamily: '"Palatino Linotype", Georgia, serif', fontSize: '1.5rem', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.04em' }}>The God's Tool</div>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.04em' }}>The God's Tool</div>
             <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#38bdf8', letterSpacing: '0.2em', marginTop: '6px', opacity: 0.7 }}>DATA · INTELLIGENCE · PIPELINE</div>
           </div>
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
