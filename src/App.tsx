@@ -657,11 +657,11 @@ if (!entered) return (
           <div style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: '#94a3b8', marginBottom: '4px' }}>How are you feeling right now?</div>
           <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
             {[
-              { emoji: '🔥', label: 'Excited' },
-              { emoji: '😌', label: 'Calm' },
-              { emoji: '😬', label: 'Nervous' },
-              { emoji: '🧠', label: 'Curious' },
-              { emoji: '😤', label: 'Determined' },
+              { label: 'Excited' },
+              { label: 'Calm' },
+              { label: 'Nervous' },
+              { label: 'Curious' },
+              { label: 'Determined' },
             ].map(f => (
               <button
                 key={f.label}
