@@ -1076,8 +1076,8 @@ if (!entered) return (
 
           {isRegisterMode && (
             <>
-              <input type="text" placeholder="Your name (what your office HR calls you)" value={regName} onChange={e => setRegName(e.target.value)} className="auth-input" />
-              <input type="text" placeholder="Nickname (what your classmates call you)" value={regNickname} onChange={e => setRegNickname(e.target.value)} className="auth-input" />
+              <input type="text" placeholder="Your name (What your stakeholders calls you?)" value={regName} onChange={e => setRegName(e.target.value)} className="auth-input" />
+              <input type="text" placeholder="Nickname (What does your mom call you?)" value={regNickname} onChange={e => setRegNickname(e.target.value)} className="auth-input" />
               <input type="password" placeholder="Repeat password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="auth-input" />
 
               {loginPassword && (
