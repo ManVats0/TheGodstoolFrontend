@@ -698,7 +698,6 @@ if (!entered) return (
     <div style={{ background: 'rgba(124,58,237,0.08)', borderTop: '1px solid rgba(167,139,250,0.1)', borderBottom: '1px solid rgba(167,139,250,0.1)', padding: '0 24px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[
-          { val: '∞', label: 'Data Sources' },
           { val: 'SQL', label: 'Editable & Copyable Pipelines' },
           { val: '🔍', label: 'Schema Change Detector' },
           { val: 'AI', label: 'Powered Cleaning' },
