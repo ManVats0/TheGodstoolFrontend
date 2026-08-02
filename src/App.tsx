@@ -635,14 +635,8 @@ if (!entered) return (
             See How It Works
           </button>
         </div>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '8px', letterSpacing: '0.05em' }}>
-          🛡️ Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems
-        </p>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
-          ✅ Data Security Guaranteed
-        </p>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: 'rgba(255,255,255,0.32)', marginTop: '5px', letterSpacing: '0.05em' }}>
-          ✅ Google OAuth Verified
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginTop: '12px' }}>
+          Built with years of experience handling sensitive, large-scale, systems in production · Data Security Guaranteed · Google OAuth Verified
         </p>
       </div>
 
@@ -1109,11 +1103,11 @@ if (!entered) return (
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {[
-                    { emoji: '🔥', label: 'Excited' },
-                    { emoji: '😌', label: 'Calm' },
-                    { emoji: '😬', label: 'Nervous' },
-                    { emoji: '🧠', label: 'Curious' },
-                    { emoji: '😤', label: 'Determined' },
+                    { label: 'Excited' },
+                    { label: 'Calm' },
+                    { label: 'Nervous' },
+                    { label: 'Curious' },
+                    { label: 'Determined' },
                   ].map(f => (
                     <button
                       key={f.label}
