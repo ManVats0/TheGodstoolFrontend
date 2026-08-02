@@ -420,13 +420,13 @@ if (location.pathname === '/feedback') return <Routes><Route path="/feedback" el
 if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
 
 if (location.pathname === '/auth/callback') return (
-  <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '1rem' }}>
+  <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1rem' }}>
     Signing you in…
   </div>
 )
 
 if (!entered) return (
-  <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: 'Georgia, serif', overflowX: 'hidden' }}>
+  <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: "'Inter', -apple-system, sans-serif", overflowX: 'hidden' }}>
     <style>{`
       @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
       @keyframes fadeUp { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
@@ -485,7 +485,7 @@ if (!entered) return (
       }
       .cta-btn:hover { background: #6d28d9; transform: translateY(-1px); }
       .cta-btn-outline {
-        font-family: Georgia, serif;
+        font-family: 'Inter', -apple-system, sans-serif;
         background: transparent;
         color: #a78bfa;
         border: 1px solid rgba(167,139,250,0.4);
@@ -529,7 +529,7 @@ if (!entered) return (
         background: rgba(255,255,255,0.04);
         border: 1px solid rgba(99,179,237,0.18);
         border-radius: 6px; color: #e2e8f0;
-        font-size: 0.95rem; font-family: Georgia, serif;
+        font-size: 0.95rem; font-family: "'Inter', -apple-system, sans-serif";
         box-sizing: border-box; outline: none;
         transition: border-color 0.2s;
       }
@@ -540,7 +540,7 @@ if (!entered) return (
         background: linear-gradient(135deg, #1a56db 0%, #1e40af 100%);
         border: none; border-radius: 6px; color: white;
         font-weight: 700; font-size: 0.95rem; letter-spacing: 0.08em;
-        cursor: pointer; font-family: Georgia, serif; transition: opacity 0.2s;
+        cursor: pointer; font-family: "'Inter', -apple-system, sans-serif"; transition: opacity 0.2s;
       }
       .auth-btn-primary:hover { opacity: 0.88; }
       .auth-btn-google {
@@ -550,7 +550,7 @@ if (!entered) return (
         border-radius: 6px; padding: 12px 20px;
         font-size: 0.92rem; font-weight: 500; cursor: pointer;
         width: 100%; justify-content: center; color: #cbd5e1;
-        font-family: Georgia, serif; transition: background 0.2s;
+        font-family: "'Inter', -apple-system, sans-serif"; transition: background 0.2s;
       }
       .auth-btn-google:hover { background: rgba(255,255,255,0.1); }
       .auth-btn-primary:disabled, .auth-btn-google:disabled { opacity: 0.65; cursor: not-allowed; }
@@ -610,7 +610,7 @@ if (!entered) return (
         </h1>
 
         {/* */}
-<p style={{ fontSize: 'clamp(0.88rem, 1.5vw, 1.02rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, maxWidth: '600px', margin: '0 auto 10px', fontFamily: 'Georgia, serif' }}>
+<p style={{ fontSize: 'clamp(0.88rem, 1.5vw, 1.02rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, maxWidth: '600px', margin: '0 auto 10px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
   Connect your database, sheet, or CRM. AI profiles it, cleans it, and pipelines it out — the work a data engineer would spend hours on, done in minutes.
 </p>
 
@@ -628,7 +628,7 @@ if (!entered) return (
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="cta-btn" onClick={() => handleEnter('register')}>Connect Your First Source</button>
-          <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '13px 32px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
+          <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '13px 32px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.4)'; e.currentTarget.style.color = '#a78bfa' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}>
             See How It Works
@@ -933,7 +933,7 @@ if (!entered) return (
           <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 900, margin: '0 0 20px', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
             We wake up before your problems wake you up.
           </h2>
-          <p style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, maxWidth: '580px', margin: '0 auto 40px' }}>
+          <p style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, maxWidth: '580px', margin: '0 auto 40px' }}>
             Something went sideways in your pipeline at 2 AM — your data drifted, a schema broke, row counts dropped to zero. Before your senior even opens Slack on Monday morning, <span style={{ color: '#a78bfa', fontStyle: 'italic' }}>you already know, you already fixed it, and you already moved on.</span>
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px', textAlign: 'left' }}>
@@ -988,7 +988,7 @@ if (!entered) return (
                   </div>
                 ))}
               </div>
-              <button onClick={() => handleEnter('register')} style={{ width: '100%', padding: '11px', borderRadius: '6px', border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.12)', background: plan.featured ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(255,255,255,0.04)', color: 'white', fontFamily: 'Georgia, serif', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'opacity 0.2s' }}
+              <button onClick={() => handleEnter('register')} style={{ width: '100%', padding: '11px', borderRadius: '6px', border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.12)', background: plan.featured ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(255,255,255,0.04)', color: 'white', fontFamily: "'Inter', -apple-system, sans-serif", fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'opacity 0.2s' }}
                 onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
                 {plan.name === 'Free' ? 'Start Free' : plan.featured ? 'Start Pro Trial' : 'Get Started'}
@@ -1159,14 +1159,14 @@ if (!entered) return (
     <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '24px', padding: '24px' }}>
       <div style={{ textAlign: 'center', maxWidth: '480px' }}>
         <img src={logo} alt="logo" style={{ height: '64px', width: '64px', marginBottom: '16px' }} />
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>Welcome to The God's Tool</div>
+        <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>Welcome to The God's Tool</div>
         <div style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginBottom: '32px' }}>Get started for free or unlock the full platform</div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
           {/* Free tier */}
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '20px 24px', textAlign: 'left' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ color: 'white', fontWeight: 700, fontFamily: 'Georgia, serif', fontSize: '1rem' }}>Free</span>
+              <span style={{ color: 'white', fontWeight: 700, fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1rem' }}>Free</span>
               <span style={{ color: '#4ade80', fontFamily: 'monospace', fontSize: '0.78rem', background: 'rgba(74,222,128,0.1)', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>No credit card</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
@@ -1176,7 +1176,7 @@ if (!entered) return (
             </div>
             <button
               onClick={() => { localStorage.setItem('datapro_plan', 'free'); setUserPlan('free'); }}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)', color: 'white', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', fontFamily: 'Georgia, serif' }}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)', color: 'white', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', fontFamily: "'Inter', -apple-system, sans-serif" }}
             >
               Continue Free
             </button>
@@ -1185,7 +1185,7 @@ if (!entered) return (
           {/* Paid tier */}
           <div style={{ background: 'rgba(124,58,237,0.1)', border: '2px solid rgba(124,58,237,0.4)', borderRadius: '12px', padding: '20px 24px', textAlign: 'left' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-  <span style={{ color: 'white', fontWeight: 700, fontFamily: 'Georgia, serif', fontSize: '1rem' }}>Paid Plans</span>
+  <span style={{ color: 'white', fontWeight: 700, fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1rem' }}>Paid Plans</span>
 </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
               {['✓ All data sources (MySQL, Postgres, BigQuery…)', '✓ AI-powered data cleaning', '✓ Unlimited pipeline automation', '✓ Priority support'].map(f => (
@@ -1194,7 +1194,7 @@ if (!entered) return (
             </div>
             <button
               onClick={() => navigate('/pricing')}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', fontFamily: 'Georgia, serif' }}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', fontFamily: "'Inter', -apple-system, sans-serif" }}
             >
               View Plans →
             </button>
