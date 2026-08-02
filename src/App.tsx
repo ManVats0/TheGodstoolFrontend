@@ -568,8 +568,7 @@ if (!entered) return (
     <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(5,3,15,0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '28px', width: '28px' }} /> 
-        <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: '1rem', letterSpacing: '0.06em', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
-      </div>
+        <span style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>      </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
         <span className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</span>
         <span className="nav-link" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>How It Works</span>
@@ -698,6 +697,7 @@ if (!entered) return (
     <div style={{ background: 'rgba(124,58,237,0.08)', borderTop: '1px solid rgba(167,139,250,0.1)', borderBottom: '1px solid rgba(167,139,250,0.1)', padding: '0 24px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[
+          { val: '∞', label: 'Data Sources' },
           { val: 'SQL', label: 'Editable & Copyable Pipelines' },
           { val: '🔍', label: 'Schema Change Detector' },
           { val: 'AI', label: 'Powered Cleaning' },
