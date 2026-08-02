@@ -98,29 +98,6 @@ useEffect(() => {
   const readIds = useStore(s => s.readIds)
   const unread = notifications.filter(n => !readIds.has(n.id)).length
 
-  const speakWelcome = () => {
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance('We are so happy you found this technology.')
-    utterance.pitch = 0.1
-    utterance.rate = 0.78
-    utterance.volume = 1
-    const trySpeak = () => {
-      const voices = window.speechSynthesis.getVoices()
-      const deep = voices.find(v => /male/i.test(v.name) || /david/i.test(v.name) || /daniel/i.test(v.name) || /james/i.test(v.name))
-      if (deep) utterance.voice = deep
-      window.speechSynthesis.speak(utterance)
-    }
-    if (window.speechSynthesis.getVoices().length > 0) {
-      trySpeak()
-    } else {
-      window.speechSynthesis.onvoiceschanged = () => { trySpeak(); window.speechSynthesis.onvoiceschanged = null }
-    }
-  }
-
-  useEffect(() => {
-    if (entered) speakWelcome()
-  }, [entered])
-
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === 'GOOGLE_TOKEN' && (window as any)._googleLoginCallback) {
@@ -458,17 +435,14 @@ if (!entered) return (
       @keyframes rotateOrb { 0%{transform:rotate(0deg) translateX(120px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)} }
       @keyframes gridFade { 0%,100%{opacity:0.04} 50%{opacity:0.08} }
       .hero-title {
-        font-size: clamp(1.7rem, 4.2vw, 3.1rem);
-        font-weight: 900;
-        letter-spacing: -0.02em;
-        line-height: 1.05;
-        background: linear-gradient(135deg, #ffffff 0%, #e9d5ff 30%, #a78bfa 60%, #7c3aed 100%);
-        background-size: 300% auto;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        animation: shimmer 6s linear infinite;
+        font-family: 'Inter', -apple-system, sans-serif;
+        font-size: clamp(2rem, 4.2vw, 3.4rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.08;
+        color: #ffffff;
       }
+      .hero-title .accent { color: #a78bfa; }
       .nav-link {
         color: rgba(255,255,255,0.55);
         text-decoration: none;
@@ -497,21 +471,19 @@ if (!entered) return (
         padding: 24px 16px;
       }
       .cta-btn {
-        font-family: Georgia, serif;
-        background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+        font-family: 'Inter', -apple-system, sans-serif;
+        background: #7c3aed;
         color: white;
         border: none;
         padding: 13px 38px;
-        border-radius: 6px;
-        font-size: 0.88rem;
-        font-weight: 700;
-        letter-spacing: 0.15em;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
         cursor: pointer;
-        text-transform: uppercase;
-        animation: pulseGlow 3s ease-in-out infinite;
-        transition: transform 0.2s;
+        transition: background 0.15s ease, transform 0.15s ease;
       }
-      .cta-btn:hover { transform: scale(1.04); }
+      .cta-btn:hover { background: #6d28d9; transform: translateY(-1px); }
       .cta-btn-outline {
         font-family: Georgia, serif;
         background: transparent;
@@ -635,7 +607,7 @@ if (!entered) return (
           For Teams Without a Data Engineer
         </p>
         <h1 className="hero-title" style={{ margin: '0 0 8px' }}>
-          The data engineer you don't have to hire
+          The data engineer <span className="accent">you don't have to hire</span>
         </h1>
 
         {/* */}
@@ -1080,9 +1052,9 @@ if (!entered) return (
       <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,8,15,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
         <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '400px', margin: '0 16px', background: 'rgba(10,15,28,0.95)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '12px', padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: '18px', maxHeight: '90vh', overflowY: 'auto' }}>
           {/* Floating SQL particles */}
-          {['SELECT *','JOIN','GROUP BY','WHERE','AVG()','COUNT(*)'].map((word, i) => (
+          {/* {['SELECT *','JOIN','GROUP BY','WHERE','AVG()','COUNT(*)'].map((word, i) => (
             <div key={i} style={{ position: 'absolute', left: `${8 + (i * 15) % 80}%`, top: `${65 + (i * 8) % 30}%`, fontFamily: 'monospace', fontSize: '0.65rem', color: '#38bdf8', opacity: 0.1, pointerEvents: 'none', animation: `float-up ${3 + (i % 3)}s ease-in ${i * 0.6}s infinite`, userSelect: 'none' }}>{word}</div>
-          ))}
+          ))} */}
           <div style={{ textAlign: 'center', marginBottom: '4px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(30,64,175,0.25)', border: '1px solid rgba(99,179,237,0.2)', marginBottom: '14px' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
