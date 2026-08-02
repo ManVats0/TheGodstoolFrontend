@@ -699,8 +699,10 @@ if (!entered) return (
       <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[
           { val: '∞', label: 'Data Sources' },
+          { val: 'SQL', label: 'Editable & Copyable Pipelines' },
           { val: '🔍', label: 'Schema Change Detector' },
           { val: 'AI', label: 'Powered Cleaning' },
+          { val: '📧', label: 'Email Alerts on Data Anomalies' },
           { val: '1', label: 'Everything in Browser Tab' },
         ].map((s, i) => (
           <div key={i} className="stat-item" style={{ padding: '28px 40px' }}>
