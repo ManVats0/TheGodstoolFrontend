@@ -1096,37 +1096,6 @@ if (!entered) return (
                   </div>
                 </div>
               )}
-
-              <div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>
-                  How are you feeling right now?
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {[
-                    { label: 'Excited' },
-                    { label: 'Calm' },
-                    { label: 'Nervous' },
-                    { label: 'Curious' },
-                    { label: 'Determined' },
-                  ].map(f => (
-                    <button
-                      key={f.label}
-                      type="button"
-                      onClick={() => setRegFeeling(f.label)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '6px',
-                        background: regFeeling === f.label ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.04)',
-                        border: regFeeling === f.label ? '1px solid rgba(167,139,250,0.5)' : '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '20px', padding: '6px 12px',
-                        fontFamily: 'monospace', fontSize: '0.75rem', color: '#e2e8f0',
-                        cursor: 'pointer', transition: 'all 0.15s'
-                      }}
-                    >
-                      <span>{f.emoji}</span>{f.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </>
           )}
 
