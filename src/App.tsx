@@ -600,14 +600,14 @@ if (!entered) return (
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '1180px', width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '32px', animation: 'fadeUp 0.8s ease both' }}>
       <div style={{ flex: '1 1 480px', maxWidth: '620px', minWidth: '300px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(167,139,250,0.25)', borderRadius: '20px', padding: '5px 16px', marginBottom: '10px', fontFamily: 'monospace', fontSize: '0.68rem', color: '#a78bfa', letterSpacing: '0.15em' }}>
-          ⚡ ETL SOFTWARE
+           ETL SOFTWARE AND DATA INTELLIGENCE PLATFORM
         </div>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '8px', textTransform: 'uppercase' }}>
-          For Teams Without a Data Engineer
+          For Teams Who care about data quality, speed, and security
         </p>
         <h1 className="hero-title" style={{ margin: '0 0 8px' }}>
-          The data engineer <span className="accent">you don't have to hire</span>
+          Everything your data needs <span className="accent">in one platform.</span>
         </h1>
 
         {/* */}
