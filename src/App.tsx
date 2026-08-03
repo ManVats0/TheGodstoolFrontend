@@ -750,8 +750,8 @@ if (!entered) return (
   letterSpacing: '-0.03em', 
   lineHeight: 1.15 
 }}>Messy data in. Clean answers out</h2>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>Connect, clean, automate — one platform, zero hires.</p>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>Connect, clean, automate — one platform, zero hires.</p>
+        <p style={{ color: 'rgba(255,255,255,0.45)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
@@ -770,7 +770,7 @@ if (!entered) return (
           <div key={i} className="feature-card" style={{ animationDelay: f.delay }}>
             <div style={{ marginBottom: '16px' }}><LineIcon name={f.icon} size={30} /></div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.05rem', fontWeight: 700, marginBottom: '10px', color: 'rgba(255,255,255,0.9)' }}>{f.title}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.7 }}>{f.desc}</div>
+            <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.7 }}>{f.desc}</div>
           </div>
         ))}
       </div>
@@ -793,7 +793,7 @@ if (!entered) return (
               <div className="step-num">{step.n}</div>
               <div style={{ paddingTop: '8px' }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>{step.title}</div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.75 }}>{step.body}</div>
+                <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75 }}>{step.body}</div>
               </div>
             </div>
           ))}
@@ -809,7 +809,7 @@ if (!entered) return (
   <div style={{ textAlign: 'center', marginBottom: '56px' }}>
     <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Real Output</div>
     <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>From messy to production-ready.</h2>
-    <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', marginTop: '12px' }}>37,880 rows analyzed, cleaned, and scheduled to stay clean — no code written.</p>
+    <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.58)', marginTop: '12px' }}>37,880 rows analyzed, cleaned, and scheduled to stay clean — no code written.</p>
   </div>
 
   <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '28px' }}>
@@ -910,7 +910,7 @@ if (!entered) return (
       <div style={{ maxWidth: '860px', margin: '0 auto', textAlign: 'center' }}>
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>See It In Action</div>
         <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>Watch the Tool clean your data live.</h2>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.75, marginBottom: '48px', maxWidth: '560px', margin: '0 auto 48px' }}>Upload a messy CSV. Watch the platform detect issues, suggest fixes, and produce clean output — in seconds.</p>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75, marginBottom: '48px', maxWidth: '560px', margin: '0 auto 48px' }}>Upload a messy CSV. Watch the platform detect issues, suggest fixes, and produce clean output — in seconds.</p>
 <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.2)', boxShadow: '0 0 60px rgba(124,58,237,0.15)', background: '#000' }}>
           {demoPlaying ? (
             <iframe
@@ -942,7 +942,7 @@ if (!entered) return (
             { icon: 'cpu', text: 'AI detects every issue' },
             { icon: 'check', text: 'One-click clean export' },
           ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.62)' }}>
               <LineIcon name={item.icon} size={18} />
               {item.text}
             </div>
@@ -978,7 +978,7 @@ if (!entered) return (
               <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(167,139,250,0.1)', borderRadius: '12px', padding: '20px' }}>
                 <div style={{ marginBottom: '10px' }}><LineIcon name={item.icon} size={22} /></div>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.92rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginBottom: '6px' }}>{item.title}</div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.7 }}>{item.desc}</div>
+                <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.7 }}>{item.desc}</div>
               </div>
             ))}
           </div>
@@ -991,7 +991,7 @@ if (!entered) return (
     </section>
 
     {/* ── PRICING ── */}
-    <section id="pricing" style={{ padding: '100px 24px' }}>
+    <section id="pricing" style={{ padding: '100px 24px', background: 'linear-gradient(180deg, rgba(124,58,237,0.05) 0%, rgba(251,191,36,0.02) 100%)', borderTop: '1px solid rgba(167,139,250,0.08)', borderBottom: '1px solid rgba(167,139,250,0.08)' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '64px' }}>
           <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Pricing</div>
@@ -1053,7 +1053,7 @@ if (!entered) return (
         <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '24px', width: '24px' }} />
         <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: '0.95rem', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
       </div>
-      <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', marginBottom: '20px', lineHeight: 1.8 }}>
+      <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginBottom: '20px', lineHeight: 1.8 }}>
         Google Sign-In is used solely for account authentication. Google Sheets access is optional and only activated when you explicitly connect a sheet. We do not access, store, or share any Google data without your action.
       </p>
       <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '24px' }}>
