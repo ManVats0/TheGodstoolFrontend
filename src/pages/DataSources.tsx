@@ -17,8 +17,8 @@
   },
 ]
 
-  const badge = (text: string, color: string) => (
-    <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: `${color}20`, color }}>{text}</span>
+  const badge = (text: string, _color?: string) => (
+    <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}>{text}</span>
   )
 
   function SourceIcon({ name, size = 18, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
@@ -1350,7 +1350,7 @@ const handleLockedSource = () => {
                 {badge('Available', '#22c55e')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer hover:bg-blue-500/10"
-                style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.25)' }}
+                style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}
                 onClick={() => setShowCatalogList(true)}>
                 <div className="mb-3"><SourceIcon name="folder" size={26} color="#60a5fa" /></div>
                 <h3 className="font-bold text-white mb-1">From Catalog</h3>
@@ -1358,20 +1358,20 @@ const handleLockedSource = () => {
                 {badge('Available', '#3b82f6')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)' }}
+                style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}
                 onClick={() => setShowGSheetsFlow(true)}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.14)'; e.currentTarget.style.border = '1px solid rgba(52,211,153,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.08)'; e.currentTarget.style.border = '1px solid rgba(52,211,153,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="mb-3"><SourceIcon name="grid" size={26} color="#34d399" /></div>
                 <h3 className="font-bold text-white mb-1">Google Sheets</h3>
                 <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>Connect live Google Sheets data</p>
                 {badge('Available', '#34d399')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: isPaid ? 'rgba(234,179,8,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(234,179,8,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
+                style={{ background: isPaid ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(124,58,237,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
                 onClick={() => isPaid ? setShowMySQLFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.14)'; e.currentTarget.style.border = '1px solid rgba(234,179,8,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.08)'; e.currentTarget.style.border = '1px solid rgba(234,179,8,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">🗄️</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1385,10 +1385,10 @@ const handleLockedSource = () => {
                 {badge('New', '#f59e0b')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: isPaid ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(99,102,241,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
+                style={{ background: isPaid ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(124,58,237,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
                 onClick={() => isPaid ? setShowPostgresFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.14)'; e.currentTarget.style.border = '1px solid rgba(99,102,241,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; e.currentTarget.style.border = '1px solid rgba(99,102,241,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">🐘</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1402,10 +1402,10 @@ const handleLockedSource = () => {
                 {badge('New', '#6366f1')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: isPaid ? 'rgba(234,88,12,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(234,88,12,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
+                style={{ background: isPaid ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(124,58,237,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
                 onClick={() => isPaid ? setShowBigQueryFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(234,88,12,0.14)'; e.currentTarget.style.border = '1px solid rgba(234,88,12,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(234,88,12,0.08)'; e.currentTarget.style.border = '1px solid rgba(234,88,12,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">🔷</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1417,10 +1417,10 @@ const handleLockedSource = () => {
                 {badge('New', '#ea580c')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: isPaid ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(34,197,94,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
+                style={{ background: isPaid ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(124,58,237,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
                 onClick={() => isPaid ? setShowMongoFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.14)'; e.currentTarget.style.border = '1px solid rgba(34,197,94,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.08)'; e.currentTarget.style.border = '1px solid rgba(34,197,94,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">🍃</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1434,10 +1434,10 @@ const handleLockedSource = () => {
                 {badge('New', '#22c55e')}
               </div>
             <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: isPaid ? 'rgba(255,153,0,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(255,153,0,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
+                style={{ background: isPaid ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(124,58,237,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
                 onClick={() => isPaid ? setShowAWSFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,153,0,0.14)'; e.currentTarget.style.border = '1px solid rgba(255,153,0,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,153,0,0.08)'; e.currentTarget.style.border = '1px solid rgba(255,153,0,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">☁️</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1451,10 +1451,10 @@ const handleLockedSource = () => {
                 {badge('New', '#FF9900')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: isPaid ? 'rgba(255,153,0,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(255,153,0,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
+                style={{ background: isPaid ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(124,58,237,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
                 onClick={() => isPaid ? setShowCostExplorerFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,153,0,0.14)'; e.currentTarget.style.border = '1px solid rgba(255,153,0,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,153,0,0.08)'; e.currentTarget.style.border = '1px solid rgba(255,153,0,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">💰</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1467,10 +1467,10 @@ const handleLockedSource = () => {
               </div>
               {/* GCS Card */}
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: isPaid ? 'rgba(66,133,244,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(66,133,244,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
+                style={{ background: isPaid ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(124,58,237,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
                 onClick={() => isPaid ? setShowGCSFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(66,133,244,0.14)'; e.currentTarget.style.border = '1px solid rgba(66,133,244,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(66,133,244,0.08)'; e.currentTarget.style.border = '1px solid rgba(66,133,244,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">🪣</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1483,10 +1483,10 @@ const handleLockedSource = () => {
               </div>
               {/* Cloud SQL Card */}
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: isPaid ? 'rgba(52,168,83,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(52,168,83,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
+                style={{ background: isPaid ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.02)', border: isPaid ? '1px solid rgba(124,58,237,0.25)' : '1px solid rgba(255,255,255,0.06)', opacity: isPaid ? 1 : 0.6 }}
                 onClick={() => isPaid ? setShowCloudSQLFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(52,168,83,0.14)'; e.currentTarget.style.border = '1px solid rgba(52,168,83,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,168,83,0.08)'; e.currentTarget.style.border = '1px solid rgba(52,168,83,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">☁️</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1500,10 +1500,10 @@ const handleLockedSource = () => {
                 {badge('GCP', '#34A853')}
               </div>
                             <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: 'rgba(255,70,0,0.08)', border: '1px solid rgba(255,70,0,0.25)' }}
+                style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}
                 onClick={() => isPaid ? setShowDatabricksFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,70,0,0.14)'; e.currentTarget.style.border = '1px solid rgba(255,70,0,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,70,0,0.08)'; e.currentTarget.style.border = '1px solid rgba(255,70,0,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">🧱</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1516,10 +1516,10 @@ const handleLockedSource = () => {
                 {badge('New', '#FF4600')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.25)' }}
+                style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}
                 onClick={() => isPaid ? setShowRestApiFlow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(20,184,166,0.14)'; e.currentTarget.style.border = '1px solid rgba(20,184,166,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(20,184,166,0.08)'; e.currentTarget.style.border = '1px solid rgba(20,184,166,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">🌐</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1532,10 +1532,10 @@ const handleLockedSource = () => {
                 {badge('New', '#14b8a6')}
               </div>
               <div className="p-6 rounded-2xl cursor-pointer transition-all"
-                style={{ background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.25)' }}
+                style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}
                 onClick={() => isPaid ? setShowGA4Flow(true) : handleLockedSource()}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(251,146,60,0.14)'; e.currentTarget.style.border = '1px solid rgba(251,146,60,0.45)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(251,146,60,0.08)'; e.currentTarget.style.border = '1px solid rgba(251,146,60,0.25)' }}>
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
                 <div className="text-2xl mb-3">📈</div>
                 <div className="flex items-center gap-2 mb-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -1553,7 +1553,7 @@ const handleLockedSource = () => {
               className="rounded-2xl p-12 text-center transition-all cursor-pointer"
               style={{
                 background: dragging ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.02)',
-                border: `2px dashed ${dragging ? 'rgba(124,58,237,0.6)' : pendingFile ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                border: `2px dashed ${dragging ? 'rgba(124,58,237,0.6)' : pendingFile ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.1)'}`,
               }}
               onClick={() => fileRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setDragging(true) }}
@@ -1641,7 +1641,7 @@ const handleLockedSource = () => {
               <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{ background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)' }}>
+                    style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                       <rect x="4" y="2" width="16" height="20" rx="2" fill="#34A853" fillOpacity="0.2" stroke="#34A853" strokeWidth="1.5"/>
                       <line x1="8" y1="8"  x2="16" y2="8"  stroke="#34A853" strokeWidth="1.3"/>
@@ -1667,13 +1667,13 @@ const handleLockedSource = () => {
                 {/* Step 1: Auth */}
                 {gsheetsStep === 'auth' && (
                   <>
-                    <div className="rounded-xl p-4" style={{ background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)' }}>
+                    <div className="rounded-xl p-4" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                       <p className="text-xs font-bold text-white mb-1.5">🔒 Secure OAuth 2.0 via Google</p>
                       <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
                         We use Google's standard sign-in screen. If you're already logged into Google in this browser, your account will be pre-populated — one click and you're in.
                       </p>
                       <button className="mt-2 text-xs underline"
-                        style={{ color: 'rgba(52,211,153,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
+                        style={{ color: 'rgba(124,58,237,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
                         onClick={() => setGsheetsError(v => v ? '' : 'Google requires explicit permission consent to access your Sheets. This is a one-time step per account.')}>
                         Why this step? ⓘ
                       </button>
@@ -1721,7 +1721,7 @@ const handleLockedSource = () => {
                     <div className="rounded-xl p-3 space-y-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                       <p className="text-xs font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.3)' }}>Data row preview (sample)</p>
                       {['Row 1: Sales · Q2 · ₹48,200', 'Row 2: Marketing · Q2 · ₹12,400', 'Row 3: HR · Q1 · ₹8,900'].map((r, i) => (
-                        <div key={i} className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(52,211,153,0.05)', color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>{r}</div>
+                        <div key={i} className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(124,58,237,0.05)', color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>{r}</div>
                       ))}
                     </div>
                     <button onClick={() => { setGsheetsStep('auth'); setGsheetsProgress(0) }}
@@ -1735,7 +1735,7 @@ const handleLockedSource = () => {
                 {gsheetsStep === 'picker' && (
                   <>
                     <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
-                      style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)' }}>
+                      style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}>
                       <span className="text-xs" style={{ color: '#34d399' }}>✓ Signed in as</span>
                       <span className="text-xs font-bold text-white">{gsheetsEmail}</span>
                     </div>
@@ -1767,7 +1767,7 @@ const handleLockedSource = () => {
                           className="w-full text-sm text-white rounded-xl outline-none"
                           style={{
                             background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(52,211,153,0.25)',
+                            border: '1px solid rgba(124,58,237,0.25)',
                             padding: '10px 36px 10px 36px',
                           }}
                         />
@@ -1788,7 +1788,7 @@ const handleLockedSource = () => {
 
 <button onClick={openGooglePicker}
                         className="w-full mb-3 py-2.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2"
-                        style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.4)', cursor: 'pointer' }}>
+                        style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.4)', cursor: 'pointer' }}>
                         📁 Choose a Spreadsheet from Drive
                       </button>
 
@@ -1808,8 +1808,8 @@ const handleLockedSource = () => {
                               onClick={() => handleSheetSelect(sheet.id)}
                               className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all"
                               style={{
-                                background: selectedSheetId === sheet.id ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.03)',
-                                border: `1px solid ${selectedSheetId === sheet.id ? 'rgba(52,211,153,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                                background: selectedSheetId === sheet.id ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${selectedSheetId === sheet.id ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}`,
                               }}>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                                 <rect x="3" y="2" width="18" height="20" rx="2" fill="#34A853" fillOpacity="0.2" stroke="#34A853" strokeWidth="1.5"/>
@@ -1851,8 +1851,8 @@ const handleLockedSource = () => {
                               <button key={t} onClick={() => setSelectedTab(t)}
                                 className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
                                 style={{
-                                  background: selectedTab === t ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.05)',
-                                  border: `1px solid ${selectedTab === t ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                  background: selectedTab === t ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.05)',
+                                  border: `1px solid ${selectedTab === t ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.1)'}`,
                                   color: selectedTab === t ? '#34d399' : 'rgba(255,255,255,0.5)',
                                 }}>
                                 {t}
@@ -1888,7 +1888,7 @@ const handleLockedSource = () => {
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowMySQLFlow(false); setMysqlStatus('idle'); setMysqlError('') }}>
           <div className="rounded-2xl w-full max-w-md overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(234,179,8,0.25)' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)' }}
             onClick={e => e.stopPropagation()}>
 
             {/* Header */}
@@ -1896,7 +1896,7 @@ const handleLockedSource = () => {
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="1.8">
                     <ellipse cx="12" cy="5" rx="9" ry="3"/>
                     <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
@@ -1924,7 +1924,7 @@ const handleLockedSource = () => {
             <div className="p-5 space-y-4">
 
               {/* Info banner */}
-              <div className="rounded-xl p-3" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔒 SSL/TLS · Connection pool · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Credentials are saved in your browser only. Other users on this tool connect with their own MySQL — your database is never shared.
@@ -1941,7 +1941,7 @@ const handleLockedSource = () => {
                     onChange={e => setMysql(p => ({ ...p, host: e.target.value }))}
                     placeholder="localhost or db.example.com"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(234,179,8,0.25)' }}
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                   />
                 </div>
                 <div>
@@ -1951,7 +1951,7 @@ const handleLockedSource = () => {
                     value={mysql.port}
                     onChange={e => setMysql(p => ({ ...p, port: e.target.value }))}
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(234,179,8,0.25)' }}
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                   />
                 </div>
               </div>
@@ -1966,7 +1966,7 @@ const handleLockedSource = () => {
                     onChange={e => setMysql(p => ({ ...p, user: e.target.value }))}
                     placeholder="root"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(234,179,8,0.25)' }}
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                   />
                 </div>
                 <div>
@@ -1977,7 +1977,7 @@ const handleLockedSource = () => {
                     onChange={e => setMysql(p => ({ ...p, password: e.target.value }))}
                     placeholder="••••••••"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(234,179,8,0.25)' }}
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                   />
                 </div>
               </div>
@@ -1991,7 +1991,7 @@ const handleLockedSource = () => {
                   onChange={e => setMysql(p => ({ ...p, database: e.target.value }))}
                   placeholder="my_database"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(234,179,8,0.25)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                 />
               </div>
 
@@ -2029,7 +2029,7 @@ const handleLockedSource = () => {
               {mysqlStatus === 'ok' && !mysqlError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
-                    style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                    style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>
                       ✅ Health check passed — database is reachable
                     </p>
@@ -2058,7 +2058,7 @@ const handleLockedSource = () => {
                               }
                             }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)', color: '#fbbf24' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#fbbf24' }}>
                             {mysqlSelectedTables.size === mysqlTables.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -2076,8 +2076,8 @@ const handleLockedSource = () => {
                               }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
                               style={{
-                                background: checked ? 'rgba(234,179,8,0.1)' : 'rgba(255,255,255,0.03)',
-                                border: `1px solid ${checked ? 'rgba(234,179,8,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                                background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}`,
                               }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{
@@ -2098,7 +2098,7 @@ const handleLockedSource = () => {
                                 {table}
                               </span>
                               {checked && (
-                                <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(234,179,8,0.15)', color: '#fbbf24' }}>✓</span>
+                                <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#fbbf24' }}>✓</span>
                               )}
                             </div>
                           )
@@ -2158,8 +2158,8 @@ if (tablesData.tables?.length > 0) {
                   disabled={!mysql.host || !mysql.user || !mysql.database || mysqlStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{
-                    background: 'rgba(234,179,8,0.15)',
-                    border: '1px solid rgba(234,179,8,0.35)',
+                    background: 'rgba(124,58,237,0.15)',
+                    border: '1px solid rgba(124,58,237,0.35)',
                     color: '#fbbf24',
                     cursor: (!mysql.host || !mysql.user || !mysql.database || mysqlStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
@@ -2239,14 +2239,14 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowPostgresFlow(false); setPostgresStatus('idle'); setPostgresError('') }}>
           <div className="rounded-2xl w-full max-w-md overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(99,102,241,0.25)' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)' }}
             onClick={e => e.stopPropagation()}>
 
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="1.8">
                     <ellipse cx="12" cy="5" rx="9" ry="3"/>
                     <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
@@ -2263,7 +2263,7 @@ setMysqlSelectedTables(new Set())
             </div>
 
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔒 SSL/TLS · Connection pool · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Credentials are saved in your browser only. Your database is never shared with other users.
@@ -2277,14 +2277,14 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setPostgres(p => ({ ...p, host: e.target.value }))}
                     placeholder="localhost or db.example.com"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(99,102,241,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Port</label>
                   <input type="number" value={postgres.port}
                     onChange={e => setPostgres(p => ({ ...p, port: e.target.value }))}
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(99,102,241,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
               </div>
 
@@ -2295,7 +2295,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setPostgres(p => ({ ...p, user: e.target.value }))}
                     placeholder="postgres"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(99,102,241,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Password</label>
@@ -2303,7 +2303,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setPostgres(p => ({ ...p, password: e.target.value }))}
                     placeholder="••••••••"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(99,102,241,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
               </div>
 
@@ -2313,7 +2313,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setPostgres(p => ({ ...p, database: e.target.value }))}
                   placeholder="my_database"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(99,102,241,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
 
               <div className="flex items-center justify-between px-3 py-2.5 rounded-xl"
@@ -2342,7 +2342,7 @@ setMysqlSelectedTables(new Set())
               {postgresStatus === 'ok' && !postgresError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
-                    style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                    style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — database is reachable</p>
                   </div>
                   {postgresTablesLoading && (
@@ -2357,7 +2357,7 @@ setMysqlSelectedTables(new Set())
                           <button
                             onClick={() => { if (postgresSelectedTables.size === postgresTables.length) { setPostgresSelectedTables(new Set()) } else { setPostgresSelectedTables(new Set(postgresTables)) } }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', color: '#818cf8' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#818cf8' }}>
                             {postgresSelectedTables.size === postgresTables.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -2369,7 +2369,7 @@ setMysqlSelectedTables(new Set())
                             <div key={`${table}-${idx}`}
                               onClick={() => { const next = new Set(postgresSelectedTables); checked ? next.delete(table) : next.add(table); setPostgresSelectedTables(next) }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-                              style={{ background: checked ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
+                              style={{ background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{ width: '16px', height: '16px', background: checked ? '#6366f1' : 'transparent', border: `2px solid ${checked ? '#6366f1' : 'rgba(255,255,255,0.25)'}` }}>
                                 {checked && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
@@ -2378,7 +2378,7 @@ setMysqlSelectedTables(new Set())
                                 <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
                               </svg>
                               <span className="text-sm flex-1 font-medium" style={{ color: checked ? 'white' : 'rgba(255,255,255,0.55)' }}>{table}</span>
-                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}>✓</span>}
+                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#818cf8' }}>✓</span>}
                             </div>
                           )
                         })}
@@ -2431,7 +2431,7 @@ setMysqlSelectedTables(new Set())
                   }}
                   disabled={!postgres.host || !postgres.user || !postgres.database || postgresStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.35)', color: '#818cf8', cursor: (!postgres.host || !postgres.user || !postgres.database || postgresStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)', color: '#818cf8', cursor: (!postgres.host || !postgres.user || !postgres.database || postgresStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
                   {postgresStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
@@ -2501,14 +2501,14 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowBigQueryFlow(false); setBqStatus('idle'); setBqError('') }}>
           <div className="rounded-2xl w-full max-w-md overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(234,88,12,0.25)' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)' }}
             onClick={e => e.stopPropagation()}>
 
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(234,88,12,0.12)', border: '1px solid rgba(234,88,12,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M12 2L22 19H2L12 2Z" fill="#ea580c" fillOpacity="0.7" stroke="#ea580c" strokeWidth="1.5" strokeLinejoin="round"/>
                   </svg>
@@ -2523,7 +2523,7 @@ setMysqlSelectedTables(new Set())
             </div>
 
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(234,88,12,0.06)', border: '1px solid rgba(234,88,12,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔑 Service Account JSON Key</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   In Google Cloud Console → IAM → Service Accounts → create key (JSON). The service account needs BigQuery Data Viewer + BigQuery Job User roles. Key is saved in your browser only.
@@ -2538,7 +2538,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setBqProject(e.target.value)}
                   placeholder="my-gcp-project-id"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(234,88,12,0.25)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                 />
               </div>
 
@@ -2550,7 +2550,7 @@ setMysqlSelectedTables(new Set())
                   placeholder='Paste the full JSON key here: {"type":"service_account","project_id":...}'
                   rows={5}
                   className="w-full text-xs text-white rounded-xl px-3 py-2.5 outline-none resize-none font-mono"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(234,88,12,0.25)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                 />
               </div>
 
@@ -2566,7 +2566,7 @@ setMysqlSelectedTables(new Set())
               {bqStatus === 'ok' && !bqError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
-                    style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                    style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — BigQuery is reachable</p>
                   </div>
 
@@ -2597,7 +2597,7 @@ setMysqlSelectedTables(new Set())
                             finally { setBqTablesLoading(false) }
                           }}
                           className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none appearance-none"
-                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(234,88,12,0.25)', paddingRight: '28px', cursor: 'pointer' }}
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)', paddingRight: '28px', cursor: 'pointer' }}
                         >
                           <option value="" style={{ background: '#0d0a1a' }}>Select a dataset…</option>
                           {bqDatasets.map(d => (
@@ -2605,7 +2605,7 @@ setMysqlSelectedTables(new Set())
                           ))}
                         </select>
                         <div style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                          <svg width="10" height="10" fill="none" stroke="rgba(234,88,12,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                          <svg width="10" height="10" fill="none" stroke="rgba(124,58,237,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
                       </div>
                     </div>
@@ -2627,7 +2627,7 @@ setMysqlSelectedTables(new Set())
                               else setBqSelectedTables(new Set(bqTables))
                             }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(234,88,12,0.1)', border: '1px solid rgba(234,88,12,0.25)', color: '#fb923c' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#fb923c' }}>
                             {bqSelectedTables.size === bqTables.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -2644,8 +2644,8 @@ setMysqlSelectedTables(new Set())
                               }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
                               style={{
-                                background: checked ? 'rgba(234,88,12,0.1)' : 'rgba(255,255,255,0.03)',
-                                border: `1px solid ${checked ? 'rgba(234,88,12,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                                background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}`,
                               }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{ width: '16px', height: '16px', background: checked ? '#ea580c' : 'transparent', border: `2px solid ${checked ? '#ea580c' : 'rgba(255,255,255,0.25)'}` }}>
@@ -2655,7 +2655,7 @@ setMysqlSelectedTables(new Set())
                                 <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
                               </svg>
                               <span className="text-sm flex-1 font-medium" style={{ color: checked ? 'white' : 'rgba(255,255,255,0.55)' }}>{table}</span>
-                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(234,88,12,0.15)', color: '#fb923c' }}>✓</span>}
+                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#fb923c' }}>✓</span>}
                             </div>
                           )
                         })}
@@ -2721,8 +2721,8 @@ setMysqlSelectedTables(new Set())
                   disabled={!bqProject || !bqKeyJson || bqStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{
-                    background: 'rgba(234,88,12,0.15)',
-                    border: '1px solid rgba(234,88,12,0.35)',
+                    background: 'rgba(124,58,237,0.15)',
+                    border: '1px solid rgba(124,58,237,0.35)',
                     color: '#fb923c',
                     cursor: (!bqProject || !bqKeyJson || bqStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
@@ -2800,14 +2800,14 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowMongoFlow(false); setMongoStatus('idle'); setMongoError('') }}>
           <div className="rounded-2xl w-full max-w-md overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(34,197,94,0.25)' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)' }}
             onClick={e => e.stopPropagation()}>
 
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="1.8">
                     <ellipse cx="12" cy="5" rx="9" ry="3"/>
                     <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
@@ -2824,7 +2824,7 @@ setMysqlSelectedTables(new Set())
             </div>
 
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔒 Connection URI · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Get this from MongoDB Atlas → Install MongoDB Atlas → Connect → Drivers. Format: mongodb+srv://user:pass@cluster.mongodb.net/ — Credentials stay in your browser only.
@@ -2839,7 +2839,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setMongo(p => ({ ...p, uri: e.target.value }))}
                   placeholder="mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(34,197,94,0.25)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                 />
               </div>
 
@@ -2851,7 +2851,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setMongo(p => ({ ...p, database: e.target.value }))}
                   placeholder="my_database"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(34,197,94,0.25)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                 />
               </div>
 
@@ -2867,7 +2867,7 @@ setMysqlSelectedTables(new Set())
               {mongoStatus === 'ok' && !mongoError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
-                    style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                    style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — MongoDB is reachable</p>
                   </div>
                   {mongoCollectionsLoading && (
@@ -2885,7 +2885,7 @@ setMysqlSelectedTables(new Set())
                               else setMongoSelectedCollections(new Set(mongoCollections))
                             }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', color: '#4ade80' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#4ade80' }}>
                             {mongoSelectedCollections.size === mongoCollections.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -2901,7 +2901,7 @@ setMysqlSelectedTables(new Set())
                                 setMongoSelectedCollections(next)
                               }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-                              style={{ background: checked ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(34,197,94,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
+                              style={{ background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{ width: '16px', height: '16px', background: checked ? '#22c55e' : 'transparent', border: `2px solid ${checked ? '#22c55e' : 'rgba(255,255,255,0.25)'}` }}>
                                 {checked && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
@@ -2910,7 +2910,7 @@ setMysqlSelectedTables(new Set())
                                 <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
                               </svg>
                               <span className="text-sm flex-1 font-medium" style={{ color: checked ? 'white' : 'rgba(255,255,255,0.55)' }}>{coll}</span>
-                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80' }}>✓</span>}
+                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#4ade80' }}>✓</span>}
                             </div>
                           )
                         })}
@@ -2963,7 +2963,7 @@ setMysqlSelectedTables(new Set())
                   }}
                   disabled={!mongo.uri || !mongo.database || mongoStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80', cursor: (!mongo.uri || !mongo.database || mongoStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)', color: '#4ade80', cursor: (!mongo.uri || !mongo.database || mongoStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
                   {mongoStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
@@ -3029,14 +3029,14 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowAWSFlow(false); setAwsStatus('idle'); setAwsError('') }}>
           <div className="rounded-2xl w-full max-w-lg overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(255,153,0,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}>
 
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(255,153,0,0.12)', border: '1px solid rgba(255,153,0,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M6.5 20C4.01 20 2 17.99 2 15.5C2 13.01 4.01 11 6.5 11C6.5 8.24 8.74 6 11.5 6C13.85 6 15.82 7.57 16.4 9.74C16.6 9.72 16.8 9.7 17 9.7C19.21 9.7 21 11.49 21 13.7C21 15.91 19.21 17.7 17 17.7H16.5" stroke="#FF9900" strokeWidth="1.5" strokeLinecap="round"/>
                     <path d="M9 17L12 20L15 17" stroke="#FF9900" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -3054,7 +3054,7 @@ setMysqlSelectedTables(new Set())
 
             <div className="p-5 space-y-4">
               {/* IAM info banner */}
-              <div className="rounded-xl p-3" style={{ background: 'rgba(255,153,0,0.06)', border: '1px solid rgba(255,153,0,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔑 IAM Access Key Required</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   In AWS Console → IAM → Users → your user → Security credentials → Create access key.
@@ -3081,8 +3081,8 @@ setMysqlSelectedTables(new Set())
                       onClick={() => { setAwsService(svc.id); setAwsStatus('idle'); setAwsError(''); setAwsTables([]); setAwsSelectedTables(new Set()) }}
                       className="p-2 rounded-xl cursor-pointer text-center transition-all"
                       style={{
-                        background: awsService === svc.id ? 'rgba(255,153,0,0.2)' : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${awsService === svc.id ? 'rgba(255,153,0,0.5)' : 'rgba(255,255,255,0.07)'}`,
+                        background: awsService === svc.id ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${awsService === svc.id ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.07)'}`,
                       }}>
                       <div className="text-base mb-0.5">{svc.icon}</div>
                       <p className="text-xs font-semibold" style={{ color: awsService === svc.id ? '#FF9900' : 'rgba(255,255,255,0.55)', fontSize: '10px' }}>{svc.label}</p>
@@ -3096,7 +3096,7 @@ setMysqlSelectedTables(new Set())
                 <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>AWS Region</label>
                 <select value={aws.region} onChange={e => setAws(p => ({ ...p, region: e.target.value }))}
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }}>
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}>
                   {['us-east-1','us-east-2','us-west-1','us-west-2','eu-west-1','eu-west-2','eu-central-1',
                     'ap-south-1','ap-southeast-1','ap-southeast-2','ap-northeast-1','ca-central-1','sa-east-1'].map(r => (
                     <option key={r} value={r} style={{ background: '#0d0a1a' }}>{r}</option>
@@ -3112,7 +3112,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setAws(p => ({ ...p, accessKeyId: e.target.value }))}
                     placeholder="AKIAIOSFODNN7EXAMPLE"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Secret Access Key</label>
@@ -3120,7 +3120,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setAws(p => ({ ...p, secretAccessKey: e.target.value }))}
                     placeholder="••••••••••••••••••••"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
               </div>
 
@@ -3136,14 +3136,14 @@ setMysqlSelectedTables(new Set())
                         onChange={e => setAws(p => ({ ...p, host: e.target.value }))}
                         placeholder={awsService === 'redshift' ? 'cluster.xxxx.region.redshift.amazonaws.com' : 'mydb.xxxx.region.rds.amazonaws.com'}
                         className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                     </div>
                     <div>
                       <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Port</label>
                       <input type="number" value={aws.port || (awsService === 'rds-mysql' ? '3306' : awsService === 'redshift' ? '5439' : '5432')}
                         onChange={e => setAws(p => ({ ...p, port: e.target.value }))}
                         className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -3153,7 +3153,7 @@ setMysqlSelectedTables(new Set())
                         onChange={e => setAws(p => ({ ...p, user: e.target.value }))}
                         placeholder={awsService === 'redshift' ? 'awsuser' : 'admin'}
                         className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                     </div>
                     <div>
                       <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Password</label>
@@ -3161,7 +3161,7 @@ setMysqlSelectedTables(new Set())
                         onChange={e => setAws(p => ({ ...p, password: e.target.value }))}
                         placeholder="••••••••"
                         className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                     </div>
                   </div>
                   <div>
@@ -3170,7 +3170,7 @@ setMysqlSelectedTables(new Set())
                       onChange={e => setAws(p => ({ ...p, database: e.target.value }))}
                       placeholder="my_database"
                       className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                   </div>
                   <div className="flex items-center justify-between px-3 py-2.5 rounded-xl"
                     style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
@@ -3196,7 +3196,7 @@ setMysqlSelectedTables(new Set())
                       onChange={e => setAws(p => ({ ...p, bucket: e.target.value }))}
                       placeholder="my-data-bucket"
                       className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                   </div>
                   <div>
                     <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Prefix / Folder (optional)</label>
@@ -3204,7 +3204,7 @@ setMysqlSelectedTables(new Set())
                       onChange={e => setAws(p => ({ ...p, prefix: e.target.value }))}
                       placeholder="data/exports/ (leave empty for root)"
                       className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                   </div>
                 </>
               )}
@@ -3216,13 +3216,13 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setAws(p => ({ ...p, tableName: e.target.value }))}
                     placeholder="my-dynamo-table"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
               )}
 
               {awsService === 'cost-explorer' && (
                 <>
-                  <div className="rounded-xl p-3" style={{ background: 'rgba(255,153,0,0.06)', border: '1px solid rgba(255,153,0,0.2)' }}>
+                  <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                     <p className="text-xs font-bold text-white mb-1">💰 AWS Cost Explorer</p>
                     <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                       Pulls your AWS billing data into a CSV for analysis. Your IAM user needs the
@@ -3239,7 +3239,7 @@ setMysqlSelectedTables(new Set())
                         value={awsCostStartDate}
                         onChange={e => setAwsCostStartDate(e.target.value)}
                         className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)', colorScheme: 'dark' }}
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)', colorScheme: 'dark' }}
                       />
                     </div>
                     <div>
@@ -3249,7 +3249,7 @@ setMysqlSelectedTables(new Set())
                         value={awsCostEndDate}
                         onChange={e => setAwsCostEndDate(e.target.value)}
                         className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)', colorScheme: 'dark' }}
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)', colorScheme: 'dark' }}
                       />
                     </div>
                   </div>
@@ -3261,12 +3261,12 @@ setMysqlSelectedTables(new Set())
                           value={awsCostGranularity}
                           onChange={e => setAwsCostGranularity(e.target.value as 'DAILY' | 'MONTHLY')}
                           className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none appearance-none"
-                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)', paddingRight: '28px', cursor: 'pointer' }}>
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)', paddingRight: '28px', cursor: 'pointer' }}>
                           <option value="MONTHLY" style={{ background: '#0d0a1a' }}>Monthly</option>
                           <option value="DAILY" style={{ background: '#0d0a1a' }}>Daily</option>
                         </select>
                         <div style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                          <svg width="10" height="10" fill="none" stroke="rgba(255,153,0,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                          <svg width="10" height="10" fill="none" stroke="rgba(124,58,237,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
                       </div>
                     </div>
@@ -3277,13 +3277,13 @@ setMysqlSelectedTables(new Set())
                           value={awsCostGroupBy}
                           onChange={e => setAwsCostGroupBy(e.target.value as 'SERVICE' | 'REGION' | 'USAGE_TYPE')}
                           className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none appearance-none"
-                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)', paddingRight: '28px', cursor: 'pointer' }}>
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)', paddingRight: '28px', cursor: 'pointer' }}>
                           <option value="SERVICE" style={{ background: '#0d0a1a' }}>Service (EC2, S3…)</option>
                           <option value="REGION" style={{ background: '#0d0a1a' }}>Region</option>
                           <option value="USAGE_TYPE" style={{ background: '#0d0a1a' }}>Usage Type</option>
                         </select>
                         <div style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                          <svg width="10" height="10" fill="none" stroke="rgba(255,153,0,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                          <svg width="10" height="10" fill="none" stroke="rgba(124,58,237,0.7)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
                       </div>
                     </div>
@@ -3305,7 +3305,7 @@ setMysqlSelectedTables(new Set())
               {awsStatus === 'ok' && !awsError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
-                    style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                    style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ AWS connection healthy</p>
                   </div>
                   {awsTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables / objects…</p>}
@@ -3323,7 +3323,7 @@ setMysqlSelectedTables(new Set())
                               else setAwsSelectedTables(new Set(awsTables))
                             }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(255,153,0,0.1)', border: '1px solid rgba(255,153,0,0.25)', color: '#FF9900' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#FF9900' }}>
                             {awsSelectedTables.size === awsTables.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -3335,13 +3335,13 @@ setMysqlSelectedTables(new Set())
                             <div key={`${item}-${idx}`}
                               onClick={() => { const next = new Set(awsSelectedTables); checked ? next.delete(item) : next.add(item); setAwsSelectedTables(next) }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-                              style={{ background: checked ? 'rgba(255,153,0,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(255,153,0,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
+                              style={{ background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{ width: '16px', height: '16px', background: checked ? '#FF9900' : 'transparent', border: `2px solid ${checked ? '#FF9900' : 'rgba(255,255,255,0.25)'}` }}>
                                 {checked && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
                               </div>
                               <span className="text-sm flex-1 font-medium font-mono" style={{ color: checked ? 'white' : 'rgba(255,255,255,0.55)', fontSize: '12px' }}>{item}</span>
-                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(255,153,0,0.15)', color: '#FF9900' }}>✓</span>}
+                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#FF9900' }}>✓</span>}
                             </div>
                           )
                         })}
@@ -3402,7 +3402,7 @@ setMysqlSelectedTables(new Set())
                   }}
                   disabled={awsStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(255,153,0,0.15)', border: '1px solid rgba(255,153,0,0.35)', color: '#FF9900', cursor: awsStatus === 'testing' ? 'not-allowed' : 'pointer' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)', color: '#FF9900', cursor: awsStatus === 'testing' ? 'not-allowed' : 'pointer' }}>
                   {awsStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
@@ -3475,13 +3475,13 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowCostExplorerFlow(false); setCostExplorerStatus('idle'); setCostExplorerError('') }}>
           <div className="rounded-2xl w-full max-w-lg overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(255,153,0,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(255,153,0,0.12)', border: '1px solid rgba(255,153,0,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <span style={{ fontSize: '18px' }}>💰</span>
                 </div>
                 <div>
@@ -3493,7 +3493,7 @@ setMysqlSelectedTables(new Set())
                 style={{ color: 'rgba(255,255,255,0.35)', fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(255,153,0,0.06)', border: '1px solid rgba(255,153,0,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔑 IAM permissions required</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Your IAM user needs <strong style={{ color: '#FF9900' }}>ce:GetCostAndUsage</strong> permission. In AWS Console → IAM → attach a policy with that action on resource <code style={{ color: '#FF9900' }}>*</code>. Keys are saved in your browser only.
@@ -3506,7 +3506,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setCostExplorer(p => ({ ...p, accessKeyId: e.target.value }))}
                     placeholder="AKIAIOSFODNN7EXAMPLE"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Secret Access Key</label>
@@ -3514,14 +3514,14 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setCostExplorer(p => ({ ...p, secretAccessKey: e.target.value }))}
                     placeholder="••••••••••••••••••••"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
               </div>
               <div>
                 <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>AWS Region</label>
                 <select value={costExplorer.region} onChange={e => setCostExplorer(p => ({ ...p, region: e.target.value }))}
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }}>
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}>
                   {['us-east-1','us-east-2','us-west-1','us-west-2','eu-west-1','eu-central-1','ap-south-1','ap-southeast-1','ap-northeast-1'].map(r => (
                     <option key={r} value={r} style={{ background: '#0d0a1a' }}>{r}</option>
                   ))}
@@ -3533,14 +3533,14 @@ setMysqlSelectedTables(new Set())
                   <input type="date" value={costExplorer.startDate}
                     onChange={e => setCostExplorer(p => ({ ...p, startDate: e.target.value }))}
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)', colorScheme: 'dark' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)', colorScheme: 'dark' }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>End Date</label>
                   <input type="date" value={costExplorer.endDate}
                     onChange={e => setCostExplorer(p => ({ ...p, endDate: e.target.value }))}
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)', colorScheme: 'dark' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)', colorScheme: 'dark' }} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -3548,7 +3548,7 @@ setMysqlSelectedTables(new Set())
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Granularity</label>
                   <select value={costExplorer.granularity} onChange={e => setCostExplorer(p => ({ ...p, granularity: e.target.value }))}
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }}>
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <option value="DAILY" style={{ background: '#0d0a1a' }}>Daily</option>
                     <option value="MONTHLY" style={{ background: '#0d0a1a' }}>Monthly</option>
                   </select>
@@ -3557,7 +3557,7 @@ setMysqlSelectedTables(new Set())
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Group By</label>
                   <select value={costExplorer.groupBy} onChange={e => setCostExplorer(p => ({ ...p, groupBy: e.target.value }))}
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,153,0,0.25)' }}>
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <option value="SERVICE" style={{ background: '#0d0a1a' }}>Service</option>
                     <option value="REGION" style={{ background: '#0d0a1a' }}>Region</option>
                     <option value="USAGE_TYPE" style={{ background: '#0d0a1a' }}>Usage Type</option>
@@ -3572,7 +3572,7 @@ setMysqlSelectedTables(new Set())
                 </div>
               )}
               {costExplorerStatus === 'ok' && costExplorerData.length > 0 && (
-                <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                   <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ {costExplorerData.length} rows fetched — ready to add as source</p>
                 </div>
               )}
@@ -3603,7 +3603,7 @@ setMysqlSelectedTables(new Set())
                   }}
                   disabled={!costExplorer.accessKeyId || !costExplorer.secretAccessKey || !costExplorer.startDate || !costExplorer.endDate || costExplorerStatus === 'fetching'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(255,153,0,0.15)', border: '1px solid rgba(255,153,0,0.35)', color: '#FF9900', cursor: 'pointer' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)', color: '#FF9900', cursor: 'pointer' }}>
                   {costExplorerStatus === 'fetching' ? '⏳ Fetching…' : '📊 Fetch Cost Data'}
                 </button>
                 <button
@@ -3652,13 +3652,13 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowGCSFlow(false); setGcsStatus('idle'); setGcsError('') }}>
           <div className="rounded-2xl w-full max-w-md overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(66,133,244,0.25)' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)' }}
             onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(66,133,244,0.12)', border: '1px solid rgba(66,133,244,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <span style={{ fontSize: '18px' }}>🪣</span>
                 </div>
                 <div>
@@ -3670,7 +3670,7 @@ setMysqlSelectedTables(new Set())
                 style={{ color: 'rgba(255,255,255,0.35)', fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(66,133,244,0.06)', border: '1px solid rgba(66,133,244,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔑 Service Account JSON Key</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   GCP Console → IAM → Service Accounts → Create key (JSON). The account needs <strong style={{ color: '#4285F4' }}>Storage Object Viewer</strong> role. Key stays in your browser only.
@@ -3682,7 +3682,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setGcs(p => ({ ...p, project: e.target.value }))}
                   placeholder="my-gcp-project"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(66,133,244,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
               <div>
                 <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Bucket Name</label>
@@ -3690,7 +3690,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setGcs(p => ({ ...p, bucket: e.target.value }))}
                   placeholder="my-data-bucket"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(66,133,244,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
               <div>
                 <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Prefix / Folder (optional)</label>
@@ -3698,7 +3698,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setGcs(p => ({ ...p, prefix: e.target.value }))}
                   placeholder="data/exports/ (leave empty for root)"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(66,133,244,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
               <div>
                 <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Service Account Key JSON</label>
@@ -3707,7 +3707,7 @@ setMysqlSelectedTables(new Set())
                   placeholder='Paste the full JSON key here: {"type":"service_account","project_id":...}'
                   rows={4}
                   className="w-full text-xs text-white rounded-xl px-3 py-2.5 outline-none resize-none font-mono"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(66,133,244,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
               {gcsError && (
                 <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
@@ -3717,7 +3717,7 @@ setMysqlSelectedTables(new Set())
               )}
               {gcsStatus === 'ok' && !gcsError && (
                 <div className="space-y-3">
-                  <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                  <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ GCS bucket reachable</p>
                   </div>
                   {gcsFilesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading CSV files…</p>}
@@ -3729,7 +3729,7 @@ setMysqlSelectedTables(new Set())
                           <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{gcsSelectedFiles.size}/{gcsFiles.length} selected</span>
                           <button onClick={() => { if (gcsSelectedFiles.size === gcsFiles.length) setGcsSelectedFiles(new Set()); else setGcsSelectedFiles(new Set(gcsFiles)) }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(66,133,244,0.1)', border: '1px solid rgba(66,133,244,0.25)', color: '#4285F4' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#4285F4' }}>
                             {gcsSelectedFiles.size === gcsFiles.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -3741,13 +3741,13 @@ setMysqlSelectedTables(new Set())
                             <div key={`${f}-${idx}`}
                               onClick={() => { const next = new Set(gcsSelectedFiles); checked ? next.delete(f) : next.add(f); setGcsSelectedFiles(next) }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-                              style={{ background: checked ? 'rgba(66,133,244,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(66,133,244,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
+                              style={{ background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{ width: '16px', height: '16px', background: checked ? '#4285F4' : 'transparent', border: `2px solid ${checked ? '#4285F4' : 'rgba(255,255,255,0.25)'}` }}>
                                 {checked && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
                               </div>
                               <span className="text-sm flex-1 font-medium font-mono" style={{ color: checked ? 'white' : 'rgba(255,255,255,0.55)', fontSize: '12px' }}>{f}</span>
-                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(66,133,244,0.15)', color: '#4285F4' }}>✓</span>}
+                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#4285F4' }}>✓</span>}
                             </div>
                           )
                         })}
@@ -3784,7 +3784,7 @@ setMysqlSelectedTables(new Set())
                   }}
                   disabled={!gcs.project || !gcs.bucket || !gcs.keyJson || gcsStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.35)', color: '#4285F4', cursor: 'pointer' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)', color: '#4285F4', cursor: 'pointer' }}>
                   {gcsStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
@@ -3821,13 +3821,13 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowCloudSQLFlow(false); setCloudSQLStatus('idle'); setCloudSQLError('') }}>
           <div className="rounded-2xl w-full max-w-md overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(52,168,83,0.25)' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)' }}
             onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(52,168,83,0.12)', border: '1px solid rgba(52,168,83,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <span style={{ fontSize: '18px' }}>☁️</span>
                 </div>
                 <div>
@@ -3839,7 +3839,7 @@ setMysqlSelectedTables(new Set())
                 style={{ color: 'rgba(255,255,255,0.35)', fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(52,168,83,0.06)', border: '1px solid rgba(52,168,83,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔌 Cloud SQL Connection</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Use the public IP of your Cloud SQL instance (enable it in GCP Console → Cloud SQL → Connections → Public IP). Add your IP to Authorized Networks. Credentials stay in browser only.
@@ -3849,7 +3849,7 @@ setMysqlSelectedTables(new Set())
                 {(['postgres', 'mysql'] as const).map(t => (
                   <button key={t} onClick={() => setCloudSQL(p => ({ ...p, dbType: t, port: t === 'postgres' ? '5432' : '3306' }))}
                     className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                    style={{ background: cloudSQL.dbType === t ? 'rgba(52,168,83,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${cloudSQL.dbType === t ? 'rgba(52,168,83,0.5)' : 'rgba(255,255,255,0.08)'}`, color: cloudSQL.dbType === t ? '#34A853' : 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+                    style={{ background: cloudSQL.dbType === t ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${cloudSQL.dbType === t ? 'rgba(124,58,237,0.5)' : 'rgba(255,255,255,0.08)'}`, color: cloudSQL.dbType === t ? '#34A853' : 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
                     {t === 'postgres' ? '🐘 PostgreSQL' : '🗄️ MySQL'}
                   </button>
                 ))}
@@ -3860,7 +3860,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setCloudSQL(p => ({ ...p, project: e.target.value }))}
                   placeholder="my-gcp-project"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(52,168,83,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
@@ -3869,14 +3869,14 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setCloudSQL(p => ({ ...p, instanceConnectionName: e.target.value }))}
                     placeholder="34.x.x.x or instance IP"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(52,168,83,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Port</label>
                   <input type="number" value={cloudSQL.port}
                     onChange={e => setCloudSQL(p => ({ ...p, port: e.target.value }))}
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(52,168,83,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -3886,7 +3886,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setCloudSQL(p => ({ ...p, user: e.target.value }))}
                     placeholder={cloudSQL.dbType === 'postgres' ? 'postgres' : 'root'}
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(52,168,83,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Password</label>
@@ -3894,7 +3894,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setCloudSQL(p => ({ ...p, password: e.target.value }))}
                     placeholder="••••••••"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(52,168,83,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
               </div>
               <div>
@@ -3903,7 +3903,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setCloudSQL(p => ({ ...p, database: e.target.value }))}
                   placeholder="my_database"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(52,168,83,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
               {cloudSQLError && (
                 <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
@@ -3913,7 +3913,7 @@ setMysqlSelectedTables(new Set())
               )}
               {cloudSQLStatus === 'ok' && !cloudSQLError && (
                 <div className="space-y-3">
-                  <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                  <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Cloud SQL reachable</p>
                   </div>
                   {cloudSQLTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>}
@@ -3925,7 +3925,7 @@ setMysqlSelectedTables(new Set())
                           <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{cloudSQLSelectedTables.size}/{cloudSQLTables.length} selected</span>
                           <button onClick={() => { if (cloudSQLSelectedTables.size === cloudSQLTables.length) setCloudSQLSelectedTables(new Set()); else setCloudSQLSelectedTables(new Set(cloudSQLTables)) }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(52,168,83,0.1)', border: '1px solid rgba(52,168,83,0.25)', color: '#34A853' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#34A853' }}>
                             {cloudSQLSelectedTables.size === cloudSQLTables.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -3937,13 +3937,13 @@ setMysqlSelectedTables(new Set())
                             <div key={`${tbl}-${idx}`}
                               onClick={() => { const next = new Set(cloudSQLSelectedTables); checked ? next.delete(tbl) : next.add(tbl); setCloudSQLSelectedTables(next) }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-                              style={{ background: checked ? 'rgba(52,168,83,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(52,168,83,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
+                              style={{ background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{ width: '16px', height: '16px', background: checked ? '#34A853' : 'transparent', border: `2px solid ${checked ? '#34A853' : 'rgba(255,255,255,0.25)'}` }}>
                                 {checked && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
                               </div>
                               <span className="text-sm flex-1 font-medium" style={{ color: checked ? 'white' : 'rgba(255,255,255,0.55)' }}>{tbl}</span>
-                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(52,168,83,0.15)', color: '#34A853' }}>✓</span>}
+                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#34A853' }}>✓</span>}
                             </div>
                           )
                         })}
@@ -3980,7 +3980,7 @@ setMysqlSelectedTables(new Set())
                   }}
                   disabled={!cloudSQL.instanceConnectionName || !cloudSQL.user || !cloudSQL.database || cloudSQLStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(52,168,83,0.15)', border: '1px solid rgba(52,168,83,0.35)', color: '#34A853', cursor: 'pointer' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)', color: '#34A853', cursor: 'pointer' }}>
                   {cloudSQLStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
@@ -4018,14 +4018,14 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowDatabricksFlow(false); setDatabricksStatus('idle'); setDatabricksError('') }}>
           <div className="rounded-2xl w-full max-w-md overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(255,70,0,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}>
 
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(255,70,0,0.12)', border: '1px solid rgba(255,70,0,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M12 2L2 7v5l10 5 10-5V7L12 2z" fill="#FF4600" fillOpacity="0.7" stroke="#FF4600" strokeWidth="1.5"/>
                     <path d="M2 12v5l10 5 10-5v-5" stroke="#FF4600" strokeWidth="1.5" fill="none"/>
@@ -4041,7 +4041,7 @@ setMysqlSelectedTables(new Set())
             </div>
 
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(255,70,0,0.06)', border: '1px solid rgba(255,70,0,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔑 Personal Access Token (PAT)</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   In Databricks → User Settings → Access Tokens → Generate token. Host is your workspace URL e.g. <strong style={{ color: '#FF4600' }}>adb-xxxx.azuredatabricks.net</strong>. HTTP path is in SQL Warehouses → your warehouse → Connection details. Token stays in your browser only.
@@ -4056,7 +4056,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setDatabricks(p => ({ ...p, host: e.target.value }))}
                   placeholder="adb-1234567890.azuredatabricks.net"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,70,0,0.25)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                 />
               </div>
 
@@ -4068,7 +4068,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setDatabricks(p => ({ ...p, httpPath: e.target.value }))}
                   placeholder="/sql/1.0/warehouses/xxxxxxxxxx"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,70,0,0.25)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                 />
               </div>
 
@@ -4080,7 +4080,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setDatabricks(p => ({ ...p, token: e.target.value }))}
                   placeholder="dapi••••••••••••••••••••••••••••••••"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,70,0,0.25)' }}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                 />
               </div>
 
@@ -4093,7 +4093,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setDatabricks(p => ({ ...p, catalog: e.target.value }))}
                     placeholder="hive_metastore"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,70,0,0.25)' }}
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                   />
                 </div>
                 <div>
@@ -4104,7 +4104,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setDatabricks(p => ({ ...p, schema: e.target.value }))}
                     placeholder="default"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,70,0,0.25)' }}
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }}
                   />
                 </div>
               </div>
@@ -4121,7 +4121,7 @@ setMysqlSelectedTables(new Set())
               {databricksStatus === 'ok' && !databricksError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
-                    style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                    style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — Databricks is reachable</p>
                   </div>
                   {databricksTablesLoading && (
@@ -4139,7 +4139,7 @@ setMysqlSelectedTables(new Set())
                               else setDatabricksSelectedTables(new Set(databricksTables))
                             }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(255,70,0,0.1)', border: '1px solid rgba(255,70,0,0.25)', color: '#FF4600' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#FF4600' }}>
                             {databricksSelectedTables.size === databricksTables.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -4156,8 +4156,8 @@ setMysqlSelectedTables(new Set())
                               }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
                               style={{
-                                background: checked ? 'rgba(255,70,0,0.1)' : 'rgba(255,255,255,0.03)',
-                                border: `1px solid ${checked ? 'rgba(255,70,0,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                                background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}`,
                               }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{
@@ -4178,7 +4178,7 @@ setMysqlSelectedTables(new Set())
                                 {table}
                               </span>
                               {checked && (
-                                <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(255,70,0,0.15)', color: '#FF4600' }}>✓</span>
+                                <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#FF4600' }}>✓</span>
                               )}
                             </div>
                           )
@@ -4236,8 +4236,8 @@ setMysqlSelectedTables(new Set())
                   disabled={!databricks.host || !databricks.httpPath || !databricks.token || databricksStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{
-                    background: 'rgba(255,70,0,0.15)',
-                    border: '1px solid rgba(255,70,0,0.35)',
+                    background: 'rgba(124,58,237,0.15)',
+                    border: '1px solid rgba(124,58,237,0.35)',
                     color: '#FF4600',
                     cursor: (!databricks.host || !databricks.httpPath || !databricks.token || databricksStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
@@ -4313,14 +4313,14 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowRestApiFlow(false); setRestStatus('idle'); setRestError('') }}>
           <div className="rounded-2xl w-full max-w-lg overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(20,184,166,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}>
 
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(20,184,166,0.12)', border: '1px solid rgba(20,184,166,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <circle cx="12" cy="12" r="10" stroke="#14b8a6" strokeWidth="1.5"/>
                     <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="#14b8a6" strokeWidth="1.5" fill="none"/>
@@ -4336,7 +4336,7 @@ setMysqlSelectedTables(new Set())
             </div>
 
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(20,184,166,0.06)', border: '1px solid rgba(20,184,166,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🌐 REST API Connection</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Connect any REST API endpoint. Supports Bearer token, API key, or no auth. Credentials stay in your browser only.
@@ -4349,7 +4349,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setRestApi(p => ({ ...p, base_url: e.target.value }))}
                   placeholder="https://api.example.com"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(20,184,166,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -4359,7 +4359,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setRestApi(p => ({ ...p, auth_header: e.target.value }))}
                     placeholder="Authorization"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(20,184,166,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Auth Prefix</label>
@@ -4367,7 +4367,7 @@ setMysqlSelectedTables(new Set())
                     onChange={e => setRestApi(p => ({ ...p, auth_prefix: e.target.value }))}
                     placeholder="Bearer"
                     className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(20,184,166,0.25)' }} />
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 </div>
               </div>
 
@@ -4377,7 +4377,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setRestApi(p => ({ ...p, api_key: e.target.value }))}
                   placeholder="••••••••••••••••"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(20,184,166,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
 
               <div>
@@ -4386,7 +4386,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setRestApi(p => ({ ...p, test_path: e.target.value }))}
                   placeholder="/health or /api/v1/status"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(20,184,166,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
 
               <div>
@@ -4398,7 +4398,7 @@ setMysqlSelectedTables(new Set())
                   placeholder={"/api/v1/users\n/api/v1/orders\n/api/v1/products"}
                   rows={4}
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none resize-none font-mono"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(20,184,166,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
 
               <div className="flex items-center justify-between px-3 py-2.5 rounded-xl"
@@ -4427,7 +4427,7 @@ setMysqlSelectedTables(new Set())
               {restStatus === 'ok' && !restError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
-                    style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                    style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ REST API reachable</p>
                   </div>
                   {restEndpointResults.length > 0 && (
@@ -4443,7 +4443,7 @@ setMysqlSelectedTables(new Set())
                               else setRestSelectedEndpoints(new Set(okEndpoints))
                             }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(20,184,166,0.1)', border: '1px solid rgba(20,184,166,0.25)', color: '#14b8a6' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#14b8a6' }}>
                             {restSelectedEndpoints.size === restEndpointResults.filter(r => r.ok).length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -4461,8 +4461,8 @@ setMysqlSelectedTables(new Set())
                               }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all"
                               style={{
-                                background: checked ? 'rgba(20,184,166,0.1)' : 'rgba(255,255,255,0.03)',
-                                border: `1px solid ${checked ? 'rgba(20,184,166,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                                background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}`,
                                 cursor: result.ok ? 'pointer' : 'not-allowed',
                                 opacity: result.ok ? 1 : 0.5,
                               }}>
@@ -4472,7 +4472,7 @@ setMysqlSelectedTables(new Set())
                               </div>
                               <span className="text-sm flex-1 font-mono" style={{ color: checked ? 'white' : 'rgba(255,255,255,0.55)', fontSize: '12px' }}>{result.endpoint}</span>
                               <span className="text-xs px-1.5 py-0.5 rounded-md font-medium"
-                                style={{ background: result.ok ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)', color: result.ok ? '#4ade80' : '#f87171' }}>
+                                style={{ background: result.ok ? 'rgba(124,58,237,0.15)' : 'rgba(239,68,68,0.15)', color: result.ok ? '#4ade80' : '#f87171' }}>
                                 {result.ok ? `✓ ${result.status}` : `✗ ${result.status || 'err'}`}
                               </span>
                             </div>
@@ -4547,7 +4547,7 @@ setMysqlSelectedTables(new Set())
                   }}
                   disabled={!restApi.base_url || restStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(20,184,166,0.15)', border: '1px solid rgba(20,184,166,0.35)', color: '#14b8a6', cursor: (!restApi.base_url || restStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)', color: '#14b8a6', cursor: (!restApi.base_url || restStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
                   {restStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
@@ -4622,14 +4622,14 @@ setMysqlSelectedTables(new Set())
           style={{ background: 'rgba(0,0,0,0.85)' }}
           onClick={() => { setShowGA4Flow(false); setGa4Status('idle'); setGa4Error('') }}>
           <div className="rounded-2xl w-full max-w-md overflow-hidden"
-            style={{ background: '#0d0a1a', border: '1px solid rgba(251,146,60,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
+            style={{ background: '#0d0a1a', border: '1px solid rgba(124,58,237,0.25)', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}>
 
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(251,146,60,0.12)', border: '1px solid rgba(251,146,60,0.3)' }}>
+                  style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)' }}>
                   <span style={{ fontSize: '18px' }}>📈</span>
                 </div>
                 <div>
@@ -4642,7 +4642,7 @@ setMysqlSelectedTables(new Set())
             </div>
 
             <div className="p-5 space-y-4">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(251,146,60,0.06)', border: '1px solid rgba(251,146,60,0.2)' }}>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔑 Setup Instructions</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   1. GCP Console → IAM → Service Accounts → Create key (JSON)<br/>
@@ -4658,7 +4658,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setGa4(p => ({ ...p, propertyId: e.target.value }))}
                   placeholder="123456789"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(251,146,60,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
 
               <div>
@@ -4668,7 +4668,7 @@ setMysqlSelectedTables(new Set())
                   placeholder='Paste the full JSON key here: {"type":"service_account","project_id":...}'
                   rows={4}
                   className="w-full text-xs text-white rounded-xl px-3 py-2.5 outline-none resize-none font-mono"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(251,146,60,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
               </div>
 
               <div>
@@ -4677,7 +4677,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setGa4(p => ({ ...p, metrics: e.target.value }))}
                   placeholder="sessions,activeUsers,newUsers,screenPageViews"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(251,146,60,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Common: sessions, activeUsers, newUsers, screenPageViews, bounceRate, averageSessionDuration, conversions</p>
               </div>
 
@@ -4687,7 +4687,7 @@ setMysqlSelectedTables(new Set())
                   onChange={e => setGa4(p => ({ ...p, dimensions: e.target.value }))}
                   placeholder="date,sessionDefaultChannelGroup"
                   className="w-full text-sm text-white rounded-xl px-3 py-2.5 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(251,146,60,0.25)' }} />
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.25)' }} />
                 <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>Common: date, country, city, deviceCategory, sessionDefaultChannelGroup, pagePath, browser</p>
               </div>
 
@@ -4700,7 +4700,7 @@ setMysqlSelectedTables(new Set())
 
               {ga4Status === 'ok' && !ga4Error && (
                 <div className="space-y-3">
-                  <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                  <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ GA4 property reachable</p>
                   </div>
                   {ga4ReportsLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Building report list…</p>}
@@ -4713,7 +4713,7 @@ setMysqlSelectedTables(new Set())
                           <button
                             onClick={() => { if (ga4SelectedReports.size === ga4Reports.length) setGa4SelectedReports(new Set()); else setGa4SelectedReports(new Set(ga4Reports)) }}
                             className="text-xs px-2 py-0.5 rounded-md font-semibold"
-                            style={{ background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.25)', color: '#fb923c' }}>
+                            style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#fb923c' }}>
                             {ga4SelectedReports.size === ga4Reports.length ? 'Deselect All' : 'Select All'}
                           </button>
                         </div>
@@ -4725,13 +4725,13 @@ setMysqlSelectedTables(new Set())
                             <div key={`${report}-${idx}`}
                               onClick={() => { const next = new Set(ga4SelectedReports); checked ? next.delete(report) : next.add(report); setGa4SelectedReports(next) }}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-                              style={{ background: checked ? 'rgba(251,146,60,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(251,146,60,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
+                              style={{ background: checked ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${checked ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
                               <div className="flex items-center justify-center rounded-md flex-shrink-0"
                                 style={{ width: '16px', height: '16px', background: checked ? '#fb923c' : 'transparent', border: `2px solid ${checked ? '#fb923c' : 'rgba(255,255,255,0.25)'}` }}>
                                 {checked && <svg width="9" height="9" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
                               </div>
                               <span className="text-sm flex-1 font-medium" style={{ color: checked ? 'white' : 'rgba(255,255,255,0.55)' }}>{report}</span>
-                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c' }}>✓</span>}
+                              {checked && <span className="text-xs px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(124,58,237,0.15)', color: '#fb923c' }}>✓</span>}
                             </div>
                           )
                         })}
@@ -4771,7 +4771,7 @@ setMysqlSelectedTables(new Set())
                   }}
                   disabled={!ga4.propertyId || !ga4.keyJson || ga4Status === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-                  style={{ background: 'rgba(251,146,60,0.15)', border: '1px solid rgba(251,146,60,0.35)', color: '#fb923c', cursor: 'pointer' }}>
+                  style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)', color: '#fb923c', cursor: 'pointer' }}>
                   {ga4Status === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
