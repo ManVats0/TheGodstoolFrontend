@@ -53,7 +53,7 @@ function getPasswordStrength(pw: string) {
   return { label: 'Strong', color: '#22c55e', pct: 100 }
 }
 
-function LineIcon({ name, size = 32 }: { name: string; size?: number }) {
+function LineIcon({ name, size = 32, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
   const paths: Record<string, JSX.Element> = {
     zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
     link: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>,
@@ -74,7 +74,7 @@ function LineIcon({ name, size = 32 }: { name: string; size?: number }) {
     mail: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>,
   }
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       {paths[name]}
     </svg>
   )
@@ -803,12 +803,21 @@ if (!entered) return (
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
           {[
-            { n: '1', title: 'Connect Your Source', body: 'Upload a CSV, paste a Google Sheet link, or connect your database. The God\'s Tool recognizes your schema instantly.' },
-            { n: '2', title: 'Let AI Clean & Profile', body: 'Our AI scans every column, flags issues, suggests fixes, and applies transformations — all reviewable before you confirm.' },
-            { n: '3', title: 'Automate & Export', body: 'Set a pipeline schedule, push to your warehouse, or download clean data. Your workflow, fully automated.' },
+            { n: '1', icon: 'link', title: 'Connect Your Source', body: 'Upload a CSV, paste a Google Sheet link, or connect your database. The God\'s Tool recognizes your schema instantly.' },
+            { n: '2', icon: 'zap', title: 'Let AI Clean & Profile', body: 'Our AI scans every column, flags issues, suggests fixes, and applies transformations — all reviewable before you confirm.' },
+            { n: '3', icon: 'refresh', title: 'Automate & Export', body: 'Set a pipeline schedule, push to your warehouse, or download clean data. Your workflow, fully automated.' },
           ].map((step, i) => (
             <div key={i} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-              <div className="step-num">{step.n}</div>
+              <div className="step-num" style={{ position: 'relative' }}>
+                <LineIcon name={step.icon} size={22} color="#fff" />
+                <span style={{
+                  position: 'absolute', bottom: '-6px', right: '-6px',
+                  width: '18px', height: '18px', borderRadius: '50%',
+                  background: '#0d0a1a', border: '1px solid rgba(167,139,250,0.4)',
+                  fontSize: '0.62rem', fontWeight: 800, color: '#a78bfa',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>{step.n}</span>
+              </div>
               <div style={{ paddingTop: '8px' }}>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>{step.title}</div>
                 <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75 }}>{step.body}</div>
