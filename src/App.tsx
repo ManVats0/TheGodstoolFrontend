@@ -171,6 +171,7 @@ useEffect(() => {
   }, [location.pathname])
 
   const [demoPlaying, setDemoPlaying] = useState(false)
+  const [showAllFeatures, setShowAllFeatures] = useState(false)
   const [sideEmail, setSideEmail] = useState('')
   const [sidePassword, setSidePassword] = useState('')
   const [sideConfirmPassword, setSideConfirmPassword] = useState('')
@@ -756,16 +757,8 @@ if (!entered) return (
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
           { icon: 'zap', title: 'AI-Powered Cleaning', desc: 'Detect nulls, fix formats, remove duplicates, and standardize columns — automatically. Or just write in plain English to generate a cleaning step. Claude AI does the heavy lifting.', delay: '0s' },
-          { icon: 'link', title: 'Connect Anything', desc: 'CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, GA4 — plug in any source in seconds.', delay: '0.1s' },
-          { icon: 'refresh', title: 'Pipeline Automation', desc: 'Build no-code data flows that run on a schedule. Transform, join, filter, and export without writing a line.', delay: '0.2s' },
-          { icon: 'chart', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.3s' },
-          { icon: 'lock', title: 'Secure by Default', desc: 'Your data never leaves your session without permission. Encrypted in transit, zero third-party sharing.', delay: '0.4s' },
-          { icon: 'shield', title: 'Secure Tunneling', desc: 'Your database never has to leave home to get cleaned. We quietly bridge the connection so nothing sits exposed on the internet — and you never have to touch a firewall setting.', delay: '0.5s' },
-          { icon: 'database', title: 'Build Pipelines in SQL', desc: 'Skip the drag-and-drop if you\'d rather not. Write plain SQL in our built-in editor and get a live, editable pipeline — a real SQL interface for people who just want to do ground-level work on their data.', delay: '0.55s' },
-          { icon: 'clock', title: 'Schedule Your Runs', desc: 'Set it once, then stop thinking about it. Every 5 seconds or once a month — pick your rhythm and the tool keeps the beat, even when you\'re not watching.', delay: '0.6s' },
-          { icon: 'alert', title: 'Issue Detector', desc: 'Auto-detects issues in your data before they break downstream.', delay: '0.7s' },
-          { icon: 'filter', title: 'Advanced Filter', desc: 'Instantly isolate the exact rows or values causing a data quality issue — no more scrolling through thousands of rows by hand.', delay: '0.8s' },
-          { icon: 'book', title: 'Analyse', desc: 'Free analysis on every connected data source — a full data dictionary and data info, ready for you.', delay: '0.9s' },
+          { icon: 'shield', title: 'Your Data Never Leaves Home', desc: 'We tunnel into your database to clean it — nothing sits exposed on the internet, and you never touch a firewall setting.', delay: '0.1s' },
+          { icon: 'alert', title: 'Issue Detector', desc: 'Auto-detects issues in your data before they break downstream.', delay: '0.2s' },
         ].map((f, i) => (
           <div key={i} className="feature-card" style={{ animationDelay: f.delay }}>
             <div style={{ marginBottom: '16px' }}><LineIcon name={f.icon} size={30} /></div>
@@ -773,6 +766,31 @@ if (!entered) return (
             <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.7 }}>{f.desc}</div>
           </div>
         ))}
+        {showAllFeatures && [
+          { icon: 'link', title: 'Connect Anything', desc: 'CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, GA4 — plug in any source in seconds.', delay: '0s' },
+          { icon: 'refresh', title: 'Pipeline Automation', desc: 'Build no-code data flows that run on a schedule. Transform, join, filter, and export without writing a line.', delay: '0.05s' },
+          { icon: 'chart', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.1s' },
+          { icon: 'database', title: 'Build Pipelines in SQL', desc: 'Skip the drag-and-drop if you\'d rather not. Write plain SQL in our built-in editor and get a live, editable pipeline — a real SQL interface for people who just want to do ground-level work on their data.', delay: '0.15s' },
+          { icon: 'clock', title: 'Schedule Your Runs', desc: 'Set it once, then stop thinking about it. Every 5 seconds or once a month — pick your rhythm and the tool keeps the beat, even when you\'re not watching.', delay: '0.2s' },
+          { icon: 'filter', title: 'Advanced Filter', desc: 'Instantly isolate the exact rows or values causing a data quality issue — no more scrolling through thousands of rows by hand.', delay: '0.25s' },
+          { icon: 'book', title: 'Analyse', desc: 'Free analysis on every connected data source — a full data dictionary and data info, ready for you.', delay: '0.3s' },
+        ].map((f, i) => (
+          <div key={`extra-${i}`} className="feature-card" style={{ animationDelay: f.delay }}>
+            <div style={{ marginBottom: '16px' }}><LineIcon name={f.icon} size={30} /></div>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.05rem', fontWeight: 700, marginBottom: '10px', color: 'rgba(255,255,255,0.9)' }}>{f.title}</div>
+            <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.7 }}>{f.desc}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ textAlign: 'center', marginTop: '32px' }}>
+        <button
+          onClick={() => setShowAllFeatures(v => !v)}
+          style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.3)', color: '#a78bfa', padding: '10px 28px', borderRadius: '6px', fontSize: '0.78rem', letterSpacing: '0.08em', cursor: 'pointer', transition: 'all 0.2s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+        >
+          {showAllFeatures ? 'SHOW LESS ↑' : 'SEE ALL FEATURES ↓'}
+        </button>
       </div>
     </section>
 
