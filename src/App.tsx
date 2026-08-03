@@ -925,11 +925,9 @@ if (!entered) return (
 
 {/* ── DEMO VIDEO ── */}
     <section style={{ padding: '100px 24px', background: 'rgba(79,70,229,0.04)', borderTop: '1px solid rgba(167,139,250,0.07)', borderBottom: '1px solid rgba(167,139,250,0.07)' }}>
-      <div style={{ maxWidth: '860px', margin: '0 auto', textAlign: 'center' }}>
-        <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>See It In Action</div>
-        <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>Watch the Tool clean your data live.</h2>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.75, marginBottom: '48px', maxWidth: '560px', margin: '0 auto 48px' }}>Upload a messy CSV. Watch the platform detect issues, suggest fixes, and produce clean output — in seconds.</p>
-<div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.2)', boxShadow: '0 0 60px rgba(124,58,237,0.15)', background: '#000' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(320px, 1.15fr) minmax(260px, 0.85fr)', gap: '48px', alignItems: 'center' }}>
+
+        <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.2)', boxShadow: '0 0 60px rgba(124,58,237,0.15)', background: '#000' }}>
           {demoPlaying ? (
             <iframe
               src="https://www.youtube-nocookie.com/embed/YMY6fx731Ps?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&iv_load_policy=3"
@@ -954,21 +952,28 @@ if (!entered) return (
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', marginTop: '40px', flexWrap: 'wrap' }}>
-          {[
-            { icon: 'upload', text: 'Upload any CSV or sheet' },
-            { icon: 'cpu', text: 'AI detects every issue' },
-            { icon: 'check', text: 'One-click clean export' },
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.62)' }}>
-              <LineIcon name={item.icon} size={18} />
-              {item.text}
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop: '48px' }}>
+
+        <div>
+          <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>See It In Action</div>
+          <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 2.8vw, 2.2rem)', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>Watch the Tool clean your data live.</h2>
+          <p style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '0.95rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.65, marginBottom: '28px' }}>Upload a messy CSV. Watch the platform detect issues, suggest fixes, and produce clean output — in seconds.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '32px' }}>
+            {[
+              { icon: 'upload', text: 'Upload any CSV or sheet' },
+              { icon: 'cpu', text: 'AI detects every issue' },
+              { icon: 'check', text: 'One-click clean export' },
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)' }}>
+                <div style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(167,139,250,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <LineIcon name={item.icon} size={15} />
+                </div>
+                {item.text}
+              </div>
+            ))}
+          </div>
           <button className="cta-btn" onClick={() => handleEnter('register')}>Connect a Source</button>
         </div>
+
       </div>
     </section>
 
