@@ -21,6 +21,28 @@
     <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: `${color}20`, color }}>{text}</span>
   )
 
+  function SourceIcon({ name, size = 18, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
+    const paths: Record<string, JSX.Element> = {
+      inbox: <><path d="M22 12h-6l-2 3h-4l-2-3H2" /><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></>,
+      file: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></>,
+      grid: <><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /></>,
+      folder: <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />,
+      database: <><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" /></>,
+      leaf: <><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 11 13.51 11 11" /></>,
+      cloud: <path d="M17.5 19H9a7 7 0 1 1 6.71-9h.79a4.5 4.5 0 1 1 0 9z" />,
+      bucket: <><path d="M4 6h16l-1.58 14.22A2 2 0 0 1 16.43 22H7.57a2 2 0 0 1-1.99-1.78z" /><path d="M2 6h20M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></>,
+      cube: <><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></>,
+      globe: <><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></>,
+      trending: <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></>,
+      check: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></>,
+    }
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {paths[name]}
+      </svg>
+    )
+  }
+
   export default function DataSources() {
     const navigate = useNavigate()
     const {
@@ -1189,7 +1211,7 @@ const handleLockedSource = () => {
             {sources.length === 0 ? (
               <div className="text-center py-20 rounded-2xl"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
-                <div className="text-4xl mb-4">📭</div>
+                <div className="flex justify-center mb-4"><SourceIcon name="inbox" size={40} color="rgba(255,255,255,0.25)" /></div>
                 <p className="text-white font-medium mb-1">No sources yet</p>
                 <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.35)' }}>Add a data source to get started</p>
                 <button onClick={() => setTab('add')}
@@ -1207,9 +1229,11 @@ const handleLockedSource = () => {
                     onMouseEnter={e => (e.currentTarget.style.border = '1px solid rgba(124,58,237,0.3)')}
                     onMouseLeave={e => (e.currentTarget.style.border = '1px solid rgba(255,255,255,0.07)')}>
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center"
                         style={{ background: 'rgba(124,58,237,0.15)' }}>
-                        {String(s.type) === 'csv' ? '📄' : String(s.type) === 'sheets' ? '📊' : String(s.type) === 'catalog' ? '🗂️' : String(s.type) === 'mongodb' ? '🍃' : String(s.type) === 'aws' ? '☁️' : String(s.type) === 'gcs' ? '🪣' : String(s.type) === 'cloudsql' ? '🐘' : String(s.type) === 'databricks' ? '🧱' : String(s.type) === 'rest' ? '🌐' : String(s.type) === 'ga4' ? '📈' : '🗄️'}
+                        <SourceIcon name={
+                          String(s.type) === 'csv' ? 'file' : String(s.type) === 'sheets' ? 'grid' : String(s.type) === 'catalog' ? 'folder' : String(s.type) === 'mongodb' ? 'leaf' : String(s.type) === 'aws' ? 'cloud' : String(s.type) === 'gcs' ? 'bucket' : String(s.type) === 'cloudsql' ? 'database' : String(s.type) === 'databricks' ? 'cube' : String(s.type) === 'rest' ? 'globe' : String(s.type) === 'ga4' ? 'trending' : 'database'
+                        } />
                       </div>
                       <div>
                         <p className="font-semibold text-white text-sm">{s.name}</p>
@@ -1320,7 +1344,7 @@ const handleLockedSource = () => {
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.45)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.08)'; e.currentTarget.style.border = '1px solid rgba(124,58,237,0.25)' }}>
-                <div className="text-2xl mb-3">📄</div>
+                <div className="mb-3"><SourceIcon name="file" size={26} /></div>
                 <h3 className="font-bold text-white mb-1">CSV Upload</h3>
                 <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>Upload any .csv file for instant analysis</p>
                 {badge('Available', '#22c55e')}
@@ -1328,7 +1352,7 @@ const handleLockedSource = () => {
               <div className="p-6 rounded-2xl cursor-pointer hover:bg-blue-500/10"
                 style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.25)' }}
                 onClick={() => setShowCatalogList(true)}>
-                <div className="text-2xl mb-3">🗂️</div>
+                <div className="mb-3"><SourceIcon name="folder" size={26} color="#60a5fa" /></div>
                 <h3 className="font-bold text-white mb-1">From Catalog</h3>
                 <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>Select verified metadata datasets</p>
                 {badge('Available', '#3b82f6')}
@@ -1338,7 +1362,7 @@ const handleLockedSource = () => {
                 onClick={() => setShowGSheetsFlow(true)}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.14)'; e.currentTarget.style.border = '1px solid rgba(52,211,153,0.45)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(52,211,153,0.08)'; e.currentTarget.style.border = '1px solid rgba(52,211,153,0.25)' }}>
-                <div className="text-2xl mb-3">📊</div>
+                <div className="mb-3"><SourceIcon name="grid" size={26} color="#34d399" /></div>
                 <h3 className="font-bold text-white mb-1">Google Sheets</h3>
                 <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>Connect live Google Sheets data</p>
                 {badge('Available', '#34d399')}
@@ -1543,7 +1567,7 @@ const handleLockedSource = () => {
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
               {pendingFile ? (
                 <div>
-                  <div className="text-4xl mb-4">✅</div>
+                  <div className="flex justify-center mb-4"><SourceIcon name="check" size={36} color="#4ade80" /></div>
                   <p className="font-bold text-white text-lg mb-1">{pendingFile.name}</p>
                   <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.4)' }}>
                     {Math.round(pendingFile.size / 1024)} KB · Ready to analyze
@@ -1563,7 +1587,7 @@ const handleLockedSource = () => {
                 </div>
               ) : (
                 <div>
-                  <div className="text-4xl mb-4">☁️</div>
+                  <div className="flex justify-center mb-4"><SourceIcon name="cloud" size={36} color="rgba(255,255,255,0.3)" /></div>
                   <p className="font-bold text-white text-lg mb-1">Drop your CSV here</p>
                   <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>or click to browse · any CSV file works</p>
                 </div>
