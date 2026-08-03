@@ -716,7 +716,14 @@ if (!entered) return (
     <section id="features" style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '64px' }}>
         <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
-        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>Messy data in. Clean answers out</h2>
+        <h2 style={{ 
+  fontFamily: "'Inter', -apple-system, sans-serif", 
+  fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', 
+  fontWeight: 700, 
+  margin: 0, 
+  letterSpacing: '-0.03em', 
+  lineHeight: 1.15 
+}}>Messy data in. Clean answers out</h2>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>Connect, clean, automate — one platform, zero hires.</p>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
       </div>
