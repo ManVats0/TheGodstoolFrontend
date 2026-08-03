@@ -1,5 +1,24 @@
 import { NavLink, useLocation } from 'react-router-dom'
 
+function SidebarIcon({ name, size = 19, active = false }: { name: string; size?: number; active?: boolean }) {
+  const paths: Record<string, JSX.Element> = {
+    plug: <><path d="M9 2v6M15 2v6M6 8h12l-1 6a5 5 0 0 1-5 4h0a5 5 0 0 1-5-4L6 8z" /><path d="M12 18v4" /></>,
+    folder: <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />,
+    flow: <><circle cx="6" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M6 9v6" /><path d="M18 6a9 9 0 0 1-9 9" /></>,
+    chart: <><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></>,
+    file: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></>,
+    book: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></>,
+    shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
+    message: <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />,
+    bell: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>,
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={active ? '#c4b5fd' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {paths[name]}
+    </svg>
+  )
+}
+
 interface SidebarProps {
   onOpenNotif: () => void;
   unread: number;
@@ -12,14 +31,14 @@ export default function Sidebar({ onOpenNotif, unread, isExpanded, onToggleExpan
   const location = useLocation();
 
 const navItems = [
-    { path: '/sources', icon: '🔌', label: 'Sources' },
-    { path: '/catalog', icon: '🗂️', label: 'Catalog' },
-    { path: '/flow', icon: '⚙️', label: 'Pipeline Flow' },
-    { path: '/analysis', icon: '📊', label: 'Analysis' },
-    { path: '/audit', icon: '📜', label: 'Audit Logs' },
-    { path: '/docs', icon: '📖', label: 'Cosmic Documentation' },
-    { path: '/tunneling', icon: '🔐', label: 'Tunneling' },
-    { path: '/feedback', icon: '💬', label: 'Feedback / Support' },
+    { path: '/sources', icon: 'plug', label: 'Sources' },
+    { path: '/catalog', icon: 'folder', label: 'Catalog' },
+    { path: '/flow', icon: 'flow', label: 'Pipeline Flow' },
+    { path: '/analysis', icon: 'chart', label: 'Analysis' },
+    { path: '/audit', icon: 'file', label: 'Audit Logs' },
+    { path: '/docs', icon: 'book', label: 'Cosmic Documentation' },
+    { path: '/tunneling', icon: 'shield', label: 'Tunneling' },
+    { path: '/feedback', icon: 'message', label: 'Feedback / Support' },
   ]
 
   return (
@@ -73,7 +92,9 @@ const navItems = [
               }}
               title={!isExpanded ? item.label : undefined}
             >
-              <span className="text-lg shrink-0">{item.icon}</span>
+              <span className="shrink-0">
+                <SidebarIcon name={item.icon} active={isActive} />
+              </span>
               
               {isExpanded && (
                 <span className="ml-3 text-sm font-medium whitespace-nowrap">
@@ -123,7 +144,7 @@ const navItems = [
           title={!isExpanded ? "Notifications" : undefined}
         >
           <div className="relative shrink-0">
-            <span className="text-lg">🔔</span>
+            <SidebarIcon name="bell" />
             {unread > 0 && (
               <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border-2 border-[#0d0a1a]">
                 {unread > 9 ? '9+' : unread}
