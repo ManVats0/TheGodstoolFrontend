@@ -21,7 +21,7 @@ export default function Privacy() {
 <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>6. Data Retention and Deletion</h2>
         <p>We retain your account data (name, email, subscription status) for as long as your account is active.</p>
         <p style={{ marginTop: '12px' }}>Google user data (Sheets content accessed during a session) is not stored beyond the active session and is automatically discarded once your operation is complete.</p>
-        <p style={{ marginTop: '12px' }}>To request deletion of your account and all associated data, email us at <a href="mailto:vatsaman888@gmail.com" style={{ color: '#a78bfa' }}>vatsaman888@gmail.com</a>. We will process deletion requests within 30 days.</p>
+        <p style={{ marginTop: '12px' }}>To request deletion of your account and all associated data, email us at <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>contact@thegodstool.com</a>. We will process deletion requests within 30 days.</p>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>7. Contact</h2>
         <p>Email us at <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>contact@thegodstool.com</a></p>
         <a href="/" style={{ display: 'inline-block', marginTop: '40px', color: '#a78bfa' }}>← Back to The God's Tool</a>
