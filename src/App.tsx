@@ -53,6 +53,33 @@ function getPasswordStrength(pw: string) {
   return { label: 'Strong', color: '#22c55e', pct: 100 }
 }
 
+function LineIcon({ name, size = 32 }: { name: string; size?: number }) {
+  const paths: Record<string, JSX.Element> = {
+    zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
+    link: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>,
+    refresh: <><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" /></>,
+    chart: <><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></>,
+    lock: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
+    shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
+    database: <><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" /></>,
+    clock: <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>,
+    alert: <><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></>,
+    filter: <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />,
+    book: <><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></>,
+    upload: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></>,
+    cpu: <><rect x="4" y="4" width="16" height="16" rx="2" ry="2" /><rect x="9" y="9" width="6" height="6" /><line x1="9" y1="1" x2="9" y2="4" /><line x1="15" y1="1" x2="15" y2="4" /><line x1="9" y1="20" x2="9" y2="23" /><line x1="15" y1="20" x2="15" y2="23" /><line x1="20" y1="9" x2="23" y2="9" /><line x1="20" y1="14" x2="23" y2="14" /><line x1="1" y1="9" x2="4" y2="9" /><line x1="1" y1="14" x2="4" y2="14" /></>,
+    check: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></>,
+    trendDown: <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6" /><polyline points="17 18 23 18 23 12" /></>,
+    layers: <><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></>,
+    mail: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>,
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      {paths[name]}
+    </svg>
+  )
+}
+
 export default function App() {
   const [showNotif, setShowNotif] = useState(false)
   const navigate = useNavigate()
@@ -628,7 +655,7 @@ if (!entered) return (
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="cta-btn" onClick={() => handleEnter('register')}>Connect Your First Source</button>
+          <button className="cta-btn" onClick={() => handleEnter('register')}>Connect a Source</button>
           <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '13px 32px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.4)'; e.currentTarget.style.color = '#a78bfa' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}>
@@ -699,10 +726,9 @@ if (!entered) return (
       <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {[
           { val: 'SQL', label: 'Editable & Copyable Pipelines' },
-          { val: '🔍', label: 'Schema Change Detector' },
+          { val: 'AUTO', label: 'Schema Change Detector' },
           { val: 'AI', label: 'Powered Cleaning' },
-          { val: '📧', label: 'Email Alerts on Data Anomalies' },
-          { val: '1', label: 'Everything in Browser Tab' },
+          { val: 'ALERT', label: 'Email Alerts on Data Anomalies' },
         ].map((s, i) => (
           <div key={i} className="stat-item" style={{ padding: '28px 40px' }}>
             <div style={{ fontSize: '2rem', fontWeight: 900, background: 'linear-gradient(135deg, #e9d5ff, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 }}>{s.val}</div>
@@ -729,20 +755,20 @@ if (!entered) return (
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {[
-          { icon: '⚡', title: 'AI-Powered Cleaning', desc: 'Detect nulls, fix formats, remove duplicates, and standardize columns — automatically. Or just write in plain English to generate a cleaning step. Claude AI does the heavy lifting.', delay: '0s' },
-          { icon: '🔌', title: 'Connect Anything', desc: 'CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, GA4 — plug in any source in seconds.', delay: '0.1s' },
-          { icon: '🔄', title: 'Pipeline Automation', desc: 'Build no-code data flows that run on a schedule. Transform, join, filter, and export without writing a line.', delay: '0.2s' },
-          { icon: '📊', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.3s' },
-          { icon: '🔒', title: 'Secure by Default', desc: 'Your data never leaves your session without permission. Encrypted in transit, zero third-party sharing.', delay: '0.4s' },
-          { icon: '🔒', title: 'Secure Tunneling', desc: 'Your database never has to leave home to get cleaned. We quietly bridge the connection so nothing sits exposed on the internet — and you never have to touch a firewall setting.', delay: '0.5s' },
-          { icon: '🗄️', title: 'Build Pipelines in SQL', desc: 'Skip the drag-and-drop if you\'d rather not. Write plain SQL in our built-in editor and get a live, editable pipeline — a real SQL interface for people who just want to do ground-level work on their data.', delay: '0.55s' },
-          { icon: '⏱️', title: 'Schedule Your Runs', desc: 'Set it once, then stop thinking about it. Every 5 seconds or once a month — pick your rhythm and the tool keeps the beat, even when you\'re not watching.', delay: '0.6s' },
-          { icon: '🚨', title: 'Issue Detector', desc: 'Auto-detects issues in your data before they break downstream.', delay: '0.7s' },
-          { icon: '🎯', title: 'Advanced Filter', desc: 'Pinpoint exactly which raw number is causing the problem with the problem filter.', delay: '0.8s' },
-          { icon: '📖', title: 'Analyse', desc: 'Free analysis on every connected data source — a full data dictionary and data info, ready for you.', delay: '0.9s' },
+          { icon: 'zap', title: 'AI-Powered Cleaning', desc: 'Detect nulls, fix formats, remove duplicates, and standardize columns — automatically. Or just write in plain English to generate a cleaning step. Claude AI does the heavy lifting.', delay: '0s' },
+          { icon: 'link', title: 'Connect Anything', desc: 'CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, GA4 — plug in any source in seconds.', delay: '0.1s' },
+          { icon: 'refresh', title: 'Pipeline Automation', desc: 'Build no-code data flows that run on a schedule. Transform, join, filter, and export without writing a line.', delay: '0.2s' },
+          { icon: 'chart', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.3s' },
+          { icon: 'lock', title: 'Secure by Default', desc: 'Your data never leaves your session without permission. Encrypted in transit, zero third-party sharing.', delay: '0.4s' },
+          { icon: 'shield', title: 'Secure Tunneling', desc: 'Your database never has to leave home to get cleaned. We quietly bridge the connection so nothing sits exposed on the internet — and you never have to touch a firewall setting.', delay: '0.5s' },
+          { icon: 'database', title: 'Build Pipelines in SQL', desc: 'Skip the drag-and-drop if you\'d rather not. Write plain SQL in our built-in editor and get a live, editable pipeline — a real SQL interface for people who just want to do ground-level work on their data.', delay: '0.55s' },
+          { icon: 'clock', title: 'Schedule Your Runs', desc: 'Set it once, then stop thinking about it. Every 5 seconds or once a month — pick your rhythm and the tool keeps the beat, even when you\'re not watching.', delay: '0.6s' },
+          { icon: 'alert', title: 'Issue Detector', desc: 'Auto-detects issues in your data before they break downstream.', delay: '0.7s' },
+          { icon: 'filter', title: 'Advanced Filter', desc: 'Instantly isolate the exact rows or values causing a data quality issue — no more scrolling through thousands of rows by hand.', delay: '0.8s' },
+          { icon: 'book', title: 'Analyse', desc: 'Free analysis on every connected data source — a full data dictionary and data info, ready for you.', delay: '0.9s' },
         ].map((f, i) => (
           <div key={i} className="feature-card" style={{ animationDelay: f.delay }}>
-            <div style={{ fontSize: '2rem', marginBottom: '16px', filter: 'drop-shadow(0 0 12px rgba(124,58,237,0.5))' }}>{f.icon}</div>
+            <div style={{ marginBottom: '16px' }}><LineIcon name={f.icon} size={30} /></div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.05rem', fontWeight: 700, marginBottom: '10px', color: 'rgba(255,255,255,0.9)' }}>{f.title}</div>
             <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.7 }}>{f.desc}</div>
           </div>
@@ -912,18 +938,18 @@ if (!entered) return (
         </div>
         <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', marginTop: '40px', flexWrap: 'wrap' }}>
           {[
-            { icon: '📥', text: 'Upload any CSV or sheet' },
-            { icon: '🤖', text: 'AI detects every issue' },
-            { icon: '✅', text: 'One-click clean export' },
+            { icon: 'upload', text: 'Upload any CSV or sheet' },
+            { icon: 'cpu', text: 'AI detects every issue' },
+            { icon: 'check', text: 'One-click clean export' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)' }}>
-              <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+              <LineIcon name={item.icon} size={18} />
               {item.text}
             </div>
           ))}
         </div>
         <div style={{ marginTop: '48px' }}>
-          <button className="cta-btn" onClick={() => handleEnter('register')}>Upload a File, Watch It Work</button>
+          <button className="cta-btn" onClick={() => handleEnter('register')}>Connect a Source</button>
         </div>
       </div>
     </section>
@@ -945,19 +971,19 @@ if (!entered) return (
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px', textAlign: 'left' }}>
             {[
-              { icon: '📉', title: 'Data drift detected', desc: 'Unusual volume drops, column nulls spiking, distribution shifts — caught the moment they happen.' },
-              { icon: '🔗', title: 'Pipeline failures', desc: 'A connector went silent, a cron job missed its window, a schema changed upstream. You hear it first.' },
-              { icon: '🧬', title: 'Schema anomalies', desc: 'Your client won\'t call you asking why the columns moved and the numbers don\'t match last week\'s report — because you\'ll already know, and it\'ll already be fixed.' },
+              { icon: 'trendDown', title: 'Data drift detected', desc: 'Unusual volume drops, column nulls spiking, distribution shifts — caught the moment they happen.' },
+              { icon: 'link', title: 'Pipeline failures', desc: 'A connector went silent, a cron job missed its window, a schema changed upstream. You hear it first.' },
+              { icon: 'layers', title: 'Schema anomalies', desc: 'Your client won\'t call you asking why the columns moved and the numbers don\'t match last week\'s report — because you\'ll already know, and it\'ll already be fixed.' },
             ].map((item, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(167,139,250,0.1)', borderRadius: '12px', padding: '20px' }}>
-                <div style={{ fontSize: '1.4rem', marginBottom: '10px' }}>{item.icon}</div>
+                <div style={{ marginBottom: '10px' }}><LineIcon name={item.icon} size={22} /></div>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.92rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginBottom: '6px' }}>{item.title}</div>
                 <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.38)', lineHeight: 1.7 }}>{item.desc}</div>
               </div>
             ))}
           </div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'rgba(10,15,28,0.7)', border: '1px solid rgba(99,179,237,0.2)', borderRadius: '10px', padding: '16px 24px', fontFamily: 'monospace', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'left' }}>
-            <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>📬</span>
+            <span style={{ flexShrink: 0 }}><LineIcon name="mail" size={20} /></span>
             <span><span style={{ color: '#38bdf8' }}>alert@thegodstool.com</span> → <span style={{ color: '#86efac' }}>you@company.com</span><br/><span style={{ opacity: 0.55, fontSize: '0.72rem' }}>Sat 07:14 AM · "Row count in orders_fact dropped 94% since last run."</span></span>
           </div>
         </div>
@@ -1005,6 +1031,9 @@ if (!entered) return (
         </div>
         <p style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '32px' }}>
          Cancel anytime · 14-day money-back guarantee on all paid plans
+        </p>
+        <p style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '12px' }}>
+          Need more than Team? <a href="/pricing" style={{ color: '#a78bfa', textDecoration: 'underline' }}>View Enterprise pricing →</a>
         </p>
       </div>
     </section>
