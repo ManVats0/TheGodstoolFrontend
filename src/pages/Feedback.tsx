@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Feedback() {
+  const navigate = useNavigate()
   const [form, setForm] = useState({ name: '', email: '', feedback: '' })
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -8,6 +10,17 @@ export default function Feedback() {
   const [file, setFile] = useState<File | null>(null)
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+  const handleBack = () => {
+    const lastPage = localStorage.getItem('datapro_last_page')
+    if (lastPage) {
+      navigate(lastPage)
+    } else if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate('/')
+    }
+  }
 
   const handleSubmit = async () => {
     if (honeypot) return
@@ -115,6 +128,22 @@ export default function Feedback() {
           </button>
         </div>
       )}
+
+      <div style={{ textAlign: 'center', marginTop: '24px' }}>
+        <button
+          onClick={handleBack}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem',
+            fontFamily: 'monospace', letterSpacing: '0.02em',
+            padding: '6px 10px', transition: 'color 0.15s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+        >
+          ← Back to app
+        </button>
+      </div>
     </div>
   )
 }
