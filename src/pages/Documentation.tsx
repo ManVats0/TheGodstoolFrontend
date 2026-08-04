@@ -14,6 +14,34 @@ type DocSection = {
   errors?: { code: string; cause: string; fix: string }[]
 }
 
+function Icon({ name, size = 16, color = 'currentColor' }: { name: string; size?: number; color?: string }) {
+  const common = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color, strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  switch (name) {
+    case 'database':
+      return (<svg {...common}><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5" /><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6" /></svg>)
+    case 'folder':
+      return (<svg {...common}><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" /></svg>)
+    case 'workflow':
+      return (<svg {...common}><circle cx="6" cy="6" r="2.5" /><circle cx="6" cy="18" r="2.5" /><circle cx="18" cy="12" r="2.5" /><path d="M8.2 7.2 15.8 10.8M8.2 16.8 15.8 13.2" /></svg>)
+    case 'chart':
+      return (<svg {...common}><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg>)
+    case 'file':
+      return (<svg {...common}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /><path d="M9 13h6M9 17h6" /></svg>)
+    case 'shield':
+      return (<svg {...common}><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" /></svg>)
+    case 'lightbulb':
+      return (<svg {...common}><path d="M9 18h6M10 21h4" /><path d="M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.5h6c0-1.1.4-1.9 1-2.5A6 6 0 0 0 12 3z" /></svg>)
+    case 'alert':
+      return (<svg {...common}><path d="M10.3 4.3 2.6 18a1 1 0 0 0 .9 1.5h17a1 1 0 0 0 .9-1.5L13.7 4.3a1.6 1.6 0 0 0-2.8 0z" /><path d="M12 9v4M12 17h.01" /></svg>)
+    case 'info':
+      return (<svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>)
+    case 'book':
+      return (<svg {...common}><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" /><path d="M20 18H6.5A2.5 2.5 0 0 0 4 20.5" /></svg>)
+    default:
+      return null
+  }
+}
+
 const DOCS: Record<string, {
   title: string
   icon: string
@@ -23,7 +51,7 @@ const DOCS: Record<string, {
 }> = {
   '/sources': {
     title: 'Data Sources',
-    icon: '🔌',
+    icon: 'database',
     color: '#7c3aed',
     badge: 'Core',
     sections: [
@@ -230,7 +258,7 @@ const DOCS: Record<string, {
   },
   '/catalog': {
     title: 'Data Catalog',
-    icon: '🗂️',
+    icon: 'folder',
     color: '#3b82f6',
     badge: 'Governance',
     sections: [
@@ -298,7 +326,7 @@ const DOCS: Record<string, {
   },
   '/flow': {
     title: 'Pipeline Flow',
-    icon: '⚙️',
+    icon: 'workflow',
     color: '#7c3aed',
     badge: 'Automation',
     sections: [
@@ -412,7 +440,7 @@ const DOCS: Record<string, {
   },
   '/analysis': {
     title: 'Analysis',
-    icon: '📊',
+    icon: 'chart',
     color: '#8b5cf6',
     sections: [
       {
@@ -457,7 +485,7 @@ const DOCS: Record<string, {
   },
   '/audit': {
     title: 'Audit Logs',
-    icon: '📜',
+    icon: 'file',
     color: '#6366f1',
     sections: [
       {
@@ -484,7 +512,7 @@ const DOCS: Record<string, {
   },
   '/tunneling': {
     title: 'Secure Tunneling',
-    icon: '🔐',
+    icon: 'shield',
     color: '#f59e0b',
     sections: [],
   },
@@ -734,7 +762,7 @@ export default function Documentation() {
             background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.18)',
             borderRadius: 10, borderLeft: '3px solid #3b82f6',
           }}>
-            <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>💡</span>
+            <Icon name="lightbulb" size={14} color="#93c5fd" />
             <p style={{ fontSize: 13, lineHeight: 1.65, color: '#bfdbfe', margin: 0 }}>{section.tip}</p>
           </div>
         )}
@@ -746,7 +774,7 @@ export default function Documentation() {
             background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.2)',
             borderRadius: 10, borderLeft: '3px solid #f59e0b',
           }}>
-            <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>⚠️</span>
+            <Icon name="alert" size={14} color="#fbbf24" />
             <p style={{ fontSize: 13, lineHeight: 1.65, color: '#fde68a', margin: 0 }}>{section.warning}</p>
           </div>
         )}
@@ -758,7 +786,7 @@ export default function Documentation() {
             background: 'rgba(100,116,139,0.07)', border: '1px solid rgba(100,116,139,0.2)',
             borderRadius: 10, borderLeft: '3px solid #64748b',
           }}>
-            <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>📎</span>
+            <Icon name="info" size={14} color="#94a3b8" />
             <p style={{ fontSize: 13, lineHeight: 1.65, color: 'rgba(255,255,255,0.5)', margin: 0 }}>{section.note}</p>
           </div>
         )}
@@ -798,7 +826,7 @@ export default function Documentation() {
               onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
             >
-              <span style={{ fontSize: 13 }}>{d.icon}</span>
+              <Icon name={d.icon} size={13} color={active ? '#c4b5fd' : 'rgba(255,255,255,0.5)'} />
               <span style={{
                 fontSize: 13, fontWeight: active ? 600 : 400,
                 color: active ? '#e9d5ff' : 'rgba(255,255,255,0.5)',
@@ -884,7 +912,7 @@ export default function Documentation() {
                       onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-                        <span style={{ fontSize: 12 }}>{item.pageIcon}</span>
+                        <Icon name={item.pageIcon} size={12} color="rgba(255,255,255,0.4)" />
                         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>{item.pageTitle}</span>
                         <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>›</span>
                         <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{item.heading}</span>
@@ -912,7 +940,7 @@ export default function Documentation() {
               background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.35)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15,
             }}>
-              {referrer && DOCS[referrer]?.icon}
+              {referrer && <Icon name={DOCS[referrer].icon} size={16} color="#c4b5fd" />}
             </div>
             <div>
               <p style={{ margin: '0 0 3px', fontSize: 13, fontWeight: 600, color: '#e9d5ff' }}>
@@ -937,7 +965,7 @@ export default function Documentation() {
                   background: `rgba(139,92,246,0.18)`, border: `1px solid rgba(139,92,246,0.35)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17,
                 }}>
-                  {doc.icon}
+                  <Icon name={doc.icon} size={18} color="#c4b5fd" />
                 </div>
                 <div>
                   <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f0ff', margin: 0, letterSpacing: '-0.02em' }}>
@@ -965,7 +993,9 @@ export default function Documentation() {
             {/* Tunneling special case */}
             {currentPage === '/tunneling' ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.1)' }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>🔐</div>
+                <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
+                  <Icon name="shield" size={40} color="rgba(245,158,11,0.55)" />
+                </div>
                 <p style={{ fontWeight: 600, color: '#fff', fontSize: 15, marginBottom: 8 }}>Secure Tunneling documentation</p>
                 <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 24 }}>
                   Step-by-step guides live directly on the Tunneling page.
@@ -992,7 +1022,9 @@ export default function Documentation() {
         {/* ── EMPTY STATE ── */}
         {!search.trim() && !doc && (
           <div style={{ textAlign: 'center', padding: '80px 20px', color: 'rgba(255,255,255,0.3)' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>📖</div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
+              <Icon name="book" size={40} color="rgba(255,255,255,0.2)" />
+            </div>
             <p style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>Select a section</p>
             <p style={{ fontSize: 13 }}>Pick any topic from the sidebar, or search above.</p>
           </div>
