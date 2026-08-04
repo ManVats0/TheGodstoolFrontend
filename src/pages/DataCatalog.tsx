@@ -41,6 +41,22 @@
   // Default tags applied to every source. In a real app these could be per-source.
   const DEFAULT_TAGS = ['Sensitive', 'MyGov', 'Finance', 'Internal']
 
+  function CatalogIcon({ name, size = 18, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
+    const paths: Record<string, JSX.Element> = {
+      folder: <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />,
+      inbox: <><path d="M22 12h-6l-2 3h-4l-2-3H2" /><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /></>,
+      search: <><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></>,
+      check: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></>,
+      alert: <><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></>,
+      lightbulb: <><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A6 6 0 1 0 6.5 9.5c0 2.5 1.5 3.5 2 4.5" /></>,
+    }
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {paths[name]}
+      </svg>
+    )
+  }
+
   // ── DESCRIPTION GENERATOR ────────────────────────────────────────────────────
   // In production this would come from the source metadata / user input.
   function getDescription(name: string): string {
@@ -103,7 +119,13 @@
 
         {/* ── HEADER ── */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">🗂️ Data Catalog</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)' }}>
+              <CatalogIcon name="folder" size={16} />
+            </div>
+            <h1 className="text-3xl font-bold text-white">Data Catalog</h1>
+          </div>
           <p className="text-white/40">Browse, search, and manage your connected enterprise metadata and schemas.</p>
         </div>
 
@@ -159,7 +181,7 @@
         {/* ── EMPTY CATALOG ── */}
         {sources.length === 0 ? (
           <div className="text-center py-20 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
-            <div className="text-4xl mb-4">📭</div>
+            <div className="flex justify-center mb-4"><CatalogIcon name="inbox" size={40} color="rgba(255,255,255,0.25)" /></div>
             <p className="text-white font-medium mb-1">Your catalog is empty</p>
             <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.35)' }}>
               Connect a data source first to generate metadata.
@@ -172,7 +194,7 @@
         ) : filteredSources.length === 0 ? (
           /* ── NO RESULTS ── */
           <div className="text-center py-20 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
-            <div className="text-4xl mb-4">🔍</div>
+            <div className="flex justify-center mb-4"><CatalogIcon name="search" size={40} color="rgba(255,255,255,0.25)" /></div>
             <p className="text-white font-medium mb-1">No results match your search</p>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
               Try a different keyword, owner, or date.
@@ -219,12 +241,12 @@
                         })}
                         {/* Status pill */}
                         {isAnalyzed ? (
-                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ background: TAG_STYLES.Verified.bg, color: TAG_STYLES.Verified.text, border: `1px solid ${TAG_STYLES.Verified.border}` }}>
-                            ✓ Profiled
+                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1" style={{ background: TAG_STYLES.Verified.bg, color: TAG_STYLES.Verified.text, border: `1px solid ${TAG_STYLES.Verified.border}` }}>
+                            <CatalogIcon name="check" size={11} color={TAG_STYLES.Verified.text} /> Profiled
                           </span>
                         ) : (
-                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(234,179,8,0.1)', color: '#fbbf24', border: '1px solid rgba(234,179,8,0.2)' }}>
-                            ⚠️ Needs Profiling
+                          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1" style={{ background: 'rgba(234,179,8,0.1)', color: '#fbbf24', border: '1px solid rgba(234,179,8,0.2)' }}>
+                            <CatalogIcon name="alert" size={11} color="#fbbf24" /> Needs Profiling
                           </span>
                         )}
                       </div>
@@ -306,7 +328,9 @@
                     </p>
                   </div>
                 </div>
-                <button onClick={() => setDictionaryOpen(false)} style={{ color: 'rgba(255,255,255,0.35)', fontSize: '20px', lineHeight: 1 }}>✕</button>
+                <button onClick={() => setDictionaryOpen(false)} style={{ color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1 }}>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
               </div>
 
               {/* Column legend */}
@@ -365,8 +389,9 @@
 
               {/* Modal footer */}
               <div className="px-6 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  💡 Column definitions are maintained by the Data Governance team. Contact your data owner to request changes.
+                <p className="text-xs flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  <CatalogIcon name="lightbulb" size={12} color="rgba(255,255,255,0.3)" />
+                  Column definitions are maintained by the Data Governance team. Contact your data owner to request changes.
                 </p>
               </div>
             </div>
