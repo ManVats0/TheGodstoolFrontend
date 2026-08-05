@@ -12,14 +12,7 @@ export default function Feedback() {
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
   const handleBack = () => {
-    const lastPage = localStorage.getItem('datapro_last_page')
-    if (lastPage) {
-      navigate(lastPage)
-    } else if (window.history.length > 1) {
-      navigate(-1)
-    } else {
-      navigate('/')
-    }
+    navigate('/')
   }
 
   const handleSubmit = async () => {
