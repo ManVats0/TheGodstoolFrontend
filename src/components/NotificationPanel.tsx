@@ -15,6 +15,21 @@ const TYPE_COLOR: Record<string, string> = {
   anomaly: '#ec4899', imbalance: '#f59e0b'
 }
 
+function NotifIcon({ name, size = 14, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
+  const paths: Record<string, JSX.Element> = {
+    close: <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>,
+    mail: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>,
+    check: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></>,
+    rocket: <><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" /><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" /><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" /></>,
+    bell: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>,
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {paths[name]}
+    </svg>
+  )
+}
+
 export default function NotificationPanel({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate()
   const {
@@ -135,8 +150,10 @@ const handleEmailOk = async () => {
                 Mark all read
               </button>
             )}
-            <button onClick={onClose} className="text-xl transition-colors"
-              style={{ color: 'rgba(255,255,255,0.35)' }}>✕</button>
+            <button onClick={onClose} className="transition-colors"
+              style={{ color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <NotifIcon name="close" size={18} color="rgba(255,255,255,0.35)" />
+            </button>
           </div>
         </div>
 
@@ -145,12 +162,12 @@ const handleEmailOk = async () => {
           style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
 
           <div className="flex items-center gap-2 mb-2">
-            <span style={{ fontSize: '14px' }}>📧</span>
+            <NotifIcon name="mail" size={14} color="rgba(255,255,255,0.6)" />
             <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Email Alerts</p>
             {emailSaved && (
-              <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-semibold"
+              <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1"
                 style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80' }}>
-                ✓ Active
+                <NotifIcon name="check" size={10} color="#4ade80" /> Active
               </span>
             )}
           </div>
@@ -186,7 +203,7 @@ const handleEmailOk = async () => {
           ) : (
             <div className="mt-2 rounded-xl px-3 py-2.5 flex items-start gap-2"
               style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
-              <span style={{ fontSize: '14px', marginTop: '1px' }}>✅</span>
+              <span style={{ marginTop: '2px' }}><NotifIcon name="check" size={13} color="#4ade80" /></span>
               <div>
                 <p className="text-xs font-semibold" style={{ color: '#4ade80' }}>
                   Email saved — alerts will go to {emailInput}
@@ -207,14 +224,14 @@ const handleEmailOk = async () => {
           {/* Recommended steps */}
           <div className="mt-3 rounded-xl p-3"
             style={{ background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.18)' }}>
-            <p className="text-xs font-semibold mb-2" style={{ color: '#a78bfa' }}>
-              🚀 3 steps to get alerts
+            <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#a78bfa' }}>
+              <NotifIcon name="rocket" size={12} color="#a78bfa" /> 3 steps to get alerts
             </p>
             <div className="space-y-1.5">
               {recommendedSteps.map((step, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <span style={{ fontSize: '11px', color: step.done ? '#4ade80' : 'rgba(255,255,255,0.25)' }}>
-                    {step.done ? '✓' : `${i + 1}.`}
+                  <span style={{ fontSize: '11px', color: step.done ? '#4ade80' : 'rgba(255,255,255,0.25)', display: 'inline-flex', alignItems: 'center' }}>
+                    {step.done ? <NotifIcon name="check" size={11} color="#4ade80" /> : `${i + 1}.`}
                   </span>
                   <p className="text-xs" style={{ color: step.done ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.35)' }}>
                     {step.text}
@@ -263,7 +280,7 @@ const handleEmailOk = async () => {
         <div className="flex-1 overflow-auto">
           {notifications.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-4xl mb-3">🔔</div>
+              <div className="flex justify-center mb-3"><NotifIcon name="bell" size={34} color="rgba(255,255,255,0.25)" /></div>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>No notifications yet</p>
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.15)' }}>Upload a CSV to generate alerts</p>
             </div>
