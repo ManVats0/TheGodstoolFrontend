@@ -3115,9 +3115,7 @@ const getPreviewFullscreenData = () => {
                         </select>
                       </div>
                       <div className="flex items-end pb-2">
-                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                          {filteredProblems.length.toLocaleString()} of {totalProblems.toLocaleString()} shown
-                        </span>
+                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>{filteredProblems.length.toLocaleString()} shown</span>
                       </div>
                       <div className="flex items-end pb-2 ml-auto">
                         <button
