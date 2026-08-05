@@ -3082,10 +3082,13 @@ const getPreviewFullscreenData = () => {
                   <div>
                     {totalProblems > problems.length && (
                       <div
-                        className="rounded-xl px-4 py-2.5 mb-4 text-sm"
+                        className="rounded-xl px-4 py-2.5 mb-4 text-sm flex items-center justify-between gap-3"
                         style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)', color: '#fbbf24' }}
                       >
-                        Showing {problems.length.toLocaleString()} of {totalProblems.toLocaleString()} total problems
+                        <span>
+                          Showing the first {problems.length.toLocaleString()} of {totalProblems.toLocaleString()} problems detected.
+                          Download the cleaned file to resolve all of them at once.
+                        </span>
                       </div>
                     )}
                     <div className="flex flex-wrap gap-3 mb-4">
@@ -3112,7 +3115,9 @@ const getPreviewFullscreenData = () => {
                         </select>
                       </div>
                       <div className="flex items-end pb-2">
-                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>{filteredProblems.length.toLocaleString()} shown</span>
+                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                          {filteredProblems.length.toLocaleString()} of {totalProblems.toLocaleString()} shown
+                        </span>
                       </div>
                       <div className="flex items-end pb-2 ml-auto">
                         <button
