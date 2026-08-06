@@ -1078,9 +1078,9 @@ const openGooglePicker = async () => {
   }, []);
 
   const userPlan = localStorage.getItem('datapro_plan') || 'none'
-  const isPaid = userPlan === 'solo' || userPlan === 'starter' || userPlan === 'pro_monthly' || userPlan === 'pro_yearly' || userPlan === 'enterprise'
+  const isPaid = ['trial', 'lite', 'starter', 'pro', 'team', 'enterprise'].includes(userPlan)
 const handleLockedSource = () => {
-    alert('🔒 This data source requires a paid plan.\n\nUpgrade to unlock all connectors.')
+    alert('This data source requires a paid plan.\n\nUpgrade to unlock all connectors.')
     window.location.href = '/pricing'
   }
 
