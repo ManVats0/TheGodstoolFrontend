@@ -107,9 +107,18 @@ const [pendingGooglePayload, setPendingGooglePayload] = useState<{ email: string
 const [regName, setRegName] = useState('')
 const [regNickname, setRegNickname] = useState('')
 const [confirmPassword, setConfirmPassword] = useState('')
-const [regFeeling, setRegFeeling] = useState('')
 const [showTrialWelcome, setShowTrialWelcome] = useState(false)
+const [regFeeling, setRegFeeling] = useState('')
 const forceLogoutRef = useRef<HTMLButtonElement>(null)
+const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
+
+useEffect(() => {
+  if (userPlan !== 'trial') { setTrialDaysLeft(null); return }
+  const expiresStr = localStorage.getItem('datapro_plan_expires')
+  if (!expiresStr) { setTrialDaysLeft(null); return }
+  const msLeft = new Date(expiresStr).getTime() - Date.now()
+  setTrialDaysLeft(Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24))))
+}, [userPlan])
 
 useEffect(() => {
   if (showForceLogout && forceLogoutRef.current) {
@@ -162,6 +171,8 @@ useEffect(() => {
       .then(planData => {
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
+        if (planData.planExpiresAt) localStorage.setItem('datapro_plan_expires', planData.planExpiresAt)
+        else localStorage.removeItem('datapro_plan_expires')
         setUserPlan(plan)
       })
       .catch(() => { /* ignore */ })
@@ -262,6 +273,8 @@ useEffect(() => {
         const planData = await planRes.json()
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
+        if (planData.planExpiresAt) localStorage.setItem('datapro_plan_expires', planData.planExpiresAt)
+        else localStorage.removeItem('datapro_plan_expires')
         setUserPlan(plan)
         if (isRegisterMode && plan === 'trial') setShowTrialWelcome(true)
       } catch { /* ignore */ }
@@ -1170,7 +1183,7 @@ if (!entered) return (
           {showForceLogout && (
             <>
               <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
-                 Click below again to confirm and log in here
+                👆 Click below again to confirm and log in here
               </div>
               <button
                 ref={forceLogoutRef}
@@ -1293,6 +1306,25 @@ if (!entered) return (
       <main className={`flex-1 min-h-screen overflow-auto transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-16'}`}>
         {/* The floating hamburger menu that used to be here has been removed and moved inside the Sidebar */}
         
+        {trialDaysLeft !== null && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            padding: '10px 16px', background: trialDaysLeft <= 3 ? 'rgba(239,68,68,0.1)' : 'rgba(124,58,237,0.1)',
+            borderBottom: `1px solid ${trialDaysLeft <= 3 ? 'rgba(239,68,68,0.25)' : 'rgba(167,139,250,0.2)'}`,
+            fontFamily: 'monospace', fontSize: '0.78rem',
+            color: trialDaysLeft <= 3 ? '#fca5a5' : '#c4b5fd',
+          }}>
+            <span>
+              {trialDaysLeft === 0
+                ? ' Your free trial ends today'
+                : ` Free trial — ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`}
+            </span>
+            <a href="/pricing" style={{ color: trialDaysLeft <= 3 ? '#f87171' : '#a78bfa', fontWeight: 700, textDecoration: 'underline' }}>
+              Upgrade now →
+            </a>
+          </div>
+        )}
+
         <Routes>
           <Route path="/" element={<DataSources />} />
           <Route path="/sources" element={<DataSources />} />
@@ -1313,7 +1345,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
