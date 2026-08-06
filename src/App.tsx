@@ -1183,7 +1183,7 @@ if (!entered) return (
           {showForceLogout && (
             <>
               <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
-                👆 Click below again to confirm and log in here
+                 Click below again to confirm and log in here
               </div>
               <button
                 ref={forceLogoutRef}
@@ -1345,7 +1345,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
