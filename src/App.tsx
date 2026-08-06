@@ -108,6 +108,7 @@ const [regName, setRegName] = useState('')
 const [regNickname, setRegNickname] = useState('')
 const [confirmPassword, setConfirmPassword] = useState('')
 const [regFeeling, setRegFeeling] = useState('')
+const [showTrialWelcome, setShowTrialWelcome] = useState(false)
 const forceLogoutRef = useRef<HTMLButtonElement>(null)
 
 useEffect(() => {
@@ -262,6 +263,7 @@ useEffect(() => {
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
+        if (isRegisterMode && plan === 'trial') setShowTrialWelcome(true)
       } catch { /* ignore */ }
       setEntered(true)
       setShowLogin(false)
@@ -652,7 +654,7 @@ if (!entered) return (
         </div>
 
         <p style={{ fontFamily: 'monospace', fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', marginBottom: '14px' }}>
-          No credit card required · Full platform access from day one
+           14-day free trial · Full platform unlocked · No credit card required
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -670,8 +672,8 @@ if (!entered) return (
 
       {/* ── SIDE SIGNUP FORM ── */}
       <form onSubmit={handleSideFormSubmit} style={{ flex: '1 1 340px', maxWidth: '380px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '7px', textAlign: 'left', backdropFilter: 'blur(6px)' }}>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>Get started free</div>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 2px' }}>Fill this once — confirm on the next screen.</p>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>Start your 14-day free trial</div>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 2px' }}>Full access, no card needed. Fill this once — confirm on the next screen.</p>
         <input type="email" placeholder="you@example.com" value={sideEmail} onChange={e => setSideEmail(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px' }}>
           <input type="password" placeholder="Password" value={sidePassword} onChange={e => setSidePassword(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
@@ -713,7 +715,7 @@ if (!entered) return (
           <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '6px 10px', color: '#fca5a5', fontSize: '0.68rem', fontFamily: 'monospace' }}>⚠ {sideFormError}</div>
         )}
         <button type="submit" className="auth-btn-primary" style={{ padding: '9px', fontSize: '0.85rem' }}>CONTINUE →</button>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>No credit card required · Takes 30 seconds</p>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>14-day free trial · No credit card required · Takes 30 seconds</p>
       </form>
       </div>
       <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '14px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', animation: 'float 2s ease-in-out infinite' }}>
@@ -1168,7 +1170,7 @@ if (!entered) return (
           {showForceLogout && (
             <>
               <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
-                👆 Click below again to confirm and log in here
+                 Click below again to confirm and log in here
               </div>
               <button
                 ref={forceLogoutRef}
@@ -1306,6 +1308,24 @@ if (!entered) return (
       </main>
       
       {showNotif && <NotificationPanel onClose={() => setShowNotif(false)} />}
+      {showTrialWelcome && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(5,8,15,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}
+          onClick={() => setShowTrialWelcome(false)}>
+          <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
+              Your 14-day free trial has started
+            </div>
+            <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '24px' }}>
+              Every data source and AI feature is unlocked for the next 14 days — no credit card needed. Connect a real database and see how it feels before you decide on a plan.
+            </p>
+            <button onClick={() => setShowTrialWelcome(false)} className="cta-btn" style={{ width: '100%' }}>
+              Let's go →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
