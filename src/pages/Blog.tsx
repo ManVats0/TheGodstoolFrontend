@@ -19,7 +19,7 @@ const POSTS: Post[] = [
     tag: 'Security',
     readTime: '5 min read',
     date: 'August 2026',
-    title: 'Is my data actually safe with us?',
+    title: 'Is my data actually safe on this platform?',
     body: [
       { type: 'p', text: `Every time someone asks about connecting a database, this is the real question underneath it. Not "what features do you have" — it's "what happens to my data once I hand it over." Fair enough. Here's the straight answer.` },
       { type: 'p', text: `Start with a test run, not your real database. Point the platform at a dummy table, a throwaway sheet, anything you don't care about, and watch what it actually does — how it profiles the data, what it flags, what fixes it suggests. Your real numbers are never touched during this. Once you've seen it work and you trust the process, swapping in your actual database is the exact same steps, just with real credentials this time.` },
