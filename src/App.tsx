@@ -28,19 +28,10 @@ import Feedback from './pages/Feedback'
 
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
-const [phraseIndex, setPhraseIndex] = useState(0)
-const [phraseVisible, setPhraseVisible] = useState(true)
-
-useEffect(() => {
-  const interval = setInterval(() => {
-    setPhraseVisible(false)
-    setTimeout(() => {
-      setPhraseIndex(i => (i + 1) % ROTATING_PHRASES.length)
-      setPhraseVisible(true)
-    }, 350)
-  }, 2600)
-  return () => clearInterval(interval)
-}, [])
+const ROTATING_PHRASES = [
+  'in one platform.',
+  'in minutes, not weeks.',
+]
 
 function redirectToGoogleOAuth() {
   const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/auth/google/callback`
@@ -680,7 +671,20 @@ if (!entered) return (
           For Teams Who care about data quality, speed, and security
         </p>
         <h1 className="hero-title" style={{ margin: '0 0 8px' }}>
-  Everything your data needs <span className="accent">in minutes, not weeks.</span>
+  Everything your data needs{' '}
+  <span
+    className="accent"
+    style={{
+      display: 'inline-block',
+      minWidth: '15ch',
+      textAlign: 'left',
+      whiteSpace: 'nowrap',
+      opacity: phraseVisible ? 1 : 0,
+      transition: 'opacity 0.35s ease',
+    }}
+  >
+    {ROTATING_PHRASES[phraseIndex]}
+  </span>
 </h1>
 
         {/* */}
