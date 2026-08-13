@@ -145,11 +145,23 @@ useEffect(() => {
   }
 }, [showForceLogout])
 
-  useEffect(() => {
-    if (location.pathname !== '/docs') {
-      localStorage.setItem('datapro_last_page', location.pathname)
-    }
-  }, [location.pathname]) // Default to true if you prefer it open
+useEffect(() => {
+  if (location.pathname !== '/docs') {
+    localStorage.setItem('datapro_last_page', location.pathname)
+  }
+}, [location.pathname]) // Default to true if you prefer it open
+
+useEffect(() => {
+  const titles: Record<string, string> = {
+    '/': "The God's Tool — No-Code ETL & Data Pipeline Platform",
+    '/pricing': "Pricing — The God's Tool",
+    '/contact': "Contact — The God's Tool",
+    '/blog': "Blog — The God's Tool",
+    '/terms': "Terms of Service — The God's Tool",
+    '/feedback': "Feedback — The God's Tool",
+  }
+  document.title = titles[location.pathname] || "The God's Tool"
+}, [location.pathname])
   const notifications = useStore(s => s.notifications)
   const readIds = useStore(s => s.readIds)
   const unread = notifications.filter(n => !readIds.has(n.id)).length
@@ -469,12 +481,10 @@ useEffect(() => {
     }
   }
 
-if (location.pathname === '/privacy.html') { window.location.href = '/privacy.html'; return null; }
-if (location.pathname === '/terms.html') { window.location.href = '/terms.html'; return null; }
+if (location.pathname === '/privacy.html' || location.pathname === '/privacy' || location.pathname === '/terms.html') return null
 
 if (location.pathname === '/reset-password') return <Routes><Route path="/reset-password" element={<ResetPassword />} /></Routes>
 if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
-if (location.pathname === '/privacy') { window.location.href = '/privacy.html'; return null; }
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
 // if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
@@ -1218,7 +1228,7 @@ if (!entered) return (
           {showForceLogout && (
             <>
               <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
-                 Click below again to confirm and log in here
+                👆 Click below again to confirm and log in here
               </div>
               <button
                 ref={forceLogoutRef}
@@ -1380,7 +1390,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
