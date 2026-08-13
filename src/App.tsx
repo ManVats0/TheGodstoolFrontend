@@ -28,10 +28,19 @@ import Feedback from './pages/Feedback'
 
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
-const ROTATING_PHRASES = [
-  'in one platform.',
-  'in minutes.',
-]
+const [phraseIndex, setPhraseIndex] = useState(0)
+const [phraseVisible, setPhraseVisible] = useState(true)
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setPhraseVisible(false)
+    setTimeout(() => {
+      setPhraseIndex(i => (i + 1) % ROTATING_PHRASES.length)
+      setPhraseVisible(true)
+    }, 350)
+  }, 2600)
+  return () => clearInterval(interval)
+}, [])
 
 function redirectToGoogleOAuth() {
   const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/auth/google/callback`
@@ -670,19 +679,8 @@ if (!entered) return (
         <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '8px', textTransform: 'uppercase' }}>
           For Teams Who care about data quality, speed, and security
         </p>
-        <h1 className="hero-title" style={{ margin: '0 0 8px', minHeight: '2.4em' }}>
-  Everything your data needs{' '}
-  <span
-    className="accent"
-    style={{
-      display: 'inline-block',
-      opacity: phraseVisible ? 1 : 0,
-      transform: phraseVisible ? 'translateY(0)' : 'translateY(-6px)',
-      transition: 'opacity 0.35s ease, transform 0.35s ease',
-    }}
-  >
-    {ROTATING_PHRASES[phraseIndex]}
-  </span>
+        <h1 className="hero-title" style={{ margin: '0 0 8px' }}>
+  Everything your data needs <span className="accent">in minutes, not weeks.</span>
 </h1>
 
         {/* */}
@@ -1216,7 +1214,7 @@ if (!entered) return (
           {showForceLogout && (
             <>
               <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
-                 Click below again to confirm and log in here
+                👆 Click below again to confirm and log in here
               </div>
               <button
                 ref={forceLogoutRef}
@@ -1378,7 +1376,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
