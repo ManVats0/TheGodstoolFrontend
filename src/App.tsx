@@ -30,9 +30,7 @@ const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.goo
 
 const ROTATING_PHRASES = [
   'in one platform.',
-  'without an engineer.',
   'in minutes, not weeks.',
-  'without leaving your network.',
 ]
 
 function redirectToGoogleOAuth() {
@@ -1218,7 +1216,7 @@ if (!entered) return (
           {showForceLogout && (
             <>
               <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
-                 Click below again to confirm and log in here
+                Click below again to confirm and log in here
               </div>
               <button
                 ref={forceLogoutRef}
