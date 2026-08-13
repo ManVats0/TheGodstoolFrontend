@@ -29,8 +29,8 @@ import Feedback from './pages/Feedback'
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
 const ROTATING_PHRASES = [
-  'one platform.',
-  'minutes.',
+  'in one platform.',
+  'in minutes.',
 ]
 
 function redirectToGoogleOAuth() {
