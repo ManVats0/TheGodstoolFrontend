@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 type Cycle = 'monthly' | 'yearly'
 type Currency = 'INR' | 'USD'
 
+const ROTATING_WORDS = ['moves your data', 'cleans your data']
+
 const PLANS = [
   {
     key: 'lite',
@@ -97,6 +99,22 @@ export default function Pricing() {
   const [cycle, setCycle] = useState<Cycle>('monthly')
   const [currency, setCurrency] = useState<Currency>('INR')
 
+  // ── Rotating headline word ──────────────────────────────────────────
+  const [wordIndex, setWordIndex] = useState(0)
+  const [wordVisible, setWordVisible] = useState(true)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordVisible(false)
+      setTimeout(() => {
+        setWordIndex(i => (i + 1) % ROTATING_WORDS.length)
+        setWordVisible(true)
+      }, 350)
+    }, 2800)
+    return () => clearInterval(interval)
+  }, [])
+  // ─────────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const script = document.createElement('script')
     script.src = 'https://checkout.razorpay.com/v1/checkout.js'
@@ -184,11 +202,26 @@ export default function Pricing() {
     <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
 
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          Hire an AI data engineer
+        <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', color: 'white' }}>
+          ETL that{' '}
+          <span
+            style={{
+              display: 'inline-block',
+              background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              opacity: wordVisible ? 1 : 0,
+              transform: wordVisible ? 'translateY(0)' : 'translateY(-6px)',
+              transition: 'opacity 0.35s ease, transform 0.35s ease',
+            }}
+          >
+            {ROTATING_WORDS[wordIndex]}
+          </span>{' '}
+          effortlessly
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
-          Cheaper than a hire, faster than a freelancer, available every day
+          Preview every transform before it runs. Credentials stay on your network.
         </p>
       </div>
 
