@@ -123,6 +123,9 @@ interface AppState {
   // ── KEY FIX: atomic switch that also clears stale analysis ──────────────
   switchActiveSource: (file: File | null, name: string) => void
 
+  // Load a cached "last run" analysis result without triggering a fresh run
+  loadCachedAnalysis: (name: string, a: AnalysisResult) => void
+
   // Destination name for pipeline output
   activeDestinationName: string
   setActiveDestinationName: (n: string) => void
@@ -204,6 +207,14 @@ export const useStore = create<AppState>((set) => ({
     activeSourceName: name,
     analysis: null,          // ← clears stale data from previous dataset
     analysisTab: 'preview',  // ← reset tab too
+  }),
+
+  // ── Load a cached last-run result instantly, no re-fetch/re-analyze ──────
+  loadCachedAnalysis: (name, a) => set({
+    activeFile: null,
+    activeSourceName: name,
+    analysis: a,
+    analysisTab: 'preview',
   }),
 
   activeDestinationName: '',
