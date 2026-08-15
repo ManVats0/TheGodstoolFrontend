@@ -1474,6 +1474,32 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       }
     }, [pendingCleanOptions, analysis])
 
+    const SIZE_LIMIT_GB = 10
+
+    const checkSizeAndMaybeBlock = useCallback(async (sizeCheckBody: Record<string, any>): Promise<boolean> => {
+      try {
+        const res = await fetch(`${API_BASE}/api/check-size`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sizeCheckBody),
+        })
+        const data = await res.json()
+        if (!data.supported) return false
+        const sizeGb = (data.size_bytes || 0) / (1024 ** 3)
+        if (sizeGb > SIZE_LIMIT_GB) {
+          alert(
+            `This source is too large to auto-analyze right now (${sizeGb.toFixed(1)}GB, limit is ${SIZE_LIMIT_GB}GB).\n\n` +
+            `Skip analysis for now — you can still build your pipeline, and we'll show insights after your first run.`
+          )
+          setAnalyzing(false)
+          return true
+        }
+        return false
+      } catch {
+        return false
+      }
+    }, [])
+
     const runAnalysis = useCallback(async () => {
       void activeFile // suppress ts6133 — used below and in AIChatClean
       const sourceObj2 = sources.find(s => s.name === activeSourceName)
@@ -1509,6 +1535,12 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           return
         }
         if (mysqlConn) {
+          const blocked = await checkSizeAndMaybeBlock({
+            source_type: 'mysql', host: mysqlConn.host, port: mysqlConn.port,
+            user: mysqlConn.user, password: mysqlConn.password,
+            database: mysqlConn.database, table, ssl: mysqlConn.ssl,
+          })
+          if (blocked) return
           formData.append('source_type', 'mysql')
           formData.append('mysql_host', mysqlConn.host)
           formData.append('mysql_port', mysqlConn.port)
@@ -1540,6 +1572,12 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           return
         }
         if (pgConn) {
+          const blocked = await checkSizeAndMaybeBlock({
+            source_type: 'postgres', host: pgConn.host, port: pgConn.port,
+            user: pgConn.user, password: pgConn.password,
+            database: pgConn.database, table, ssl: pgConn.ssl,
+          })
+          if (blocked) return
           formData.append('source_type', 'postgres')
           formData.append('mysql_host', pgConn.host)
           formData.append('mysql_port', pgConn.port)
@@ -1570,6 +1608,11 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           setAnalyzing(false)
           return
         }
+        const blockedMongo = await checkSizeAndMaybeBlock({
+          source_type: 'mongodb', mongo_uri: mongoConn.uri,
+          mongo_database: mongoConn.database, mongo_collection: mongoCollection,
+        })
+        if (blockedMongo) return
         formData.append('source_type', 'mongodb')
         formData.append('mysql_host', mongoConn.uri)
         formData.append('mysql_user', mongoConn.database)
@@ -1587,6 +1630,11 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           setAnalyzing(false)
           return
         }
+        const blockedGcs = await checkSizeAndMaybeBlock({
+          source_type: 'gcs', gcs_key_json: conn.keyJson, gcs_project: conn.project,
+          gcs_bucket: bucket, gcs_file: gcsFile,
+        })
+        if (blockedGcs) return
         try {
           const fetchRes = await fetch(`${API_BASE}/api/gcs/fetch-file`, {
             method: 'POST',
@@ -1623,6 +1671,12 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           setAnalyzing(false)
           return
         }
+        const blockedCloudSql = await checkSizeAndMaybeBlock({
+          source_type: conn.dbType === 'mysql' ? 'mysql' : 'postgres',
+          host: conn.instanceConnectionName, port: conn.port, user: conn.user,
+          password: conn.password, database: conn.database, table, ssl: true,
+        })
+        if (blockedCloudSql) return
         const endpoint = conn.dbType === 'mysql' ? '/api/mysql/fetch-table' : '/api/postgres/fetch-table'
         try {
           const fetchRes = await fetch(`${API_BASE}${endpoint}`, {
@@ -1665,6 +1719,11 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           alert(`BigQuery connection not found for ${project}.${dataset}. Please reconnect in Sources.`)
           return
         }
+        const blockedBq = await checkSizeAndMaybeBlock({
+          source_type: 'bigquery', bq_key_json: bqConn.key_json,
+          bq_project: project, bq_dataset: dataset, bq_table: table,
+        })
+        if (blockedBq) return
         formData.append('source_type', 'bigquery')
         formData.append('bq_key_json', bqConn.key_json)
         formData.append('bq_project', project)
@@ -1749,6 +1808,14 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           awsTable = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : beforeAt
         }
         // Fetch the table as CSV first
+        const blockedAws = await checkSizeAndMaybeBlock({
+          source_type: 'aws', aws_service: awsConn.service, aws_region: awsConn.region,
+          aws_access_key_id: awsConn.accessKeyId, aws_secret_access_key: awsConn.secretAccessKey,
+          aws_bucket: awsConn.bucket, aws_table: awsTable,
+          host: awsConn.host, port: awsConn.port, user: awsConn.user,
+          password: awsConn.password, database: awsConn.database, ssl: true,
+        })
+        if (blockedAws) return
         try {
           const fetchRes = await fetch(`${API_BASE}/api/aws/fetch-table`, {
             method: 'POST',
