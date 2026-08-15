@@ -957,6 +957,15 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
     // Track if a re-run was triggered by a source switch (avoid double-running)
     // const switchTriggeredRef = useRef(false)
 
+    // ── If analysis arrived pre-loaded from cache (DataSources "Last Run"),
+    // sync the ref so the source-switch effect below doesn't trigger a re-run ──
+    useEffect(() => {
+      if (analysis && activeSourceName && analysisSourceRef.current === '') {
+        analysisSourceRef.current = activeSourceName
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     const liveSQLPreview = useMemo(() => {
       const tableName = activeSourceName?.replace('.csv', '').replace(/[^a-zA-Z0-9_]/g, '_') || 'raw_dataset'
       if (!Object.values(options).some(Boolean) && imputationMethod === 'none') {
@@ -1964,6 +1973,11 @@ setAnalyzing(false)
           return
         }
         setAnalysis(data)
+        try {
+          localStorage.setItem(`analysis_cache_${activeSourceName}`, JSON.stringify(data))
+        } catch {
+          // Storage full or blocked — cache is best-effort, safe to skip
+        }
 
         // ── Approach 2: Save analysis metadata ──
         const now = Date.now()
