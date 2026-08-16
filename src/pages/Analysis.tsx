@@ -2940,24 +2940,27 @@ const getPreviewFullscreenData = () => {
           <StatCard label="Problems Found" value={totalProblems.toLocaleString()} color={totalProblems > 0 ? '#f87171' : '#4ade80'} />
         </div>
 
-        {/* Insights — what changed since last sync */}
-        {insights.length > 0 && (
-          <div
-            className="rounded-3xl p-6"
-            style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)' }}
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <svg width="16" height="16" fill="none" stroke="#60a5fa" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-              </svg>
-              <h3 className="font-bold text-white text-sm">Insights</h3>
+        {/* Insights — what changed since last sync (always visible, even before there's history) */}
+        <div
+          className="rounded-3xl p-6"
+          style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)' }}
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <svg width="16" height="16" fill="none" stroke="#60a5fa" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+            <h3 className="font-bold text-white text-sm">Insights</h3>
+            {insights.length > 0 && (
               <span
                 className="px-2 py-0.5 rounded-full text-xs font-semibold"
                 style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa' }}
               >
                 {insights.length}
               </span>
-            </div>
+            )}
+          </div>
+
+          {insights.length > 0 ? (
             <div className="space-y-2">
               {insights.map((ins, i) => (
                 <div
@@ -2970,8 +2973,18 @@ const getPreviewFullscreenData = () => {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div
+              className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginTop: '1px' }}>•</span>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Insights will show up here the next time your data changes — for example, if your database or Google Sheet gets updated and you re-analyze.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Problem pills */}
         {(counts.missing > 0 || counts.duplicates > 0 || counts.outliers > 0) && (
