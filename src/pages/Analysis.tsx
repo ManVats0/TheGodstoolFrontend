@@ -893,6 +893,94 @@ const assistantText = aiData.success
     )
   }
 
+  // ── Compare current analysis vs the last saved snapshot ────────────────
+  // Only surfaces changes that cross a meaningful threshold — not noise.
+  function computeInsights(prev: any, current: any): any[] {
+    if (!prev || !current) return []
+    const found: { severity: number; message: string; type: string }[] = []
+
+    // 1) Row count change
+    const prevRows = prev.dataset_info?.rows
+    const currRows = current.dataset_info?.rows
+    if (typeof prevRows === 'number' && typeof currRows === 'number' && prevRows > 0) {
+      const pct = ((currRows - prevRows) / prevRows) * 100
+      if (Math.abs(pct) >= 15) {
+        found.push({
+          severity: Math.abs(pct),
+          type: 'rows',
+          message: `Row count ${pct > 0 ? 'increased' : 'dropped'} ${Math.abs(pct).toFixed(0)}% (${prevRows.toLocaleString()} → ${currRows.toLocaleString()}) since last sync`,
+        })
+      }
+    }
+
+    // 2) Quality score change
+    const prevQ = prev.quality_score
+    const currQ = current.quality_score
+    if (typeof prevQ === 'number' && typeof currQ === 'number') {
+      const diff = currQ - prevQ
+      if (Math.abs(diff) >= 10) {
+        found.push({
+          severity: Math.abs(diff) * 1.5, // weight quality changes a bit higher
+          type: 'quality',
+          message: `Dataset quality ${diff > 0 ? 'improved' : 'declined'} from ${prevQ}% to ${currQ}% since last sync`,
+        })
+      }
+    }
+
+    // 3) Per-column mean change (numeric columns present in both)
+    const prevDescribe = prev.describe || {}
+    const currDescribe = current.describe || {}
+    Object.keys(currDescribe).forEach(col => {
+      const prevMean = prevDescribe[col]?.mean
+      const currMean = currDescribe[col]?.mean
+      if (typeof prevMean === 'number' && typeof currMean === 'number' && prevMean !== 0) {
+        const pct = ((currMean - prevMean) / Math.abs(prevMean)) * 100
+        if (Math.abs(pct) >= 15) {
+          found.push({
+            severity: Math.abs(pct),
+            type: 'column_mean',
+            message: `"${col}" average ${pct > 0 ? 'rose' : 'dropped'} ${Math.abs(pct).toFixed(0)}% (${prevMean.toLocaleString(undefined,{maximumFractionDigits:2})} → ${currMean.toLocaleString(undefined,{maximumFractionDigits:2})}) since last sync`,
+          })
+        }
+      }
+    })
+
+    // 4) Null / missing value rate change per column
+    const prevCols: Record<string, any> = {}
+    ;(prev.col_info || []).forEach((c: any) => { prevCols[c.column] = c })
+    ;(current.col_info || []).forEach((c: any) => {
+      const p = prevCols[c.column]
+      if (!p || !prevRows || !currRows) return
+      const prevPct = (p.null / prevRows) * 100
+      const currPct = (c.null / currRows) * 100
+      const diff = currPct - prevPct
+      if (diff >= 10) { // only flag increases — a drop in nulls isn't a problem worth flagging
+        found.push({
+          severity: diff * 1.2,
+          type: 'nulls',
+          message: `"${c.column}" missing values jumped from ${prevPct.toFixed(0)}% to ${currPct.toFixed(0)}% since last sync`,
+        })
+      }
+    })
+
+    // 5) Total problems change
+    const prevProblems = prev.total_problems
+    const currProblems = current.total_problems
+    if (typeof prevProblems === 'number' && typeof currProblems === 'number' && prevProblems > 0) {
+      const pct = ((currProblems - prevProblems) / prevProblems) * 100
+      if (pct >= 20) {
+        found.push({
+          severity: pct,
+          type: 'problems',
+          message: `Detected problems increased ${pct.toFixed(0)}% (${prevProblems.toLocaleString()} → ${currProblems.toLocaleString()}) since last sync`,
+        })
+      }
+    }
+
+    // Sort by severity, cap to top 5 — keep it scannable, not a wall of text
+    return found.sort((a, b) => b.severity - a.severity).slice(0, 5)
+  }
+
   export default function Analysis() {
     const navigate = useNavigate()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -909,6 +997,7 @@ const assistantText = aiData.success
     const [analyzing, setAnalyzing]         = useState(false)
     const [cleaning, setCleaning]           = useState(false)
     const [result, setResult]               = useState<any>(null)
+    const [insights, setInsights]           = useState<any[]>([])
     const [filterIssue, setFilterIssue]     = useState('All')
     const [filterCol, setFilterCol]         = useState('All')
     const [showOriginal, setShowOriginal]   = useState(false)
@@ -1972,6 +2061,15 @@ setAnalyzing(false)
           setAnalyzing(false)
           return
         }
+        // ── Read the previous snapshot BEFORE overwriting it, then diff ──
+        try {
+          const prevRaw = localStorage.getItem(`analysis_cache_${activeSourceName}`)
+          const prevData = prevRaw ? JSON.parse(prevRaw) : null
+          setInsights(computeInsights(prevData, data))
+        } catch {
+          setInsights([])
+        }
+
         setAnalysis(data)
         try {
           localStorage.setItem(`analysis_cache_${activeSourceName}`, JSON.stringify(data))
@@ -2841,6 +2939,39 @@ const getPreviewFullscreenData = () => {
           <StatCard label="Memory" value={`${(info.memory_mb || 0).toFixed(1)} MB`} />
           <StatCard label="Problems Found" value={totalProblems.toLocaleString()} color={totalProblems > 0 ? '#f87171' : '#4ade80'} />
         </div>
+
+        {/* Insights — what changed since last sync */}
+        {insights.length > 0 && (
+          <div
+            className="rounded-3xl p-6"
+            style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)' }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="16" height="16" fill="none" stroke="#60a5fa" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+              <h3 className="font-bold text-white text-sm">Insights</h3>
+              <span
+                className="px-2 py-0.5 rounded-full text-xs font-semibold"
+                style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa' }}
+              >
+                {insights.length}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {insights.map((ins, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <span style={{ color: '#60a5fa', fontSize: '13px', marginTop: '1px' }}>•</span>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>{ins.message}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Problem pills */}
         {(counts.missing > 0 || counts.duplicates > 0 || counts.outliers > 0) && (
