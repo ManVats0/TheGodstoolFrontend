@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { API_BASE } from '../config'
+import { API_BASE } from './config'
 
 export interface Notification {
   id: string
