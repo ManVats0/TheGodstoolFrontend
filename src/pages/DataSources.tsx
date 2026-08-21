@@ -6,7 +6,7 @@
 
   const DATASOURCES_TOUR: TourStep[] = [
   {
-    title: 'Welcome to Data Sources 👋',
+    title: 'Welcome to Data Sources',
     body: 'This is where every project starts. Connect a CSV, Google Sheet, database, or API here and DataPipe will pull it in for cleaning and analysis.',
   },
   {
