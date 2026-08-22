@@ -871,8 +871,9 @@ const openGooglePicker = async () => {
         setGsheetsProgress(0)
         setTab('existing')
         navigate('/analysis')
-      } catch {
-        setGsheetsError('Import failed. Please try again.')
+      } catch (err: any) {
+        console.error('confirmGSheet failed:', err)
+        setGsheetsError(`Import failed: ${err?.message || String(err)}`)
         setGsheetsStep('picker')
       }
     }
