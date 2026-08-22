@@ -116,7 +116,7 @@ interface BackendConnection {
 }
 
 function authHeaders(): Record<string, string> {
-  const token = localStorage.getItem('datapro_auth_token') || ''
+  const token = localStorage.getItem('datapro_token') || ''
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
@@ -193,6 +193,12 @@ interface AppState {
   // ── Backend-backed connections (MongoDB via main.py /api/connections) ──
   loadingSourcesFromBackend: boolean
   loadSourcesFromBackend: () => Promise<void>
+  saveConnectionToBackend: (
+    name: string,
+    type: string,
+    config: Record<string, any>,
+    credentials: Record<string, any>,
+  ) => Promise<string | undefined>
 
   catalog: CatalogItem[]
 
@@ -300,6 +306,34 @@ export const useStore = create<AppState>((set, get) => ({
       })
     } catch {
       set({ loadingSourcesFromBackend: false })
+    }
+  },
+
+  saveConnectionToBackend: async (name, type, config, credentials) => {
+    const token = localStorage.getItem('datapro_token') || ''
+    if (!token) {
+      console.warn('saveConnectionToBackend: no auth token, skipping backend save')
+      return undefined
+    }
+    try {
+      const res = await fetch(`${API_BASE}/api/connections`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders(),
+        },
+        body: JSON.stringify({ name, type, config, credentials }),
+      })
+      if (!res.ok) {
+        console.warn(`saveConnectionToBackend: HTTP ${res.status}`)
+        return undefined
+      }
+      const doc = await res.json()
+      return doc._id
+    } catch (e) {
+      console.warn('saveConnectionToBackend failed:', e)
+      return undefined
     }
   },
 
