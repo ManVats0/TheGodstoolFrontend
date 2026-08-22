@@ -834,6 +834,13 @@ const openGooglePicker = async () => {
   const realFile = new File([blob], data.filename, { type: 'text/csv' })
   setGsheetsProgress(100)
 
+  const backendId = await saveConnectionToBackend(
+    sheet.name,
+    'sheets',
+    { sheetId: sheet.id, sheetName: sheet.name, tab: tabToImport },
+    {},
+  )
+
   const source = {
     id: crypto.randomUUID(),
     name: sheet.name,
@@ -843,6 +850,7 @@ const openGooglePicker = async () => {
     addedAt: new Date().toLocaleString(),
     sheetId: sheet.id,        // ← store the real sheet ID
     tab: tabToImport,         // ← store the tab name
+    connectionId: backendId || undefined,
   }
   addSource(source)
   switchActiveSource(realFile, sheet.name)
@@ -2739,29 +2747,35 @@ setMysqlSelectedTables(new Set())
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (bqStatus !== 'ok' || bqSelectedTables.size === 0) return
-                    const id = crypto.randomUUID()
+                    const tablesArr = [...bqSelectedTables]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `${bqProject}@bigquery`,
+                      'bigquery',
+                      { project: bqProject, dataset: bqDataset, tables: tablesArr },
+                      { key_json: bqKeyJson },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
-                      id,
-                      key_json: bqKeyJson,
-                      project: bqProject,
-                      dataset: bqDataset,
-                      table: [...bqSelectedTables][0],
-                      tables: [...bqSelectedTables],
-                      name: `${bqProject}@bigquery`,
-                      addedAt: new Date().toLocaleString(),
+                      id, key_json: bqKeyJson, project: bqProject, dataset: bqDataset,
+                      table: tablesArr[0], tables: tablesArr,
+                      name: `${bqProject}@bigquery`, addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_bigquery_connections', JSON.stringify(updated))
                     setSavedBqConns(updated)
-                    ;[...bqSelectedTables].forEach((tbl, idx) => {
+                    tablesArr.forEach((tbl, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${bqProject}.${bqDataset}.${tbl}`,
                         type: 'bigquery' as const,
-                        addedAt: connRecord.addedAt,
+                        addedAt,
+                        connectionId: backendId || undefined,
                       })
                     })
                     addAuditLog({
@@ -2770,7 +2784,7 @@ setMysqlSelectedTables(new Set())
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
-                      details: `Connected BigQuery: ${bqProject}.${bqDataset} (${bqSelectedTables.size} table(s))`,
+                      details: `Connected BigQuery: ${bqProject}.${bqDataset} (${tablesArr.length} table(s))`,
                       user: 'local_user',
                     })
                     setShowBigQueryFlow(false)
@@ -2977,28 +2991,35 @@ setMysqlSelectedTables(new Set())
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (mongoStatus !== 'ok' || mongoSelectedCollections.size === 0) return
-                    const id = crypto.randomUUID()
+                    const collsArr = [...mongoSelectedCollections]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `${mongo.database}@mongo`,
+                      'mongodb',
+                      { database: mongo.database, collections: collsArr },
+                      { uri: mongo.uri },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
-                      id,
-                      uri: mongo.uri,
-                      database: mongo.database,
-                      collection: [...mongoSelectedCollections][0],
-                      collections: [...mongoSelectedCollections],
-                      name: `${mongo.database}@mongo`,
-                      addedAt: new Date().toLocaleString(),
+                      id, uri: mongo.uri, database: mongo.database,
+                      collection: collsArr[0], collections: collsArr,
+                      name: `${mongo.database}@mongo`, addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_mongo_connections', JSON.stringify(updated))
                     setSavedMongoConns(updated)
-                    ;[...mongoSelectedCollections].forEach((coll, idx) => {
+                    collsArr.forEach((coll, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${mongo.database}.${coll}@mongo`,
                         type: 'mongodb' as const,
-                        addedAt: connRecord.addedAt,
+                        addedAt,
+                        connectionId: backendId || undefined,
                       })
                     })
                     addAuditLog({
@@ -3007,7 +3028,7 @@ setMysqlSelectedTables(new Set())
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
-                      details: `Connected MongoDB: ${mongo.database} (${mongoSelectedCollections.size} collection(s))`,
+                      details: `Connected MongoDB: ${mongo.database} (${collsArr.length} collection(s))`,
                       user: 'local_user',
                     })
                     setShowMongoFlow(false)
@@ -3415,9 +3436,20 @@ setMysqlSelectedTables(new Set())
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (awsStatus !== 'ok' || awsSelectedTables.size === 0) return
-                    const id = crypto.randomUUID()
+                    const tablesArr = [...awsSelectedTables]
+                    const addedAt = new Date().toLocaleString()
+                    const connName = awsService === 's3' ? `s3://${aws.bucket}` : awsService === 'dynamodb' ? `dynamodb.${aws.region}` : awsService === 'cost-explorer' ? `cost-explorer@${aws.region}` : `${aws.database}@${aws.host}`
+
+                    const backendId = await saveConnectionToBackend(
+                      connName,
+                      'aws',
+                      { service: awsService, region: aws.region, host: aws.host, port: aws.port, database: aws.database, ssl: aws.ssl, bucket: aws.bucket, prefix: aws.prefix, tableName: aws.tableName, tables: tablesArr },
+                      { accessKeyId: aws.accessKeyId, secretAccessKey: aws.secretAccessKey, user: aws.user, password: aws.password },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
                       id, service: awsService, region: aws.region,
                       accessKeyId: aws.accessKeyId, secretAccessKey: aws.secretAccessKey,
@@ -3426,16 +3458,14 @@ setMysqlSelectedTables(new Set())
                       bucket: aws.bucket, prefix: aws.prefix, tableName: aws.tableName,
                       costStartDate: awsCostStartDate, costEndDate: awsCostEndDate,
                       costGranularity: awsCostGranularity, costGroupBy: awsCostGroupBy,
-                      table: [...awsSelectedTables][0],
-                      tables: [...awsSelectedTables],
-                      name: awsService === 's3' ? `s3://${aws.bucket}` : awsService === 'dynamodb' ? `dynamodb.${aws.region}` : awsService === 'cost-explorer' ? `cost-explorer@${aws.region}` : `${aws.database}@${aws.host}`,
-                      addedAt: new Date().toLocaleString(),
+                      table: tablesArr[0], tables: tablesArr,
+                      name: connName, addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_aws_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_aws_connections', JSON.stringify(updated))
                     setSavedAWSConns(updated)
-                    ;[...awsSelectedTables].forEach((item, idx) => {
+                    tablesArr.forEach((item, idx) => {
                       const srcName = awsService === 's3'
                         ? `s3://${aws.bucket}/${item}`
                         : awsService === 'dynamodb'
@@ -3443,14 +3473,14 @@ setMysqlSelectedTables(new Set())
                         : awsService === 'cost-explorer'
                         ? `cost-explorer:${item}@${aws.region}`
                         : `${aws.database}.${item}@${aws.host}`
-                      addSource({ id: `${id}-${idx}`, name: srcName, type: 'aws' as any, addedAt: connRecord.addedAt })
+                      addSource({ id: `${id}-${idx}`, name: srcName, type: 'aws' as any, addedAt, connectionId: backendId || undefined })
                     })
                     addAuditLog({
                       id: crypto.randomUUID(), time: new Date().toLocaleString(),
                       action: 'add_source', entity_type: 'data_source', entity_id: id,
                       details: awsService === 'cost-explorer'
                         ? `Connected AWS Cost Explorer: ${awsCostStartDate} → ${awsCostEndDate} · ${awsCostGranularity} · grouped by ${awsCostGroupBy} · region: ${aws.region}`
-                        : `Connected AWS ${awsService.toUpperCase()}: ${connRecord.name} (${awsSelectedTables.size} item(s)) · region: ${aws.region}`,
+                        : `Connected AWS ${awsService.toUpperCase()}: ${connName} (${tablesArr.length} item(s)) · region: ${aws.region}`,
                       user: 'local_user',
                     })
                     setShowAWSFlow(false)
@@ -3796,18 +3826,28 @@ setMysqlSelectedTables(new Set())
                   {gcsStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (gcsStatus !== 'ok' || gcsSelectedFiles.size === 0) return
-                    const id = crypto.randomUUID()
-                    const connRecord = { id, keyJson: gcs.keyJson, project: gcs.project, bucket: gcs.bucket, prefix: gcs.prefix, files: [...gcsSelectedFiles], file: [...gcsSelectedFiles][0], name: `gcs://${gcs.bucket}`, addedAt: new Date().toLocaleString() }
+                    const filesArr = [...gcsSelectedFiles]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `gcs://${gcs.bucket}`,
+                      'gcs',
+                      { project: gcs.project, bucket: gcs.bucket, files: filesArr, prefix: gcs.prefix },
+                      { keyJson: gcs.keyJson },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
+                    const connRecord = { id, keyJson: gcs.keyJson, project: gcs.project, bucket: gcs.bucket, prefix: gcs.prefix, files: filesArr, file: filesArr[0], name: `gcs://${gcs.bucket}`, addedAt }
                     const existing = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_gcs_connections', JSON.stringify(updated))
                     setSavedGcsConns(updated)
-                    ;[...gcsSelectedFiles].forEach((f, idx) => {
-                      addSource({ id: `${id}-${idx}`, name: `gcs://${gcs.bucket}/${f}`, type: 'gcs' as any, addedAt: connRecord.addedAt })
+                    filesArr.forEach((f, idx) => {
+                      addSource({ id: `${id}-${idx}`, name: `gcs://${gcs.bucket}/${f}`, type: 'gcs' as any, addedAt, connectionId: backendId || undefined })
                     })
-                    addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected GCS: ${gcs.bucket} (${gcsSelectedFiles.size} file(s))`, user: 'local_user' })
+                    addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected GCS: ${gcs.bucket} (${filesArr.length} file(s))`, user: 'local_user' })
                     setShowGCSFlow(false); setGcsStatus('idle'); setGcsError('')
                     setGcs({ keyJson: '', project: '', bucket: '', prefix: '' }); setGcsFiles([]); setGcsSelectedFiles(new Set()); setTab('existing')
                   }}
@@ -3992,18 +4032,28 @@ setMysqlSelectedTables(new Set())
                   {cloudSQLStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (cloudSQLStatus !== 'ok' || cloudSQLSelectedTables.size === 0) return
-                    const id = crypto.randomUUID()
-                    const connRecord = { id, ...cloudSQL, tables: [...cloudSQLSelectedTables], table: [...cloudSQLSelectedTables][0], name: `${cloudSQL.database}@cloudsql.${cloudSQL.project}`, addedAt: new Date().toLocaleString() }
+                    const tablesArr = [...cloudSQLSelectedTables]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `${cloudSQL.database}@cloudsql.${cloudSQL.project}`,
+                      'cloudsql',
+                      { project: cloudSQL.project, database: cloudSQL.database, dbType: cloudSQL.dbType, port: cloudSQL.port, instanceConnectionName: cloudSQL.instanceConnectionName, tables: tablesArr },
+                      { user: cloudSQL.user, password: cloudSQL.password, keyJson: cloudSQL.keyJson },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
+                    const connRecord = { id, ...cloudSQL, tables: tablesArr, table: tablesArr[0], name: `${cloudSQL.database}@cloudsql.${cloudSQL.project}`, addedAt }
                     const existing = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_cloudsql_connections', JSON.stringify(updated))
                     setSavedCloudSQLConns(updated)
-                    ;[...cloudSQLSelectedTables].forEach((tbl, idx) => {
-                      addSource({ id: `${id}-${idx}`, name: `${cloudSQL.database}.${tbl}@cloudsql.${cloudSQL.project}`, type: 'cloudsql' as any, addedAt: connRecord.addedAt })
+                    tablesArr.forEach((tbl, idx) => {
+                      addSource({ id: `${id}-${idx}`, name: `${cloudSQL.database}.${tbl}@cloudsql.${cloudSQL.project}`, type: 'cloudsql' as any, addedAt, connectionId: backendId || undefined })
                     })
-                    addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected Cloud SQL: ${cloudSQL.database}@${cloudSQL.instanceConnectionName} (${cloudSQLSelectedTables.size} table(s))`, user: 'local_user' })
+                    addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected Cloud SQL: ${cloudSQL.database}@${cloudSQL.instanceConnectionName} (${tablesArr.length} table(s))`, user: 'local_user' })
                     setShowCloudSQLFlow(false); setCloudSQLStatus('idle'); setCloudSQLError('')
                     setCloudSQL({ keyJson: '', project: '', instanceConnectionName: '', user: '', password: '', database: '', dbType: 'postgres', port: '5432' })
                     setCloudSQLTables([]); setCloudSQLSelectedTables(new Set()); setTab('existing')
@@ -4253,31 +4303,36 @@ setMysqlSelectedTables(new Set())
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (databricksStatus !== 'ok' || databricksSelectedTables.size === 0) return
-                    const id = crypto.randomUUID()
+                    const tablesArr = [...databricksSelectedTables]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `${databricks.catalog}.${databricks.schema}@${databricks.host}`,
+                      'databricks',
+                      { host: databricks.host, catalog: databricks.catalog, schema: databricks.schema, httpPath: databricks.httpPath, tables: tablesArr },
+                      { token: databricks.token },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
-                      id,
-                      host: databricks.host,
-                      httpPath: databricks.httpPath,
-                      token: databricks.token,
-                      catalog: databricks.catalog,
-                      schema: databricks.schema,
-                      table: [...databricksSelectedTables][0],
-                      tables: [...databricksSelectedTables],
-                      name: `${databricks.catalog}.${databricks.schema}@${databricks.host}`,
-                      addedAt: new Date().toLocaleString(),
+                      id, host: databricks.host, httpPath: databricks.httpPath, token: databricks.token,
+                      catalog: databricks.catalog, schema: databricks.schema,
+                      table: tablesArr[0], tables: tablesArr,
+                      name: `${databricks.catalog}.${databricks.schema}@${databricks.host}`, addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_databricks_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_databricks_connections', JSON.stringify(updated))
                     setSavedDatabricksConns(updated)
-                    ;[...databricksSelectedTables].forEach((tbl, idx) => {
+                    tablesArr.forEach((tbl, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${databricks.catalog}.${databricks.schema}.${tbl}@${databricks.host}`,
                         type: 'databricks' as any,
-                        addedAt: connRecord.addedAt,
+                        addedAt,
+                        connectionId: backendId || undefined,
                       })
                     })
                     addAuditLog({
@@ -4286,7 +4341,7 @@ setMysqlSelectedTables(new Set())
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
-                      details: `Connected Databricks: ${databricks.catalog}.${databricks.schema}@${databricks.host} (${databricksSelectedTables.size} table(s))`,
+                      details: `Connected Databricks: ${databricks.catalog}.${databricks.schema}@${databricks.host} (${tablesArr.length} table(s))`,
                       user: 'local_user',
                     })
                     setShowDatabricksFlow(false)
@@ -4556,42 +4611,45 @@ setMysqlSelectedTables(new Set())
                   disabled={!restApi.base_url || restStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(20,184,166,0.15)', border: '1px solid rgba(20,184,166,0.35)', color: '#14b8a6', cursor: (!restApi.base_url || restStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
-                  {restStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {restStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (restStatus !== 'ok' || restSelectedEndpoints.size === 0) return
-                    const id = crypto.randomUUID()
+                    const endpointsArr = [...restSelectedEndpoints]
+                    const addedAt = new Date().toLocaleString()
                     const headers: Record<string, string> = {}
                     if (restApi.api_key) {
                       headers[restApi.auth_header] = `${restApi.auth_prefix} ${restApi.api_key}`.trim()
                     }
+
+                    const backendId = await saveConnectionToBackend(
+                      restApi.base_url.replace(/https?:\/\//, ''),
+                      'rest',
+                      { base_url: restApi.base_url, endpoints: endpointsArr, auth_header: restApi.auth_header, auth_prefix: restApi.auth_prefix, verify_ssl: restApi.verify_ssl, test_path: restApi.test_path, timeout: restApi.timeout },
+                      { api_key: restApi.api_key },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
-                      id,
-                      base_url: restApi.base_url,
-                      api_key: restApi.api_key,
-                      auth_header: restApi.auth_header,
-                      auth_prefix: restApi.auth_prefix,
-                      headers,
-                      verify_ssl: restApi.verify_ssl,
-                      test_path: restApi.test_path,
-                      timeout: restApi.timeout,
-                      endpoints: [...restSelectedEndpoints],
-                      endpoint: [...restSelectedEndpoints][0],
-                      name: restApi.base_url.replace(/https?:\/\//, ''),
-                      addedAt: new Date().toLocaleString(),
+                      id, base_url: restApi.base_url, api_key: restApi.api_key,
+                      auth_header: restApi.auth_header, auth_prefix: restApi.auth_prefix, headers,
+                      verify_ssl: restApi.verify_ssl, test_path: restApi.test_path, timeout: restApi.timeout,
+                      endpoints: endpointsArr, endpoint: endpointsArr[0],
+                      name: restApi.base_url.replace(/https?:\/\//, ''), addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_rest_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_rest_connections', JSON.stringify(updated))
                     setSavedRestConns(updated)
-                    ;[...restSelectedEndpoints].forEach((ep, idx) => {
+                    endpointsArr.forEach((ep, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `rest:${restApi.base_url.replace(/https?:\/\//, '')}${ep}`,
                         type: 'rest' as any,
-                        addedAt: connRecord.addedAt,
+                        addedAt,
+                        connectionId: backendId || undefined,
                       })
                     })
                     addAuditLog({
@@ -4600,7 +4658,7 @@ setMysqlSelectedTables(new Set())
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
-                      details: `Connected REST API: ${restApi.base_url} (${restSelectedEndpoints.size} endpoint(s))`,
+                      details: `Connected REST API: ${restApi.base_url} (${endpointsArr.length} endpoint(s))`,
                       user: 'local_user',
                     })
                     setShowRestApiFlow(false)
@@ -4784,38 +4842,43 @@ setMysqlSelectedTables(new Set())
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (ga4Status !== 'ok' || ga4SelectedReports.size === 0) return
-                    const id = crypto.randomUUID()
+                    const reportsArr = [...ga4SelectedReports]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `ga4:${ga4.propertyId}`,
+                      'ga4',
+                      { propertyId: ga4.propertyId, reports: reportsArr, metrics: ga4.metrics, dimensions: ga4.dimensions },
+                      { keyJson: ga4.keyJson },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
-                      id,
-                      keyJson: ga4.keyJson,
-                      propertyId: ga4.propertyId,
-                      metrics: ga4.metrics,
-                      dimensions: ga4.dimensions,
-                      startDate: '365daysAgo',
-                      endDate: 'today',
-                      reports: [...ga4SelectedReports],
-                      report: [...ga4SelectedReports][0],
-                      name: `ga4:${ga4.propertyId}`,
-                      addedAt: new Date().toLocaleString(),
+                      id, keyJson: ga4.keyJson, propertyId: ga4.propertyId,
+                      metrics: ga4.metrics, dimensions: ga4.dimensions,
+                      startDate: '365daysAgo', endDate: 'today',
+                      reports: reportsArr, report: reportsArr[0],
+                      name: `ga4:${ga4.propertyId}`, addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_ga4_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_ga4_connections', JSON.stringify(updated))
                     setSavedGa4Conns(updated)
-                    ;[...ga4SelectedReports].forEach((report, idx) => {
+                    reportsArr.forEach((report, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `ga4:${ga4.propertyId}/${report}`,
                         type: 'ga4' as any,
-                        addedAt: connRecord.addedAt,
+                        addedAt,
+                        connectionId: backendId || undefined,
                       })
                     })
                     addAuditLog({
                       id: crypto.randomUUID(), time: new Date().toLocaleString(),
                       action: 'add_source', entity_type: 'data_source', entity_id: id,
-                      details: `Connected GA4 Property: ${ga4.propertyId} (${ga4SelectedReports.size} report(s))`,
+                      details: `Connected GA4 Property: ${ga4.propertyId} (${reportsArr.length} report(s))`,
                       user: 'local_user',
                     })
                     setShowGA4Flow(false); setGa4Status('idle'); setGa4Error('')
