@@ -2190,9 +2190,19 @@ if (tablesData.tables?.length > 0) {
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (mysqlStatus !== 'ok') return
-                    const id = crypto.randomUUID()
+                    const tablesArr = [...mysqlSelectedTables]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `${mysql.database}@${mysql.host}`,
+                      'mysql',
+                      { host: mysql.host, port: mysql.port, database: mysql.database, ssl: mysql.ssl, tables: tablesArr },
+                      { user: mysql.user, password: mysql.password },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
   id,
   host: mysql.host,
@@ -2201,22 +2211,23 @@ if (tablesData.tables?.length > 0) {
   password: mysql.password,
   database: mysql.database,
   ssl: mysql.ssl,
-  table: [...mysqlSelectedTables][0],
-  tables: [...mysqlSelectedTables],   // ← save only checked tables
+  table: tablesArr[0],
+  tables: tablesArr,   // ← save only checked tables
   name: `${mysql.database}@${mysql.host}`,
-  addedAt: new Date().toLocaleString(),
+  addedAt,
 }
                     const existing = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_mysql_connections', JSON.stringify(updated))
                     setSavedMySQLConns(updated)
                     // Add one source entry per table
-;[...mysqlSelectedTables].forEach((tbl, idx) => {
+tablesArr.forEach((tbl, idx) => {
   addSource({
     id: `${id}-${idx}`,
     name: `${mysql.database}.${tbl}@${mysql.host}`,
     type: 'mysql' as const,
-    addedAt: connRecord.addedAt,
+    addedAt,
+    connectionId: backendId || undefined,
   })
 })
                     addAuditLog({
@@ -2458,9 +2469,19 @@ setMysqlSelectedTables(new Set())
                   {postgresStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (postgresStatus !== 'ok') return
-                    const id = crypto.randomUUID()
+                    const tablesArr = [...postgresSelectedTables]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `${postgres.database}@${postgres.host}`,
+                      'postgres',
+                      { host: postgres.host, port: postgres.port, database: postgres.database, ssl: postgres.ssl, tables: tablesArr },
+                      { user: postgres.user, password: postgres.password },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
                       id,
                       host: postgres.host,
@@ -2469,21 +2490,22 @@ setMysqlSelectedTables(new Set())
                       password: postgres.password,
                       database: postgres.database,
                       ssl: postgres.ssl,
-                      table: [...postgresSelectedTables][0],
-                      tables: [...postgresSelectedTables],
+                      table: tablesArr[0],
+                      tables: tablesArr,
                       name: `${postgres.database}@${postgres.host}`,
-                      addedAt: new Date().toLocaleString(),
+                      addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_postgres_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_postgres_connections', JSON.stringify(updated))
                     setSavedPostgresConns(updated);
-                    [...postgresSelectedTables].forEach((tbl, idx) => {
+                    tablesArr.forEach((tbl, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${postgres.database}.${tbl}@${postgres.host}`,
                         type: 'postgres' as const,
-                        addedAt: connRecord.addedAt,
+                        addedAt,
+                        connectionId: backendId || undefined,
                       })
                     })
                     addAuditLog({
