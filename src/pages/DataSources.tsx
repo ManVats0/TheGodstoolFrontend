@@ -834,12 +834,7 @@ const openGooglePicker = async () => {
   const realFile = new File([blob], data.filename, { type: 'text/csv' })
   setGsheetsProgress(100)
 
-  const backendId = await saveConnectionToBackend(
-    sheet.name,
-    'sheets',
-    { sheetId: sheet.id, sheetName: sheet.name, tab: tabToImport },
-    {},
-  )
+  const backendId: string | undefined = undefined
 
   const source = {
     id: crypto.randomUUID(),
