@@ -1688,11 +1688,18 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         )
         console.log('MySQL debug:', { activeSourceName, database, table, host, savedMySQL, mysqlConn })
         if (!mysqlConn) {
-          console.error('❌ No MySQL connection found for', { database, host })
-          alert(`MySQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
-          return
-        }
-        if (mysqlConn) {
+          if (sourceObj2?.connectionId) {
+            // No local cache (new device / cleared storage) — let the backend
+            // resolve the saved connection by id instead of giving up.
+            formData.append('source_type', 'mysql')
+            formData.append('connection_id', sourceObj2.connectionId)
+            formData.append('mysql_table', table)
+          } else {
+            console.error('❌ No MySQL connection found for', { database, host })
+            alert(`MySQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
+            return
+          }
+        } else {
           const blocked = await checkSizeAndMaybeBlock({
             source_type: 'mysql', host: mysqlConn.host, port: mysqlConn.port,
             user: mysqlConn.user, password: mysqlConn.password,
@@ -1725,11 +1732,16 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         )
         console.log('PostgreSQL debug:', { activeSourceName, database, table, host, savedPG, pgConn })
         if (!pgConn) {
-          console.error('❌ No PostgreSQL connection found for', { database, host })
-          alert(`PostgreSQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
-          return
-        }
-        if (pgConn) {
+          if (sourceObj2?.connectionId) {
+            formData.append('source_type', 'postgres')
+            formData.append('connection_id', sourceObj2.connectionId)
+            formData.append('mysql_table', table)
+          } else {
+            console.error('❌ No PostgreSQL connection found for', { database, host })
+            alert(`PostgreSQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
+            return
+          }
+        } else {
           const blocked = await checkSizeAndMaybeBlock({
             source_type: 'postgres', host: pgConn.host, port: pgConn.port,
             user: pgConn.user, password: pgConn.password,
@@ -1755,27 +1767,34 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         const mongoConn = savedMongo.find((c: any) => c.database === database)
         console.log('MongoDB debug:', { activeSourceName, database, collection, savedMongo, mongoConn })
         if (!mongoConn) {
-          console.error('❌ No MongoDB connection found for', { database })
-          alert(`MongoDB connection not found for ${database}. Please reconnect in Sources.`)
-          setAnalyzing(false)
-          return
+          if (sourceObj2?.connectionId) {
+            formData.append('source_type', 'mongodb')
+            formData.append('connection_id', sourceObj2.connectionId)
+            formData.append('mysql_table', collection)
+          } else {
+            console.error('❌ No MongoDB connection found for', { database })
+            alert(`MongoDB connection not found for ${database}. Please reconnect in Sources.`)
+            setAnalyzing(false)
+            return
+          }
+        } else {
+          const mongoCollection = collection || mongoConn.collection || mongoConn.collections?.[0] || ''
+          if (!mongoCollection) {
+            alert(`No collection specified for MongoDB source "${activeSourceName}". Please reconnect in Sources.`)
+            setAnalyzing(false)
+            return
+          }
+          const blockedMongo = await checkSizeAndMaybeBlock({
+            source_type: 'mongodb', mongo_uri: mongoConn.uri,
+            mongo_database: mongoConn.database, mongo_collection: mongoCollection,
+          })
+          if (blockedMongo) return
+          formData.append('source_type', 'mongodb')
+          formData.append('mysql_host', mongoConn.uri)
+          formData.append('mysql_user', mongoConn.database)
+          formData.append('mysql_database', mongoConn.database)
+          formData.append('mysql_table', mongoCollection)
         }
-        const mongoCollection = collection || mongoConn.collection || mongoConn.collections?.[0] || ''
-        if (!mongoCollection) {
-          alert(`No collection specified for MongoDB source "${activeSourceName}". Please reconnect in Sources.`)
-          setAnalyzing(false)
-          return
-        }
-        const blockedMongo = await checkSizeAndMaybeBlock({
-          source_type: 'mongodb', mongo_uri: mongoConn.uri,
-          mongo_database: mongoConn.database, mongo_collection: mongoCollection,
-        })
-        if (blockedMongo) return
-        formData.append('source_type', 'mongodb')
-        formData.append('mysql_host', mongoConn.uri)
-        formData.append('mysql_user', mongoConn.database)
-        formData.append('mysql_database', mongoConn.database)
-        formData.append('mysql_table', mongoCollection)
       } else if ((sourceObj2?.type as string) === 'gcs') {
         const savedGCSMeta = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
         const withoutProto = activeSourceName.replace('gcs://', '')
