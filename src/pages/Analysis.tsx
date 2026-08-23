@@ -17,7 +17,10 @@ import { API_BASE } from '../config'
     { value:'interpolate_linear', label:'Linear Interp',   desc:'Estimate from surrounding values.' },
     { value:'interpolate_time',   label:'Index Interp',    desc:'Estimate by row index.' },
   ]
-
+            df_mg = pd.DataFrame(docs_mg)
+            for col in df_mg.columns:
+                if df_mg[col].apply(lambda x: isinstance(x, (dict, list))).any():
+                    df_mg[col] = df_mg[col].apply(lambda x: json.dumps(x, default=str) if isinstance(x, (dict, list)) else x)
   const CLEANING_OPTIONS = [
     { key:'remove_duplicates', label:'Remove Duplicates',  desc:'Delete identical rows',              issueKey:'duplicates' },
     { key:'remove_empty_rows', label:'Remove Empty Rows',  desc:'Delete completely blank lines',       issueKey:'empty_rows' },
@@ -31,46 +34,6 @@ import { API_BASE } from '../config'
     'Missing value': { bg: 'rgba(249,115,22,0.15)', text: '#fb923c' },
     'Duplicate row': { bg: 'rgba(239,68,68,0.15)',  text: '#f87171' },
     'Outlier':       { bg: 'rgba(234,179,8,0.15)',  text: '#fbbf24' },
-  }
-
-  // ── Backend metadata persistence (MongoDB via main.py /api/analysis-results) ──
-  // CRITICAL: only ever send the trimmed object below. The raw /api/analyze
-  // response contains sample_data (100 rows), original_preview (50 rows), and
-  // problems[].value (real cell values) — none of that may reach the DB.
-  // Trend history keeps only quality_score/total_problems/rows per run.
-  function toAnalysisMetadata(data: any) {
-    const { sample_data, original_preview, problems, ...rest } = data
-    return {
-      ...rest,
-      time_series: rest.time_series ? {
-        detected: rest.time_series.detected,
-        date_col: rest.time_series.date_col,
-        frequency: rest.time_series.frequency,
-      } : rest.time_series,
-    }
-  }
-
-  function analysisAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('datapro_auth_token') || ''
-    return token ? { Authorization: `Bearer ${token}` } : {}
-  }
-
-  async function saveAnalysisResultToBackend(sourceName: string, connectionId: string | undefined, fullResult: any) {
-    try {
-      await fetch(`${API_BASE}/api/analysis-results`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', ...analysisAuthHeaders() },
-        body: JSON.stringify({
-          source_name: sourceName,
-          connection_id: connectionId || '',
-          result: toAnalysisMetadata(fullResult),
-        }),
-      })
-    } catch {
-      // Best-effort — the localStorage cache already has the full result
-      // for this browser, so a failed backend save doesn't break the page.
-    }
   }
 
   const sparkleCSS = `
@@ -2116,10 +2079,6 @@ setAnalyzing(false)
         } catch {
           // Storage full or blocked — cache is best-effort, safe to skip
         }
-
-        // Cross-device "Last Run" badge + quality trend — metadata only.
-        // Full `data` (with sample rows) stays local via the cache above.
-        saveAnalysisResultToBackend(activeSourceName, sourceObj2?.connectionId, data)
 
         // ── Approach 2: Save analysis metadata ──
         const now = Date.now()
