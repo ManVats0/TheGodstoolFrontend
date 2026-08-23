@@ -2084,12 +2084,45 @@ setAnalyzing(false)
           return
         }
       } else if (sourceObj2?.type === 'sheets') {
-        if (!sourceObj2?.file) {
+        if (sourceObj2?.file) {
+          formData.append('file', sourceObj2.file)
+        } else if (sourceObj2?.sheetId) {
+          // No cached File object (fresh device/session/restart) — but we
+          // have the sheetId + tab, so re-fetch live from Google instead
+          // of failing. Mirrors confirmGSheet's import flow in DataSources.tsx.
+          try {
+            const storedSession = localStorage.getItem('datapro_session') || ''
+            const importRes = await fetch(
+              `${API_BASE}/api/auth/google/sheets/${sourceObj2.sheetId}/import?tab=${encodeURIComponent(sourceObj2.tab || 'Sheet1')}`,
+              {
+                method: 'POST',
+                credentials: 'include',
+                headers: storedSession ? { 'X-Session-ID': storedSession } : {},
+              }
+            )
+            const importData = await importRes.json()
+            if (!importRes.ok || importData.error || !importData.download_url) {
+              alert(`Could not refresh this Google Sheet (${importData.error || 'not signed in to Google'}). Please reconnect it from Data Sources.`)
+              setAnalyzing(false)
+              return
+            }
+            const csvRes = await fetch(`${API_BASE}${importData.download_url}`, {
+              credentials: 'include',
+              headers: storedSession ? { 'X-Session-ID': storedSession } : {},
+            })
+            const blob = await csvRes.blob()
+            const realFile = new File([blob], importData.filename, { type: 'text/csv' })
+            formData.append('file', realFile)
+          } catch (e) {
+            alert(`Could not refresh this Google Sheet: ${e}`)
+            setAnalyzing(false)
+            return
+          }
+        } else {
           alert('Google Sheet file not found. Please re-import the sheet from Data Sources.')
           setAnalyzing(false)
           return
         }
-        formData.append('file', sourceObj2.file)
       } else if (!sourceObj2 || sourceObj2.type === 'csv') {
         alert('CSV file not found in memory. Please re-upload the CSV from Data Sources — the file needs to be re-attached after a page refresh or source switch.')
         setAnalyzing(false)
