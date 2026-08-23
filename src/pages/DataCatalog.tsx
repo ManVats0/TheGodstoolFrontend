@@ -1,6 +1,7 @@
-  import { useState } from 'react'
+  import { useState, useEffect } from 'react'
   import { useNavigate } from 'react-router-dom'
   import { useStore } from '../store'
+  import { API_BASE } from '../config'
 
   // ── DATA DICTIONARY ─────────────────────────────────────────────────────────
   // Full 17-column dictionary. Adjust column names/types/definitions to match
@@ -74,12 +75,97 @@
     const [dictionaryOpen, setDictionaryOpen]   = useState(false)
     const [dictionarySource, setDictionarySource] = useState<string | null>(null)
 
+    // ── Catalog metadata (backend-persisted overlay) ──────────────────────
+    const [catalogMap, setCatalogMap] = useState<Record<string, any>>({})
+    const [editingDescKey, setEditingDescKey] = useState<string | null>(null)
+    const [descDraft, setDescDraft] = useState('')
+    const [tagDraft, setTagDraft] = useState<Record<string, string>>({})
+
+    const authHeaders = (): Record<string, string> => {
+      const token = localStorage.getItem('datapro_token') || ''
+      return token ? { Authorization: `Bearer ${token}` } : {}
+    }
+
+    const catalogKeyFor = (source: any) => source.connectionId || source.name
+
+    useEffect(() => {
+      const loadCatalog = async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/catalog`, {
+            credentials: 'include',
+            headers: authHeaders(),
+          })
+          if (!res.ok) return
+          const rows = await res.json()
+          if (!Array.isArray(rows)) return
+          const map: Record<string, any> = {}
+          rows.forEach((r: any) => { map[r.sourceKey] = r })
+          setCatalogMap(map)
+        } catch {
+          // Not authenticated or backend unreachable — cards fall back to
+          // the templated description/default tags below; harmless.
+        }
+      }
+      loadCatalog()
+    }, [])
+
+    const saveCatalogField = async (source: any, field: 'description' | 'tags', value: any) => {
+      const key = catalogKeyFor(source)
+      setCatalogMap(prev => ({
+        ...prev,
+        [key]: { ...(prev[key] || { sourceKey: key, sourceName: source.name, colInfo: [], columnOverrides: {} }), [field]: value },
+      }))
+      try {
+        await fetch(`${API_BASE}/api/catalog`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({
+            source_name: source.name,
+            connection_id: source.connectionId || '',
+            [field]: value,
+          }),
+        })
+      } catch {
+        // Best-effort — local state already reflects the edit for this session.
+      }
+    }
+
+    const saveColumnDefinition = async (source: any, columnName: string, definition: string) => {
+      const key = catalogKeyFor(source)
+      setCatalogMap(prev => {
+        const existing = prev[key] || { sourceKey: key, sourceName: source.name, colInfo: [], columnOverrides: {} }
+        return {
+          ...prev,
+          [key]: {
+            ...existing,
+            columnOverrides: { ...(existing.columnOverrides || {}), [columnName]: { ...(existing.columnOverrides?.[columnName] || {}), definition } },
+          },
+        }
+      })
+      try {
+        await fetch(`${API_BASE}/api/catalog`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({
+            source_name: source.name,
+            connection_id: source.connectionId || '',
+            column_overrides: { [columnName]: { definition } },
+          }),
+        })
+      } catch {
+        // Best-effort.
+      }
+    }
+
     // ── SEARCH / FILTER LOGIC ────────────────────────────────────────────────
     const filteredSources = sources.filter(source => {
       const q = searchQuery.toLowerCase()
-      const desc = getDescription(source.name).toLowerCase()
-      const tags = DEFAULT_TAGS.map(t => t.toLowerCase())
-      const owner = 'local user'
+      const catalogEntry = catalogMap[catalogKeyFor(source)]
+      const desc = (catalogEntry?.description || getDescription(source.name)).toLowerCase()
+      const tags = (catalogEntry?.tags?.length ? catalogEntry.tags : DEFAULT_TAGS).map((t: string) => t.toLowerCase())
+      const owner = (catalogEntry?.owner || 'local user').toLowerCase()
 
       const matchesSearch = !q ||
         source.name.toLowerCase().includes(q) ||
@@ -206,9 +292,13 @@
           <div className="grid gap-4">
             {filteredSources.map(source => {
               const isAnalyzed = activeSourceName === source.name && analysis !== null
-              const rows = isAnalyzed ? analysis.dataset_info?.rows : null
+              const catalogKey = catalogKeyFor(source)
+              const catalogEntry = catalogMap[catalogKey]
+              const rows = isAnalyzed ? analysis.dataset_info?.rows : (catalogEntry?.rows ?? null)
               const cols = isAnalyzed ? analysis.dataset_info?.columns : null
-              const description = getDescription(source.name)
+              const description = catalogEntry?.description || getDescription(source.name)
+              const tags: string[] = catalogEntry?.tags?.length ? catalogEntry.tags : DEFAULT_TAGS
+              const isEditingDesc = editingDescKey === catalogKey
 
               return (
                 <div key={source.id} className="bg-[#110e1b] border border-white/5 p-6 rounded-2xl hover:border-purple-500/30 transition-all flex flex-col group">
@@ -221,24 +311,73 @@
                         {source.name}
                       </h3>
 
-                      {/* 1. Business description — lighter text directly under title */}
-                      <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '680px' }}>
-                        {description}
-                      </p>
+                      {/* 1. Business description — click to edit, persists to backend */}
+                      {isEditingDesc ? (
+                        <div className="mb-1" style={{ maxWidth: '680px' }}>
+                          <textarea
+                            value={descDraft}
+                            onChange={e => setDescDraft(e.target.value)}
+                            rows={2}
+                            className="w-full text-sm text-white rounded-lg px-2 py-1.5 outline-none resize-none"
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.3)' }}
+                          />
+                          <div className="flex gap-2 mt-1">
+                            <button
+                              onClick={() => { saveCatalogField(source, 'description', descDraft); setEditingDescKey(null) }}
+                              className="text-xs font-semibold px-2 py-0.5 rounded-md"
+                              style={{ background: 'rgba(52,211,153,0.15)', color: '#34d399' }}>
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingDescKey(null)}
+                              className="text-xs font-semibold px-2 py-0.5 rounded-md"
+                              style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p
+                          onClick={() => { setEditingDescKey(catalogKey); setDescDraft(description) }}
+                          className="text-sm leading-relaxed cursor-pointer"
+                          title="Click to edit description"
+                          style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '680px' }}>
+                          {description}
+                        </p>
+                      )}
 
-                      {/* 3. Tags / labels */}
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {DEFAULT_TAGS.map(tag => {
+                      {/* 3. Tags / labels — editable, persists to backend */}
+                      <div className="flex flex-wrap items-center gap-2 mt-3">
+                        {tags.map(tag => {
                           const style = TAG_STYLES[tag] || TAG_STYLES['Raw']
                           return (
                             <span
                               key={tag}
-                              className="text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                              className="text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1"
                               style={{ background: style.bg, color: style.text, border: `1px solid ${style.border}` }}>
                               {tag}
+                              <button
+                                onClick={() => saveCatalogField(source, 'tags', tags.filter(t => t !== tag))}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', opacity: 0.6, fontSize: '10px', lineHeight: 1 }}
+                                title="Remove tag">✕</button>
                             </span>
                           )
                         })}
+                        <input
+                          type="text"
+                          value={tagDraft[catalogKey] || ''}
+                          onChange={e => setTagDraft(prev => ({ ...prev, [catalogKey]: e.target.value }))}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && tagDraft[catalogKey]?.trim()) {
+                              const newTag = tagDraft[catalogKey].trim()
+                              if (!tags.includes(newTag)) saveCatalogField(source, 'tags', [...tags, newTag])
+                              setTagDraft(prev => ({ ...prev, [catalogKey]: '' }))
+                            }
+                          }}
+                          placeholder="+ tag"
+                          className="text-xs px-2 py-0.5 rounded-full outline-none"
+                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.15)', color: 'white', width: '70px' }}
+                        />
                         {/* Status pill */}
                         {isAnalyzed ? (
                           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1" style={{ background: TAG_STYLES.Verified.bg, color: TAG_STYLES.Verified.text, border: `1px solid ${TAG_STYLES.Verified.border}` }}>
@@ -324,7 +463,12 @@
                   <div>
                     <h2 className="font-bold text-white text-sm">Data Dictionary</h2>
                     <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                      {dictionarySource} · {DATA_DICTIONARY.length} columns
+                      {(() => {
+                        const dictSource = sources.find(s => s.name === dictionarySource)
+                        const dictColInfo = dictSource ? (catalogMap[catalogKeyFor(dictSource)]?.colInfo || []) : []
+                        const count = dictColInfo.length > 0 ? dictColInfo.length : DATA_DICTIONARY.length
+                        return `${dictionarySource} · ${count} columns${dictColInfo.length > 0 ? '' : ' (run the profiler for real columns)'}`
+                      })()}
                     </p>
                   </div>
                 </div>
@@ -348,43 +492,76 @@
 
               {/* Column rows */}
               <div className="overflow-auto flex-1">
-                <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
-                  <tbody>
-                    {DATA_DICTIONARY.map((col, i) => (
-                      <tr
-                        key={col.name}
-                        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
-                        {/* Column name */}
-                        <td className="px-6 py-3 font-mono font-semibold whitespace-nowrap" style={{ color: '#e2e8f0', width: '200px' }}>
-                          {col.name}
-                        </td>
-                        {/* Type badge */}
-                        <td className="px-4 py-3 whitespace-nowrap" style={{ width: '110px' }}>
-                          <span
-                            className="text-xs font-bold px-2 py-0.5 rounded-md"
-                            style={{
-                              background: col.type === 'Integer' ? 'rgba(99,102,241,0.15)'
-                                        : col.type === 'Float'   ? 'rgba(234,179,8,0.12)'
-                                        : col.type === 'Date'    ? 'rgba(34,197,94,0.1)'
-                                        : col.type === 'Boolean' ? 'rgba(239,68,68,0.1)'
-                                        : 'rgba(255,255,255,0.07)',
-                              color:     col.type === 'Integer' ? '#818cf8'
-                                        : col.type === 'Float'   ? '#fbbf24'
-                                        : col.type === 'Date'    ? '#4ade80'
-                                        : col.type === 'Boolean' ? '#f87171'
-                                        : 'rgba(255,255,255,0.55)',
-                            }}>
-                            {col.type}
-                          </span>
-                        </td>
-                        {/* Definition */}
-                        <td className="px-4 py-3 text-xs" style={{ color: 'rgba(255,255,255,0.45)', lineHeight: '1.5' }}>
-                          {col.definition}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {(() => {
+                  const dictSource = sources.find(s => s.name === dictionarySource)
+                  const dictEntry = dictSource ? catalogMap[catalogKeyFor(dictSource)] : null
+                  const dictColInfo: any[] = dictEntry?.colInfo || []
+                  const overrides: Record<string, any> = dictEntry?.columnOverrides || {}
+                  const usingRealColumns = dictColInfo.length > 0
+
+                  const rows = usingRealColumns
+                    ? dictColInfo.map((c: any) => ({
+                        name: c.column,
+                        type: c.dtype,
+                        definition: overrides[c.column]?.definition ?? '',
+                      }))
+                    : DATA_DICTIONARY
+
+                  return (
+                    <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+                      <tbody>
+                        {rows.map((col: any, i: number) => (
+                          <tr
+                            key={col.name}
+                            style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
+                            {/* Column name */}
+                            <td className="px-6 py-3 font-mono font-semibold whitespace-nowrap" style={{ color: '#e2e8f0', width: '200px' }}>
+                              {col.name}
+                            </td>
+                            {/* Type badge */}
+                            <td className="px-4 py-3 whitespace-nowrap" style={{ width: '110px' }}>
+                              <span
+                                className="text-xs font-bold px-2 py-0.5 rounded-md"
+                                style={{
+                                  background: /int|float/i.test(col.type) ? 'rgba(234,179,8,0.12)'
+                                            : /bool/i.test(col.type) ? 'rgba(239,68,68,0.1)'
+                                            : /date|time/i.test(col.type) ? 'rgba(34,197,94,0.1)'
+                                            : col.type === 'Integer' ? 'rgba(99,102,241,0.15)'
+                                            : 'rgba(255,255,255,0.07)',
+                                  color: /int|float/i.test(col.type) ? '#fbbf24'
+                                       : /bool/i.test(col.type) ? '#f87171'
+                                       : /date|time/i.test(col.type) ? '#4ade80'
+                                       : col.type === 'Integer' ? '#818cf8'
+                                       : 'rgba(255,255,255,0.55)',
+                                }}>
+                                {col.type}
+                              </span>
+                            </td>
+                            {/* Definition — editable only for real, profiled columns */}
+                            <td className="px-4 py-3 text-xs" style={{ color: 'rgba(255,255,255,0.45)', lineHeight: '1.5' }}>
+                              {usingRealColumns && dictSource ? (
+                                <input
+                                  type="text"
+                                  defaultValue={col.definition}
+                                  placeholder="Add a definition…"
+                                  onBlur={e => {
+                                    if (e.target.value !== col.definition) {
+                                      saveColumnDefinition(dictSource, col.name, e.target.value)
+                                    }
+                                  }}
+                                  className="w-full text-xs outline-none rounded-md px-2 py-1"
+                                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
+                                />
+                              ) : (
+                                col.definition
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )
+                })()}
               </div>
 
               {/* Modal footer */}
