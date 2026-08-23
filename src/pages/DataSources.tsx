@@ -2751,33 +2751,44 @@ if (tablesData.tables?.length > 0) {
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (mongoStatus !== 'ok' || mongoSelectedCollections.size === 0) return
-                    const id = crypto.randomUUID()
+                    const collectionsArr = [...mongoSelectedCollections]
+                    const addedAt = new Date().toLocaleString()
+
+                    const backendId = await saveConnectionToBackend(
+                      `${mongo.database}@mongo`,
+                      'mongodb',
+                      { database: mongo.database, collections: collectionsArr },
+                      { uri: mongo.uri },
+                    )
+                    const id = backendId || crypto.randomUUID()
+
                     const connRecord = {
                       id,
                       uri: mongo.uri,
                       database: mongo.database,
-                      collection: [...mongoSelectedCollections][0],
-                      collections: [...mongoSelectedCollections],
+                      collection: collectionsArr[0],
+                      collections: collectionsArr,
                       name: `${mongo.database}@mongo`,
-                      addedAt: new Date().toLocaleString(),
+                      addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_mongo_connections', JSON.stringify(updated))
                     setSavedMongoConns(updated)
-                    ;[...mongoSelectedCollections].forEach((coll, idx) => {
+                    collectionsArr.forEach((coll, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${mongo.database}.${coll}@mongo`,
                         type: 'mongodb' as const,
-                        addedAt: connRecord.addedAt,
+                        addedAt,
+                        connectionId: backendId || undefined,
                       })
                     })
                     addAuditLog({
                       id: crypto.randomUUID(),
-                      time: new Date().toLocaleString(),
+                      time: addedAt,
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
