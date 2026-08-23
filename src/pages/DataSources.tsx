@@ -6,7 +6,7 @@
 
   const DATASOURCES_TOUR: TourStep[] = [
   {
-    title: 'Welcome to Data Sources',
+    title: 'Welcome to Data Sources 👋',
     body: 'This is where every project starts. Connect a CSV, Google Sheet, database, or API here and DataPipe will pull it in for cleaning and analysis.',
   },
   {
@@ -658,7 +658,7 @@ const openGooglePicker = async () => {
       navigate('/analysis')
     }
 
-    const loadSource = (source: any) => {
+    const loadSource = async (source: any) => {
       const cached = getCachedAnalysis(source.name)
       if (cached) {
         loadCachedAnalysis(source.name, cached)
@@ -716,7 +716,19 @@ const openGooglePicker = async () => {
         const database: string = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
         const collection: string = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
         const mongoMeta = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
-        const conn = mongoMeta.find((c: any) => String(c.database) === database)
+        let conn = mongoMeta.find((c: any) => String(c.database) === database)
+        if (!conn && source.connectionId) {
+          try {
+            const res = await fetch(`${API_BASE}/api/connections/${source.connectionId}/reveal`, {
+              credentials: 'include',
+              headers: authHeaders(),
+            })
+            const data = await res.json()
+            if (data && !data.error) {
+              conn = { uri: data.credentials?.uri, database: data.config?.database }
+            }
+          } catch { /* fall through — analysis will surface a clear error */ }
+        }
         if (conn) {
           localStorage.setItem('datapro_active_mongo_source', JSON.stringify({ ...conn, collection }))
         }
