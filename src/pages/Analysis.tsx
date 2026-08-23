@@ -17,10 +17,7 @@ import { API_BASE } from '../config'
     { value:'interpolate_linear', label:'Linear Interp',   desc:'Estimate from surrounding values.' },
     { value:'interpolate_time',   label:'Index Interp',    desc:'Estimate by row index.' },
   ]
-            df_mg = pd.DataFrame(docs_mg)
-            for col in df_mg.columns:
-                if df_mg[col].apply(lambda x: isinstance(x, (dict, list))).any():
-                    df_mg[col] = df_mg[col].apply(lambda x: json.dumps(x, default=str) if isinstance(x, (dict, list)) else x)
+
   const CLEANING_OPTIONS = [
     { key:'remove_duplicates', label:'Remove Duplicates',  desc:'Delete identical rows',              issueKey:'duplicates' },
     { key:'remove_empty_rows', label:'Remove Empty Rows',  desc:'Delete completely blank lines',       issueKey:'empty_rows' },
