@@ -73,6 +73,26 @@ import { API_BASE } from '../config'
     }
   }
 
+  // Fetches the last saved run for this source from the backend, so
+  // "what changed" insights work across devices/browsers — not just within
+  // the current one. Falls back silently (returns null) if not logged in
+  // or nothing has been saved for this source yet.
+  async function fetchPreviousAnalysisResult(sourceKey: string): Promise<any | null> {
+    try {
+      const headers = analysisAuthHeaders()
+      if (!headers.Authorization) return null
+      const res = await fetch(`${API_BASE}/api/analysis-results/latest?source_key=${encodeURIComponent(sourceKey)}`, {
+        credentials: 'include',
+        headers,
+      })
+      if (!res.ok) return null
+      const data = await res.json()
+      return data.result?.result || null
+    } catch {
+      return null
+    }
+  }
+
   const sparkleCSS = `
   @keyframes sparkle-pulse {
     0%, 100% { box-shadow: 0 0 20px rgba(124,58,237,0.6), 0 0 40px rgba(37,99,235,0.3), 0 0 0 0 rgba(124,58,237,0.4); }
@@ -2102,9 +2122,18 @@ setAnalyzing(false)
           return
         }
         // ── Read the previous snapshot BEFORE overwriting it, then diff ──
+        // Prefer the backend history (works across devices/browsers — e.g.
+        // yesterday's Google Sheets refresh was analyzed on a different
+        // machine); fall back to this browser's local cache if the backend
+        // has nothing yet (first run, or not logged in).
         try {
-          const prevRaw = localStorage.getItem(`analysis_cache_${activeSourceName}`)
-          const prevData = prevRaw ? JSON.parse(prevRaw) : null
+          const sourceKeyForPrev = sourceObj2?.connectionId || activeSourceName
+          const backendPrev = await fetchPreviousAnalysisResult(sourceKeyForPrev)
+          let prevData = backendPrev
+          if (!prevData) {
+            const prevRaw = localStorage.getItem(`analysis_cache_${activeSourceName}`)
+            prevData = prevRaw ? JSON.parse(prevRaw) : null
+          }
           setInsights(computeInsights(prevData, data))
         } catch {
           setInsights([])
