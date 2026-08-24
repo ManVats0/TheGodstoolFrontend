@@ -268,6 +268,7 @@ type PipelineLogEntry = {
 
 type SavedPipeline = {
   id: string
+  serverId?: string | null   // Mongo _id once synced via /api/pipelines — required to run on server
   name: string
   sourceId: string
   destinationId: string
@@ -465,6 +466,168 @@ function applyTransforms(
       }
   }
   return data
+}
+
+const getAuthToken = () => localStorage.getItem('datapro_token') || ''
+
+async function resolveConnectionId(name: string, type: string, config: any, credentials: any): Promise<string | null> {
+  const token = getAuthToken()
+  if (!token) return null
+  try {
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+    const existingRes = await fetch(`${API_BASE}/api/connections`, { headers })
+    const existing = await existingRes.json()
+    if (Array.isArray(existing)) {
+      const match = existing.find((c: any) => c.type === type && c.name === name)
+      if (match?._id) return match._id
+    }
+    const createRes = await fetch(`${API_BASE}/api/connections`, {
+      method: 'POST', headers, body: JSON.stringify({ name, type, config, credentials }),
+    })
+    const created = await createRes.json()
+    return created?._id || null
+  } catch (e) {
+    console.error('resolveConnectionId failed:', e)
+    return null
+  }
+}
+
+// Best-effort mapping from Flow.tsx's local state shapes to the
+// {name, type, config, credentials} shape /api/connections expects.
+// Source types beyond mysql/postgres/mongodb aren't linked yet — those
+// pipelines will save locally as before but won't run on the server until
+// this mapping is extended for them.
+function buildConnectionPayload(kind: 'source' | 'destination', ctx: any): { name: string; type: string; config: any; credentials: any } | null {
+  if (kind === 'source') {
+    const s = ctx.activeSource
+    if (!s) return null
+    if (s.type === 'mysql' || s.type === 'postgres') {
+      const [dbPart, host] = String(s.name).split('@')
+      const [database, table] = (dbPart || '').split('.')
+      return { name: s.name, type: s.type, config: { host, database, table, tables: [table] }, credentials: {} }
+    }
+    if (s.type === 'mongodb') {
+      const dbPart = String(s.name).includes('@') ? String(s.name).split('@')[0] : String(s.name)
+      const [database, collection] = dbPart.split('.')
+      return { name: s.name, type: 'mongodb', config: { database, collection, collections: [collection] }, credentials: {} }
+    }
+    return null
+  }
+  if (ctx.mysqlDestination) {
+    const d = ctx.mysqlDestination
+    return { name: `${d.database}.${d.table}@${d.host}`, type: 'mysql',
+      config: { host: d.host, port: d.port, database: d.database, table: d.table, tables: d.tables, ssl: d.ssl },
+      credentials: { user: d.user, password: d.password } }
+  }
+  if (ctx.pgDestination) {
+    const d = ctx.pgDestination
+    return { name: `${d.database}.${d.table}@${d.host}`, type: 'postgres',
+      config: { host: d.host, port: d.port, database: d.database, table: d.table, tables: d.tables, ssl: d.ssl },
+      credentials: { user: d.user, password: d.password } }
+  }
+  if (ctx.mongoDestination) {
+    const d = ctx.mongoDestination
+    return { name: `${d.database}.${d.collection}`, type: 'mongodb',
+      config: { database: d.database, collection: d.collection, collections: d.collections },
+      credentials: { uri: d.uri } }
+  }
+  if (ctx.bqDestination) {
+    const d = ctx.bqDestination
+    return { name: `${d.project}.${d.dataset}.${d.table}`, type: 'bigquery',
+      config: { project: d.project, dataset: d.dataset, table: d.table, tables: d.tables },
+      credentials: { key_json: d.key_json } }
+  }
+  if (ctx.gcsDestination) {
+    const d = ctx.gcsDestination
+    return { name: `gcs://${d.bucket}/${d.file}`, type: 'gcs',
+      config: { project: d.project, bucket: d.bucket, file: d.file, files: d.files },
+      credentials: { key_json: d.keyJson } }
+  }
+  if (ctx.cloudsqlDestination) {
+    const d = ctx.cloudsqlDestination
+    return { name: `${d.database}.${d.table}@cloudsql.${d.project}`, type: 'cloudsql',
+      config: { instanceConnectionName: d.instanceConnectionName, project: d.project, database: d.database,
+        table: d.table, tables: d.tables, port: d.port, dbType: d.dbType },
+      credentials: { user: d.user, password: d.password } }
+  }
+  if (ctx.databricksDestination) {
+    const d = ctx.databricksDestination
+    return { name: `${d.catalog}.${d.schema}.${d.table}@${d.host}`, type: 'databricks',
+      config: { host: d.host, httpPath: d.httpPath, catalog: d.catalog, schema: d.schema, table: d.table, tables: d.tables },
+      credentials: { token: d.token } }
+  }
+  if (ctx.awsDestinationState) {
+    const d = ctx.awsDestinationState
+    return { name: `aws:${d.service}:${d.bucket || d.database || d.table}`, type: 'aws',
+      config: { service: d.service, region: d.region, bucket: d.bucket, host: d.host, port: d.port,
+        database: d.database, table: d.table, tables: d.tables },
+      credentials: { accessKeyId: d.accessKeyId, secretAccessKey: d.secretAccessKey, user: d.user, password: d.password } }
+  }
+  // Plain CSV / unrecognized destination — nothing to link.
+  return null
+}
+
+async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any, destPayload: any): Promise<string | null> {
+  const token = getAuthToken()
+  if (!token) {
+    console.warn('Not signed in — pipeline saved locally only and will NOT run automatically on the server.')
+    return null
+  }
+  const sourceConnectionId = sourcePayload
+    ? await resolveConnectionId(sourcePayload.name, sourcePayload.type, sourcePayload.config, sourcePayload.credentials)
+    : null
+  const destinationConnectionId = destPayload
+    ? await resolveConnectionId(destPayload.name, destPayload.type, destPayload.config, destPayload.credentials)
+    : null
+  try {
+    const res = await fetch(`${API_BASE}/api/pipelines`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        id: pipeline.serverId || undefined,
+        name: pipeline.name,
+        sourceId: pipeline.sourceId,
+        destinationId: pipeline.destinationId,
+        sourceName: pipeline.sourceName,
+        destinationName: pipeline.destinationName,
+        sourceConnectionId,
+        destinationConnectionId,
+        destinationMode: pipeline.destinationMode,
+        transformations: pipeline.transformations,
+        schedule: pipeline.schedule,
+        scheduleLabel: pipeline.scheduleLabel,
+        scheduleMs: pipeline.scheduleMs,
+        scheduleTimezone: pipeline.scheduleTimezone,
+        scheduleStartDate: pipeline.scheduleStartDate,
+        isActive: pipeline.isActive,
+      }),
+    })
+    const saved = await res.json()
+    if (saved?._id) return saved._id as string
+    console.error('Server pipeline sync failed:', saved)
+    return null
+  } catch (e) {
+    console.error('Server pipeline sync failed:', e)
+    return null
+  }
+}
+
+async function executePipelineOnServer(serverId: string) {
+  const token = getAuthToken()
+  if (!token) { alert('Not signed in — cannot run on server.'); return }
+  try {
+    const res = await fetch(`${API_BASE}/api/pipelines/${serverId}/execute`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    })
+    const result = await res.json()
+    if (result.status === 'success') {
+      alert(`Ran on server: ${result.rowsIn ?? '?'} → ${result.rowsOut ?? '?'} rows`)
+    } else {
+      alert(`Server run failed: ${result.error || 'unknown error'}`)
+    }
+  } catch (e) {
+    alert(`Could not reach server: ${e}`)
+  }
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -3200,6 +3363,26 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
     persistPipelines(newPipelines)
     if (schedMs && schedMs > 0) startSchedule(pipeline)
 
+    // Sync to the backend so it's persistent server-side and can be picked
+    // up by the scheduler / run without this tab being open. Fire-and-forget:
+    // local save above already succeeded, this just adds server capability.
+    const sourcePayload = buildConnectionPayload('source', { activeSource })
+    const destPayload = buildConnectionPayload('destination', {
+      mysqlDestination, pgDestination, bqDestination, mongoDestination,
+      awsDestinationState, gcsDestination, cloudsqlDestination, databricksDestination,
+    })
+    syncPipelineToServer(pipeline, sourcePayload, destPayload).then(serverId => {
+      if (serverId) {
+        setSavedPipelines(prev => {
+          const updated = prev.map(p => p.id === pipeline.id ? { ...p, serverId } : p)
+          localStorage.setItem('datapipe_pipelines', JSON.stringify(updated))
+          return updated
+        })
+      } else {
+        console.warn(`Pipeline "${pipeline.name}" saved locally but not linked server-side — it will not run automatically unless this tab stays open.`)
+      }
+    })
+
     addAuditLog({ id:crypto.randomUUID(), time:new Date().toLocaleString(), action:'save_pipeline', entity_type:'pipeline', entity_id:pipeline.id, details:`Saved "${pipelineName}" · ${selectedSourceId} → ${effectiveDestination} · ${transformations.length} transforms${schedLabel ? ` · ${schedLabel}` : ''}${finalStartDate ? ` · starts ${finalStartDate}` : ''}`, user:'local_user' })
     setShowSaveModal(false)
 setPipelineName('')
@@ -4441,6 +4624,9 @@ setTimeout(() => {
                           {latestLog?.status==='failed'?'⚠ View Error':'Runs & Logs'}
                         </button>
                         <button onClick={() => runPipeline(pipeline,'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.15)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
+                        {pipeline.serverId && (
+                          <button onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side — works even if this tab is closed">☁ Run on Server</button>
+                        )}
                         <button onClick={() => {
                           if (window.confirm(`Permanently delete pipeline "${pipeline.name}"? This cannot be undone.`)) {
                             stopSchedule(pipeline.id)
