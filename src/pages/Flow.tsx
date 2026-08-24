@@ -513,6 +513,13 @@ function buildConnectionPayload(kind: 'source' | 'destination', ctx: any): { nam
     }
     return null
   }
+  if (ctx.gsheetsConnected) {
+    const d = ctx.gsheetsConnected
+    const sessionId = localStorage.getItem('datapro_session') || ''
+    return { name: d.sheetName, type: 'google_sheets',
+      config: { sheetId: d.sheetId, sheetName: d.sheetName },
+      credentials: { sessionId } }
+  }
   if (ctx.mysqlDestination) {
     const d = ctx.mysqlDestination
     return { name: `${d.database}.${d.table}@${d.host}`, type: 'mysql',
@@ -3368,7 +3375,7 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
     // local save above already succeeded, this just adds server capability.
     const sourcePayload = buildConnectionPayload('source', { activeSource })
     const destPayload = buildConnectionPayload('destination', {
-      mysqlDestination, pgDestination, bqDestination, mongoDestination,
+      gsheetsConnected, mysqlDestination, pgDestination, bqDestination, mongoDestination,
       awsDestinationState, gcsDestination, cloudsqlDestination, databricksDestination,
     })
     syncPipelineToServer(pipeline, sourcePayload, destPayload).then(serverId => {
