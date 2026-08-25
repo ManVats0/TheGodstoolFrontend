@@ -1951,6 +1951,7 @@ export default function Flow() {
     (awsDestinationState ? (awsDestinationState.service === 's3' ? `s3://${awsDestinationState.bucket}/${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}` : awsDestinationState.service === 'dynamodb' ? `${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}@dynamodb.${awsDestinationState.region}` : `${awsDestinationState.database}.${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}@${awsDestinationState.host}`) : null) ||
     (gcsDestination ? `gcs://${gcsDestination.bucket}/${gcsDestination.file || gcsDestination.files?.[0] || '?'}` : null) ||
     (cloudsqlDestination ? `${cloudsqlDestination.database}.${cloudsqlDestination.table || cloudsqlDestination.tables?.[0] || '?'}@cloudsql.${cloudsqlDestination.project}` : null) ||
+    (databricksDestination ? `${databricksDestination.catalog}.${databricksDestination.schema}.${databricksDestination.table || databricksDestination.tables?.[0] || '?'}@${databricksDestination.host}` : null) ||
     destinationName
   const existingPipeline = savedPipelines.find(p => p.sourceId === selectedSourceId && p.destinationId === effectiveDestination)
 
@@ -2018,11 +2019,12 @@ useEffect(() => {
 
 
   useEffect(() => {
-  // Only auto-set destination when source changes AND user hasn't manually set it
-  if (selectedSourceId && !destinationEdited) {
-    // Leave destination empty — user fills it via the dropdown
+  // Auto-set destination when source changes AND user hasn't manually set it
+  if (selectedSourceId && !destinationEdited && activeSource) {
+    const auto = `${activeSource.name.replace(/\.csv$/i, '')}_cleaned.csv`
+    setDestinationName(auto)
   }
-}, [selectedSourceId])
+}, [selectedSourceId, activeSource?.name, destinationEdited])
 
   useEffect(() => {
   // Only resume schedules that were already active — never auto-run on fresh upload
@@ -3805,7 +3807,7 @@ setTimeout(() => {
         title={destTooltips[type]}
         onClick={() => {
           if (type === 'Google Sheets' && !gsheetsConnected) { setGsheetsPickerFor('dest'); setShowGSheetsPicker(true) }
-          if (type === 'CSV') { setGsheetsConnected(null); setMysqlDest(null); setMongoDest(null); setPgDest(null); setBqDest(null); setAwsDest(null); setGcsDest(null); setCsqlDest(null) }
+          if (type === 'CSV') { setGsheetsConnected(null); setMysqlDest(null); setMongoDest(null); setPgDest(null); setBqDest(null); setAwsDest(null); setGcsDest(null); setCsqlDest(null); setDbxDest(null) }
           if (type === 'MongoDB' as any && !mongoDestination) {
             const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
             if (savedMongo.length > 0) {
