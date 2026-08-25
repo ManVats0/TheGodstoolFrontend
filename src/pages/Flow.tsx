@@ -3837,7 +3837,7 @@ setTimeout(() => {
       type === 'AWS' ? !!awsDestinationState :
       type === 'GCS' ? !!gcsDestination :
       type === 'Cloud SQL' ? !!cloudsqlDestination :
-      type === 'CSV' ? (!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination) :
+      type === 'CSV' ? (!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination && !databricksDestination) :
       type === 'MySQL' ? !!mysqlDestination :
       type === 'PostgreSQL' ? !!pgDestination :
       type === 'BigQuery' ? !!bqDestination :
@@ -4482,7 +4482,7 @@ setTimeout(() => {
                 </div>
                 ) : null}
               {/* Combobox with ✕ clear button — only show for CSV destination */}
-              {!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination && (
+              {!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination && !databricksDestination && (
                 <DestinationSelect
                   value={destinationName}
                   onChange={v => { setDestinationName(v); setDestinationEdited(true) }}
