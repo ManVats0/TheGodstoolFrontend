@@ -1793,11 +1793,21 @@ export default function Flow() {
   // nothing already on this device is silently dropped.
   useEffect(() => {
     const token = getAuthToken()
-    if (!token) return
+    const resumeSchedules = (pipes: SavedPipeline[]) => {
+      pipes.forEach(p => {
+        if (p.isActive && p.scheduleMs && p.scheduleMs > 0 && p.lastRun) {
+          startSchedule(p)
+        }
+      })
+    }
+    if (!token) {
+      resumeSchedules(savedPipelines)
+      return
+    }
     fetch(`${API_BASE}/api/pipelines`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then((serverDocs: any[]) => {
-        if (!Array.isArray(serverDocs)) return
+        if (!Array.isArray(serverDocs)) { resumeSchedules(savedPipelines); return }
         const serverPipelines: SavedPipeline[] = serverDocs.map(d => ({
           id: d._id,
           serverId: d._id,
@@ -1823,10 +1833,14 @@ export default function Flow() {
           const localOnly = prev.filter(p => !p.serverId)
           const merged = [...serverPipelines, ...localOnly]
           localStorage.setItem('datapipe_pipelines', JSON.stringify(merged))
+          resumeSchedules(merged)
           return merged
         })
       })
-      .catch(e => console.error('Failed to load pipelines from server:', e))
+      .catch(e => {
+        console.error('Failed to load pipelines from server:', e)
+        resumeSchedules(savedPipelines)
+      })
   }, [])
 
   const [selectedSourceId,  setSelectedSourceId]  = useState<string>(sources[0]?.name || '')
@@ -1967,6 +1981,7 @@ export default function Flow() {
   const [approvingFixes,          setApprovingFixes]          = useState(false)
   const [driftLoading,            setDriftLoading]            = useState(false)
   const [scheduledTimers,         setScheduledTimers]         = useState<Record<string, ReturnType<typeof setInterval>>>({})
+  const resumedScheduleIdsRef = useRef<Set<string>>(new Set())
   const [lastRunResult, setLastRunResult] = useState<{ pipelineName: string; rowsIn: number; rowsOut: number; rowsAffected: number; mode: string; destinationType?: string } | null>(null)
 const [postRunPreview, setPostRunPreview] = useState<{ columns: string[]; rows: any[] } | null>(null)
   // Save modal schedule state
@@ -2020,6 +2035,8 @@ useEffect(() => {
 
   const startSchedule = (pipeline: SavedPipeline) => {
     if (!pipeline.scheduleMs || pipeline.scheduleMs <= 0) return
+    if (resumedScheduleIdsRef.current.has(pipeline.id)) return // already running — prevents duplicate intervals
+    resumedScheduleIdsRef.current.add(pipeline.id)
     const timer = setInterval(() => { runPipeline(pipeline, 'schedule') }, pipeline.scheduleMs)
     setScheduledTimers(prev => ({ ...prev, [pipeline.id]: timer }))
   }
@@ -2027,6 +2044,7 @@ useEffect(() => {
   const stopSchedule = (pipelineId: string) => {
     const timer = scheduledTimers[pipelineId]
     if (timer) { clearInterval(timer); setScheduledTimers(prev => { const n={...prev}; delete n[pipelineId]; return n }) }
+    resumedScheduleIdsRef.current.delete(pipelineId)
   }
 
   const runPipeline = useCallback(async (pipeline: SavedPipeline, triggeredBy: 'manual'|'schedule'|'api' = 'manual') => {
