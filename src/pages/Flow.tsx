@@ -220,8 +220,9 @@ const KIND_LABEL: Record<string, { icon: string; plain: string }> = {
   type_change: { icon: '🔄', plain: 'A column\'s data type changed (e.g. text → number)' },
 }
 
+const MIN_SCHEDULE_MS = 30_000 // matches the backend scheduler's poll interval — nothing faster can actually run more often anyway
+
 const SCHEDULE_PRESETS = [
-  { label: 'Live (5s)',  value: 'live',   cron: '',              ms: 5_000   },
   { label: '5 minutes',  value: '5m',     cron: '*/5 * * * *',  ms: 300_000 },
   { label: '15 minutes', value: '15m',    cron: '*/15 * * * *', ms: 900_000 },
   { label: '30 minutes', value: '30m',    cron: '*/30 * * * *', ms: 1_800_000 },
@@ -944,9 +945,9 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
       else { finalCron = `${min} ${hour} * * 0`; finalLabel = `Weekly at ${scheduleTime}` }
     } else if (isCustom) {
       finalCron  = customCron || '* * * * *'
-      finalLabel = `Custom (${fmtDur(customMs)})`
+      finalLabel = `Custom (${fmtDur(Math.max(MIN_SCHEDULE_MS, customMs))})`
     }
-    onSave(preset?.ms || customMs, finalLabel, finalCron, showTimezone ? timezone : 'UTC', finalStartDate)
+    onSave(preset?.ms || Math.max(MIN_SCHEDULE_MS, customMs), finalLabel, finalCron, showTimezone ? timezone : 'UTC', finalStartDate)
   }
 
   return (
@@ -1007,7 +1008,7 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
                 <div className="mt-3 grid grid-cols-2 gap-3 p-3 rounded-xl" style={{ background:'rgba(124,58,237,0.06)', border:'1px solid rgba(124,58,237,0.2)' }}>
                   <div>
                     <label className="text-xs block mb-1" style={{ color:'rgba(255,255,255,0.4)' }}>Interval (ms)</label>
-                    <input type="number" min={60000} value={customMs} onChange={e => setCustomMs(Number(e.target.value))} className="w-full text-sm text-white rounded-lg px-3 py-2 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
+                    <input type="number" min={60000} value={customMs} onChange={e => setCustomMs(Math.max(MIN_SCHEDULE_MS, Number(e.target.value) || MIN_SCHEDULE_MS))} className="w-full text-sm text-white rounded-lg px-3 py-2 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
                     <p className="text-xs mt-1" style={{ color:'rgba(255,255,255,0.3)' }}>= {fmtDur(customMs)}</p>
                   </div>
                   <div>
@@ -2037,7 +2038,10 @@ useEffect(() => {
     if (!pipeline.scheduleMs || pipeline.scheduleMs <= 0) return
     if (resumedScheduleIdsRef.current.has(pipeline.id)) return // already running — prevents duplicate intervals
     resumedScheduleIdsRef.current.add(pipeline.id)
-    const timer = setInterval(() => { runPipeline(pipeline, 'schedule') }, pipeline.scheduleMs)
+    // Floors any pipeline saved before MIN_SCHEDULE_MS existed (e.g. an old
+    // "Live (5s)" pipeline) — single choke point, no DB migration needed.
+    const effectiveMs = Math.max(pipeline.scheduleMs, MIN_SCHEDULE_MS)
+    const timer = setInterval(() => { runPipeline(pipeline, 'schedule') }, effectiveMs)
     setScheduledTimers(prev => ({ ...prev, [pipeline.id]: timer }))
   }
 
@@ -3389,9 +3393,9 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
       schedLabel = `Daily at ${fmt12Save(saveDailyAtTime)}`
     } else if (saveScheduleValue !== 'none') {
       const preset = SCHEDULE_PRESETS.find(p => p.value === saveScheduleValue)
-      schedMs    = saveScheduleValue === 'live' ? 5_000 : saveScheduleValue === 'custom' ? saveCustomMs : (preset?.ms || 0)
+      schedMs    = saveScheduleValue === 'custom' ? Math.max(MIN_SCHEDULE_MS, saveCustomMs) : (preset?.ms || 0)
       schedCron  = saveScheduleValue === 'custom' ? saveCustomCron : (preset?.cron || null)
-      schedLabel = saveScheduleValue === 'custom' ? `Custom (${fmtDur(saveCustomMs)})` : (preset?.label || null)
+      schedLabel = saveScheduleValue === 'custom' ? `Custom (${fmtDur(Math.max(MIN_SCHEDULE_MS, saveCustomMs))})` : (preset?.label || null)
       if (isSaveAbsolute) {
         const [h, m] = saveScheduleTime.split(':')
         const hour = parseInt(h || '0')
@@ -5039,7 +5043,7 @@ setTimeout(() => {
                       <div className="mt-3 grid grid-cols-2 gap-3 p-3 rounded-xl" style={{ background:'rgba(124,58,237,0.06)', border:'1px solid rgba(124,58,237,0.2)' }}>
                         <div>
                           <label className="text-xs block mb-1" style={{ color:'rgba(255,255,255,0.4)' }}>Interval (ms)</label>
-                          <input type="number" min={60000} value={saveCustomMs} onChange={e => setSaveCustomMs(Number(e.target.value))} className="w-full text-sm text-white rounded-lg px-3 py-2 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
+                          <input type="number" min={60000} value={saveCustomMs} onChange={e => setSaveCustomMs(Math.max(MIN_SCHEDULE_MS, Number(e.target.value) || MIN_SCHEDULE_MS))} className="w-full text-sm text-white rounded-lg px-3 py-2 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
                           <p className="text-xs mt-1" style={{ color:'rgba(255,255,255,0.3)' }}>= {fmtDur(saveCustomMs)}</p>
                         </div>
                         <div>
