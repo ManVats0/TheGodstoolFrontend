@@ -510,7 +510,9 @@ function buildConnectionPayload(kind: 'source' | 'destination', ctx: any): { nam
     if (s.type === 'mongodb') {
       const dbPart = String(s.name).includes('@') ? String(s.name).split('@')[0] : String(s.name)
       const [database, collection] = dbPart.split('.')
-      return { name: s.name, type: 'mongodb', config: { database, collection, collections: [collection] }, credentials: {} }
+      const savedMongoConnsForSync = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
+      const matchedMongoConn = savedMongoConnsForSync.find((c: any) => c.database === database)
+      return { name: s.name, type: 'mongodb', config: { database, collection, collections: [collection] }, credentials: { uri: matchedMongoConn?.uri || '' } }
     }
     return null
   }
@@ -2284,7 +2286,57 @@ if (mysqlConn) {
             console.log('[Pipeline] Fetched MongoDB collection as CSV:', mongoData.rows, 'rows')
           } else {
             console.error('[Pipeline] MongoDB fetch failed:', mongoData.error)
+            const mongoFetchFailLog: PipelineLogEntry = {
+              ...log,
+              status: 'failed',
+              duration: Date.now() - new Date(log.timestamp).getTime(),
+              steps: pipeline.transformations.map(t => ({
+                name: t.label,
+                status: 'failed' as const,
+                duration: 0,
+                message: `MongoDB fetch failed: ${mongoData.error || 'unknown error from /api/mongo/fetch-collection'}`,
+              })),
+            }
+            const updatedMongoFetchFail = savedPipelines.map(p =>
+              p.id === pipeline.id
+                ? { ...p, lastRun: mongoFetchFailLog.timestamp, runCount: p.runCount + 1, logs: [mongoFetchFailLog, ...p.logs].slice(0, 50) }
+                : p
+            )
+            persistPipelines(updatedMongoFetchFail)
+            addAuditLog({
+              id: crypto.randomUUID(), time: new Date().toLocaleString(),
+              action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+              details: `Pipeline "${pipeline.name}" failed · MongoDB fetch returned no download_url · ${mongoData.error || 'unknown'} · triggered by ${triggeredBy}`,
+              user: 'local_user'
+            })
+            return mongoFetchFailLog
           }
+        } else {
+          console.error('[Pipeline] No matching MongoDB connection found in localStorage for database:', srcDatabase)
+          const noMongoConnLog: PipelineLogEntry = {
+            ...log,
+            status: 'failed',
+            duration: Date.now() - new Date(log.timestamp).getTime(),
+            steps: pipeline.transformations.map(t => ({
+              name: t.label,
+              status: 'failed' as const,
+              duration: 0,
+              message: `No saved MongoDB connection found for database "${srcDatabase}" on this browser. Go to Data Sources → MongoDB and re-test the connection, then Run Now again.`,
+            })),
+          }
+          const updatedNoMongoConn = savedPipelines.map(p =>
+            p.id === pipeline.id
+              ? { ...p, lastRun: noMongoConnLog.timestamp, runCount: p.runCount + 1, logs: [noMongoConnLog, ...p.logs].slice(0, 50) }
+              : p
+          )
+          persistPipelines(updatedNoMongoConn)
+          addAuditLog({
+            id: crypto.randomUUID(), time: new Date().toLocaleString(),
+            action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+            details: `Pipeline "${pipeline.name}" failed · no MongoDB connection found for database "${srcDatabase}" · triggered by ${triggeredBy}`,
+            user: 'local_user'
+          })
+          return noMongoConnLog
         }
       } catch (e) {
         console.error('[Pipeline] MongoDB fetch failed:', e)
@@ -2742,7 +2794,7 @@ if (mysqlConn) {
 
         let data: any = null
 if (!fileToUse) {
-  console.error('[Pipeline] No file available to process — MySQL fetch may have failed or returned empty')
+  console.error(`[Pipeline] No file available to process — ${sourceObj?.type || 'source'} fetch may have failed or returned empty`)
   const failLog: PipelineLogEntry = {
     ...log,
     status: 'failed',
@@ -2751,7 +2803,7 @@ if (!fileToUse) {
       name: t.label,
       status: 'failed' as const,
       duration: 0,
-      message: 'Could not fetch source data — check MySQL connection and table name',
+      message: `Could not fetch source data from ${sourceObj?.type || 'the source'} "${sourceObj?.name || pipeline.sourceId}" — check its connection and table/collection name`,
     })),
   }
   const updated = savedPipelines.map(p =>
