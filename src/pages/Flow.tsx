@@ -1786,6 +1786,49 @@ export default function Flow() {
     setSavedPipelines(pipes); localStorage.setItem('datapipe_pipelines', JSON.stringify(pipes))
   }, [])
 
+  // Hydrate saved pipelines from the server (Mongo) on mount, so pipelines
+  // persist across devices/browsers/incognito instead of only living in
+  // this browser's localStorage. Any pipeline that never got a serverId
+  // (failed to sync earlier) is kept from localStorage as a fallback so
+  // nothing already on this device is silently dropped.
+  useEffect(() => {
+    const token = getAuthToken()
+    if (!token) return
+    fetch(`${API_BASE}/api/pipelines`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then((serverDocs: any[]) => {
+        if (!Array.isArray(serverDocs)) return
+        const serverPipelines: SavedPipeline[] = serverDocs.map(d => ({
+          id: d._id,
+          serverId: d._id,
+          name: d.name,
+          sourceId: d.sourceId,
+          destinationId: d.destinationId,
+          sourceName: d.sourceName,
+          destinationName: d.destinationName,
+          destinationMode: d.destinationMode || 'replace',
+          transformations: d.transformations || [],
+          createdAt: d.createdAt,
+          schedule: d.schedule,
+          scheduleLabel: d.scheduleLabel,
+          scheduleMs: d.scheduleMs,
+          scheduleTimezone: d.scheduleTimezone,
+          scheduleStartDate: d.scheduleStartDate,
+          lastRun: d.lastRun,
+          runCount: d.runCount || 0,
+          logs: [],
+          isActive: d.isActive || false,
+        }))
+        setSavedPipelines(prev => {
+          const localOnly = prev.filter(p => !p.serverId)
+          const merged = [...serverPipelines, ...localOnly]
+          localStorage.setItem('datapipe_pipelines', JSON.stringify(merged))
+          return merged
+        })
+      })
+      .catch(e => console.error('Failed to load pipelines from server:', e))
+  }, [])
+
   const [selectedSourceId,  setSelectedSourceId]  = useState<string>(sources[0]?.name || '')
   const [destinationName,   setDestinationName]   = useState<string>('')
   const [destinationEdited, setDestinationEdited] = useState(false)
