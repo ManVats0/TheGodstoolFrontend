@@ -480,7 +480,21 @@ async function resolveConnectionId(name: string, type: string, config: any, cred
     const existing = await existingRes.json()
     if (Array.isArray(existing)) {
       const match = existing.find((c: any) => c.type === type && c.name === name)
-      if (match?._id) return match._id
+      if (match?._id) {
+        // Refresh the existing connection with today's config/credentials
+        // instead of blindly reusing whatever was saved the first time —
+        // otherwise a connection created early with an incomplete config
+        // (e.g. before a working MongoDB URI existed locally) stays broken
+        // forever, since every later save just matched and reused it as-is.
+        try {
+          await fetch(`${API_BASE}/api/connections/${match._id}`, {
+            method: 'PUT', headers, body: JSON.stringify({ name, type, config, credentials }),
+          })
+        } catch (e) {
+          console.error('resolveConnectionId: refresh of existing connection failed:', e)
+        }
+        return match._id
+      }
     }
     const createRes = await fetch(`${API_BASE}/api/connections`, {
       method: 'POST', headers, body: JSON.stringify({ name, type, config, credentials }),
