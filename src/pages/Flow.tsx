@@ -489,12 +489,25 @@ async function resolveConnectionId(name: string, type: string, config: any, cred
         // otherwise a connection created early with an incomplete config
         // (e.g. before a working MongoDB URI existed locally) stays broken
         // forever, since every later save just matched and reused it as-is.
-        try {
-          await fetch(`${API_BASE}/api/connections/${match._id}`, {
-            method: 'PUT', headers, body: JSON.stringify({ name, type, config, credentials }),
-          })
-        } catch (e) {
-          console.error('resolveConnectionId: refresh of existing connection failed:', e)
+        // GUARD: only overwrite if the new credentials actually contain
+        // something — otherwise a stale/missing localStorage entry (e.g.
+        // after reopening the app) sends blank credentials and wipes out
+        // a previously-working, already-encrypted connection on the
+        // server, which is what caused "MongoDB source is missing
+        // uri/database/collection" even though the source looked connected.
+        const hasRealCredentials = credentials && Object.values(credentials).some(
+          (v: any) => typeof v === 'string' && v.trim().length > 0
+        )
+        if (hasRealCredentials) {
+          try {
+            await fetch(`${API_BASE}/api/connections/${match._id}`, {
+              method: 'PUT', headers, body: JSON.stringify({ name, type, config, credentials }),
+            })
+          } catch (e) {
+            console.error('resolveConnectionId: refresh of existing connection failed:', e)
+          }
+        } else {
+          console.warn(`resolveConnectionId: skipping refresh of "${name}" — new credentials were empty, keeping existing saved credentials intact.`)
         }
         return match._id
       }
@@ -529,7 +542,16 @@ function buildConnectionPayload(kind: 'source' | 'destination', ctx: any): { nam
       const [database, collection] = dbPart.split('.')
       const savedMongoConnsForSync = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
       const matchedMongoConn = savedMongoConnsForSync.find((c: any) => c.database === database)
-      return { name: s.name, type: 'mongodb', config: { database, collection, collections: [collection] }, credentials: { uri: matchedMongoConn?.uri || '' } }
+      // If this browser has no locally-saved URI for this database, don't
+      // sync at all — sending an empty uri would (via resolveConnectionId's
+      // refresh-on-match logic) overwrite a previously-working, already
+      // encrypted connection on the server with a blank one, breaking
+      // Run Now / Analysis for a pipeline that used to work fine.
+      if (!matchedMongoConn?.uri) {
+        console.warn(`buildConnectionPayload: no local MongoDB URI found for database "${database}" — skipping source connection sync to avoid wiping a working server-side connection.`)
+        return null
+      }
+      return { name: s.name, type: 'mongodb', config: { database, collection, collections: [collection] }, credentials: { uri: matchedMongoConn.uri } }
     }
     return null
   }
