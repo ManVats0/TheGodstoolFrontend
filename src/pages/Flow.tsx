@@ -2055,6 +2055,146 @@ useEffect(() => {
     resumedScheduleIdsRef.current.delete(pipelineId)
   }
 
+  // ── Run a pipeline entirely server-side ─────────────────────────────────
+  // Used for any connection-backed source (MySQL/Postgres/MongoDB/BigQuery/
+  // AWS/GCS/CloudSQL/Databricks) once the pipeline has a serverId. Bypasses
+  // every localStorage `datapro_*_connections` lookup — the backend already
+  // has the encrypted credentials keyed by sourceConnectionId/
+  // destinationConnectionId, so this works from any browser/device and
+  // survives page refreshes and cleared local storage.
+  const runPipelineViaBackend = useCallback(async (
+    pipeline: SavedPipeline,
+    triggeredBy: 'manual' | 'schedule' | 'api'
+  ): Promise<PipelineLogEntry> => {
+    const startedAt = new Date().toISOString()
+    const baseLog: PipelineLogEntry = {
+      id: crypto.randomUUID(),
+      pipelineId: pipeline.id,
+      timestamp: startedAt,
+      status: 'running',
+      duration: 0,
+      rowsIn: 0,
+      rowsOut: 0,
+      steps: pipeline.transformations.map(t => ({ name: t.label, status: 'success' as const, duration: 0 })),
+      triggeredBy,
+      schedule: pipeline.scheduleLabel || undefined,
+    }
+
+    const token = getAuthToken()
+    if (!token) {
+      const failLog: PipelineLogEntry = {
+        ...baseLog,
+        status: 'failed',
+        steps: baseLog.steps.map(s => ({ ...s, status: 'failed' as const, message: 'Not signed in — cannot run this server-linked pipeline. Sign in and try again.' })),
+      }
+      const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: failLog.timestamp, runCount: p.runCount + 1, logs: [failLog, ...p.logs].slice(0, 50) } : p)
+      persistPipelines(updated)
+      return failLog
+    }
+
+    const clientStart = Date.now()
+    try {
+      const res = await fetch(`${API_BASE}/api/pipelines/${pipeline.serverId}/execute`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const result = await res.json()
+      const duration = typeof result.durationMs === 'number' ? result.durationMs : Date.now() - clientStart
+
+      if (result.status === 'success') {
+        const rowsIn = result.rowsIn ?? 0
+        const rowsOut = result.rowsOut ?? 0
+        const successLog: PipelineLogEntry = {
+          ...baseLog,
+          status: 'success',
+          duration,
+          rowsIn,
+          rowsOut,
+          steps: baseLog.steps.map(s => ({ ...s, status: 'success' as const, duration: Math.floor(duration / Math.max(baseLog.steps.length, 1)) })),
+        }
+        const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: successLog.timestamp, runCount: p.runCount + 1, logs: [successLog, ...p.logs].slice(0, 50) } : p)
+        persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" ran on server · success · ${rowsIn}→${rowsOut} rows · triggered by ${triggeredBy}`,
+          user: 'local_user',
+        })
+        setLastRunResult({
+          pipelineName: pipeline.name,
+          rowsIn,
+          rowsOut,
+          rowsAffected: rowsIn - rowsOut,
+          mode: pipeline.destinationMode,
+        })
+
+        // No destination connection was linked → backend returns a CSV
+        // download_url instead. Fetch it so the existing preview/download
+        // UI keeps working exactly as it does for the local CSV path.
+        if (result.download_url) {
+          try {
+            const fileRes = await fetch(`${API_BASE}${result.download_url}`)
+            const blob = await fileRes.blob()
+            const outputFile = new File([blob], pipeline.destinationName, { type: 'text/csv' })
+            useStore.setState({
+              pipelineOutputFile: outputFile,
+              activeFile: outputFile,
+              activeSourceName: pipeline.destinationName,
+              activeDestinationName: pipeline.destinationName,
+              analysis: null,
+              analysisTab: 'preview',
+              lastPipelineRunAt: new Date().toISOString(),
+            })
+            const csvText = await outputFile.text()
+            const { headers, rows } = parseCSV(csvText)
+            setPostRunPreview({ columns: headers, rows: rows.slice(0, 100) })
+          } catch (e) {
+            console.error('[Pipeline] Could not fetch server run output for preview:', e)
+          }
+        }
+
+        setTimeout(() => {
+          document.getElementById('saved-pipelines-section')?.scrollIntoView({ behavior: 'smooth' })
+        }, 300)
+
+        return successLog
+      }
+
+      const errMsg = result.error || 'Server run failed'
+      const failLog: PipelineLogEntry = {
+        ...baseLog,
+        status: 'failed',
+        duration,
+        steps: baseLog.steps.map(s => ({ ...s, status: 'failed' as const, message: errMsg })),
+      }
+      const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: failLog.timestamp, runCount: p.runCount + 1, logs: [failLog, ...p.logs].slice(0, 50) } : p)
+      persistPipelines(updated)
+      addAuditLog({
+        id: crypto.randomUUID(), time: new Date().toLocaleString(),
+        action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+        details: `Pipeline "${pipeline.name}" failed on server · ${errMsg} · triggered by ${triggeredBy}`,
+        user: 'local_user',
+      })
+      return failLog
+    } catch (e) {
+      const failLog: PipelineLogEntry = {
+        ...baseLog,
+        status: 'failed',
+        duration: Date.now() - clientStart,
+        steps: baseLog.steps.map(s => ({ ...s, status: 'failed' as const, message: `Could not reach server: ${String(e)}` })),
+      }
+      const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: failLog.timestamp, runCount: p.runCount + 1, logs: [failLog, ...p.logs].slice(0, 50) } : p)
+      persistPipelines(updated)
+      addAuditLog({
+        id: crypto.randomUUID(), time: new Date().toLocaleString(),
+        action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+        details: `Pipeline "${pipeline.name}" failed · could not reach server · ${String(e)} · triggered by ${triggeredBy}`,
+        user: 'local_user',
+      })
+      return failLog
+    }
+  }, [savedPipelines, persistPipelines, addAuditLog])
+
   const runPipeline = useCallback(async (pipeline: SavedPipeline, triggeredBy: 'manual'|'schedule'|'api' = 'manual') => {
     const log: PipelineLogEntry = {
   id: crypto.randomUUID(),
@@ -2076,6 +2216,18 @@ useEffect(() => {
     // ── Find the source file ─────────────────────────────────────────────
     const sourceObj = sources.find(s => s.name === pipeline.sourceId)
     let fileToUse = sourceObj?.file || (sourceObj?.type !== ('sheets' as string) ? activeFile : null) || null 
+
+    // ── Connection-backed sources: if this pipeline is linked to the
+    // server (serverId set after a successful save while signed in), run
+    // it entirely server-side instead of trying every datapro_*_connections
+    // localStorage lookup below. This is what makes "Run Now" work after a
+    // refresh, on a different browser/device, or with cleared local
+    // storage — for MySQL, Postgres, MongoDB, BigQuery, AWS, GCS, Cloud SQL
+    // and Databricks alike, not just one of them.
+    const SERVER_ONLY_SOURCE_TYPES = ['mysql', 'postgres', 'mongodb', 'bigquery', 'aws', 'gcs', 'cloudsql', 'databricks']
+    if (pipeline.serverId && sourceObj && SERVER_ONLY_SOURCE_TYPES.includes(sourceObj.type as string)) {
+      return await runPipelineViaBackend(pipeline, triggeredBy)
+    }
 
     // ── If source is MySQL, fetch table as CSV first ──────────────────────
     if (sourceObj?.type === 'mysql') {
@@ -3343,7 +3495,7 @@ const realLog: PipelineLogEntry = {
     return log
   }, [savedPipelines, persistPipelines, addAuditLog, activeFile, sources,
       setPipelineOutputFile, setLastPipelineRunAt, setActiveDestinationName,
-      switchActiveSource, navigate])
+      switchActiveSource, navigate, runPipelineViaBackend])
 
   const loadPipelineData = async () => {
     setDriftLoading(true)
