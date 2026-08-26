@@ -270,6 +270,9 @@ type PipelineLogEntry = {
 type SavedPipeline = {
   id: string
   serverId?: string | null   // Mongo _id once synced via /api/pipelines — required to run on server
+  sourceConnectionId?: string | null  // Mongo connection _id for the source — lets Run Now execute
+                                       // entirely server-side even when this pipeline's source was
+                                       // never (re)loaded into local `sources` state this session
   name: string
   sourceId: string
   destinationId: string
@@ -591,7 +594,7 @@ function buildConnectionPayload(kind: 'source' | 'destination', ctx: any): { nam
   return null
 }
 
-async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any, destPayload: any): Promise<string | null> {
+async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any, destPayload: any): Promise<{ serverId: string; sourceConnectionId: string | null } | null> {
   const token = getAuthToken()
   if (!token) {
     console.warn('Not signed in — pipeline saved locally only and will NOT run automatically on the server.')
@@ -627,7 +630,7 @@ async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any,
       }),
     })
     const saved = await res.json()
-    if (saved?._id) return saved._id as string
+    if (saved?._id) return { serverId: saved._id as string, sourceConnectionId: sourceConnectionId || null }
     console.error('Server pipeline sync failed:', saved)
     return null
   } catch (e) {
@@ -1828,6 +1831,7 @@ export default function Flow() {
         const serverPipelines: SavedPipeline[] = serverDocs.map(d => ({
           id: d._id,
           serverId: d._id,
+          sourceConnectionId: d.sourceConnectionId || null,
           name: d.name,
           sourceId: d.sourceId,
           destinationId: d.destinationId,
@@ -2239,7 +2243,7 @@ useEffect(() => {
     // storage — for MySQL, Postgres, MongoDB, BigQuery, AWS, GCS, Cloud SQL
     // and Databricks alike, not just one of them.
     const SERVER_ONLY_SOURCE_TYPES = ['mysql', 'postgres', 'mongodb', 'bigquery', 'aws', 'gcs', 'cloudsql', 'databricks']
-    if (pipeline.serverId && sourceObj && SERVER_ONLY_SOURCE_TYPES.includes(sourceObj.type as string)) {
+    if (pipeline.serverId && (pipeline.sourceConnectionId || (sourceObj && SERVER_ONLY_SOURCE_TYPES.includes(sourceObj.type as string)))) {
       return await runPipelineViaBackend(pipeline, triggeredBy)
     }
 
@@ -3663,10 +3667,12 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
       gsheetsConnected, mysqlDestination, pgDestination, bqDestination, mongoDestination,
       awsDestinationState, gcsDestination, cloudsqlDestination, databricksDestination,
     })
-    syncPipelineToServer(pipeline, sourcePayload, destPayload).then(serverId => {
-      if (serverId) {
+    syncPipelineToServer(pipeline, sourcePayload, destPayload).then(syncResult => {
+      if (syncResult) {
         setSavedPipelines(prev => {
-          const updated = prev.map(p => p.id === pipeline.id ? { ...p, serverId } : p)
+          const updated = prev.map(p => p.id === pipeline.id
+            ? { ...p, serverId: syncResult.serverId, sourceConnectionId: syncResult.sourceConnectionId }
+            : p)
           localStorage.setItem('datapipe_pipelines', JSON.stringify(updated))
           return updated
         })
