@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useStore } from '../store'
 
-const ACTION_COLOR: Record<string, string> = {
-  add_source: '#22c55e',
-  add_transformation: '#3b82f6',
-  set_alert: '#f59e0b',
-  analyze: '#8b5cf6',
-  clean: '#06b6d4',
-  download: '#34d399',
+const CATEGORY_COLOR: Record<string, string> = {
+  connection: '#22c55e',
+  pipeline: '#3b82f6',
+  data: '#8b5cf6',
+  security: '#f59e0b',
+  billing: '#06b6d4',
+  other: '#64748b',
 }
 
 export default function AuditLogs() {
@@ -17,9 +17,9 @@ export default function AuditLogs() {
 
   const filtered = auditLogs.filter(l =>
     !filter ||
-    l.action.includes(filter.toLowerCase()) ||
-    l.entity_type.includes(filter.toLowerCase()) ||
-    l.details.toLowerCase().includes(filter.toLowerCase())
+    (l.action || '').toLowerCase().includes(filter.toLowerCase()) ||
+    (l.resourceType || '').toLowerCase().includes(filter.toLowerCase()) ||
+    (l.resourceName || '').toLowerCase().includes(filter.toLowerCase())
   )
 
   const grouped = groupByTrigger
@@ -127,7 +127,7 @@ export default function AuditLogs() {
 
 function LogRow({ log }: { log: any }) {
   const [showDetail, setShowDetail] = useState(false)
-  const color = ACTION_COLOR[log.action] || '#64748b'
+  const color = CATEGORY_COLOR[log.category] || '#64748b'
 
   return (
     <>
@@ -139,17 +139,21 @@ function LogRow({ log }: { log: any }) {
         }}
         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{log.time}</span>
-        <span className="text-white text-xs truncate pr-4">{log.details}</span>
+        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          {log.createdAt ? new Date(log.createdAt).toLocaleString() : ''}
+        </span>
+        <span className="text-white text-xs truncate pr-4">
+          {log.resourceName || log.metadata?.name || '—'}
+        </span>
         <span>
           <span className="px-2 py-0.5 rounded-full text-xs font-medium"
             style={{ background: `${color}18`, color }}>
-            {log.action.replace(/_/g, ' ')}
+            {(log.action || '').replace(/[._]/g, ' ')}
           </span>
         </span>
-        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{log.entity_type}</span>
+        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{log.resourceType}</span>
         <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>
-          {log.entity_id.slice(0, 8)}...
+          {(log.resourceId || '').slice(0, 8)}...
         </span>
         <button onClick={() => setShowDetail(!showDetail)}
           className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
@@ -168,9 +172,19 @@ function LogRow({ log }: { log: any }) {
             borderBottom: '1px solid rgba(255,255,255,0.04)',
             color: 'rgba(255,255,255,0.55)'
           }}>
-          <span className="font-semibold text-white">Full ID:</span> {log.entity_id}<br />
-          <span className="font-semibold text-white">User:</span> {log.user}<br />
-          <span className="font-semibold text-white">Details:</span> {log.details}
+          <span className="font-semibold text-white">Full ID:</span> {log.resourceId}<br />
+          <span className="font-semibold text-white">Actor:</span> {log.actorId}<br />
+          <span className="font-semibold text-white">Status:</span> {log.status}<br />
+          {log.changes ? (
+            <>
+              <span className="font-semibold text-white">Changes:</span>
+              <pre className="whitespace-pre-wrap mt-1">{JSON.stringify(log.changes, null, 2)}</pre>
+            </>
+          ) : (
+            <>
+              <span className="font-semibold text-white">Details:</span> {JSON.stringify(log.metadata)}
+            </>
+          )}
         </div>
       )}
     </>
