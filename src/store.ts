@@ -411,8 +411,20 @@ export const useStore = create<AppState>((set, get) => ({
   lastSourcesScanAt: 0,
   setLastSourcesScanAt: (t: number) => set({ lastSourcesScanAt: t }),
 
-  auditLogs: [],
-  addAuditLog: (log) => set((s) => ({ auditLogs: [log, ...s.auditLogs] })),
+  auditLogs: (() => {
+    try {
+      const saved = localStorage.getItem('datapipe_audit_logs')
+      return saved ? JSON.parse(saved) : []
+    } catch { return [] }
+  })(),
+  addAuditLog: (log) => set((s) => {
+    // Cap at 500 entries so localStorage doesn't grow unbounded — audit
+    // logs are meant as a rolling recent-activity view, not permanent
+    // storage (that's what the backend /api/pipelines execute history is for).
+    const updated = [log, ...s.auditLogs].slice(0, 500)
+    try { localStorage.setItem('datapipe_audit_logs', JSON.stringify(updated)) } catch {}
+    return { auditLogs: updated }
+  }),
 
   transformations: [],
   addTransformation: (t) => set((s) => ({ transformations: [...s.transformations, t] })),
