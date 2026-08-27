@@ -18,8 +18,8 @@ export default function AuditLogs() {
   const filtered = auditLogs.filter(l =>
     !filter ||
     (l.action || '').toLowerCase().includes(filter.toLowerCase()) ||
-    (l.resourceType || '').toLowerCase().includes(filter.toLowerCase()) ||
-    (l.resourceName || '').toLowerCase().includes(filter.toLowerCase())
+    (l.entity_type || '').toLowerCase().includes(filter.toLowerCase()) ||
+    (l.details || '').toLowerCase().includes(filter.toLowerCase())
   )
 
   const grouped = groupByTrigger
@@ -125,9 +125,22 @@ export default function AuditLogs() {
   )
 }
 
+// AuditLog entries only ever have {id, time, action, entity_type, entity_id,
+// details, user} — there's no stored "category" field. Derive a display
+// color from entity_type/action instead of a nonexistent log.category, so
+// rows aren't all falling back to the same gray "other" color.
+function deriveCategory(log: any): string {
+  const key = `${log.entity_type || ''} ${log.action || ''}`.toLowerCase()
+  if (key.includes('connection') || key.includes('connect')) return 'connection'
+  if (key.includes('pipeline') || key.includes('transformation') || key.includes('schedule')) return 'pipeline'
+  if (key.includes('source') || key.includes('destination') || key.includes('analysis')) return 'data'
+  if (key.includes('alert') || key.includes('approve') || key.includes('drift')) return 'security'
+  return 'other'
+}
+
 function LogRow({ log }: { log: any }) {
   const [showDetail, setShowDetail] = useState(false)
-  const color = CATEGORY_COLOR[log.category] || '#64748b'
+  const color = CATEGORY_COLOR[deriveCategory(log)] || '#64748b'
 
   return (
     <>
@@ -140,10 +153,10 @@ function LogRow({ log }: { log: any }) {
         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
         <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {log.createdAt ? new Date(log.createdAt).toLocaleString() : ''}
+          {log.time || ''}
         </span>
-        <span className="text-white text-xs truncate pr-4">
-          {log.resourceName || log.metadata?.name || '—'}
+        <span className="text-white text-xs truncate pr-4" title={log.details}>
+          {log.details || '—'}
         </span>
         <span>
           <span className="px-2 py-0.5 rounded-full text-xs font-medium"
@@ -151,9 +164,9 @@ function LogRow({ log }: { log: any }) {
             {(log.action || '').replace(/[._]/g, ' ')}
           </span>
         </span>
-        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{log.resourceType}</span>
+        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{log.entity_type}</span>
         <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>
-          {(log.resourceId || '').slice(0, 8)}...
+          {(log.entity_id || '').slice(0, 8)}...
         </span>
         <button onClick={() => setShowDetail(!showDetail)}
           className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
@@ -172,19 +185,11 @@ function LogRow({ log }: { log: any }) {
             borderBottom: '1px solid rgba(255,255,255,0.04)',
             color: 'rgba(255,255,255,0.55)'
           }}>
-          <span className="font-semibold text-white">Full ID:</span> {log.resourceId}<br />
-          <span className="font-semibold text-white">Actor:</span> {log.actorId}<br />
-          <span className="font-semibold text-white">Status:</span> {log.status}<br />
-          {log.changes ? (
-            <>
-              <span className="font-semibold text-white">Changes:</span>
-              <pre className="whitespace-pre-wrap mt-1">{JSON.stringify(log.changes, null, 2)}</pre>
-            </>
-          ) : (
-            <>
-              <span className="font-semibold text-white">Details:</span> {JSON.stringify(log.metadata)}
-            </>
-          )}
+          <span className="font-semibold text-white">Full Entity ID:</span> {log.entity_id}<br />
+          <span className="font-semibold text-white">Entity Type:</span> {log.entity_type}<br />
+          <span className="font-semibold text-white">User:</span> {log.user}<br />
+          <span className="font-semibold text-white">Time:</span> {log.time}<br />
+          <span className="font-semibold text-white">Details:</span> {log.details}
         </div>
       )}
     </>
