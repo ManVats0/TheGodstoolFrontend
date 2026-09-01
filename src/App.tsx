@@ -215,7 +215,6 @@ useEffect(() => {
       })
   }, [location.pathname])
 
-  const [demoPlaying, setDemoPlaying] = useState(false)
   const [heroClipIndex, setHeroClipIndex] = useState(0)
   const heroClips = [heroClipA, heroClipB]
   const [showAllFeatures, setShowAllFeatures] = useState(false)
@@ -1020,60 +1019,6 @@ if (!entered) return (
   </div>
 </section>
 
-{/* ── DEMO VIDEO ── */}
-    <section style={{ padding: '100px 24px', background: 'rgba(79,70,229,0.04)', borderTop: '1px solid rgba(167,139,250,0.07)', borderBottom: '1px solid rgba(167,139,250,0.07)' }}>
-      <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(320px, 1.15fr) minmax(260px, 0.85fr)', gap: '48px', alignItems: 'center' }}>
-
-        <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.2)', boxShadow: '0 0 60px rgba(124,58,237,0.15)', background: '#000' }}>
-          {demoPlaying ? (
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/YMY6fx731Ps?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&iv_load_policy=3"
-              title="The God's Tool Demo"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              frameBorder="0"
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-            />
-          ) : (
-            <div onClick={() => setDemoPlaying(true)} style={{ position: 'absolute', inset: 0, cursor: 'pointer' }}>
-              <img
-                src="https://img.youtube.com/vi/YMY6fx731Ps/maxresdefault.jpg"
-                alt="Demo Video"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
-                onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://img.youtube.com/vi/YMY6fx731Ps/hqdefault.jpg' }}
-              />
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(255,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 32px rgba(255,0,0,0.5)' }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div>
-          <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>See It In Action</div>
-          <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 2.8vw, 2.2rem)', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>Watch the Tool clean your data live.</h2>
-          <p style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '0.95rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.65, marginBottom: '28px' }}>Upload a messy CSV. Watch the platform detect issues, suggest fixes, and produce clean output — in seconds.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '32px' }}>
-            {[
-              { icon: 'upload', text: 'Upload any CSV or sheet' },
-              { icon: 'cpu', text: 'AI detects every issue' },
-              { icon: 'check', text: 'One-click clean export' },
-            ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '0.88rem', color: 'rgba(255,255,255,0.75)' }}>
-                <div style={{ flexShrink: 0, width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(167,139,250,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <LineIcon name={item.icon} size={15} />
-                </div>
-                {item.text}
-              </div>
-            ))}
-          </div>
-          <button className="cta-btn" onClick={() => handleEnter('register')}>Connect a Source</button>
-        </div>
-
-      </div>
-    </section>
-
     {/* ── ALERT SECTION ── */}
     <section style={{ padding: '100px 24px', maxWidth: '820px', margin: '0 auto' }}>
       <div style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: '20px', padding: '56px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
@@ -1419,7 +1364,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
