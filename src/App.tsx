@@ -4,9 +4,8 @@ import postTransformAfterImg from './post transformation overview.png'
 import pipelineBuilderImg from './pipeline builder.png'
 import transformTypesImg from './TYPES OF TRANSFORMATIONS OVERVIEW.png'
 import cronJobsImg from './pipeline creation cron jobs.png'
-import heroDemoMp4 from './hero-demo.mp4'
-import heroDemoWebm from './hero-demo.webm'
-import heroDemoPoster from './hero-demo-poster.jpg'
+import heroClipA from './preview_A_sql_reveal.mp4'
+import heroClipB from './preview_B_stats_reveal.mp4'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
@@ -217,6 +216,8 @@ useEffect(() => {
   }, [location.pathname])
 
   const [demoPlaying, setDemoPlaying] = useState(false)
+  const [heroClipIndex, setHeroClipIndex] = useState(0)
+  const heroClips = [heroClipA, heroClipB]
   const [showAllFeatures, setShowAllFeatures] = useState(false)
   const [sideEmail, setSideEmail] = useState('')
   const [sidePassword, setSidePassword] = useState('')
@@ -906,15 +907,14 @@ if (!entered) return (
       <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
     </div>
     <video
+      key={heroClipIndex}
       autoPlay
-      loop
       muted
       playsInline
-      poster={heroDemoPoster}
+      onEnded={() => setHeroClipIndex(i => (i + 1) % heroClips.length)}
       style={{ width: '100%', display: 'block', aspectRatio: '16 / 9', objectFit: 'cover', background: '#05030f' }}
     >
-      <source src={heroDemoWebm} type="video/webm" />
-      <source src={heroDemoMp4} type="video/mp4" />
+      <source src={heroClips[heroClipIndex]} type="video/mp4" />
     </video>
   </div>
 </section>
@@ -1419,7 +1419,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
