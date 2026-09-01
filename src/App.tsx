@@ -890,6 +890,32 @@ if (!entered) return (
       </div>
     </section>
 
+{/* ── LIVE DEMO REEL ── */}
+<section style={{ padding: '80px 24px 20px', maxWidth: '900px', margin: '0 auto' }}>
+  <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+    <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>See It Live</div>
+    <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 3.2vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>Cleaning rules run. SQL gets generated. Row counts update.</h2>
+  </div>
+  <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.25)', background: '#0a0714', boxShadow: '0 12px 50px rgba(124,58,237,0.2)', maxWidth: '760px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+      <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
+      <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
+      <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
+    </div>
+    <video
+      autoPlay
+      loop
+      muted
+      playsInline
+      poster="/hero-demo-poster.jpg"
+      style={{ width: '100%', display: 'block', aspectRatio: '16 / 9', objectFit: 'cover', background: '#05030f' }}
+    >
+      <source src="/hero-demo.webm" type="video/webm" />
+      <source src="/hero-demo.mp4" type="video/mp4" />
+    </video>
+  </div>
+</section>
+
 {/* ── BEFORE / AFTER SHOWCASE ── */}
 <section style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
   <div style={{ textAlign: 'center', marginBottom: '56px' }}>
@@ -1390,7 +1416,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
