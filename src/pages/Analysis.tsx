@@ -73,26 +73,6 @@ import { API_BASE } from '../config'
     }
   }
 
-  // Fetches the last saved run for this source from the backend, so
-  // "what changed" insights work across devices/browsers — not just within
-  // the current one. Falls back silently (returns null) if not logged in
-  // or nothing has been saved for this source yet.
-  async function fetchPreviousAnalysisResult(sourceKey: string): Promise<any | null> {
-    try {
-      const headers = analysisAuthHeaders()
-      if (!headers.Authorization) return null
-      const res = await fetch(`${API_BASE}/api/analysis-results/latest?source_key=${encodeURIComponent(sourceKey)}`, {
-        credentials: 'include',
-        headers,
-      })
-      if (!res.ok) return null
-      const data = await res.json()
-      return data.result?.result || null
-    } catch {
-      return null
-    }
-  }
-
   const sparkleCSS = `
   @keyframes sparkle-pulse {
     0%, 100% { box-shadow: 0 0 20px rgba(124,58,237,0.6), 0 0 40px rgba(37,99,235,0.3), 0 0 0 0 rgba(124,58,237,0.4); }
@@ -1688,18 +1668,11 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         )
         console.log('MySQL debug:', { activeSourceName, database, table, host, savedMySQL, mysqlConn })
         if (!mysqlConn) {
-          if (sourceObj2?.connectionId) {
-            // No local cache (new device / cleared storage) — let the backend
-            // resolve the saved connection by id instead of giving up.
-            formData.append('source_type', 'mysql')
-            formData.append('connection_id', sourceObj2.connectionId)
-            formData.append('mysql_table', table)
-          } else {
-            console.error('❌ No MySQL connection found for', { database, host })
-            alert(`MySQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
-            return
-          }
-        } else {
+          console.error('❌ No MySQL connection found for', { database, host })
+          alert(`MySQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
+          return
+        }
+        if (mysqlConn) {
           const blocked = await checkSizeAndMaybeBlock({
             source_type: 'mysql', host: mysqlConn.host, port: mysqlConn.port,
             user: mysqlConn.user, password: mysqlConn.password,
@@ -1732,16 +1705,11 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         )
         console.log('PostgreSQL debug:', { activeSourceName, database, table, host, savedPG, pgConn })
         if (!pgConn) {
-          if (sourceObj2?.connectionId) {
-            formData.append('source_type', 'postgres')
-            formData.append('connection_id', sourceObj2.connectionId)
-            formData.append('mysql_table', table)
-          } else {
-            console.error('❌ No PostgreSQL connection found for', { database, host })
-            alert(`PostgreSQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
-            return
-          }
-        } else {
+          console.error('❌ No PostgreSQL connection found for', { database, host })
+          alert(`PostgreSQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
+          return
+        }
+        if (pgConn) {
           const blocked = await checkSizeAndMaybeBlock({
             source_type: 'postgres', host: pgConn.host, port: pgConn.port,
             user: pgConn.user, password: pgConn.password,
@@ -1767,34 +1735,27 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         const mongoConn = savedMongo.find((c: any) => c.database === database)
         console.log('MongoDB debug:', { activeSourceName, database, collection, savedMongo, mongoConn })
         if (!mongoConn) {
-          if (sourceObj2?.connectionId) {
-            formData.append('source_type', 'mongodb')
-            formData.append('connection_id', sourceObj2.connectionId)
-            formData.append('mysql_table', collection)
-          } else {
-            console.error('❌ No MongoDB connection found for', { database })
-            alert(`MongoDB connection not found for ${database}. Please reconnect in Sources.`)
-            setAnalyzing(false)
-            return
-          }
-        } else {
-          const mongoCollection = collection || mongoConn.collection || mongoConn.collections?.[0] || ''
-          if (!mongoCollection) {
-            alert(`No collection specified for MongoDB source "${activeSourceName}". Please reconnect in Sources.`)
-            setAnalyzing(false)
-            return
-          }
-          const blockedMongo = await checkSizeAndMaybeBlock({
-            source_type: 'mongodb', mongo_uri: mongoConn.uri,
-            mongo_database: mongoConn.database, mongo_collection: mongoCollection,
-          })
-          if (blockedMongo) return
-          formData.append('source_type', 'mongodb')
-          formData.append('mysql_host', mongoConn.uri)
-          formData.append('mysql_user', mongoConn.database)
-          formData.append('mysql_database', mongoConn.database)
-          formData.append('mysql_table', mongoCollection)
+          console.error('❌ No MongoDB connection found for', { database })
+          alert(`MongoDB connection not found for ${database}. Please reconnect in Sources.`)
+          setAnalyzing(false)
+          return
         }
+        const mongoCollection = collection || mongoConn.collection || mongoConn.collections?.[0] || ''
+        if (!mongoCollection) {
+          alert(`No collection specified for MongoDB source "${activeSourceName}". Please reconnect in Sources.`)
+          setAnalyzing(false)
+          return
+        }
+        const blockedMongo = await checkSizeAndMaybeBlock({
+          source_type: 'mongodb', mongo_uri: mongoConn.uri,
+          mongo_database: mongoConn.database, mongo_collection: mongoCollection,
+        })
+        if (blockedMongo) return
+        formData.append('source_type', 'mongodb')
+        formData.append('mysql_host', mongoConn.uri)
+        formData.append('mysql_user', mongoConn.database)
+        formData.append('mysql_database', mongoConn.database)
+        formData.append('mysql_table', mongoCollection)
       } else if ((sourceObj2?.type as string) === 'gcs') {
         const savedGCSMeta = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
         const withoutProto = activeSourceName.replace('gcs://', '')
@@ -2103,45 +2064,12 @@ setAnalyzing(false)
           return
         }
       } else if (sourceObj2?.type === 'sheets') {
-        if (sourceObj2?.file) {
-          formData.append('file', sourceObj2.file)
-        } else if (sourceObj2?.sheetId) {
-          // No cached File object (fresh device/session/restart) — but we
-          // have the sheetId + tab, so re-fetch live from Google instead
-          // of failing. Mirrors confirmGSheet's import flow in DataSources.tsx.
-          try {
-            const storedSession = localStorage.getItem('datapro_session') || ''
-            const importRes = await fetch(
-              `${API_BASE}/api/auth/google/sheets/${sourceObj2.sheetId}/import?tab=${encodeURIComponent(sourceObj2.tab || 'Sheet1')}`,
-              {
-                method: 'POST',
-                credentials: 'include',
-                headers: storedSession ? { 'X-Session-ID': storedSession } : {},
-              }
-            )
-            const importData = await importRes.json()
-            if (!importRes.ok || importData.error || !importData.download_url) {
-              alert(`Could not refresh this Google Sheet (${importData.error || 'not signed in to Google'}). Please reconnect it from Data Sources.`)
-              setAnalyzing(false)
-              return
-            }
-            const csvRes = await fetch(`${API_BASE}${importData.download_url}`, {
-              credentials: 'include',
-              headers: storedSession ? { 'X-Session-ID': storedSession } : {},
-            })
-            const blob = await csvRes.blob()
-            const realFile = new File([blob], importData.filename, { type: 'text/csv' })
-            formData.append('file', realFile)
-          } catch (e) {
-            alert(`Could not refresh this Google Sheet: ${e}`)
-            setAnalyzing(false)
-            return
-          }
-        } else {
+        if (!sourceObj2?.file) {
           alert('Google Sheet file not found. Please re-import the sheet from Data Sources.')
           setAnalyzing(false)
           return
         }
+        formData.append('file', sourceObj2.file)
       } else if (!sourceObj2 || sourceObj2.type === 'csv') {
         alert('CSV file not found in memory. Please re-upload the CSV from Data Sources — the file needs to be re-attached after a page refresh or source switch.')
         setAnalyzing(false)
@@ -2174,18 +2102,9 @@ setAnalyzing(false)
           return
         }
         // ── Read the previous snapshot BEFORE overwriting it, then diff ──
-        // Prefer the backend history (works across devices/browsers — e.g.
-        // yesterday's Google Sheets refresh was analyzed on a different
-        // machine); fall back to this browser's local cache if the backend
-        // has nothing yet (first run, or not logged in).
         try {
-          const sourceKeyForPrev = sourceObj2?.connectionId || activeSourceName
-          const backendPrev = await fetchPreviousAnalysisResult(sourceKeyForPrev)
-          let prevData = backendPrev
-          if (!prevData) {
-            const prevRaw = localStorage.getItem(`analysis_cache_${activeSourceName}`)
-            prevData = prevRaw ? JSON.parse(prevRaw) : null
-          }
+          const prevRaw = localStorage.getItem(`analysis_cache_${activeSourceName}`)
+          const prevData = prevRaw ? JSON.parse(prevRaw) : null
           setInsights(computeInsights(prevData, data))
         } catch {
           setInsights([])
@@ -2764,6 +2683,15 @@ setAnalyzing(false)
     const sample = analysis.sample_data || []
     const firstRow = sample[0] || {}
     const colInfo = analysis.col_info || []
+    const piiColumns = analysis.pii_columns || {}
+    const maskValue = (colName: string, val: any): string => {
+      if (!piiColumns[colName]?.pii) {
+        return typeof val === 'number' ? val.toLocaleString() : String(val)
+      }
+      const str = val === null || val === undefined ? '' : String(val)
+      if (str.length <= 4) return '•'.repeat(str.length)
+      return str.slice(0, 2) + '•'.repeat(Math.max(str.length - 4, 3)) + str.slice(-2)
+    }
     const describe = analysis.describe || {}
     const describeStats = ['count','mean','std','min','25%','50%','75%','max']
     const describeCols = Object.keys(describe)
@@ -2789,9 +2717,16 @@ setAnalyzing(false)
     ]
 
     // Build row/col arrays for fullscreen from current tab
-const getPreviewFullscreenData = () => {
+    const getPreviewFullscreenData = () => {
       const cols = Object.keys(firstRow)
-      return { columns: cols, rows: sample }
+      const maskedRows = sample.map((row: any) => {
+        const maskedRow: any = {}
+        cols.forEach(c => {
+          maskedRow[c] = piiColumns[c]?.pii ? maskValue(c, row[c]) : row[c]
+        })
+        return maskedRow
+      })
+      return { columns: cols, rows: maskedRows }
     }
 
     return (
@@ -3249,8 +3184,8 @@ const getPreviewFullscreenData = () => {
                         <th
                           key={k}
                           className="p-2.5 text-left font-semibold whitespace-nowrap"
-                          style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)' }}
-                        >{k}</th>
+                          style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: piiColumns[k]?.pii ? '#f87171' : 'rgba(255,255,255,0.8)' }}
+                        >{piiColumns[k]?.pii ? `${k}` : k}</th>
                       ))}</tr>
                     </thead>
                     <tbody>
@@ -3261,10 +3196,10 @@ const getPreviewFullscreenData = () => {
                           onMouseEnter={e => (e.currentTarget.style.background = 'rgba(124,58,237,0.05)')}
                           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                         >
-                          {Object.values(row).map((val: any, j) => (
+                          {Object.entries(row).map(([colName, val]: [string, any], j) => (
                             <td key={j} className="p-2.5 whitespace-nowrap">
                               {val === '' ? <span style={{ color: '#f87171', fontStyle: 'italic' }}>null</span>
-                                : typeof val === 'number' ? val.toLocaleString() : String(val)}
+                                : maskValue(colName, val)}
                             </td>
                           ))}
                         </tr>
@@ -3327,6 +3262,7 @@ const getPreviewFullscreenData = () => {
                             {col.column}
                             {col.column === analysis.primary_key && <Pill color="#3b82f6">PK</Pill>}
                             {col.column === ts.date_col && <span className="ml-1"><Pill color="#06b6d4">Date</Pill></span>}
+                            {piiColumns[col.column]?.pii && <span className="ml-1"><Pill color="#f87171">PII</Pill></span>}
                           </td>
                           <td className="p-3"><Pill color="#6366f1">{col.dtype}</Pill></td>
                           <td className="p-3" style={{ color: '#4ade80' }}>{col.non_null.toLocaleString()}</td>
@@ -3336,7 +3272,7 @@ const getPreviewFullscreenData = () => {
                               : <span style={{ color: '#4ade80' }}>0</span>}
                           </td>
                           <td className="p-3" style={{ color: 'rgba(255,255,255,0.4)' }}>{col.unique.toLocaleString()}</td>
-                          <td className="p-3 whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.4)' }}>{col.sample}</td>
+                          <td className="p-3 whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.4)' }}>{piiColumns[col.column]?.pii ? maskValue(col.column, col.sample) : col.sample}</td>
                         </tr>
                       ))}
                     </tbody>
