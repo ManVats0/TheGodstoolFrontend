@@ -35,6 +35,7 @@ export interface AnalysisResult {
   original_preview: any[]
   describe: Record<string, any>
   col_info: any[]
+  pii_columns?: Record<string, { pii: boolean; type: string; confidence: string }>
   top_missing: { col: string; count: number }[]
   insight: string
   primary_key: string | null
