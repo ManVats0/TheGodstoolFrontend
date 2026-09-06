@@ -159,6 +159,35 @@
       }
     }
 
+    
+    const saveColumnPII = async (source: any, columnName: string, isPii: boolean) => {
+      const key = catalogKeyFor(source)
+      setCatalogMap(prev => {
+        const existing = prev[key] || { sourceKey: key, sourceName: source.name, colInfo: [], columnOverrides: {} }
+        return {
+          ...prev,
+          [key]: {
+            ...existing,
+            columnOverrides: { ...(existing.columnOverrides || {}), [columnName]: { ...(existing.columnOverrides?.[columnName] || {}), pii: isPii } },
+          },
+        }
+      })
+      try {
+        await fetch(`${API_BASE}/api/catalog`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({
+            source_name: source.name,
+            connection_id: source.connectionId || '',
+            column_overrides: { [columnName]: { pii: isPii } },
+          }),
+        })
+      } catch {
+        // Best-effort.
+      }
+    }
+
     // ── SEARCH / FILTER LOGIC ────────────────────────────────────────────────
     const filteredSources = sources.filter(source => {
       const q = searchQuery.toLowerCase()
@@ -483,6 +512,7 @@
                   { label: 'Column Name', color: 'rgba(255,255,255,0.5)' },
                   { label: 'Type',        color: '#818cf8' },
                   { label: 'Definition',  color: 'rgba(255,255,255,0.35)' },
+                  { label: 'Sensitive',   color: '#f87171' },
                 ].map(h => (
                   <span key={h.label} className="text-xs font-semibold uppercase tracking-widest" style={{ color: h.color }}>
                     {h.label}
@@ -497,6 +527,7 @@
                   const dictEntry = dictSource ? catalogMap[catalogKeyFor(dictSource)] : null
                   const dictColInfo: any[] = dictEntry?.colInfo || []
                   const overrides: Record<string, any> = dictEntry?.columnOverrides || {}
+                  const detectedPii: Record<string, any> = dictEntry?.piiColumns || {}
                   const usingRealColumns = dictColInfo.length > 0
 
                   const rows = usingRealColumns
@@ -504,6 +535,7 @@
                         name: c.column,
                         type: c.dtype,
                         definition: overrides[c.column]?.definition ?? '',
+                        pii: overrides[c.column]?.pii ?? detectedPii[c.column]?.pii ?? false,
                       }))
                     : DATA_DICTIONARY
 
@@ -554,6 +586,21 @@
                                 />
                               ) : (
                                 col.definition
+                              )}
+                            </td>
+                            {/* Sensitive / PII toggle — editable only for real, profiled columns */}
+                            <td className="px-4 py-3 whitespace-nowrap" style={{ width: '90px' }}>
+                              {usingRealColumns && dictSource ? (
+                                <button
+                                  onClick={() => saveColumnPII(dictSource, col.name, !col.pii)}
+                                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                                  style={col.pii
+                                    ? { background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }
+                                    : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)', border: '1px dashed rgba(255,255,255,0.15)' }}>
+                                  {col.pii ? '⚠ PII' : '+ mark'}
+                                </button>
+                              ) : (
+                                col.pii ? <span style={{ color: '#f87171' }}>⚠ PII</span> : null
                               )}
                             </td>
                           </tr>
