@@ -273,6 +273,7 @@ type SavedPipeline = {
   sourceConnectionId?: string | null  // Mongo connection _id for the source — lets Run Now execute
                                        // entirely server-side even when this pipeline's source was
                                        // never (re)loaded into local `sources` state this session
+  status?: 'approved' | 'pending_approval'
   name: string
   sourceId: string
   destinationId: string
@@ -649,6 +650,7 @@ async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any,
         scheduleTimezone: pipeline.scheduleTimezone,
         scheduleStartDate: pipeline.scheduleStartDate,
         isActive: pipeline.isActive,
+        status: pipeline.status || 'approved',
       }),
     })
     const saved = await res.json()
@@ -657,6 +659,24 @@ async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any,
     return null
   } catch (e) {
     console.error('Server pipeline sync failed:', e)
+    return null
+  }
+}
+
+async function setPipelineApprovalStatus(serverId: string, status: 'approved' | 'pending_approval') {
+  const token = getAuthToken()
+  if (!token) { alert('Not signed in — cannot change approval status on server.'); return null }
+  try {
+    const res = await fetch(`${API_BASE}/api/pipelines/${serverId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    })
+    const result = await res.json()
+    if (result.error) { alert(`Could not update approval status: ${result.error}`); return null }
+    return result
+  } catch (e) {
+    alert(`Could not reach server: ${e}`)
     return null
   }
 }
@@ -1854,6 +1874,7 @@ export default function Flow() {
           id: d._id,
           serverId: d._id,
           sourceConnectionId: d.sourceConnectionId || null,
+          status: d.status || 'approved',
           name: d.name,
           sourceId: d.sourceId,
           destinationId: d.destinationId,
@@ -2030,6 +2051,7 @@ export default function Flow() {
 const [postRunPreview, setPostRunPreview] = useState<{ columns: string[]; rows: any[] } | null>(null)
   // Save modal schedule state
   const [saveScheduleValue, setSaveScheduleValue] = useState('none')
+  const [requireApproval, setRequireApproval] = useState(false)
   const [saveCustomCron,    setSaveCustomCron]    = useState('')
   const [saveCustomMs,      setSaveCustomMs]      = useState(60000)
   const [saveTimezone,      setSaveTimezone]      = useState('UTC')
@@ -3671,7 +3693,8 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
       runCount:         existing?.runCount || 0,
       logs:             existing?.logs || [],
       isActive:         !!(schedMs && schedMs > 0),
-      destinationMode: destinationMode, 
+      destinationMode: destinationMode,
+      status:           requireApproval ? 'pending_approval' : 'approved',
     }
 
     if (existing) stopSchedule(existing.id)
@@ -3709,6 +3732,7 @@ setPipelineName('')
 setSaveScheduleValue('none')
 setSaveStartDate('')
 setSaveScheduleTab('frequency')
+setRequireApproval(false)
 // Scroll to saved pipelines to show proof it was saved
 setTimeout(() => {
   document.getElementById('saved-pipelines-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -4900,6 +4924,7 @@ setTimeout(() => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
                             <p className="font-bold text-white text-sm">{pipeline.name}</p>
+                            {pipeline.status === 'pending_approval' && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(234,179,8,0.15)', color:'#fbbf24' }}>⏳ Pending Approval</span>}
                             {isRunningNow && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(34,197,94,0.12)', color:'#4ade80' }}>⏱ {pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
                             {!isRunningNow&&pipeline.scheduleLabel&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(234,179,8,0.1)', color:'#fbbf24' }}>⏸ {pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
                             {pipeline.scheduleStartDate&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(99,102,241,0.1)', color:'#818cf8' }}>📅 from {pipeline.scheduleStartDate}</span>}
@@ -4943,6 +4968,26 @@ setTimeout(() => {
                           style={{ background:latestLog?.status==='failed'?'rgba(239,68,68,0.12)':'rgba(99,102,241,0.1)', border:`1px solid ${latestLog?.status==='failed'?'rgba(239,68,68,0.25)':'rgba(99,102,241,0.2)'}`, color:latestLog?.status==='failed'?'#f87171':'#818cf8' }}>
                           {latestLog?.status==='failed'?'⚠ View Error':'Runs & Logs'}
                         </button>
+                        {pipeline.serverId && (
+                          <button
+                            onClick={async () => {
+                              const newStatus = pipeline.status === 'pending_approval' ? 'approved' : 'pending_approval'
+                              const result = await setPipelineApprovalStatus(pipeline.serverId!, newStatus)
+                              if (result) {
+                                setSavedPipelines(prev => {
+                                  const updated = prev.map(p => p.id === pipeline.id ? { ...p, status: newStatus } : p)
+                                  localStorage.setItem('datapipe_pipelines', JSON.stringify(updated))
+                                  return updated
+                                })
+                              }
+                            }}
+                            className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                            style={pipeline.status === 'pending_approval'
+                              ? { background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', color: '#4ade80' }
+                              : { background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)', color: '#fbbf24' }}>
+                            {pipeline.status === 'pending_approval' ? '✓ Approve' : '⏳ Require Approval'}
+                          </button>
+                        )}
                         <button onClick={() => runPipeline(pipeline,'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.15)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
                         {pipeline.serverId && (
                           <button onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side — works even if this tab is closed">☁ Run on Server</button>
@@ -5247,6 +5292,15 @@ setTimeout(() => {
               <div>
                 <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>Pipeline Name *</label>
                 <input type="text" value={pipelineName} onChange={e => setPipelineName(e.target.value)} placeholder="e.g. Daily Customer Cleanse" autoFocus className="w-full text-sm text-white rounded-xl px-4 py-3 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
+              </div>
+              <div onClick={() => setRequireApproval(v => !v)} className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer" style={{ background: requireApproval ? 'rgba(234,179,8,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${requireApproval ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.07)'}` }}>
+                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: requireApproval ? '#eab308' : 'transparent', border: `2px solid ${requireApproval ? '#eab308' : 'rgba(255,255,255,0.25)'}` }}>
+                  {requireApproval && <span className="text-black font-black" style={{ fontSize: '10px' }}>✓</span>}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">Require approval before running</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Pipeline will be saved as pending — it won't execute (manually or on schedule) until approved</p>
+                </div>
               </div>
               <div className="rounded-xl p-3" style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)' }}>
                 <p className="text-xs font-semibold mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>{transformations.length} transforms</p>
