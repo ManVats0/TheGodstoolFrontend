@@ -245,6 +245,16 @@ const DOCS: Record<string, {
         warning: 'Removing a source does not delete any data from the underlying database. It only removes the connection configuration from the browser.',
       },
       {
+        heading: 'Data governance: retention & erasure',
+        body: 'Every connected source (any source with a saved backend connection — MySQL, PostgreSQL, MongoDB, BigQuery, AWS, GCS, Cloud SQL, or Databricks) exposes a ⚙ governance panel. Click the ⚙ button on a source card to expand it. Plain CSV uploads do not have a backend connection and show an explanatory note instead of controls.',
+        params: [
+          { name: 'Retention (days)', type: 'number | null', required: false, description: 'When set, the server automatically drops the entire table, collection, or file this connection points to once it has gone untouched for that many days. Leave empty to disable.' },
+          { name: 'Erase Now', type: 'action', required: false, description: 'Immediately and permanently deletes all data this connection points to — the entire table/collection/file, not row-level filtering. Used for DPDP/GDPR right-to-erasure requests.' },
+        ],
+        warning: 'Both retention auto-purge and manual erasure are irreversible whole-object deletions (DROP TABLE / collection.drop() / file delete) — not row-level filtering by data subject. There is no undo.',
+        note: 'Every retention change and erasure (automatic or manual) is recorded in Audit Logs under the connection.retention_updated, connection.retention_erased, and connection.erased actions, including which user or the scheduler triggered it.',
+      },
+      {
         heading: 'Best practices',
         body: 'Follow these guidelines for reliable source management:',
         params: [
@@ -300,13 +310,24 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Data Dictionary',
-        body: 'Click "View Dictionary" on any catalog card to open the column-level data dictionary modal. The dictionary lists all 17 standard columns with their name, data type, and a plain-English business definition.',
+        body: 'Click "View Dictionary" on any catalog card to open the column-level data dictionary modal. The dictionary lists all standard columns with their name, data type, a plain-English business definition, and a Sensitive/PII flag.',
         params: [
           { name: 'Column Name', type: 'string', required: true, description: 'Exact column name as it appears in the dataset.' },
           { name: 'Type', type: 'enum', required: true, description: 'Data type: Integer, Float, String, Date, Boolean.' },
           { name: 'Definition', type: 'string', required: true, description: 'Plain-English description of what the column represents.' },
+          { name: 'Sensitive', type: 'boolean', required: false, description: 'Whether this column is flagged as containing PII. Pre-populated by the automatic detector; click the pill to override manually.', anchorTarget: 'pii-detection' },
         ],
         note: 'Column definitions are maintained by the Data Governance team. Submit change requests through your internal governance process.',
+      },
+      {
+        heading: 'PII detection',
+        body: 'Every Analysis run scans column names and a sample of values for common PII patterns — PAN, Aadhaar, GSTIN, email addresses, and phone numbers — and flags any column that matches with reasonable confidence. Detected columns are automatically pre-checked as "Sensitive" in the Data Dictionary the next time you open it.',
+        params: [
+          { name: 'Detection basis', type: 'name + value pattern', required: false, description: 'A column is flagged either because its name matches a known PII term (e.g. "email", "pan_number") or because a sample of its values matches a regex pattern for PAN/Aadhaar/GSTIN/email/phone with high confidence.' },
+          { name: 'Manual override', type: 'toggle', required: false, description: 'Click the Sensitive pill in the Data Dictionary to flag or unflag a column by hand. A manual choice always takes precedence over the automatic detection and will not be silently re-flagged on the next analysis.' },
+        ],
+        tip: 'Detection is best-effort and pattern-based — always review the Data Dictionary after connecting a new source rather than relying on auto-detection alone, especially for columns using non-standard names.',
+        note: 'PII-flagged columns are automatically masked in the Analysis Preview and Columns tabs. See the Analysis documentation for how masking works.',
       },
       {
         heading: 'Running the profiler',
@@ -411,6 +432,17 @@ const DOCS: Record<string, {
         tip: 'Copy the SQL and run it directly in your data warehouse to reproduce the same cleaning logic at scale without the Python backend.',
       },
       {
+        heading: 'Approval workflow',
+        body: 'Any pipeline can be marked as requiring approval before it is allowed to run. This is useful for pipelines touching sensitive destinations, or as a change-control gate before a new pipeline goes live.',
+        params: [
+          { name: 'Require approval before running', type: 'checkbox (Save Pipeline modal)', required: false, description: 'When checked at save time, the pipeline is saved with status "pending_approval" instead of the default "approved".' },
+          { name: 'Pending Approval badge', type: 'status indicator', required: false, description: 'Shown on the pipeline row in the Saved Pipelines list whenever a pipeline is not yet approved.' },
+          { name: 'Approve / Require Approval toggle', type: 'button (pipeline row)', required: false, description: 'Flips the pipeline between "approved" and "pending_approval" at any time after saving.' },
+        ],
+        warning: 'A pipeline with status "pending_approval" cannot be executed — neither manually via Run Now / Run on Server, nor automatically by the schedule — until it is approved. Attempting to run it returns an explicit "pending approval" error rather than failing silently.',
+        note: 'Every approval status change is recorded in Audit Logs under the pipeline.status_changed action, including who changed it and the before/after value.',
+      },
+      {
         heading: 'Schema change detector',
         body: 'The status badge in the top bar compares the current source schema against the saved baseline after each run.',
         params: [
@@ -458,6 +490,17 @@ const DOCS: Record<string, {
       {
         heading: 'Problems tab',
         body: 'Filter by issue type (Missing value, Duplicate row, Outlier) and by column. The table shows row number, primary key value, column name, issue type, and the raw value. Click "Fullscreen" for a full-page view of thousands of rows.',
+      },
+      {
+        heading: 'PII masking in previews',
+        body: 'Any column flagged as PII (see Data Catalog → PII detection) is automatically masked wherever raw row data is displayed in Analysis, so sensitive values are not casually visible on screen.',
+        params: [
+          { name: 'Preview tab', type: 'masked', required: false, description: 'PII column headers are shown with a 🔒 icon in red, and cell values are partially masked (e.g. jo••••@e.com) rather than shown in full.' },
+          { name: 'Columns tab', type: 'masked', required: false, description: 'PII columns show a red "PII" pill next to the column name, and the sample value cell is masked the same way as the Preview tab.' },
+          { name: 'Fullscreen preview', type: 'masked', required: false, description: 'Opening the Preview tab in fullscreen applies the same masking to the exported row set — masking is not bypassed by the fullscreen view.' },
+          { name: 'View Original', type: 'not masked', required: false, description: 'The "View Original" modal intentionally shows raw, unmodified source data as-is, since that is its stated purpose (verifying the untouched source).' },
+        ],
+        note: 'Masking is display-only — it does not change what is written to cleaned output files or pipeline destinations. It only affects what is rendered on screen in Analysis.',
       },
       {
         heading: 'Time series detection',
