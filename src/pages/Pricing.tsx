@@ -2,16 +2,13 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 type Cycle = 'monthly' | 'yearly'
-type Currency = 'INR' | 'USD'
-
-const ROTATING_WORDS = ['moves your data', 'cleans your data']
 
 const PLANS = [
   {
     key: 'lite',
     name: 'Lite',
-    priceINR: { monthly: '₹1,834', yearly: '₹19,204' },
-    priceUSD: { monthly: '$19', yearly: '$199' },
+    monthlyPrice: '₹774',
+    yearlyPrice: '₹8,256',
     aiPerDay: 4,
     userLimit: 1,
     features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'],
@@ -22,8 +19,8 @@ const PLANS = [
   {
     key: 'starter',
     name: 'Starter',
-    priceINR: { monthly: '₹3,764', yearly: '₹40,434' },
-    priceUSD: { monthly: '$39', yearly: '$419' },
+    monthlyPrice: '₹1,634',
+    yearlyPrice: '₹17,114',
     aiPerDay: 35,
     userLimit: 1,
     features: ['Everything in Lite', '35 AI transforms/day', 'Email support'],
@@ -35,8 +32,8 @@ const PLANS = [
   {
     key: 'pro',
     name: 'Pro',
-    priceINR: { monthly: '₹7,624', yearly: '₹81,929' },
-    priceUSD: { monthly: '$79', yearly: '$849' },
+    monthlyPrice: '₹3,354',
+    yearlyPrice: '₹36,034',
     aiPerDay: 110,
     userLimit: 5,
     features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'],
@@ -48,8 +45,8 @@ const PLANS = [
   {
     key: 'team',
     name: 'Team',
-    priceINR: { monthly: '₹19,204', yearly: '₹2,07,379' },
-    priceUSD: { monthly: '$199', yearly: '$2,149' },
+    monthlyPrice: '₹6,794',
+    yearlyPrice: '₹72,154',
     aiPerDay: 150,
     userLimit: 15,
     features: ['Everything in Pro', '150 AI transforms/day', '15 concurrent logins', 'Priority support'],
@@ -60,8 +57,8 @@ const PLANS = [
   {
     key: 'enterprise',
     name: 'Enterprise',
-    priceINR: { monthly: '₹42,914', yearly: '₹4,11,940' },
-    priceUSD: { monthly: '$499', yearly: '$4,999' },
+    monthlyPrice: '₹42,914',
+    yearlyPrice: '₹4,11,940',
     aiPerDay: 500,
     userLimit: 100,
     features: ['Everything in Team', '500 AI transforms/day', '100 concurrent logins', 'Dedicated support'],
@@ -71,25 +68,15 @@ const PLANS = [
   },
 ]
 
-// Plans/cycles that exceed Razorpay's current transaction cap.
-// Domestic (INR) cap: ₹50,000 per transaction. International (USD) cap: ₹30,000-equivalent (~$311 at time of writing).
-// These route to Contact Sales instead of checkout. Update here if Razorpay raises either limit.
-const CONTACT_SALES_ONLY: Record<Currency, Record<string, Cycle[]>> = {
-  INR: {
-    pro: ['yearly'],
-    team: ['monthly', 'yearly'],
-    enterprise: ['monthly', 'yearly'],
-  },
-  USD: {
-    starter: ['yearly'],
-    pro: ['yearly'],
-    team: ['yearly'],
-    enterprise: ['monthly', 'yearly'],
-  },
+// Plans/cycles that exceed Razorpay's current transaction cap (₹50k domestic, ₹30k international).
+// These route to Contact Sales instead of checkout. Remove entries here once Razorpay raises the limit.
+const CONTACT_SALES_ONLY: Record<string, Cycle[]> = {
+  enterprise: ['monthly', 'yearly'],
+  team: ['yearly'],
 }
 
-function requiresContactSales(planKey: string, cycle: Cycle, currency: Currency) {
-  return CONTACT_SALES_ONLY[currency][planKey]?.includes(cycle) ?? false
+function requiresContactSales(planKey: string, cycle: Cycle) {
+  return CONTACT_SALES_ONLY[planKey]?.includes(cycle) ?? false
 }
 
 export default function Pricing() {
@@ -97,23 +84,9 @@ export default function Pricing() {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [cycle, setCycle] = useState<Cycle>('monthly')
-  const [currency, setCurrency] = useState<Currency>('INR')
-
-  // ── Rotating headline word ──────────────────────────────────────────
-  const [wordIndex, setWordIndex] = useState(0)
-  const [wordVisible, setWordVisible] = useState(true)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setWordVisible(false)
-      setTimeout(() => {
-        setWordIndex(i => (i + 1) % ROTATING_WORDS.length)
-        setWordVisible(true)
-      }, 350)
-    }, 2800)
-    return () => clearInterval(interval)
-  }, [])
-  // ─────────────────────────────────────────────────────────────────────
+  const [customAmount, setCustomAmount] = useState('')
+  const [customLoading, setCustomLoading] = useState(false)
+  const [customError, setCustomError] = useState('')
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -125,27 +98,14 @@ export default function Pricing() {
     }
   }, [])
 
-  // ── Geolocation: India sees INR, everywhere else sees USD ──────────────
-  useEffect(() => {
-    fetch('https://ipapi.co/json/')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.country_code && data.country_code !== 'IN') {
-          setCurrency('USD')
-        }
-      })
-      .catch(() => { /* keep default INR on failure */ })
-  }, [])
-  // ─────────────────────────────────────────────────────────────────────
-
   const handleSubscribe = async (planKey: string) => {
     setError('')
 
     // ── Payment cap guard ───────────────────────────────────────────────
-    // Razorpay checkout is skipped for plan/cycle/currency combos above the
-    // current transaction cap. The Razorpay code below is untouched and
-    // still runs normally for every other plan — this only intercepts the capped ones.
-    if (requiresContactSales(planKey, cycle, currency)) {
+    // Razorpay checkout is skipped for plan/cycle combos above the current
+    // transaction cap. The Razorpay code below is untouched and still runs
+    // normally for every other plan — this only intercepts the capped ones.
+    if (requiresContactSales(planKey, cycle)) {
       navigate(`/contact?intent=sales&plan=${planKey}&billing=${cycle}`)
       return
     }
@@ -159,7 +119,7 @@ export default function Pricing() {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planKey, billingCycle: cycle, currency })
+        body: JSON.stringify({ planKey, billingCycle: cycle })
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to create subscription'); setLoading(null); return }
@@ -198,30 +158,68 @@ export default function Pricing() {
     }
   }
 
+  const handleCustomPayment = async () => {
+    setCustomError('')
+    const amountNum = Number(customAmount)
+    if (!amountNum || amountNum <= 0) {
+      setCustomError('Enter a valid amount')
+      return
+    }
+    setCustomLoading(true)
+    const token = localStorage.getItem('datapro_token')
+    if (!token) { navigate('/'); return }
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/create-custom-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ amount: amountNum, currency: 'INR' })
+      })
+      const data = await res.json()
+      if (!res.ok) { setCustomError(data.error || 'Failed to create payment'); setCustomLoading(false); return }
+
+      const { orderId, key } = data
+
+      const rzp = new (window as any).Razorpay({
+        key,
+        order_id: orderId,
+        name: "The God's Tool",
+        description: 'Custom payment',
+        handler: async (response: any) => {
+          const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-custom-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(response)
+          })
+          const verifyData = await verifyRes.json()
+          if (verifyData.success) {
+            setCustomAmount('')
+            alert('Payment successful — thank you!')
+          } else {
+            setCustomError('Payment verification failed. Contact support.')
+          }
+          setCustomLoading(false)
+        },
+        modal: { ondismiss: () => setCustomLoading(false) },
+        prefill: { email: localStorage.getItem('datapro_email') || '' },
+        theme: { color: '#7c3aed' }
+      })
+      rzp.open()
+    } catch (err) {
+      setCustomError('Cannot connect to server.')
+      setCustomLoading(false)
+    }
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
 
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', color: 'white' }}>
-          ETL that{' '}
-          <span
-            style={{
-              display: 'inline-block',
-              background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              opacity: wordVisible ? 1 : 0,
-              transform: wordVisible ? 'translateY(0)' : 'translateY(-6px)',
-              transition: 'opacity 0.35s ease, transform 0.35s ease',
-            }}
-          >
-            {ROTATING_WORDS[wordIndex]}
-          </span>{' '}
-          effortlessly
+        <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          Unlock The God's Tool
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
-          Preview every transform before it runs. Credentials stay on your network.
+          Choose a plan to access AI-powered data cleaning
         </p>
       </div>
 
@@ -247,9 +245,7 @@ export default function Pricing() {
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', maxWidth: '1200px', width: '100%' }}>
-        {PLANS.map(plan => {
-          const priceTable = currency === 'INR' ? plan.priceINR : plan.priceUSD
-          return (
+        {PLANS.map(plan => (
           <div key={plan.key} style={{
             background: plan.highlight ? 'rgba(124,58,237,0.12)' : plan.bg,
             border: `1px solid ${plan.border}`,
@@ -270,7 +266,7 @@ export default function Pricing() {
             <div>
               <div style={{ color: plan.color, fontWeight: 700, fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{plan.name}</div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '1.8rem', fontFamily: 'Georgia, serif', lineHeight: 1.1, marginTop: '6px' }}>
-                {cycle === 'monthly' ? priceTable.monthly : priceTable.yearly}
+                {cycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{cycle === 'monthly' ? '/month' : '/year'}</span>
               </div>
             </div>
@@ -311,11 +307,47 @@ export default function Pricing() {
                 transition: 'opacity 0.2s'
               }}
             >
-              {loading === plan.key ? 'Opening...' : (requiresContactSales(plan.key, cycle, currency) ? 'Contact Sales' : 'Subscribe')}
+              {loading === plan.key ? 'Opening...' : (requiresContactSales(plan.key, cycle) ? 'Contact Sales' : 'Subscribe')}
             </button>
           </div>
-          )
-        })}
+        ))}
+      </div>
+
+      <div style={{ marginTop: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '20px 24px', maxWidth: '360px', width: '100%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+          Or pay a custom amount
+        </div>
+        <input
+          type="number"
+          min="1"
+          placeholder="Enter amount (₹)"
+          value={customAmount}
+          onChange={(e) => setCustomAmount(e.target.value)}
+          style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'white', fontFamily: 'monospace', fontSize: '0.9rem' }}
+        />
+        {customError && (
+          <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>⚠ {customError}</div>
+        )}
+        <button
+          onClick={handleCustomPayment}
+          disabled={customLoading}
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+            border: 'none',
+            borderRadius: '10px',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: customLoading ? 'not-allowed' : 'pointer',
+            fontFamily: 'monospace',
+            letterSpacing: '0.05em',
+            opacity: customLoading ? 0.6 : 1
+          }}
+        >
+          {customLoading ? 'Opening...' : 'Pay Custom Amount'}
+        </button>
       </div>
 
       <button
