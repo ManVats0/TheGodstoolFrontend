@@ -6,7 +6,7 @@
 
   const DATASOURCES_TOUR: TourStep[] = [
   {
-    title: 'Welcome to Data Sources',
+    title: 'Welcome to Data Sources 👋',
     body: 'This is where every project starts. Connect a CSV, Google Sheet, database, or API here and DataPipe will pull it in for cleaning and analysis.',
   },
   {
@@ -59,13 +59,18 @@
       switchActiveSource,
       loadCachedAnalysis,
       addAuditLog,
-      saveConnectionToBackend,
-      loadSourcesFromBackend,
+      loadSourcesFromBackend
     } = useStore()
     const [tab, setTab] = useState<'existing' | 'add'>('existing')
     const [dragging, setDragging] = useState(false)
     const [pendingFile, setPendingFile] = useState<File | null>(null)
     const [showCatalogList, setShowCatalogList] = useState(false)
+    const [backendAnalysisBadges, setBackendAnalysisBadges] = useState<Record<string, any>>({})
+    const [expandedSourceId, setExpandedSourceId] = useState<string | null>(null)
+    const [credits, setCredits] = useState<number | null>(null)
+    const [retentionDraft, setRetentionDraft] = useState<Record<string, string>>({})
+    const [retentionSaving, setRetentionSaving] = useState<Record<string, boolean>>({})
+    const [erasingId, setErasingId] = useState<string | null>(null)
     const [showGSheetsFlow, setShowGSheetsFlow] = useState(false)
     const [showMySQLFlow, setShowMySQLFlow] = useState(false)
 const [mysql, setMysql] = useState({ host: '', port: '3306', user: '', password: '', database: '', ssl: false })
@@ -232,11 +237,77 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
     const fileRef = useRef<HTMLInputElement>(null)
     const dropZoneRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-      // Pull previously-saved connections from MongoDB on load
-      loadSourcesFromBackend()
+    // ── Backend connection persistence (MongoDB via main.py /api/connections) ──
+    const authHeaders = (): Record<string, string> => {
+      const token = localStorage.getItem('datapro_token') || ''
+      return token ? { Authorization: `Bearer ${token}` } : {}
+    }
 
-      // On every page load: silently check + refresh token, show cached sheets instantly
+    const saveConnectionToBackend = async (name: string, type: string, config: any, credentials: any): Promise<string | null> => {
+      try {
+        const res = await fetch(`${API_BASE}/api/connections`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ name, type, config, credentials }),
+        })
+        if (!res.ok) return null
+        const data = await res.json()
+        return data._id || null
+      } catch {
+        return null
+      }
+    }
+
+    const deleteConnectionFromBackend = async (connectionId: string) => {
+      try {
+        await fetch(`${API_BASE}/api/connections/${connectionId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: authHeaders(),
+        })
+      } catch { /* best-effort */ }
+    }
+
+    const saveRetention = async (connectionId: string) => {
+      const raw = retentionDraft[connectionId]
+      const days = raw && raw.trim() ? parseInt(raw, 10) : null
+      setRetentionSaving(prev => ({ ...prev, [connectionId]: true }))
+      try {
+        await fetch(`${API_BASE}/api/connections/${connectionId}/retention`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ retention_days: days && days > 0 ? days : null }),
+        })
+      } catch { /* best-effort */ }
+      finally { setRetentionSaving(prev => ({ ...prev, [connectionId]: false })) }
+    }
+
+    const eraseConnectionData = async (connectionId: string, sourceName: string) => {
+      const confirmed = window.confirm(
+        `Permanently erase ALL data for "${sourceName}"?\n\nThis drops the entire table/collection/file at the source and cannot be undone.`
+      )
+      if (!confirmed) return
+      setErasingId(connectionId)
+      try {
+        const res = await fetch(`${API_BASE}/api/connections/${connectionId}/erase`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: authHeaders(),
+        })
+        const result = await res.json()
+        if (result.success) alert(` Erased: ${result.detail || 'done'}`)
+        else alert(`❌ Erasure failed: ${result.detail || 'unknown error'}`)
+      } catch (e) {
+        alert(`❌ Could not reach backend: ${e}`)
+      } finally {
+        setErasingId(null)
+      }
+    }
+
+    useEffect(() => {
+      // On every page load: silently check + refresh Google token, show cached sheets instantly
       const checkAuth = async () => {
         try {
           const storedSession = localStorage.getItem('datapro_session') || ''
@@ -256,316 +327,55 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
             setRealSheets(cached.sheets)
             setGsheetsStep('picker')
           }
-
-          } catch {
+        } catch {
           // No internet or backend not running — fail silently
         }
       }
       checkAuth()
 
-      // Auto-reconnect saved MySQL connections silently
-      const savedMySQL = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
-      savedMySQL.forEach(async (conn: any) => {
+      // ── Every connected data source (MySQL, Postgres, BigQuery, Mongo,
+      // GCS, Cloud SQL, AWS, Databricks, REST, GA4) now lives in MongoDB
+      // via /api/connections. One call rebuilds the "Connected Sources" list
+      // for this user regardless of which browser/device they're on.
+      loadSourcesFromBackend()
+
+      // Credits balance — shown right after login in the page header.
+      const loadCredits = async () => {
         try {
-          const res = await fetch(`${API_BASE}/api/mysql/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(conn),
+          const token = localStorage.getItem('datapro_token') || ''
+          if (!token) return
+          const res = await fetch(`${API_BASE}/api/plan`, {
+            credentials: 'include',
+            headers: { Authorization: `Bearer ${token}` },
           })
+          if (!res.ok) return
           const data = await res.json()
-          if (data.healthy) {
-  const allTables: string[] = conn.tables?.length ? conn.tables : [conn.table].filter(Boolean)
-  allTables.forEach((tbl: string, idx: number) => {
-    const srcName = `${conn.database}.${tbl}@${conn.host}`
-    const freshSources = useStore.getState().sources
-    const exists = freshSources.find((s: any) => s.name === srcName)
-    if (!exists) {
-      addSource({
-        id: `${conn.id}-${idx}`,
-        name: srcName,
-        type: 'mysql' as const,
-        addedAt: conn.addedAt,
-      })
-    }
-  })
-}
+          setCredits(typeof data.credits === 'number' ? data.credits : 0)
         } catch {
-          // backend not running — skip silently
+          // Not authenticated or backend unreachable — badge just won't show.
         }
-      })
+      }
+      loadCredits()
 
-      // Auto-reconnect saved PostgreSQL connections silently
-      const savedPG = JSON.parse(localStorage.getItem('datapro_postgres_connections') || '[]')
-      savedPG.forEach(async (conn: any) => {
+      // Cross-device "Last Run" badges — one bulk call instead of per-source.
+      const loadAnalysisBadges = async () => {
         try {
-          const res = await fetch(`${API_BASE}/api/postgres/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(conn),
+          const token = localStorage.getItem('datapro_token') || ''
+          const res = await fetch(`${API_BASE}/api/analysis-results`, {
+            credentials: 'include',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           })
-          const data = await res.json()
-          if (data.healthy) {
-            const allTables: string[] = conn.tables?.length ? conn.tables : [conn.table].filter(Boolean)
-            allTables.forEach((tbl: string, idx: number) => {
-              const srcName = `${conn.database}.${tbl}@${conn.host}`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({
-                  id: `${conn.id}-${idx}`,
-                  name: srcName,
-                  type: 'postgres' as const,
-                  addedAt: conn.addedAt,
-                })
-              }
-            })
-          }
+          if (!res.ok) return
+          const rows = await res.json()
+          if (!Array.isArray(rows)) return
+          const map: Record<string, any> = {}
+          rows.forEach((r: any) => { map[r.sourceKey] = r })
+          setBackendAnalysisBadges(map)
         } catch {
-          // backend not running — skip silently
+          // Not authenticated or backend unreachable — badges just won't show; harmless.
         }
-      })
-
-      // Auto-reconnect saved BigQuery connections silently
-      const savedBQ = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
-      savedBQ.forEach(async (conn: any) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/bigquery/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key_json: conn.key_json, project: conn.project }),
-          })
-          const data = await res.json()
-          if (data.healthy) {
-            const allTables: string[] = conn.tables?.length ? conn.tables : [conn.table].filter(Boolean)
-            allTables.forEach((tbl: string, idx: number) => {
-              const srcName = `${conn.project}.${conn.dataset}.${tbl}`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({
-                  id: `${conn.id}-${idx}`,
-                  name: srcName,
-                  type: 'bigquery' as const,
-                  addedAt: conn.addedAt,
-                })
-              }
-            })
-          }
-        } catch {
-          // backend not running — skip silently
-        }
-      })
-
-      // Auto-reconnect saved MongoDB connections silently
-      const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
-      savedMongo.forEach(async (conn: any) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/mongo/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uri: conn.uri, database: conn.database }),
-          })
-          const data = await res.json()
-          if (data.healthy) {
-            const allColls: string[] = conn.collections?.length ? conn.collections : [conn.collection].filter(Boolean)
-            allColls.forEach((coll: string, idx: number) => {
-              const srcName = `${conn.database}.${coll}@mongo`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({
-                  id: `${conn.id}-${idx}`,
-                  name: srcName,
-                  type: 'mongodb' as const,
-                  addedAt: conn.addedAt,
-                })
-              }
-            })
-          }
-        } catch {
-          // backend not running — skip silently
-        }
-      })
-
-      // Auto-reconnect saved GCS connections silently
-      const savedGCS = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
-      savedGCS.forEach(async (conn: any) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/gcs/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key_json: conn.keyJson, project: conn.project, bucket: conn.bucket }),
-          })
-          const data = await res.json()
-          if (data.healthy) {
-            const allFiles: string[] = conn.files?.length ? conn.files : [conn.file].filter(Boolean)
-            allFiles.forEach((f: string, idx: number) => {
-              const srcName = `gcs://${conn.bucket}/${f}`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({ id: `${conn.id}-${idx}`, name: srcName, type: 'gcs' as any, addedAt: conn.addedAt })
-              }
-            })
-          }
-        } catch { }
-      })
-
-      // Auto-reconnect saved Cloud SQL connections silently
-      const savedCloudSQL = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
-      savedCloudSQL.forEach(async (conn: any) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/cloudsql/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(conn),
-          })
-          const data = await res.json()
-          if (data.healthy) {
-            const allTables: string[] = conn.tables?.length ? conn.tables : [conn.table].filter(Boolean)
-            allTables.forEach((tbl: string, idx: number) => {
-              const srcName = `${conn.database}.${tbl}@cloudsql.${conn.project}`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({ id: `${conn.id}-${idx}`, name: srcName, type: 'cloudsql' as any, addedAt: conn.addedAt })
-              }
-            })
-          }
-        } catch { }
-      })
-
-    // Auto-reconnect saved AWS connections silently
-      const savedAWS = JSON.parse(localStorage.getItem('datapro_aws_connections') || '[]')
-      savedAWS.forEach(async (conn: any) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/aws/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(conn),
-          })
-          const data = await res.json()
-          if (data.healthy) {
-            const allItems: string[] = conn.tables?.length ? conn.tables : [conn.table].filter(Boolean)
-            allItems.forEach((item: string, idx: number) => {
-              const srcName = conn.service === 's3'
-                ? `s3://${conn.bucket}/${item}`
-                : conn.service === 'dynamodb'
-                ? `${item}@dynamodb.${conn.region}`
-                : `${conn.database}.${item}@${conn.host}`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({
-                  id: `${conn.id}-${idx}`,
-                  name: srcName,
-                  type: 'aws' as any,
-                  addedAt: conn.addedAt,
-                })
-              }
-            })
-          }
-        } catch {
-          // backend not running — skip silently
-        }
-      })
-
-      // Auto-reconnect saved Databricks connections silently
-      const savedDatabricks = JSON.parse(localStorage.getItem('datapro_databricks_connections') || '[]')
-      savedDatabricks.forEach(async (conn: any) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/databricks/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ host: conn.host, httpPath: conn.httpPath, token: conn.token }),
-          })
-          const data = await res.json()
-          if (data.healthy) {
-            const allTables: string[] = conn.tables?.length ? conn.tables : [conn.table].filter(Boolean)
-            allTables.forEach((tbl: string, idx: number) => {
-              const srcName = `${conn.catalog}.${conn.schema}.${tbl}@${conn.host}`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({
-                  id: `${conn.id}-${idx}`,
-                  name: srcName,
-                  type: 'databricks' as any,
-                  addedAt: conn.addedAt,
-                })
-              }
-            })
-          }
-        } catch {
-          // backend not running — skip silently
-        }
-      })
-
-      // Auto-reconnect saved REST API connections silently
-      const savedRest = JSON.parse(localStorage.getItem('datapro_rest_connections') || '[]')
-      savedRest.forEach(async (conn: any) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/rest/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              base_url: conn.base_url,
-              headers: conn.headers || {},
-              verify_ssl: conn.verify_ssl,
-              test_path: conn.test_path || '/',
-            }),
-          })
-          const data = await res.json()
-          if (data.healthy) {
-            const allEndpoints: string[] = conn.endpoints?.length ? conn.endpoints : [conn.endpoint].filter(Boolean)
-            allEndpoints.forEach((ep: string, idx: number) => {
-              const srcName = `rest:${conn.base_url.replace(/https?:\/\//, '')}${ep}`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({
-                  id: `${conn.id}-${idx}`,
-                  name: srcName,
-                  type: 'rest' as any,
-                  addedAt: conn.addedAt,
-                })
-              }
-            })
-          }
-        } catch {
-          // backend not running — skip silently
-        }
-      })
-
-      // Auto-reconnect saved GA4 connections silently
-      const savedGA4 = JSON.parse(localStorage.getItem('datapro_ga4_connections') || '[]')
-      savedGA4.forEach(async (conn: any) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/ga4/health`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key_json: conn.keyJson, property_id: conn.propertyId }),
-          })
-          const data = await res.json()
-          if (data.healthy) {
-            const allReports: string[] = conn.reports?.length ? conn.reports : [conn.report].filter(Boolean)
-            allReports.forEach((report: string, idx: number) => {
-              const srcName = `ga4:${conn.propertyId}/${report}`
-              const freshSources = useStore.getState().sources
-              const exists = freshSources.find((s: any) => s.name === srcName)
-              if (!exists) {
-                addSource({
-                  id: `${conn.id}-${idx}`,
-                  name: srcName,
-                  type: 'ga4' as any,
-                  addedAt: conn.addedAt,
-                })
-              }
-            })
-          }
-        } catch { }
-      })
-
+      }
+      loadAnalysisBadges()
     }, [])
     // ── FIX: default to '' not 'Sheet1' — auto-set from real tab list ───────
     const [realSheets, setRealSheets] = useState<{
@@ -839,10 +649,10 @@ const openGooglePicker = async () => {
   const realFile = new File([blob], data.filename, { type: 'text/csv' })
   setGsheetsProgress(100)
 
-    const backendId = await saveConnectionToBackend(
+  const backendId = await saveConnectionToBackend(
     sheet.name,
     'sheets',
-    { sheetId: sheet.id, sheetName: sheet.name, tab: tabToImport },
+    { sheetName: sheet.name, sheetId: sheet.id, tab: tabToImport },
     {},
   )
 
@@ -876,9 +686,8 @@ const openGooglePicker = async () => {
         setGsheetsProgress(0)
         setTab('existing')
         navigate('/analysis')
-      } catch (err: any) {
-        console.error('confirmGSheet failed:', err)
-        setGsheetsError(`Import failed: ${err?.message || String(err)}`)
+      } catch {
+        setGsheetsError('Import failed. Please try again.')
         setGsheetsStep('picker')
       }
     }
@@ -909,7 +718,7 @@ const openGooglePicker = async () => {
       navigate('/analysis')
     }
 
-    const loadSource = (source: any) => {
+    const loadSource = async (source: any) => {
       const cached = getCachedAnalysis(source.name)
       if (cached) {
         loadCachedAnalysis(source.name, cached)
@@ -967,7 +776,19 @@ const openGooglePicker = async () => {
         const database: string = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
         const collection: string = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
         const mongoMeta = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
-        const conn = mongoMeta.find((c: any) => String(c.database) === database)
+        let conn = mongoMeta.find((c: any) => String(c.database) === database)
+        if (!conn && source.connectionId) {
+          try {
+            const res = await fetch(`${API_BASE}/api/connections/${source.connectionId}/reveal`, {
+              credentials: 'include',
+              headers: authHeaders(),
+            })
+            const data = await res.json()
+            if (data && !data.error) {
+              conn = { uri: data.credentials?.uri, database: data.config?.database }
+            }
+          } catch { /* fall through — analysis will surface a clear error */ }
+        }
         if (conn) {
           localStorage.setItem('datapro_active_mongo_source', JSON.stringify({ ...conn, collection }))
         }
@@ -1132,6 +953,12 @@ const handleLockedSource = () => {
               <h1 className="text-2xl font-bold text-white">Data Sources</h1>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Manage your data connections</p>
             </div>
+            {credits !== null && credits > 0 && (
+              <span className="ml-2 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
+                style={{ background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }}>
+                🪙 {credits.toLocaleString()} credits
+              </span>
+            )}
           </div>
 
           {/* ── Warrior Animation ── */}
@@ -1253,7 +1080,8 @@ const handleLockedSource = () => {
             ) : (
               <div className="space-y-3">
                 {sources.map(s => (
-                  <div key={s.id}
+                  <div key={s.id}>
+                  <div
                     className="flex items-center justify-between p-4 rounded-2xl transition-all"
                     style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
                     onMouseEnter={e => (e.currentTarget.style.border = '1px solid rgba(124,58,237,0.3)')}
@@ -1272,7 +1100,7 @@ const handleLockedSource = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       {badge(s.type.toUpperCase(), '#7c3aed')}
-                      {getCachedAnalysis(s.name) && badge('Last Run', '#34d399')}
+                      {(getCachedAnalysis(s.name) || backendAnalysisBadges[s.connectionId || s.name]) && badge('Last Run', '#34d399')}
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }} />
                       <button onClick={() => loadSource(s)}
                         className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white"
@@ -1301,7 +1129,14 @@ const handleLockedSource = () => {
                           return getCachedAnalysis(s.name) ? `${label} — Last Run →` : `${label} →`
                         })()}
                       </button>
+                      <button onClick={() => setExpandedSourceId(prev => prev === s.id ? null : s.id)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                        style={{ background: expandedSourceId === s.id ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: expandedSourceId === s.id ? '#a78bfa' : 'rgba(255,255,255,0.5)' }}
+                        title="Data governance: retention & erasure">
+                        ⚙
+                      </button>
                       <button onClick={() => {
+                        if (s.connectionId) { deleteConnectionFromBackend(s.connectionId) }
                         removeSource(s.id)
                         if (s.type === 'mysql') {
                           const filtered = savedMySQLConns.filter((c: any) => c.id !== s.id)
@@ -1359,6 +1194,56 @@ const handleLockedSource = () => {
                         ✕
                       </button>
                     </div>
+                  </div>
+                  {expandedSourceId === s.id && (
+                    <div className="mt-2 p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                      <p className="text-xs font-bold text-white mb-3">Data Governance</p>
+                      {s.connectionId ? (
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                              Retention (days) — auto-erase data after this many days of inactivity
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="number"
+                                min={1}
+                                placeholder="e.g. 90 (leave empty to disable)"
+                                value={retentionDraft[s.connectionId] ?? ''}
+                                onChange={e => setRetentionDraft(prev => ({ ...prev, [s.connectionId!]: e.target.value }))}
+                                className="flex-1 text-sm text-white rounded-xl px-3 py-2 outline-none"
+                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                              />
+                              <button
+                                onClick={() => saveRetention(s.connectionId!)}
+                                disabled={retentionSaving[s.connectionId]}
+                                className="px-4 py-2 rounded-xl text-xs font-semibold text-white disabled:opacity-40"
+                                style={{ background: 'rgba(124,58,237,0.25)', border: '1px solid rgba(124,58,237,0.35)' }}>
+                                {retentionSaving[s.connectionId] ? 'Saving…' : 'Save'}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between px-3 py-2.5 rounded-xl" style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                            <div>
+                              <p className="text-xs font-semibold text-white">Right to Erasure</p>
+                              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Immediately and permanently deletes this source's data (DPDP/GDPR requests)</p>
+                            </div>
+                            <button
+                              onClick={() => eraseConnectionData(s.connectionId!, s.name)}
+                              disabled={erasingId === s.connectionId}
+                              className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-40"
+                              style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}>
+                              {erasingId === s.connectionId ? 'Erasing…' : 'Erase Now'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          Retention and erasure require a saved connection (not available for plain CSV uploads).
+                        </p>
+                      )}
+                    </div>
+                  )}
                   </div>
                 ))}
               </div>
@@ -1691,14 +1576,14 @@ const handleLockedSource = () => {
                 {gsheetsStep === 'auth' && (
                   <>
                     <div className="rounded-xl p-4" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(52,211,153,0.2)' }}>
-                      <h4 className="font-semibold text-white mb-1">Why sign in with Google?</h4>                                         
+                      <p className="text-xs font-bold text-white mb-1.5">🔒 Secure OAuth 2.0 via Google</p>
                       <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
                         We use Google's standard sign-in screen. If you're already logged into Google in this browser, your account will be pre-populated — one click and you're in.
                       </p>
                       <button className="mt-2 text-xs underline"
                         style={{ color: 'rgba(52,211,153,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
                         onClick={() => setGsheetsError(v => v ? '' : 'Google requires explicit permission consent to access your Sheets. This is a one-time step per account.')}>
-                        Why this step?
+                        Why this step? ⓘ
                       </button>
                       {gsheetsError && (
                         <p className="mt-2 text-xs leading-relaxed" style={{ color: '#f87171' }}>{gsheetsError}</p>
@@ -1749,7 +1634,7 @@ const handleLockedSource = () => {
                     </div>
                     <button onClick={() => { setGsheetsStep('auth'); setGsheetsProgress(0) }}
                       className="text-xs underline" style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}>
-                      Something went wrong? Click to retry
+                      ↩ Something went wrong? Click to retry
                     </button>
                   </div>
                 )}
@@ -1759,7 +1644,7 @@ const handleLockedSource = () => {
                   <>
                     <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
                       style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)' }}>
-                      <span className="text-xs" style={{ color: '#34d399' }}>Signed in as</span>
+                      <span className="text-xs" style={{ color: '#34d399' }}>✓ Signed in as</span>
                       <span className="text-xs font-bold text-white">{gsheetsEmail}</span>
                     </div>
 
@@ -1812,7 +1697,7 @@ const handleLockedSource = () => {
 <button onClick={openGooglePicker}
                         className="w-full mb-3 py-2.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2"
                         style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.4)', cursor: 'pointer' }}>
-                        Choose a Spreadsheet from Drive
+                        📁 Choose a Spreadsheet from Drive
                       </button>
 
                       <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -1948,9 +1833,9 @@ const handleLockedSource = () => {
 
               {/* Info banner */}
               <div className="rounded-xl p-3" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">SSL/TLS · Connection Pool · Health Check</p>
+                <p className="text-xs font-bold text-white mb-1">🔒 SSL/TLS · Connection pool · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  Credentials are stored locally in your browser only. Each user connects with their own MySQL instance — your database is never shared.
+                  Credentials are saved in your browser only. Other users on this tool connect with their own MySQL — your database is never shared.
                 </p>
               </div>
 
@@ -2054,12 +1939,12 @@ const handleLockedSource = () => {
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>
-                      Health check passed — database is reachable
+                      ✅ Health check passed — database is reachable
                     </p>
                   </div>
 
                   {mysqlTablesLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
                   )}
 
                   {!mysqlTablesLoading && mysqlTables.length > 0 && (
@@ -2175,7 +2060,7 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch {
                       setMysqlStatus('error')
-                      setMysqlError('Could not reach the backend. Make sure the server is running on port 8000.')
+                      setMysqlError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!mysql.host || !mysql.user || !mysql.database || mysqlStatus === 'testing'}
@@ -2186,7 +2071,7 @@ if (tablesData.tables?.length > 0) {
                     color: '#fbbf24',
                     cursor: (!mysql.host || !mysql.user || !mysql.database || mysqlStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
-                  {mysqlStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {mysqlStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
                 <button
@@ -2203,36 +2088,31 @@ if (tablesData.tables?.length > 0) {
                     )
                     const id = backendId || crypto.randomUUID()
 
+                    // Keep a local cache too — needed until /api/analyze accepts
+                    // connection_id directly (see get_decrypted_connection in main.py).
                     const connRecord = {
-  id,
-  host: mysql.host,
-  port: mysql.port,
-  user: mysql.user,
-  password: mysql.password,
-  database: mysql.database,
-  ssl: mysql.ssl,
-  table: tablesArr[0],
-  tables: tablesArr,   // ← save only checked tables
-  name: `${mysql.database}@${mysql.host}`,
-  addedAt,
-}
+                      id, host: mysql.host, port: mysql.port, user: mysql.user,
+                      password: mysql.password, database: mysql.database, ssl: mysql.ssl,
+                      table: tablesArr[0], tables: tablesArr,
+                      name: `${mysql.database}@${mysql.host}`, addedAt,
+                    }
                     const existing = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_mysql_connections', JSON.stringify(updated))
                     setSavedMySQLConns(updated)
-                    // Add one source entry per table
-tablesArr.forEach((tbl, idx) => {
-  addSource({
-    id: `${id}-${idx}`,
-    name: `${mysql.database}.${tbl}@${mysql.host}`,
-    type: 'mysql' as const,
-    addedAt,
-    connectionId: backendId || undefined,
-  })
-})
+
+                    tablesArr.forEach((tbl, idx) => {
+                      addSource({
+                        id: `${id}-${idx}`,
+                        name: `${mysql.database}.${tbl}@${mysql.host}`,
+                        type: 'mysql' as const,
+                        addedAt,
+                        connectionId: backendId || undefined,
+                      })
+                    })
                     addAuditLog({
                       id: crypto.randomUUID(),
-                      time: new Date().toLocaleString(),
+                      time: addedAt,
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
@@ -2244,7 +2124,7 @@ tablesArr.forEach((tbl, idx) => {
                     setMysqlError('')
                     setMysql({ host: '', port: '3306', user: '', password: '', database: '', ssl: false })
                     setMysqlTables([])
-setMysqlSelectedTables(new Set())
+                    setMysqlSelectedTables(new Set())
                     setTab('existing')
                   }}
                   disabled={mysqlStatus !== 'ok' || mysqlSelectedTables.size === 0}
@@ -2298,9 +2178,9 @@ setMysqlSelectedTables(new Set())
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">SSL/TLS · Connection Pool · Health Check</p>
+                <p className="text-xs font-bold text-white mb-1">🔒 SSL/TLS · Connection pool · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  Credentials are stored locally in your browser only. Your database is never shared with other users.
+                  Credentials are saved in your browser only. Your database is never shared with other users.
                 </p>
               </div>
 
@@ -2377,10 +2257,10 @@ setMysqlSelectedTables(new Set())
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — database is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — database is reachable</p>
                   </div>
                   {postgresTablesLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
                   )}
                   {!postgresTablesLoading && postgresTables.length > 0 && (
                     <div>
@@ -2460,13 +2340,13 @@ setMysqlSelectedTables(new Set())
                       }
                     } catch {
                       setPostgresStatus('error')
-                      setPostgresError('Could not reach the backend. Make sure the server is running.')
+                      setPostgresError('❌ Could not reach backend.\n   → Make sure the server is running.')
                     }
                   }}
                   disabled={!postgres.host || !postgres.user || !postgres.database || postgresStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.35)', color: '#818cf8', cursor: (!postgres.host || !postgres.user || !postgres.database || postgresStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
-                  {postgresStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {postgresStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
                   onClick={async () => {
@@ -2483,17 +2363,10 @@ setMysqlSelectedTables(new Set())
                     const id = backendId || crypto.randomUUID()
 
                     const connRecord = {
-                      id,
-                      host: postgres.host,
-                      port: postgres.port,
-                      user: postgres.user,
-                      password: postgres.password,
-                      database: postgres.database,
-                      ssl: postgres.ssl,
-                      table: tablesArr[0],
-                      tables: tablesArr,
-                      name: `${postgres.database}@${postgres.host}`,
-                      addedAt,
+                      id, host: postgres.host, port: postgres.port, user: postgres.user,
+                      password: postgres.password, database: postgres.database, ssl: postgres.ssl,
+                      table: tablesArr[0], tables: tablesArr,
+                      name: `${postgres.database}@${postgres.host}`, addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_postgres_connections') || '[]')
                     const updated = [...existing, connRecord]
@@ -2569,9 +2442,9 @@ setMysqlSelectedTables(new Set())
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(234,88,12,0.06)', border: '1px solid rgba(234,88,12,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">Service Account JSON Key</p>
+                <p className="text-xs font-bold text-white mb-1">🔑 Service Account JSON Key</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  Available in Google Cloud Console under IAM → Service Accounts → Create Key (JSON). The service account needs the BigQuery Data Viewer and BigQuery Job User roles. The key is stored locally in your browser only.
+                  In Google Cloud Console → IAM → Service Accounts → create key (JSON). The service account needs BigQuery Data Viewer + BigQuery Job User roles. Key is saved in your browser only.
                 </p>
               </div>
 
@@ -2612,7 +2485,7 @@ setMysqlSelectedTables(new Set())
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — BigQuery is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — BigQuery is reachable</p>
                   </div>
 
                   {bqDatasets.length > 0 && (
@@ -2657,7 +2530,7 @@ setMysqlSelectedTables(new Set())
                   )}
 
                   {bqTablesLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
                   )}
 
                   {!bqTablesLoading && bqTables.length > 0 && (
@@ -2760,7 +2633,7 @@ setMysqlSelectedTables(new Set())
                       }
                     } catch {
                       setBqStatus('error')
-                      setBqError('Could not reach the backend. Make sure the server is running on port 8000.')
+                      setBqError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!bqProject || !bqKeyJson || bqStatus === 'testing'}
@@ -2771,39 +2644,33 @@ setMysqlSelectedTables(new Set())
                     color: '#fb923c',
                     cursor: (!bqProject || !bqKeyJson || bqStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
-                  {bqStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {bqStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     if (bqStatus !== 'ok' || bqSelectedTables.size === 0) return
-                    const tablesArr = [...bqSelectedTables]
-                    const addedAt = new Date().toLocaleString()
-
-                    const backendId = await saveConnectionToBackend(
-                      `${bqProject}@bigquery`,
-                      'bigquery',
-                      { project: bqProject, dataset: bqDataset, tables: tablesArr },
-                      { key_json: bqKeyJson },
-                    )
-                    const id = backendId || crypto.randomUUID()
-
+                    const id = crypto.randomUUID()
                     const connRecord = {
-                      id, key_json: bqKeyJson, project: bqProject, dataset: bqDataset,
-                      table: tablesArr[0], tables: tablesArr,
-                      name: `${bqProject}@bigquery`, addedAt,
+                      id,
+                      key_json: bqKeyJson,
+                      project: bqProject,
+                      dataset: bqDataset,
+                      table: [...bqSelectedTables][0],
+                      tables: [...bqSelectedTables],
+                      name: `${bqProject}@bigquery`,
+                      addedAt: new Date().toLocaleString(),
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_bigquery_connections', JSON.stringify(updated))
                     setSavedBqConns(updated)
-                    tablesArr.forEach((tbl, idx) => {
+                    ;[...bqSelectedTables].forEach((tbl, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${bqProject}.${bqDataset}.${tbl}`,
                         type: 'bigquery' as const,
-                        addedAt,
-                        connectionId: backendId || undefined,
+                        addedAt: connRecord.addedAt,
                       })
                     })
                     addAuditLog({
@@ -2812,7 +2679,7 @@ setMysqlSelectedTables(new Set())
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
-                      details: `Connected BigQuery: ${bqProject}.${bqDataset} (${tablesArr.length} table(s))`,
+                      details: `Connected BigQuery: ${bqProject}.${bqDataset} (${bqSelectedTables.size} table(s))`,
                       user: 'local_user',
                     })
                     setShowBigQueryFlow(false)
@@ -2867,7 +2734,7 @@ setMysqlSelectedTables(new Set())
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">Connect MongoDB</h3>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Stored locally in your browser</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Saved to your browser · never shared</p>
                 </div>
               </div>
               <button onClick={() => { setShowMongoFlow(false); setMongoStatus('idle'); setMongoError('') }}
@@ -2876,9 +2743,9 @@ setMysqlSelectedTables(new Set())
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">Connection URI</p>
+                <p className="text-xs font-bold text-white mb-1">🔒 Connection URI · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  Available in MongoDB Atlas under Connect → Drivers. Format: mongodb+srv://user:pass@cluster.mongodb.net/ — credentials are stored locally in your browser only.
+                  Get this from MongoDB Atlas → Install MongoDB Atlas → Connect → Drivers. Format: mongodb+srv://user:pass@cluster.mongodb.net/ — Credentials stay in your browser only.
                 </p>
               </div>
 
@@ -2919,10 +2786,10 @@ setMysqlSelectedTables(new Set())
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — MongoDB is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — MongoDB is reachable</p>
                   </div>
                   {mongoCollectionsLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading collections…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading collections…</p>
                   )}
                   {!mongoCollectionsLoading && mongoCollections.length > 0 && (
                     <div>
@@ -3009,39 +2876,43 @@ setMysqlSelectedTables(new Set())
                       }
                     } catch {
                       setMongoStatus('error')
-                      setMongoError('Could not reach the backend. Make sure the server is running.')
+                      setMongoError('❌ Could not reach backend.\n   → Make sure the server is running.')
                     }
                   }}
                   disabled={!mongo.uri || !mongo.database || mongoStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80', cursor: (!mongo.uri || !mongo.database || mongoStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
-                  {mongoStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {mongoStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
                 <button
                   onClick={async () => {
                     if (mongoStatus !== 'ok' || mongoSelectedCollections.size === 0) return
-                    const collsArr = [...mongoSelectedCollections]
+                    const collectionsArr = [...mongoSelectedCollections]
                     const addedAt = new Date().toLocaleString()
 
                     const backendId = await saveConnectionToBackend(
                       `${mongo.database}@mongo`,
                       'mongodb',
-                      { database: mongo.database, collections: collsArr },
+                      { database: mongo.database, collections: collectionsArr },
                       { uri: mongo.uri },
                     )
                     const id = backendId || crypto.randomUUID()
 
                     const connRecord = {
-                      id, uri: mongo.uri, database: mongo.database,
-                      collection: collsArr[0], collections: collsArr,
-                      name: `${mongo.database}@mongo`, addedAt,
+                      id,
+                      uri: mongo.uri,
+                      database: mongo.database,
+                      collection: collectionsArr[0],
+                      collections: collectionsArr,
+                      name: `${mongo.database}@mongo`,
+                      addedAt,
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_mongo_connections', JSON.stringify(updated))
                     setSavedMongoConns(updated)
-                    collsArr.forEach((coll, idx) => {
+                    collectionsArr.forEach((coll, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${mongo.database}.${coll}@mongo`,
@@ -3052,11 +2923,11 @@ setMysqlSelectedTables(new Set())
                     })
                     addAuditLog({
                       id: crypto.randomUUID(),
-                      time: new Date().toLocaleString(),
+                      time: addedAt,
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
-                      details: `Connected MongoDB: ${mongo.database} (${collsArr.length} collection(s))`,
+                      details: `Connected MongoDB: ${mongo.database} (${mongoSelectedCollections.size} collection(s))`,
                       user: 'local_user',
                     })
                     setShowMongoFlow(false)
@@ -3113,7 +2984,7 @@ setMysqlSelectedTables(new Set())
             <div className="p-5 space-y-4">
               {/* IAM info banner */}
               <div className="rounded-xl p-3" style={{ background: 'rgba(255,153,0,0.06)', border: '1px solid rgba(255,153,0,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">IAM Access Key Required</p>
+                <p className="text-xs font-bold text-white mb-1">🔑 IAM Access Key Required</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   In AWS Console → IAM → Users → your user → Security credentials → Create access key.
                   The IAM user needs: <strong style={{ color: '#FF9900' }}>AmazonRDSReadOnlyAccess</strong> (for RDS/Redshift),
@@ -3363,9 +3234,9 @@ setMysqlSelectedTables(new Set())
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — connection is healthy</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ AWS connection healthy</p>
                   </div>
-                  {awsTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables / objects…</p>}
+                  {awsTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables / objects…</p>}
                   {!awsTablesLoading && awsTables.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -3454,30 +3325,19 @@ setMysqlSelectedTables(new Set())
                       }
                     } catch {
                       setAwsStatus('error')
-                      setAwsError('Could not reach the backend. Make sure the server is running on port 8000.')
+                      setAwsError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={awsStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(255,153,0,0.15)', border: '1px solid rgba(255,153,0,0.35)', color: '#FF9900', cursor: awsStatus === 'testing' ? 'not-allowed' : 'pointer' }}>
-                  {awsStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {awsStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     if (awsStatus !== 'ok' || awsSelectedTables.size === 0) return
-                    const tablesArr = [...awsSelectedTables]
-                    const addedAt = new Date().toLocaleString()
-                    const connName = awsService === 's3' ? `s3://${aws.bucket}` : awsService === 'dynamodb' ? `dynamodb.${aws.region}` : awsService === 'cost-explorer' ? `cost-explorer@${aws.region}` : `${aws.database}@${aws.host}`
-
-                    const backendId = await saveConnectionToBackend(
-                      connName,
-                      'aws',
-                      { service: awsService, region: aws.region, host: aws.host, port: aws.port, database: aws.database, ssl: aws.ssl, bucket: aws.bucket, prefix: aws.prefix, tableName: aws.tableName, tables: tablesArr },
-                      { accessKeyId: aws.accessKeyId, secretAccessKey: aws.secretAccessKey, user: aws.user, password: aws.password },
-                    )
-                    const id = backendId || crypto.randomUUID()
-
+                    const id = crypto.randomUUID()
                     const connRecord = {
                       id, service: awsService, region: aws.region,
                       accessKeyId: aws.accessKeyId, secretAccessKey: aws.secretAccessKey,
@@ -3486,14 +3346,16 @@ setMysqlSelectedTables(new Set())
                       bucket: aws.bucket, prefix: aws.prefix, tableName: aws.tableName,
                       costStartDate: awsCostStartDate, costEndDate: awsCostEndDate,
                       costGranularity: awsCostGranularity, costGroupBy: awsCostGroupBy,
-                      table: tablesArr[0], tables: tablesArr,
-                      name: connName, addedAt,
+                      table: [...awsSelectedTables][0],
+                      tables: [...awsSelectedTables],
+                      name: awsService === 's3' ? `s3://${aws.bucket}` : awsService === 'dynamodb' ? `dynamodb.${aws.region}` : awsService === 'cost-explorer' ? `cost-explorer@${aws.region}` : `${aws.database}@${aws.host}`,
+                      addedAt: new Date().toLocaleString(),
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_aws_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_aws_connections', JSON.stringify(updated))
                     setSavedAWSConns(updated)
-                    tablesArr.forEach((item, idx) => {
+                    ;[...awsSelectedTables].forEach((item, idx) => {
                       const srcName = awsService === 's3'
                         ? `s3://${aws.bucket}/${item}`
                         : awsService === 'dynamodb'
@@ -3501,14 +3363,14 @@ setMysqlSelectedTables(new Set())
                         : awsService === 'cost-explorer'
                         ? `cost-explorer:${item}@${aws.region}`
                         : `${aws.database}.${item}@${aws.host}`
-                      addSource({ id: `${id}-${idx}`, name: srcName, type: 'aws' as any, addedAt, connectionId: backendId || undefined })
+                      addSource({ id: `${id}-${idx}`, name: srcName, type: 'aws' as any, addedAt: connRecord.addedAt })
                     })
                     addAuditLog({
                       id: crypto.randomUUID(), time: new Date().toLocaleString(),
                       action: 'add_source', entity_type: 'data_source', entity_id: id,
                       details: awsService === 'cost-explorer'
                         ? `Connected AWS Cost Explorer: ${awsCostStartDate} → ${awsCostEndDate} · ${awsCostGranularity} · grouped by ${awsCostGroupBy} · region: ${aws.region}`
-                        : `Connected AWS ${awsService.toUpperCase()}: ${connName} (${tablesArr.length} item(s)) · region: ${aws.region}`,
+                        : `Connected AWS ${awsService.toUpperCase()}: ${connRecord.name} (${awsSelectedTables.size} item(s)) · region: ${aws.region}`,
                       user: 'local_user',
                     })
                     setShowAWSFlow(false)
@@ -3560,7 +3422,7 @@ setMysqlSelectedTables(new Set())
             </div>
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(255,153,0,0.06)', border: '1px solid rgba(255,153,0,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">IAM Permissions Required</p>
+                <p className="text-xs font-bold text-white mb-1">🔑 IAM permissions required</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Your IAM user needs <strong style={{ color: '#FF9900' }}>ce:GetCostAndUsage</strong> permission. In AWS Console → IAM → attach a policy with that action on resource <code style={{ color: '#FF9900' }}>*</code>. Keys are saved in your browser only.
                 </p>
@@ -3639,7 +3501,7 @@ setMysqlSelectedTables(new Set())
               )}
               {costExplorerStatus === 'ok' && costExplorerData.length > 0 && (
                 <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                  <p className="text-xs font-bold" style={{ color: '#4ade80' }}>{costExplorerData.length} rows fetched — ready to add as a source</p>
+                  <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ {costExplorerData.length} rows fetched — ready to add as source</p>
                 </div>
               )}
               <div className="flex gap-3 pt-1">
@@ -3664,13 +3526,13 @@ setMysqlSelectedTables(new Set())
                       }
                     } catch (e) {
                       setCostExplorerStatus('error')
-                      setCostExplorerError('Could not reach the backend. Make sure the server is running on port 8000.')
+                      setCostExplorerError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!costExplorer.accessKeyId || !costExplorer.secretAccessKey || !costExplorer.startDate || !costExplorer.endDate || costExplorerStatus === 'fetching'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(255,153,0,0.15)', border: '1px solid rgba(255,153,0,0.35)', color: '#FF9900', cursor: 'pointer' }}>
-                  {costExplorerStatus === 'fetching' ? 'Fetching…' : 'Fetch Cost Data'}
+                  {costExplorerStatus === 'fetching' ? '⏳ Fetching…' : '📊 Fetch Cost Data'}
                 </button>
                 <button
                   onClick={() => {
@@ -3737,9 +3599,9 @@ setMysqlSelectedTables(new Set())
             </div>
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(66,133,244,0.06)', border: '1px solid rgba(66,133,244,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">Service Account JSON Key</p>
+                <p className="text-xs font-bold text-white mb-1">🔑 Service Account JSON Key</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  Available in GCP Console under IAM → Service Accounts → Create Key (JSON). The account needs the <strong style={{ color: '#4285F4' }}>Storage Object Viewer</strong> role. The key is stored locally in your browser only.
+                  GCP Console → IAM → Service Accounts → Create key (JSON). The account needs <strong style={{ color: '#4285F4' }}>Storage Object Viewer</strong> role. Key stays in your browser only.
                 </p>
               </div>
               <div>
@@ -3784,9 +3646,9 @@ setMysqlSelectedTables(new Set())
               {gcsStatus === 'ok' && !gcsError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — bucket is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ GCS bucket reachable</p>
                   </div>
-                  {gcsFilesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading CSV files…</p>}
+                  {gcsFilesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading CSV files…</p>}
                   {!gcsFilesLoading && gcsFiles.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -3846,36 +3708,26 @@ setMysqlSelectedTables(new Set())
                           if (filesData.files?.length > 0) { setGcsFiles(filesData.files); setGcsSelectedFiles(new Set(filesData.files)) }
                         } catch { setGcsFiles([]) } finally { setGcsFilesLoading(false) }
                       } else { setGcsStatus('error'); setGcsError(data.message || 'Unknown error') }
-                    } catch { setGcsStatus('error'); setGcsError('Could not reach the backend. Make sure the server is running on port 8000.') }
+                    } catch { setGcsStatus('error'); setGcsError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.') }
                   }}
                   disabled={!gcs.project || !gcs.bucket || !gcs.keyJson || gcsStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.35)', color: '#4285F4', cursor: 'pointer' }}>
-                  {gcsStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {gcsStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     if (gcsStatus !== 'ok' || gcsSelectedFiles.size === 0) return
-                    const filesArr = [...gcsSelectedFiles]
-                    const addedAt = new Date().toLocaleString()
-
-                    const backendId = await saveConnectionToBackend(
-                      `gcs://${gcs.bucket}`,
-                      'gcs',
-                      { project: gcs.project, bucket: gcs.bucket, files: filesArr, prefix: gcs.prefix },
-                      { keyJson: gcs.keyJson },
-                    )
-                    const id = backendId || crypto.randomUUID()
-
-                    const connRecord = { id, keyJson: gcs.keyJson, project: gcs.project, bucket: gcs.bucket, prefix: gcs.prefix, files: filesArr, file: filesArr[0], name: `gcs://${gcs.bucket}`, addedAt }
+                    const id = crypto.randomUUID()
+                    const connRecord = { id, keyJson: gcs.keyJson, project: gcs.project, bucket: gcs.bucket, prefix: gcs.prefix, files: [...gcsSelectedFiles], file: [...gcsSelectedFiles][0], name: `gcs://${gcs.bucket}`, addedAt: new Date().toLocaleString() }
                     const existing = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_gcs_connections', JSON.stringify(updated))
                     setSavedGcsConns(updated)
-                    filesArr.forEach((f, idx) => {
-                      addSource({ id: `${id}-${idx}`, name: `gcs://${gcs.bucket}/${f}`, type: 'gcs' as any, addedAt, connectionId: backendId || undefined })
+                    ;[...gcsSelectedFiles].forEach((f, idx) => {
+                      addSource({ id: `${id}-${idx}`, name: `gcs://${gcs.bucket}/${f}`, type: 'gcs' as any, addedAt: connRecord.addedAt })
                     })
-                    addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected GCS: ${gcs.bucket} (${filesArr.length} file(s))`, user: 'local_user' })
+                    addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected GCS: ${gcs.bucket} (${gcsSelectedFiles.size} file(s))`, user: 'local_user' })
                     setShowGCSFlow(false); setGcsStatus('idle'); setGcsError('')
                     setGcs({ keyJson: '', project: '', bucket: '', prefix: '' }); setGcsFiles([]); setGcsSelectedFiles(new Set()); setTab('existing')
                   }}
@@ -3916,7 +3768,7 @@ setMysqlSelectedTables(new Set())
             </div>
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(52,168,83,0.06)', border: '1px solid rgba(52,168,83,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">Cloud SQL Connection</p>
+                <p className="text-xs font-bold text-white mb-1">🔌 Cloud SQL Connection</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Use the public IP of your Cloud SQL instance (enable it in GCP Console → Cloud SQL → Connections → Public IP). Add your IP to Authorized Networks. Credentials stay in browser only.
                 </p>
@@ -3990,9 +3842,9 @@ setMysqlSelectedTables(new Set())
               {cloudSQLStatus === 'ok' && !cloudSQLError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — Cloud SQL is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Cloud SQL reachable</p>
                   </div>
-                  {cloudSQLTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>}
+                  {cloudSQLTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>}
                   {!cloudSQLTablesLoading && cloudSQLTables.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -4052,36 +3904,26 @@ setMysqlSelectedTables(new Set())
                           if (tData.tables?.length > 0) { setCloudSQLTables(tData.tables); setCloudSQLSelectedTables(new Set(tData.tables)) }
                         } catch { setCloudSQLTables([]) } finally { setCloudSQLTablesLoading(false) }
                       } else { setCloudSQLStatus('error'); setCloudSQLError(data.message || 'Unknown error') }
-                    } catch { setCloudSQLStatus('error'); setCloudSQLError('Could not reach the backend. Make sure the server is running on port 8000.') }
+                    } catch { setCloudSQLStatus('error'); setCloudSQLError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.') }
                   }}
                   disabled={!cloudSQL.instanceConnectionName || !cloudSQL.user || !cloudSQL.database || cloudSQLStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(52,168,83,0.15)', border: '1px solid rgba(52,168,83,0.35)', color: '#34A853', cursor: 'pointer' }}>
-                  {cloudSQLStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {cloudSQLStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     if (cloudSQLStatus !== 'ok' || cloudSQLSelectedTables.size === 0) return
-                    const tablesArr = [...cloudSQLSelectedTables]
-                    const addedAt = new Date().toLocaleString()
-
-                    const backendId = await saveConnectionToBackend(
-                      `${cloudSQL.database}@cloudsql.${cloudSQL.project}`,
-                      'cloudsql',
-                      { project: cloudSQL.project, database: cloudSQL.database, dbType: cloudSQL.dbType, port: cloudSQL.port, instanceConnectionName: cloudSQL.instanceConnectionName, tables: tablesArr },
-                      { user: cloudSQL.user, password: cloudSQL.password, keyJson: cloudSQL.keyJson },
-                    )
-                    const id = backendId || crypto.randomUUID()
-
-                    const connRecord = { id, ...cloudSQL, tables: tablesArr, table: tablesArr[0], name: `${cloudSQL.database}@cloudsql.${cloudSQL.project}`, addedAt }
+                    const id = crypto.randomUUID()
+                    const connRecord = { id, ...cloudSQL, tables: [...cloudSQLSelectedTables], table: [...cloudSQLSelectedTables][0], name: `${cloudSQL.database}@cloudsql.${cloudSQL.project}`, addedAt: new Date().toLocaleString() }
                     const existing = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_cloudsql_connections', JSON.stringify(updated))
                     setSavedCloudSQLConns(updated)
-                    tablesArr.forEach((tbl, idx) => {
-                      addSource({ id: `${id}-${idx}`, name: `${cloudSQL.database}.${tbl}@cloudsql.${cloudSQL.project}`, type: 'cloudsql' as any, addedAt, connectionId: backendId || undefined })
+                    ;[...cloudSQLSelectedTables].forEach((tbl, idx) => {
+                      addSource({ id: `${id}-${idx}`, name: `${cloudSQL.database}.${tbl}@cloudsql.${cloudSQL.project}`, type: 'cloudsql' as any, addedAt: connRecord.addedAt })
                     })
-                    addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected Cloud SQL: ${cloudSQL.database}@${cloudSQL.instanceConnectionName} (${tablesArr.length} table(s))`, user: 'local_user' })
+                    addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected Cloud SQL: ${cloudSQL.database}@${cloudSQL.instanceConnectionName} (${cloudSQLSelectedTables.size} table(s))`, user: 'local_user' })
                     setShowCloudSQLFlow(false); setCloudSQLStatus('idle'); setCloudSQLError('')
                     setCloudSQL({ keyJson: '', project: '', instanceConnectionName: '', user: '', password: '', database: '', dbType: 'postgres', port: '5432' })
                     setCloudSQLTables([]); setCloudSQLSelectedTables(new Set()); setTab('existing')
@@ -4128,7 +3970,7 @@ setMysqlSelectedTables(new Set())
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(255,70,0,0.06)', border: '1px solid rgba(255,70,0,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">Personal Access Token (PAT)</p>
+                <p className="text-xs font-bold text-white mb-1">🔑 Personal Access Token (PAT)</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   In Databricks → User Settings → Access Tokens → Generate token. Host is your workspace URL e.g. <strong style={{ color: '#FF4600' }}>adb-xxxx.azuredatabricks.net</strong>. HTTP path is in SQL Warehouses → your warehouse → Connection details. Token stays in your browser only.
                 </p>
@@ -4208,10 +4050,10 @@ setMysqlSelectedTables(new Set())
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — Databricks is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — Databricks is reachable</p>
                   </div>
                   {databricksTablesLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
                   )}
                   {!databricksTablesLoading && databricksTables.length > 0 && (
                     <div>
@@ -4316,7 +4158,7 @@ setMysqlSelectedTables(new Set())
                       }
                     } catch {
                       setDatabricksStatus('error')
-                      setDatabricksError('Could not reach the backend. Make sure the server is running on port 8000.')
+                      setDatabricksError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!databricks.host || !databricks.httpPath || !databricks.token || databricksStatus === 'testing'}
@@ -4327,40 +4169,35 @@ setMysqlSelectedTables(new Set())
                     color: '#FF4600',
                     cursor: (!databricks.host || !databricks.httpPath || !databricks.token || databricksStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
-                  {databricksStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {databricksStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     if (databricksStatus !== 'ok' || databricksSelectedTables.size === 0) return
-                    const tablesArr = [...databricksSelectedTables]
-                    const addedAt = new Date().toLocaleString()
-
-                    const backendId = await saveConnectionToBackend(
-                      `${databricks.catalog}.${databricks.schema}@${databricks.host}`,
-                      'databricks',
-                      { host: databricks.host, catalog: databricks.catalog, schema: databricks.schema, httpPath: databricks.httpPath, tables: tablesArr },
-                      { token: databricks.token },
-                    )
-                    const id = backendId || crypto.randomUUID()
-
+                    const id = crypto.randomUUID()
                     const connRecord = {
-                      id, host: databricks.host, httpPath: databricks.httpPath, token: databricks.token,
-                      catalog: databricks.catalog, schema: databricks.schema,
-                      table: tablesArr[0], tables: tablesArr,
-                      name: `${databricks.catalog}.${databricks.schema}@${databricks.host}`, addedAt,
+                      id,
+                      host: databricks.host,
+                      httpPath: databricks.httpPath,
+                      token: databricks.token,
+                      catalog: databricks.catalog,
+                      schema: databricks.schema,
+                      table: [...databricksSelectedTables][0],
+                      tables: [...databricksSelectedTables],
+                      name: `${databricks.catalog}.${databricks.schema}@${databricks.host}`,
+                      addedAt: new Date().toLocaleString(),
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_databricks_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_databricks_connections', JSON.stringify(updated))
                     setSavedDatabricksConns(updated)
-                    tablesArr.forEach((tbl, idx) => {
+                    ;[...databricksSelectedTables].forEach((tbl, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${databricks.catalog}.${databricks.schema}.${tbl}@${databricks.host}`,
                         type: 'databricks' as any,
-                        addedAt,
-                        connectionId: backendId || undefined,
+                        addedAt: connRecord.addedAt,
                       })
                     })
                     addAuditLog({
@@ -4369,7 +4206,7 @@ setMysqlSelectedTables(new Set())
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
-                      details: `Connected Databricks: ${databricks.catalog}.${databricks.schema}@${databricks.host} (${tablesArr.length} table(s))`,
+                      details: `Connected Databricks: ${databricks.catalog}.${databricks.schema}@${databricks.host} (${databricksSelectedTables.size} table(s))`,
                       user: 'local_user',
                     })
                     setShowDatabricksFlow(false)
@@ -4428,7 +4265,7 @@ setMysqlSelectedTables(new Set())
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(20,184,166,0.06)', border: '1px solid rgba(20,184,166,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">REST API Connection</p>
+                <p className="text-xs font-bold text-white mb-1">🌐 REST API Connection</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Connect any REST API endpoint. Supports Bearer token, API key, or no auth. Credentials stay in your browser only.
                 </p>
@@ -4519,7 +4356,7 @@ setMysqlSelectedTables(new Set())
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — API is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ REST API reachable</p>
                   </div>
                   {restEndpointResults.length > 0 && (
                     <div>
@@ -4633,51 +4470,48 @@ setMysqlSelectedTables(new Set())
                       }
                     } catch {
                       setRestStatus('error')
-                      setRestError('Could not reach the backend. Make sure the server is running on port 8000.')
+                      setRestError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!restApi.base_url || restStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(20,184,166,0.15)', border: '1px solid rgba(20,184,166,0.35)', color: '#14b8a6', cursor: (!restApi.base_url || restStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
-                  {restStatus === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {restStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     if (restStatus !== 'ok' || restSelectedEndpoints.size === 0) return
-                    const endpointsArr = [...restSelectedEndpoints]
-                    const addedAt = new Date().toLocaleString()
+                    const id = crypto.randomUUID()
                     const headers: Record<string, string> = {}
                     if (restApi.api_key) {
                       headers[restApi.auth_header] = `${restApi.auth_prefix} ${restApi.api_key}`.trim()
                     }
-
-                    const backendId = await saveConnectionToBackend(
-                      restApi.base_url.replace(/https?:\/\//, ''),
-                      'rest',
-                      { base_url: restApi.base_url, endpoints: endpointsArr, auth_header: restApi.auth_header, auth_prefix: restApi.auth_prefix, verify_ssl: restApi.verify_ssl, test_path: restApi.test_path, timeout: restApi.timeout },
-                      { api_key: restApi.api_key },
-                    )
-                    const id = backendId || crypto.randomUUID()
-
                     const connRecord = {
-                      id, base_url: restApi.base_url, api_key: restApi.api_key,
-                      auth_header: restApi.auth_header, auth_prefix: restApi.auth_prefix, headers,
-                      verify_ssl: restApi.verify_ssl, test_path: restApi.test_path, timeout: restApi.timeout,
-                      endpoints: endpointsArr, endpoint: endpointsArr[0],
-                      name: restApi.base_url.replace(/https?:\/\//, ''), addedAt,
+                      id,
+                      base_url: restApi.base_url,
+                      api_key: restApi.api_key,
+                      auth_header: restApi.auth_header,
+                      auth_prefix: restApi.auth_prefix,
+                      headers,
+                      verify_ssl: restApi.verify_ssl,
+                      test_path: restApi.test_path,
+                      timeout: restApi.timeout,
+                      endpoints: [...restSelectedEndpoints],
+                      endpoint: [...restSelectedEndpoints][0],
+                      name: restApi.base_url.replace(/https?:\/\//, ''),
+                      addedAt: new Date().toLocaleString(),
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_rest_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_rest_connections', JSON.stringify(updated))
                     setSavedRestConns(updated)
-                    endpointsArr.forEach((ep, idx) => {
+                    ;[...restSelectedEndpoints].forEach((ep, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `rest:${restApi.base_url.replace(/https?:\/\//, '')}${ep}`,
                         type: 'rest' as any,
-                        addedAt,
-                        connectionId: backendId || undefined,
+                        addedAt: connRecord.addedAt,
                       })
                     })
                     addAuditLog({
@@ -4686,7 +4520,7 @@ setMysqlSelectedTables(new Set())
                       action: 'add_source',
                       entity_type: 'data_source',
                       entity_id: id,
-                      details: `Connected REST API: ${restApi.base_url} (${endpointsArr.length} endpoint(s))`,
+                      details: `Connected REST API: ${restApi.base_url} (${restSelectedEndpoints.size} endpoint(s))`,
                       user: 'local_user',
                     })
                     setShowRestApiFlow(false)
@@ -4737,7 +4571,7 @@ setMysqlSelectedTables(new Set())
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(251,146,60,0.06)', border: '1px solid rgba(251,146,60,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">Setup Instructions</p>
+                <p className="text-xs font-bold text-white mb-1">🔑 Setup Instructions</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   1. GCP Console → IAM → Service Accounts → Create key (JSON)<br/>
                   2. In GA4: Admin → Property Access Management → Add user (service account email) with Viewer role<br/>
@@ -4795,9 +4629,9 @@ setMysqlSelectedTables(new Set())
               {ga4Status === 'ok' && !ga4Error && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed — property is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ GA4 property reachable</p>
                   </div>
-                  {ga4ReportsLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Building report list…</p>}
+                  {ga4ReportsLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Building report list…</p>}
                   {!ga4ReportsLoading && ga4Reports.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -4860,53 +4694,48 @@ setMysqlSelectedTables(new Set())
                         setGa4Status('error'); setGa4Error(data.message || 'Unknown error')
                       }
                     } catch {
-                      setGa4Status('error'); setGa4Error('Could not reach the backend. Make sure the server is running on port 8000.')
+                      setGa4Status('error'); setGa4Error('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!ga4.propertyId || !ga4.keyJson || ga4Status === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(251,146,60,0.15)', border: '1px solid rgba(251,146,60,0.35)', color: '#fb923c', cursor: 'pointer' }}>
-                  {ga4Status === 'testing' ? 'Testing…' : 'Test Connection'}
+                  {ga4Status === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
 
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     if (ga4Status !== 'ok' || ga4SelectedReports.size === 0) return
-                    const reportsArr = [...ga4SelectedReports]
-                    const addedAt = new Date().toLocaleString()
-
-                    const backendId = await saveConnectionToBackend(
-                      `ga4:${ga4.propertyId}`,
-                      'ga4',
-                      { propertyId: ga4.propertyId, reports: reportsArr, metrics: ga4.metrics, dimensions: ga4.dimensions },
-                      { keyJson: ga4.keyJson },
-                    )
-                    const id = backendId || crypto.randomUUID()
-
+                    const id = crypto.randomUUID()
                     const connRecord = {
-                      id, keyJson: ga4.keyJson, propertyId: ga4.propertyId,
-                      metrics: ga4.metrics, dimensions: ga4.dimensions,
-                      startDate: '365daysAgo', endDate: 'today',
-                      reports: reportsArr, report: reportsArr[0],
-                      name: `ga4:${ga4.propertyId}`, addedAt,
+                      id,
+                      keyJson: ga4.keyJson,
+                      propertyId: ga4.propertyId,
+                      metrics: ga4.metrics,
+                      dimensions: ga4.dimensions,
+                      startDate: '365daysAgo',
+                      endDate: 'today',
+                      reports: [...ga4SelectedReports],
+                      report: [...ga4SelectedReports][0],
+                      name: `ga4:${ga4.propertyId}`,
+                      addedAt: new Date().toLocaleString(),
                     }
                     const existing = JSON.parse(localStorage.getItem('datapro_ga4_connections') || '[]')
                     const updated = [...existing, connRecord]
                     localStorage.setItem('datapro_ga4_connections', JSON.stringify(updated))
                     setSavedGa4Conns(updated)
-                    reportsArr.forEach((report, idx) => {
+                    ;[...ga4SelectedReports].forEach((report, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `ga4:${ga4.propertyId}/${report}`,
                         type: 'ga4' as any,
-                        addedAt,
-                        connectionId: backendId || undefined,
+                        addedAt: connRecord.addedAt,
                       })
                     })
                     addAuditLog({
                       id: crypto.randomUUID(), time: new Date().toLocaleString(),
                       action: 'add_source', entity_type: 'data_source', entity_id: id,
-                      details: `Connected GA4 Property: ${ga4.propertyId} (${reportsArr.length} report(s))`,
+                      details: `Connected GA4 Property: ${ga4.propertyId} (${ga4SelectedReports.size} report(s))`,
                       user: 'local_user',
                     })
                     setShowGA4Flow(false); setGa4Status('idle'); setGa4Error('')
