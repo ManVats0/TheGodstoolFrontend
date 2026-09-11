@@ -219,7 +219,7 @@ export default function Pricing() {
           Unlock The God's Tool
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
-          Choose a plan to access AI-powered data cleaning
+          Transparent pricing for freelancers, growing teams, and enterprises
         </p>
       </div>
 
@@ -313,14 +313,19 @@ export default function Pricing() {
         ))}
       </div>
 
-      <div style={{ marginTop: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '20px 24px', maxWidth: '360px', width: '100%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
-          Or pay a custom amount
+      <div style={{ marginTop: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '24px 28px', maxWidth: '420px', width: '100%', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div>
+          <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
+            Flexible Credit Top-Up
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', marginTop: '6px', lineHeight: 1.5, fontFamily: 'monospace' }}>
+            Add credits on your own terms — no subscription, no lock-in. Built for freelancers covering a single project, agencies managing multiple clients, and corporate teams needing ad-hoc budget without a procurement cycle.
+          </p>
         </div>
         <input
           type="number"
           min="1"
-          placeholder="Enter amount (₹)"
+          placeholder="Enter amount"
           value={customAmount}
           onChange={(e) => setCustomAmount(e.target.value)}
           style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'white', fontFamily: 'monospace', fontSize: '0.9rem' }}
@@ -346,8 +351,11 @@ export default function Pricing() {
             opacity: customLoading ? 0.6 : 1
           }}
         >
-          {customLoading ? 'Opening...' : 'Pay Custom Amount'}
+          {customLoading ? 'Opening...' : 'Add Credits'}
         </button>
+        <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem', fontFamily: 'monospace', textAlign: 'center' }}>
+          Credits never expire and stack with any active plan
+        </p>
       </div>
 
       <button
