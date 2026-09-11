@@ -85,8 +85,16 @@ export default function Pricing() {
   const [error, setError] = useState('')
   const [cycle, setCycle] = useState<Cycle>('monthly')
   const [customAmount, setCustomAmount] = useState('')
+  const [customAmountUSD, setCustomAmountUSD] = useState('')
+  const [customCurrency, setCustomCurrency] = useState<'INR' | 'USD'>('INR')
   const [customLoading, setCustomLoading] = useState(false)
   const [customError, setCustomError] = useState('')
+
+  // Approximate display-only conversion rate. This is NOT what the person
+  // is actually charged — Razorpay/the card network applies the real rate
+  // at settlement time. Update this periodically so the estimate stays
+  // reasonably close; it's cosmetic, not the source of truth for billing.
+  const USD_TO_INR_RATE = 83
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -158,9 +166,22 @@ export default function Pricing() {
     }
   }
 
+  const handleINRChange = (val: string) => {
+    setCustomAmount(val)
+    setCustomCurrency('INR')
+    const n = Number(val)
+    setCustomAmountUSD(n > 0 ? (n / USD_TO_INR_RATE).toFixed(2) : '')
+  }
+
+  const handleUSDChange = (val: string) => {
+    setCustomAmountUSD(val)
+    setCustomCurrency('USD')
+    setCustomAmount('') // per spec: INR box goes blank when typing in USD
+  }
+
   const handleCustomPayment = async () => {
     setCustomError('')
-    const amountNum = Number(customAmount)
+    const amountNum = customCurrency === 'USD' ? Number(customAmountUSD) : Number(customAmount)
     if (!amountNum || amountNum <= 0) {
       setCustomError('Enter a valid amount')
       return
@@ -173,7 +194,7 @@ export default function Pricing() {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/create-custom-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount: amountNum, currency: 'INR' })
+        body: JSON.stringify({ amount: amountNum, currency: customCurrency })
       })
       const data = await res.json()
       if (!res.ok) { setCustomError(data.error || 'Failed to create payment'); setCustomLoading(false); return }
@@ -322,14 +343,33 @@ export default function Pricing() {
             Add credits on your own terms — no subscription, no lock-in. Built for freelancers covering a single project, agencies managing multiple clients, and corporate teams needing ad-hoc budget without a procurement cycle.
           </p>
         </div>
-        <input
-          type="number"
-          min="1"
-          placeholder="Enter amount"
-          value={customAmount}
-          onChange={(e) => setCustomAmount(e.target.value)}
-          style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'white', fontFamily: 'monospace', fontSize: '0.9rem' }}
-        />
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.68rem', fontFamily: 'monospace' }}>INR</label>
+            <input
+              type="number"
+              min="1"
+              placeholder="₹ amount"
+              value={customAmount}
+              onChange={(e) => handleINRChange(e.target.value)}
+              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'white', fontFamily: 'monospace', fontSize: '0.9rem', width: '100%' }}
+            />
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.68rem', fontFamily: 'monospace' }}>USD</label>
+            <input
+              type="number"
+              min="1"
+              placeholder="$ amount"
+              value={customAmountUSD}
+              onChange={(e) => handleUSDChange(e.target.value)}
+              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'white', fontFamily: 'monospace', fontSize: '0.9rem', width: '100%' }}
+            />
+          </div>
+        </div>
+        <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.68rem', fontFamily: 'monospace' }}>
+          Estimated conversion — actual rate applied at checkout
+        </p>
         {customError && (
           <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>⚠ {customError}</div>
         )}
