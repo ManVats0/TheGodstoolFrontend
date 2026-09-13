@@ -21,6 +21,7 @@ import DataCatalog from './pages/DataCatalog'
 import Flow from './pages/Flow'
 import Analysis from './pages/Analysis'
 import AuditLogs from './pages/AuditLogs'
+import TeamSettings from './pages/TeamSettings'
 import { useStore } from './store'
 import Documentation from './pages/Documentation'
 import Tunneling from './pages/Tunneling'
@@ -1351,6 +1352,7 @@ if (!entered) return (
           <Route path="/flow" element={<Flow />} />
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/audit" element={<AuditLogs />} />
+          <Route path="/team" element={<TeamSettings />} />
           <Route path="/docs" element={<Documentation />} />
           <Route path="/tunneling" element={<Tunneling />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -1364,7 +1366,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
