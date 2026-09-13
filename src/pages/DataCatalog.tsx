@@ -80,6 +80,9 @@
     const [editingDescKey, setEditingDescKey] = useState<string | null>(null)
     const [descDraft, setDescDraft] = useState('')
     const [tagDraft, setTagDraft] = useState<Record<string, string>>({})
+    const [editingOwnerKey, setEditingOwnerKey] = useState<string | null>(null)
+    const [ownerDraft, setOwnerDraft] = useState('')
+    const [orgMembers, setOrgMembers] = useState<{ userId: string; roleKey: string }[]>([])
 
     const authHeaders = (): Record<string, string> => {
       const token = localStorage.getItem('datapro_token') || ''
@@ -109,7 +112,25 @@
       loadCatalog()
     }, [])
 
-    const saveCatalogField = async (source: any, field: 'description' | 'tags', value: any) => {
+    useEffect(() => {
+      const loadOrgMembers = async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/org/members`, {
+            credentials: 'include',
+            headers: authHeaders(),
+          })
+          if (!res.ok) return
+          const rows = await res.json()
+          if (Array.isArray(rows)) setOrgMembers(rows.map((r: any) => ({ userId: r.userId, roleKey: r.roleKey })))
+        } catch {
+          // Not authenticated or backend unreachable — owner dropdown falls
+          // back to "Unassigned only"; harmless.
+        }
+      }
+      loadOrgMembers()
+    }, [])
+
+    const saveCatalogField = async (source: any, field: 'description' | 'tags' | 'owner', value: any) => {
       const key = catalogKeyFor(source)
       setCatalogMap(prev => ({
         ...prev,
@@ -457,7 +478,36 @@
                     </div>
                     <div>
                       <span className="block text-xs text-white/40 mb-1">Data Owner</span>
-                      <span className="text-white text-sm">Local User</span>
+                      {editingOwnerKey === catalogKey ? (
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={ownerDraft}
+                            onChange={e => setOwnerDraft(e.target.value)}
+                            className="text-sm text-white rounded-md px-2 py-1 outline-none"
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(124,58,237,0.3)' }}
+                          >
+                            <option value="" style={{ background: '#0d0a1a' }}>Unassigned</option>
+                            {orgMembers.map(m => (
+                              <option key={m.userId} value={m.userId} style={{ background: '#0d0a1a' }}>
+                                {m.userId} ({m.roleKey})
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => { saveCatalogField(source, 'owner', ownerDraft); setEditingOwnerKey(null) }}
+                            className="text-xs font-semibold px-1.5 py-0.5 rounded-md"
+                            style={{ background: 'rgba(52,211,153,0.15)', color: '#34d399' }}>
+                            ✓
+                          </button>
+                        </div>
+                      ) : (
+                        <span
+                          onClick={() => { setEditingOwnerKey(catalogKey); setOwnerDraft(catalogEntry?.owner || '') }}
+                          className="text-white text-sm cursor-pointer"
+                          title="Click to edit owner">
+                          {catalogEntry?.owner || '<unassigned>'}
+                        </span>
+                      )}
                     </div>
                     <div>
                       <span className="block text-xs text-white/40 mb-1">Last Updated</span>
