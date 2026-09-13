@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useStore } from '../store'
+import { useState, useEffect } from 'react'
+import { API_BASE } from '../config'
 
 const CATEGORY_COLOR: Record<string, string> = {
   connection: '#22c55e',
@@ -10,16 +10,83 @@ const CATEGORY_COLOR: Record<string, string> = {
   other: '#64748b',
 }
 
+const STATUS_COLOR: Record<string, string> = {
+  success: '#4ade80',
+  failure: '#f87171',
+  info: 'rgba(255,255,255,0.5)',
+}
+
+const SEVERITY_COLOR: Record<string, string> = {
+  info: 'rgba(255,255,255,0.5)',
+  warning: '#fbbf24',
+  error: '#f87171',
+}
+
+type AuditLogDoc = {
+  _id: string
+  action: string
+  category: string
+  resourceType: string
+  resourceId: string
+  resourceName: string
+  status: string
+  severity: string
+  changes: Record<string, any> | null
+  metadata: Record<string, any>
+  correlationId: string | null
+  actorType?: string
+  createdAt: string
+}
+
+const authHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('datapro_token') || ''
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 export default function AuditLogs() {
-  const { auditLogs } = useStore()
+  const [logs, setLogs] = useState<AuditLogDoc[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [groupByTrigger, setGroupByTrigger] = useState(false)
   const [filter, setFilter] = useState('')
 
-  const filtered = auditLogs.filter(l =>
+  const loadLogs = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch(`${API_BASE}/api/audit-logs`, {
+        credentials: 'include',
+        headers: authHeaders(),
+      })
+      if (res.status === 401) {
+        setError('Sign in to view audit logs.')
+        setLogs([])
+        return
+      }
+      const data = await res.json()
+      if (data?.error) {
+        setError(data.error)
+        setLogs([])
+        return
+      }
+      if (Array.isArray(data)) setLogs(data)
+      else setLogs([])
+    } catch {
+      setError('Could not reach server to load audit logs.')
+      setLogs([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { loadLogs() }, [])
+
+  const filtered = logs.filter(l =>
     !filter ||
     (l.action || '').toLowerCase().includes(filter.toLowerCase()) ||
-    (l.entity_type || '').toLowerCase().includes(filter.toLowerCase()) ||
-    (l.details || '').toLowerCase().includes(filter.toLowerCase())
+    (l.resourceType || '').toLowerCase().includes(filter.toLowerCase()) ||
+    (l.resourceName || '').toLowerCase().includes(filter.toLowerCase()) ||
+    (l.category || '').toLowerCase().includes(filter.toLowerCase())
   )
 
   const grouped = groupByTrigger
@@ -28,7 +95,7 @@ export default function AuditLogs() {
         if (!acc[key]) acc[key] = []
         acc[key].push(log)
         return acc
-      }, {} as Record<string, typeof auditLogs>)
+      }, {} as Record<string, AuditLogDoc[]>)
     : null
 
   return (
@@ -52,6 +119,10 @@ export default function AuditLogs() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <button onClick={loadLogs} className="px-3 py-2 rounded-xl text-sm font-semibold"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}>
+            ↻ Refresh
+          </button>
           <input value={filter} onChange={e => setFilter(e.target.value)}
             placeholder="Search logs..."
             className="px-3 py-2 rounded-xl text-sm outline-none"
@@ -82,12 +153,22 @@ export default function AuditLogs() {
           <h2 className="font-bold text-white">Recent Activity</h2>
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20">
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Loading audit logs…</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <div className="text-4xl mb-4">⚠️</div>
+            <p className="text-white font-medium mb-1">Could not load audit logs</p>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>{error}</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-4xl mb-4">📋</div>
             <p className="text-white font-medium mb-1">No activity yet</p>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              Actions like uploads, analyses, and alerts will appear here
+              Actions like connections, pipeline runs, and catalog edits will appear here
             </p>
           </div>
         ) : (
@@ -95,28 +176,28 @@ export default function AuditLogs() {
             {/* Table header */}
             <div className="grid px-6 py-3 text-xs font-semibold"
               style={{
-                gridTemplateColumns: '180px 1fr 120px 140px 100px 60px',
+                gridTemplateColumns: '160px 1fr 130px 110px 90px 60px',
                 color: 'rgba(255,255,255,0.35)',
                 borderBottom: '1px solid rgba(255,255,255,0.06)'
               }}>
               <span>Time</span>
-              <span>Details</span>
+              <span>Resource</span>
               <span>Action</span>
-              <span>Entity Type</span>
-              <span>Entity ID</span>
+              <span>Category</span>
+              <span>Status</span>
               <span>View</span>
             </div>
 
             {/* Rows */}
             {(grouped
-              ? Object.entries(grouped).flatMap(([key, logs]) => [
+              ? Object.entries(grouped).flatMap(([key, groupLogs]) => [
                   <div key={`group-${key}`} className="px-6 py-2 text-xs font-bold uppercase tracking-wider"
                     style={{ background: 'rgba(124,58,237,0.05)', color: '#a78bfa' }}>
-                    {key.replace(/_/g, ' ')} ({logs.length})
+                    {key.replace(/[._]/g, ' ')} ({groupLogs.length})
                   </div>,
-                  ...logs.map(log => <LogRow key={log.id} log={log} />)
+                  ...groupLogs.map(log => <LogRow key={log._id} log={log} />)
                 ])
-              : filtered.map(log => <LogRow key={log.id} log={log} />)
+              : filtered.map(log => <LogRow key={log._id} log={log} />)
             )}
           </>
         )}
@@ -125,38 +206,28 @@ export default function AuditLogs() {
   )
 }
 
-// AuditLog entries only ever have {id, time, action, entity_type, entity_id,
-// details, user} — there's no stored "category" field. Derive a display
-// color from entity_type/action instead of a nonexistent log.category, so
-// rows aren't all falling back to the same gray "other" color.
-function deriveCategory(log: any): string {
-  const key = `${log.entity_type || ''} ${log.action || ''}`.toLowerCase()
-  if (key.includes('connection') || key.includes('connect')) return 'connection'
-  if (key.includes('pipeline') || key.includes('transformation') || key.includes('schedule')) return 'pipeline'
-  if (key.includes('source') || key.includes('destination') || key.includes('analysis')) return 'data'
-  if (key.includes('alert') || key.includes('approve') || key.includes('drift')) return 'security'
-  return 'other'
-}
-
-function LogRow({ log }: { log: any }) {
+function LogRow({ log }: { log: AuditLogDoc }) {
   const [showDetail, setShowDetail] = useState(false)
-  const color = CATEGORY_COLOR[deriveCategory(log)] || '#64748b'
+  const color = CATEGORY_COLOR[log.category] || CATEGORY_COLOR.other
+  const statusColor = STATUS_COLOR[log.status] || 'rgba(255,255,255,0.5)'
+  const severityColor = SEVERITY_COLOR[log.severity] || 'rgba(255,255,255,0.5)'
+  const timeLabel = log.createdAt ? new Date(log.createdAt).toLocaleString() : ''
 
   return (
     <>
       <div className="grid px-6 py-4 text-sm transition-all"
         style={{
-          gridTemplateColumns: '180px 1fr 120px 140px 100px 60px',
+          gridTemplateColumns: '160px 1fr 130px 110px 90px 60px',
           borderBottom: '1px solid rgba(255,255,255,0.04)',
           alignItems: 'center'
         }}
         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
         <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {log.time || ''}
+          {timeLabel}
         </span>
-        <span className="text-white text-xs truncate pr-4" title={log.details}>
-          {log.details || '—'}
+        <span className="text-white text-xs truncate pr-4" title={log.resourceName || log.resourceId}>
+          {log.resourceName || log.resourceId || '—'}
         </span>
         <span>
           <span className="px-2 py-0.5 rounded-full text-xs font-medium"
@@ -164,9 +235,9 @@ function LogRow({ log }: { log: any }) {
             {(log.action || '').replace(/[._]/g, ' ')}
           </span>
         </span>
-        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{log.entity_type}</span>
-        <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.35)' }}>
-          {(log.entity_id || '').slice(0, 8)}...
+        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{log.category}</span>
+        <span className="text-xs font-semibold" style={{ color: statusColor }}>
+          {log.status}
         </span>
         <button onClick={() => setShowDetail(!showDetail)}
           className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
@@ -185,11 +256,15 @@ function LogRow({ log }: { log: any }) {
             borderBottom: '1px solid rgba(255,255,255,0.04)',
             color: 'rgba(255,255,255,0.55)'
           }}>
-          <span className="font-semibold text-white">Full Entity ID:</span> {log.entity_id}<br />
-          <span className="font-semibold text-white">Entity Type:</span> {log.entity_type}<br />
-          <span className="font-semibold text-white">User:</span> {log.user}<br />
-          <span className="font-semibold text-white">Time:</span> {log.time}<br />
-          <span className="font-semibold text-white">Details:</span> {log.details}
+          <span className="font-semibold text-white">Resource Type:</span> {log.resourceType}<br />
+          <span className="font-semibold text-white">Resource ID:</span> {log.resourceId}<br />
+          <span className="font-semibold text-white">Severity:</span> <span style={{ color: severityColor }}>{log.severity}</span><br />
+          {log.actorType && <><span className="font-semibold text-white">Actor:</span> {log.actorType}<br /></>}
+          {log.correlationId && <><span className="font-semibold text-white">Correlation ID:</span> {log.correlationId}<br /></>}
+          {log.changes && <><span className="font-semibold text-white">Changes:</span> {JSON.stringify(log.changes)}<br /></>}
+          {log.metadata && Object.keys(log.metadata).length > 0 && (
+            <><span className="font-semibold text-white">Metadata:</span> {JSON.stringify(log.metadata)}<br /></>
+          )}
         </div>
       )}
     </>
