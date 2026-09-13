@@ -11,6 +11,8 @@ function SidebarIcon({ name, size = 19, active = false }: { name: string; size?:
     shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
     message: <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />,
     bell: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>,
+    team: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>,
+    team: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>,
   }
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={active ? '#c4b5fd' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -19,41 +21,28 @@ function SidebarIcon({ name, size = 19, active = false }: { name: string; size?:
   )
 }
 
-export const SIDEBAR_NAV_ITEMS = [
-  { path: '/sources', icon: 'plug', label: 'Sources', description: 'Connect and manage the data sources feeding your pipelines.' },
-  { path: '/catalog', icon: 'folder', label: 'Catalog', description: 'Browse every dataset and asset available across your org.' },
-  { path: '/flow', icon: 'flow', label: 'Pipeline Flow', description: 'See how data moves through your pipelines, step by step.' },
-  { path: '/analysis', icon: 'chart', label: 'Analysis', description: 'Explore charts and metrics on your data.' },
-  { path: '/audit', icon: 'file', label: 'Audit Logs', description: 'Review a history of changes and actions across the platform.' },
-  { path: '/docs', icon: 'book', label: 'Cosmic Documentation', description: 'Guides and references for using the platform.' },
-  { path: '/tunneling', icon: 'shield', label: 'Tunneling', description: 'Configure secure tunnels between your systems and this platform.' },
-  { path: '/feedback', icon: 'message', label: 'Feedback / Support', description: 'Send feedback or get help from support.' },
-] as const
-
 interface SidebarProps {
   onOpenNotif: () => void;
   unread: number;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onLogout: () => void;
-  /** When true, the sidebar renders expanded regardless of `isExpanded` — used by the onboarding tour so labels are readable while it runs. */
-  forceExpanded?: boolean;
-  /** The nav item path currently spotlighted by the onboarding tour, if any. */
-  highlightedTourPath?: string | null;
 }
 
-export default function Sidebar({
-  onOpenNotif,
-  unread,
-  isExpanded,
-  onToggleExpand,
-  onLogout,
-  forceExpanded = false,
-  highlightedTourPath = null,
-}: SidebarProps) {
+export default function Sidebar({ onOpenNotif, unread, isExpanded, onToggleExpand, onLogout }: SidebarProps) {
   const location = useLocation();
-  const expanded = isExpanded || forceExpanded;
-  const navItems = SIDEBAR_NAV_ITEMS;
+
+const navItems = [
+    { path: '/sources', icon: 'plug', label: 'Sources' },
+    { path: '/catalog', icon: 'folder', label: 'Catalog' },
+    { path: '/flow', icon: 'flow', label: 'Pipeline Flow' },
+    { path: '/analysis', icon: 'chart', label: 'Analysis' },
+    { path: '/audit', icon: 'file', label: 'Audit Logs' },
+    { path: '/team', icon: 'team', label: 'Team' },
+    { path: '/docs', icon: 'book', label: 'Cosmic Documentation' },
+    { path: '/tunneling', icon: 'shield', label: 'Tunneling' },
+    { path: '/feedback', icon: 'message', label: 'Feedback / Support' },
+  ]
 
   return (
     <aside 
@@ -61,15 +50,15 @@ export default function Sidebar({
       style={{ 
         background: '#0d0a1a', 
         borderRight: '1px solid rgba(255,255,255,0.08)',
-        width: expanded ? '16rem' : '4rem' 
+        width: isExpanded ? '16rem' : '4rem' 
       }}
     >
       {/* Brand / Logo Area */}
-      <div className={`h-16 flex items-center border-b border-white/5 ${expanded ? 'px-4' : 'justify-center'}`}>
+      <div className={`h-16 flex items-center border-b border-white/5 ${isExpanded ? 'px-4' : 'justify-center'}`}>
         <button 
           onClick={onToggleExpand}
           className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors shrink-0 outline-none"
-          title={expanded ? "Collapse Sidebar" : "Expand Sidebar"}
+          title={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
         >
           {/* Hamburger Icon */}
           <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -77,7 +66,7 @@ export default function Sidebar({
           </svg>
         </button>
         
-        {expanded && (
+        {isExpanded && (
           <span className="text-white font-bold ml-3 text-lg whitespace-nowrap overflow-hidden transition-opacity duration-300">
             The God's Tool
           </span>
@@ -89,40 +78,35 @@ export default function Sidebar({
         {navItems.map((item) => {
           // Highlight if current path matches, or if we are on root '/' and the item is '/sources'
           const isActive = location.pathname === item.path || (location.pathname === '/' && item.path === '/sources');
-          const isTourTarget = highlightedTourPath === item.path;
           
           return (
             <NavLink
               key={item.path}
               to={item.path}
-              data-tour-id={item.path}
-              title={!expanded ? item.label : undefined}
               className={`flex items-center rounded-xl transition-all duration-200 group relative ${
                 isActive 
                   ? 'bg-purple-600/15 text-white' 
                   : 'text-white/40 hover:bg-white/5 hover:text-white'
               }`}
               style={{
-                padding: expanded ? '0.75rem 1rem' : '0.75rem 0',
-                justifyContent: expanded ? 'flex-start' : 'center',
-                border: isActive ? '1px solid rgba(124,58,237,0.3)' : '1px solid transparent',
-                boxShadow: isTourTarget ? '0 0 0 2px rgba(196,181,253,0.7)' : undefined,
-                position: 'relative',
-                zIndex: isTourTarget ? 101 : undefined,
+                padding: isExpanded ? '0.75rem 1rem' : '0.75rem 0',
+                justifyContent: isExpanded ? 'flex-start' : 'center',
+                border: isActive ? '1px solid rgba(124,58,237,0.3)' : '1px solid transparent'
               }}
+              title={!isExpanded ? item.label : undefined}
             >
               <span className="shrink-0">
                 <SidebarIcon name={item.icon} active={isActive} />
               </span>
               
-              {expanded && (
+              {isExpanded && (
                 <span className="ml-3 text-sm font-medium whitespace-nowrap">
                   {item.label}
                 </span>
               )}
 
               {/* Active Indicator Line (Only visible when collapsed) */}
-              {!expanded && isActive && (
+              {!isExpanded && isActive && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-purple-500 rounded-r-full" />
               )}
             </NavLink>
@@ -137,17 +121,17 @@ export default function Sidebar({
           onClick={onLogout}
           className="w-full flex items-center rounded-xl text-red-400/70 hover:bg-red-500/10 hover:text-red-400 transition-all group relative"
           style={{
-            padding: expanded ? '0.75rem 1rem' : '0.75rem 0',
-            justifyContent: expanded ? 'flex-start' : 'center',
+            padding: isExpanded ? '0.75rem 1rem' : '0.75rem 0',
+            justifyContent: isExpanded ? 'flex-start' : 'center',
           }}
-          title={!expanded ? "Logout" : undefined}
+          title={!isExpanded ? "Logout" : undefined}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
             <polyline points="16 17 21 12 16 7"/>
             <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
-          {expanded && (
+          {isExpanded && (
             <span className="ml-3 text-sm font-medium whitespace-nowrap">Logout</span>
           )}
         </button>
@@ -157,10 +141,10 @@ export default function Sidebar({
           onClick={onOpenNotif}
           className="w-full flex items-center rounded-xl text-white/40 hover:bg-white/5 hover:text-white transition-all group relative"
           style={{
-            padding: expanded ? '0.75rem 1rem' : '0.75rem 0',
-            justifyContent: expanded ? 'flex-start' : 'center',
+            padding: isExpanded ? '0.75rem 1rem' : '0.75rem 0',
+            justifyContent: isExpanded ? 'flex-start' : 'center',
           }}
-          title={!expanded ? "Notifications" : undefined}
+          title={!isExpanded ? "Notifications" : undefined}
         >
           <div className="relative shrink-0">
             <SidebarIcon name="bell" />
@@ -171,7 +155,7 @@ export default function Sidebar({
             )}
           </div>
           
-          {expanded && (
+          {isExpanded && (
             <span className="ml-3 text-sm font-medium whitespace-nowrap">
               Notifications
             </span>
