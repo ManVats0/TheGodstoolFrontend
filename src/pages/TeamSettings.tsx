@@ -49,6 +49,10 @@ export default function TeamSettings() {
         setError('Sign in to view your team.')
         return
       }
+      if (!orgRes.ok || !membersRes.ok) {
+        setError('Could not load team data from the server.')
+        return
+      }
       const orgData = await orgRes.json()
       const membersData = await membersRes.json()
       if (orgData?.error) { setError(orgData.error); return }
