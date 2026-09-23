@@ -215,7 +215,9 @@ export default function Pricing() {
           const verifyData = await verifyRes.json()
           if (verifyData.success) {
             setCustomAmount('')
-            alert('Payment successful — thank you!')
+            // ← CHANGED: Redirect to thank-you page (tailored credits message)
+            // instead of alert(), matching handleSubscribe's pattern above.
+            window.location.href = `/thank-you?type=credits&currency=${customCurrency}&amount=${amountNum}`
           } else {
             setCustomError('Payment verification failed. Contact support.')
           }
