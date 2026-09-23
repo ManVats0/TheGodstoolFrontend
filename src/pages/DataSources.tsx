@@ -68,6 +68,8 @@
     const [backendAnalysisBadges, setBackendAnalysisBadges] = useState<Record<string, any>>({})
     const [expandedSourceId, setExpandedSourceId] = useState<string | null>(null)
     const [credits, setCredits] = useState<number | null>(null)
+    const [customCreditsINR, setCustomCreditsINR] = useState<number | null>(null)
+    const [customCreditsUSD, setCustomCreditsUSD] = useState<number | null>(null)
     const [retentionDraft, setRetentionDraft] = useState<Record<string, string>>({})
     const [retentionSaving, setRetentionSaving] = useState<Record<string, boolean>>({})
     const [erasingId, setErasingId] = useState<string | null>(null)
@@ -351,6 +353,8 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
           if (!res.ok) return
           const data = await res.json()
           setCredits(typeof data.credits === 'number' ? data.credits : 0)
+          setCustomCreditsINR(typeof data.customCreditsINR === 'number' ? data.customCreditsINR : 0)
+          setCustomCreditsUSD(typeof data.customCreditsUSD === 'number' ? data.customCreditsUSD : 0)
         } catch {
           // Not authenticated or backend unreachable — badge just won't show.
         }
@@ -957,6 +961,18 @@ const handleLockedSource = () => {
               <span className="ml-2 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
                 style={{ background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }}>
                 🪙 {credits.toLocaleString()} credits
+              </span>
+            )}
+            {customCreditsINR !== null && customCreditsINR > 0 && (
+              <span className="ml-2 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
+                style={{ background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }}>
+                🪙 ₹{customCreditsINR.toLocaleString(undefined, { maximumFractionDigits: 2 })} credits
+              </span>
+            )}
+            {customCreditsUSD !== null && customCreditsUSD > 0 && (
+              <span className="ml-2 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
+                style={{ background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }}>
+                🪙 ${customCreditsUSD.toLocaleString(undefined, { maximumFractionDigits: 2 })} credits
               </span>
             )}
           </div>
