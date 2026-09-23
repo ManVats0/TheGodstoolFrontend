@@ -1,17 +1,35 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 export default function ThankYou() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [showIndra, setShowIndra] = useState(true)
 
+  // Optional tailored message for a custom-credits top-up (see Pricing.tsx
+  // handleCustomPayment). When ?type is absent, every branch below falls
+  // back to the original generic subscription copy — untouched.
+  const purchaseType = searchParams.get('type')
+  const isCreditsPurchase = purchaseType === 'credits'
+  const creditsCurrency = searchParams.get('currency') === 'USD' ? 'USD' : 'INR'
+  const creditsCurrencySymbol = creditsCurrency === 'USD' ? '$' : '₹'
+  const creditsAmountParam = searchParams.get('amount')
+  const creditsAmount = creditsAmountParam && !isNaN(Number(creditsAmountParam)) ? Number(creditsAmountParam) : null
+
 useEffect(() => {
-    // Verify user is logged in and has a plan
+    // Verify user is logged in. A plan is only required for the subscription
+    // flow — a pure credits top-up never sets 'datapro_plan' (see Pricing.tsx
+    // handleCustomPayment), so the credits flow isn't gated on having a plan.
     const userPlan = localStorage.getItem('datapro_plan')
     const isLoggedIn = localStorage.getItem('datapro_logged_in')
-    
-    if (!isLoggedIn || !userPlan || userPlan === 'none') {
+
+    if (!isLoggedIn) {
       // If somehow they got here without proper state, redirect to home
+      window.location.href = '/'
+      return
+    }
+    if (!isCreditsPurchase && (!userPlan || userPlan === 'none')) {
+      // Subscription flow still requires an active plan, exactly as before
       window.location.href = '/'
       return
     }
@@ -120,7 +138,7 @@ useEffect(() => {
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
         }}>
-          Payment Successful!
+          {isCreditsPurchase ? 'Credits Added!' : 'Payment Successful!'}
         </h1>
 
         <p style={{
@@ -130,7 +148,9 @@ useEffect(() => {
           lineHeight: 1.8,
           margin: '0 0 24px'
         }}>
-          Your subscription is now active. Welcome to The God's Tool! 🎉
+          {isCreditsPurchase
+            ? `You've added ${creditsCurrencySymbol}${creditsAmount !== null ? creditsAmount.toLocaleString() : ''} in credits to The God's Tool! 🎉`
+            : "Your subscription is now active. Welcome to The God's Tool! 🎉"}
         </p>
 
         <div style={{
@@ -142,10 +162,12 @@ useEffect(() => {
           textAlign: 'left'
         }}>
           <div style={{ color: '#34d399', fontSize: '0.9rem', fontFamily: 'monospace', marginBottom: '12px', fontWeight: 700 }}>
-            ✓ Subscription Active
+            {isCreditsPurchase ? '✓ Credits Added' : '✓ Subscription Active'}
           </div>
           <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', fontFamily: 'monospace', lineHeight: 1.7 }}>
-            You now have full access to all data sources, AI cleaning, and pipeline automation. Start by connecting your first data source.
+            {isCreditsPurchase
+              ? `Your ${creditsCurrency} credit balance has been topped up${creditsAmount !== null ? ` by ${creditsCurrencySymbol}${creditsAmount.toLocaleString()}` : ''}. Credits never expire and stack with any active plan.`
+              : 'You now have full access to all data sources, AI cleaning, and pipeline automation. Start by connecting your first data source.'}
           </div>
         </div>
 
@@ -215,7 +237,7 @@ useEffect(() => {
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, #0a0820 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(66,153,225,0.18) 0%, transparent 70%)', animation: 'indraLightning 2.5s ease-in-out infinite' }} />
             <div style={{ position: 'absolute', bottom: '8px', left: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '1.1rem' }}>⚡</span>
+              <span style={{ fontSize: '1.1rem' }}></span>
               <span style={{ fontFamily: 'Georgia, serif', color: '#63b3ed', fontSize: '0.65rem', opacity: 0.7, letterSpacing: '0.1em' }}>GOD OF RAIN</span>
             </div>
           </div>
