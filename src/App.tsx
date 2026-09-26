@@ -837,6 +837,7 @@ if (!entered) return (
           { icon: 'clock', title: 'Schedule Your Runs', desc: 'Set it once, then stop thinking about it. Every 5 seconds or once a month — pick your rhythm and the tool keeps the beat, even when you\'re not watching.', delay: '0.2s' },
           { icon: 'filter', title: 'Advanced Filter', desc: 'Instantly isolate the exact rows or values causing a data quality issue — no more scrolling through thousands of rows by hand.', delay: '0.25s' },
           { icon: 'book', title: 'Analyse', desc: 'Free analysis on every connected data source — a full data dictionary and data info, ready for you.', delay: '0.3s' },
+          { icon: 'shield', title: 'Team & Data Governance', desc: 'Invite teammates, assign roles like Admin, Data Steward, Editor, and Viewer, and control exactly who can view, edit, or manage your organization\'s data.', delay: '0.35s' },
         ].map((f, i) => (
           <div key={`extra-${i}`} className="feature-card" style={{ animationDelay: f.delay }}>
             <div style={{ marginBottom: '16px' }}><LineIcon name={f.icon} size={30} /></div>
