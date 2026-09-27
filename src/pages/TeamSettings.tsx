@@ -9,6 +9,15 @@ type OrgMember = {
   joinedAt?: string
 }
 
+type OrgInvite = {
+  id: string
+  email: string
+  roleKey: string
+  status: string
+  invitedAt: string
+  expiresAt: string
+}
+
 const ROLE_LABELS: Record<string, string> = {
   owner: 'Organization Owner',
   admin: 'Admin',
@@ -29,6 +38,7 @@ export default function TeamSettings() {
   const [myRole, setMyRole] = useState('')
   const [permissions, setPermissions] = useState<Record<string, boolean>>({})
   const [members, setMembers] = useState<OrgMember[]>([])
+  const [invites, setInvites] = useState<OrgInvite[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -41,9 +51,10 @@ export default function TeamSettings() {
     setLoading(true)
     setError('')
     try {
-      const [orgRes, membersRes] = await Promise.all([
+      const [orgRes, membersRes, invitesRes] = await Promise.all([
         fetch(`${API_BASE}/api/org`, { credentials: 'include', headers: authHeaders() }),
         fetch(`${API_BASE}/api/org/members`, { credentials: 'include', headers: authHeaders() }),
+        fetch(`${API_BASE}/api/org/invites`, { credentials: 'include', headers: authHeaders() }),
       ])
       if (orgRes.status === 401 || membersRes.status === 401) {
         setError('Sign in to view your team.')
@@ -55,11 +66,13 @@ export default function TeamSettings() {
       }
       const orgData = await orgRes.json()
       const membersData = await membersRes.json()
+      const invitesData = invitesRes.ok ? await invitesRes.json() : []
       if (orgData?.error) { setError(orgData.error); return }
       setOrg(orgData.org)
       setMyRole(orgData.role)
       setPermissions(orgData.permissions || {})
       setMembers(Array.isArray(membersData) ? membersData : [])
+      setInvites(Array.isArray(invitesData) ? invitesData : [])
     } catch {
       setError('Could not reach the server.')
     } finally {
@@ -76,34 +89,22 @@ export default function TeamSettings() {
     setInviteBusy(true)
     setInviteMsg('')
     try {
-      // Step 1: resolve email -> userId via the auth service.
-      // NOTE: assumes the Express auth service is reachable at the same
-      // API_BASE as the Python backend. If your auth service runs on a
-      // different host/port in this deployment, change AUTH_API_BASE below.
-      const AUTH_API_BASE = API_BASE
-      const lookupRes = await fetch(
-        `${AUTH_API_BASE}/api/users/lookup-by-email?email=${encodeURIComponent(inviteEmail.trim())}`,
-        { credentials: 'include', headers: authHeaders() }
-      )
-      const lookupData = await lookupRes.json()
-      if (!lookupRes.ok || !lookupData.userId) {
-        setInviteMsg(lookupData.error || 'No account found with that email.')
-        return
-      }
-
-      // Step 2: invite that userId into the org with the chosen role.
-      const inviteRes = await fetch(`${API_BASE}/api/org/members/invite`, {
+      const res = await fetch(`${API_BASE}/api/org/invites`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ userId: lookupData.userId, roleKey: inviteRole }),
+        body: JSON.stringify({ email: inviteEmail.trim(), roleKey: inviteRole }),
       })
-      const inviteData = await inviteRes.json()
-      if (!inviteRes.ok || inviteData.error) {
-        setInviteMsg(inviteData.error || 'Could not add member.')
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        setInviteMsg(data.error || 'Could not send invite.')
         return
       }
-      setInviteMsg(`Added ${inviteEmail.trim()} as ${ROLE_LABELS[inviteRole]}.`)
+      if (data.addedImmediately) {
+        setInviteMsg(`Added ${inviteEmail.trim()} as ${ROLE_LABELS[inviteRole]}.`)
+      } else {
+        setInviteMsg(`Invite sent to ${inviteEmail.trim()}.`)
+      }
       setInviteEmail('')
       await load()
     } catch {
@@ -122,9 +123,7 @@ export default function TeamSettings() {
         body: JSON.stringify({ roleKey: newRole }),
       })
       await load()
-    } catch {
-      // best-effort; load() re-syncs state either way
-    }
+    } catch {}
   }
 
   const handleRemove = async (member: OrgMember) => {
@@ -136,9 +135,30 @@ export default function TeamSettings() {
         headers: authHeaders(),
       })
       await load()
-    } catch {
-      // best-effort
-    }
+    } catch {}
+  }
+
+  const handleRevokeInvite = async (invite: OrgInvite) => {
+    try {
+      await fetch(`${API_BASE}/api/org/invites/${invite.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: authHeaders(),
+      })
+      await load()
+    } catch {}
+  }
+
+  const handleResendInvite = async (invite: OrgInvite) => {
+    try {
+      await fetch(`${API_BASE}/api/org/invites`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ email: invite.email, roleKey: invite.roleKey }),
+      })
+      await load()
+    } catch {}
   }
 
   if (loading) {
@@ -185,14 +205,14 @@ export default function TeamSettings() {
               className="px-5 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-40"
               style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}
             >
-              {inviteBusy ? 'Adding…' : 'Add to team'}
+              {inviteBusy ? 'Sending…' : 'Add to team'}
             </button>
           </div>
-          {inviteMsg && <p className="text-xs mt-2" style={{ color: inviteMsg.startsWith('Added') ? '#4ade80' : '#f87171' }}>{inviteMsg}</p>}
+          {inviteMsg && <p className="text-xs mt-2" style={{ color: inviteMsg.startsWith('Added') || inviteMsg.startsWith('Invite sent') ? '#4ade80' : '#f87171' }}>{inviteMsg}</p>}
         </div>
       )}
 
-      <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className="rounded-2xl overflow-hidden mb-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <p className="font-bold text-white">Members ({members.length})</p>
         </div>
@@ -234,6 +254,42 @@ export default function TeamSettings() {
           ))}
         </div>
       </div>
+
+      {canManage && invites.length > 0 && (
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <p className="font-bold text-white">Pending Invites ({invites.length})</p>
+          </div>
+          <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+            {invites.map(inv => (
+              <div key={inv.id} className="flex items-center justify-between px-6 py-4">
+                <div>
+                  <p className="text-sm text-white">{inv.email}</p>
+                  <p className="text-xs" style={{ color: inv.status === 'expired' ? '#f87171' : 'rgba(255,255,255,0.35)' }}>
+                    {ROLE_LABELS[inv.roleKey] || inv.roleKey} · {inv.status === 'expired' ? 'expired' : `expires ${new Date(inv.expiresAt).toLocaleDateString()}`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleResendInvite(inv)}
+                    className="text-xs px-2.5 py-1.5 rounded-lg"
+                    style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#a78bfa' }}
+                  >
+                    Resend
+                  </button>
+                  <button
+                    onClick={() => handleRevokeInvite(inv)}
+                    className="text-xs px-2.5 py-1.5 rounded-lg"
+                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
+                  >
+                    Revoke
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
