@@ -28,6 +28,8 @@ import Tunneling from './pages/Tunneling'
 import Contact from './pages/Contact'
 import Blog from './pages/Blog'
 import Feedback from './pages/Feedback'
+import AcceptInvite from './pages/AcceptInvite'
+import { API_BASE } from './config'
 
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
@@ -60,6 +62,18 @@ function getPasswordStrength(pw: string) {
   if (score <= 3) return { label: 'Okay', color: '#fbbf24', pct: 55 }
   if (score === 4) return { label: 'Good', color: '#4ade80', pct: 80 }
   return { label: 'Strong', color: '#22c55e', pct: 100 }
+}
+
+async function acceptPendingInviteIfAny(token: string) {
+  const inviteToken = localStorage.getItem('datapro_pending_invite')
+  if (!inviteToken) return
+  try {
+    await fetch(`${API_BASE}/api/org/invites/${inviteToken}/accept`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  } catch { /* ignore */ }
+  localStorage.removeItem('datapro_pending_invite')
 }
 
 function LineIcon({ name, size = 32, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
@@ -210,7 +224,8 @@ useEffect(() => {
         setUserPlan(plan)
       })
       .catch(() => { /* ignore */ })
-      .finally(() => {
+      .finally(async () => {
+        await acceptPendingInviteIfAny(token)
         setEntered(true)
         navigate('/', { replace: true })
       })
@@ -313,6 +328,7 @@ useEffect(() => {
         setUserPlan(plan)
         if (isRegisterMode && plan === 'trial') setShowTrialWelcome(true)
       } catch { /* ignore */ }
+      await acceptPendingInviteIfAny(data.token)
       setEntered(true)
       setShowLogin(false)
     } catch (err) {
@@ -352,6 +368,7 @@ useEffect(() => {
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
       } catch { /* ignore */ }
+      await acceptPendingInviteIfAny(data.token)
       setEntered(true)
       setShowLogin(false)
     } catch {
@@ -425,6 +442,7 @@ useEffect(() => {
             localStorage.setItem('datapro_plan', plan)
             setUserPlan(plan)
           } catch { /* ignore */ }
+          await acceptPendingInviteIfAny(data.token)
           setEntered(true)
           setShowLogin(false)
         } catch {
@@ -476,6 +494,7 @@ useEffect(() => {
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
       } catch { /* ignore */ }
+      await acceptPendingInviteIfAny(data.token)
       setEntered(true)
       setShowLogin(false)
     } catch {
@@ -495,6 +514,7 @@ if (location.pathname === '/contact') return <Routes><Route path="/contact" elem
 if (location.pathname === '/blog') return <Routes><Route path="/blog" element={<Blog />} /></Routes>
 if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
 if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
+if (location.pathname === '/accept-invite') return <Routes><Route path="/accept-invite" element={<AcceptInvite />} /></Routes>
 
 if (location.pathname === '/auth/callback') return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1rem' }}>
