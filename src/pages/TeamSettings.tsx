@@ -26,7 +26,6 @@ const ROLE_LABELS: Record<string, string> = {
   editor: 'Editor',
   viewer: 'Viewer',
 }
-
 const ROLE_OPTIONS = ['admin', 'steward', 'editor', 'viewer']
 
 const authHeaders = (): Record<string, string> => {
