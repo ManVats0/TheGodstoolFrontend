@@ -3,6 +3,7 @@ import { API_BASE } from '../config'
 
 type OrgMember = {
   userId: string
+  email?: string
   roleKey: string
   status: string
   invitedAt?: string
@@ -220,7 +221,7 @@ export default function TeamSettings() {
           {members.map(m => (
             <div key={m.userId} className="flex items-center justify-between px-6 py-4">
               <div>
-                <p className="text-sm text-white font-mono">{m.userId}</p>
+                <p className="text-sm text-white">{m.email || m.userId}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.status}</p>
               </div>
               <div className="flex items-center gap-2">
