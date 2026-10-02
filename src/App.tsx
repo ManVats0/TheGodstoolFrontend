@@ -68,11 +68,27 @@ async function acceptPendingInviteIfAny(token: string) {
   const inviteToken = localStorage.getItem('datapro_pending_invite')
   if (!inviteToken) return
   try {
-    await fetch(`${API_BASE}/api/org/invites/${inviteToken}/accept`, {
+    const res = await fetch(`${API_BASE}/api/org/invites/${inviteToken}/accept`, {
       method: 'POST',
+      credentials: 'include',
       headers: { Authorization: `Bearer ${token}` }
     })
-  } catch { /* ignore */ }
+    let data: any = null
+    try { data = await res.json() } catch { /* empty body, e.g. 401 */ }
+    if (res.ok && data && !data.error) {
+      localStorage.setItem('datapro_invite_joined', '1')
+    } else {
+      localStorage.setItem(
+        'datapro_invite_error',
+        data?.error ||
+          (res.status === 401
+            ? 'Your sign-in could not be verified, so the invite was not accepted. Sign in again and reopen the invite link.'
+            : `Could not accept the invite (${res.status}).`)
+      )
+    }
+  } catch {
+    localStorage.setItem('datapro_invite_error', 'Could not reach the server to accept the invite.')
+  }
   localStorage.removeItem('datapro_pending_invite')
 }
 
@@ -167,6 +183,14 @@ useEffect(() => {
     localStorage.setItem('datapro_last_page', location.pathname)
   }
 }, [location.pathname]) // Default to true if you prefer it open
+
+// After an invite is accepted (or fails) during sign-in, show the result on the Team page.
+useEffect(() => {
+  if (!entered) return
+  if (localStorage.getItem('datapro_invite_joined') || localStorage.getItem('datapro_invite_error')) {
+    if (location.pathname !== '/team') navigate('/team', { replace: true })
+  }
+}, [entered, location.pathname])
 
 useEffect(() => {
   const titles: Record<string, string> = {
@@ -1387,7 +1411,7 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}></div>
+            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>
