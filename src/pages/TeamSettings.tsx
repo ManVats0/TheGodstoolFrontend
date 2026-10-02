@@ -50,11 +50,24 @@ export default function TeamSettings() {
   // One-time messages left by the invite flow (see acceptPendingInviteIfAny in App.tsx
   // and AcceptInvite.tsx). Read once on mount, then cleared so they don't reappear.
   const [joinedBanner] = useState(() => localStorage.getItem('datapro_invite_joined') === '1')
+  const [joinedOrgName] = useState(() => localStorage.getItem('datapro_invite_joined_org') || '')
+  const [joinedRoleLabel] = useState(() => localStorage.getItem('datapro_invite_joined_role') || '')
   const [joinError] = useState(() => localStorage.getItem('datapro_invite_error') || '')
 
   useEffect(() => {
     localStorage.removeItem('datapro_invite_joined')
+    localStorage.removeItem('datapro_invite_joined_org')
+    localStorage.removeItem('datapro_invite_joined_role')
     localStorage.removeItem('datapro_invite_error')
+  }, [])
+
+  // Owner-side live confirmation: refetch members/invites whenever this tab
+  // regains focus, so a newly-accepted invite shows up as a Member without
+  // a manual page reload.
+  useEffect(() => {
+    const onFocus = () => load()
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
   }, [])
 
   const load = async () => {
@@ -183,7 +196,7 @@ export default function TeamSettings() {
       {joinedBanner && (
         <div className="mb-6 p-4 rounded-2xl" style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)' }}>
           <p className="text-sm font-bold" style={{ color: '#4ade80' }}>
-            You joined {org?.name} as {ROLE_LABELS[myRole] || myRole}.
+            You joined {joinedOrgName || org?.name} as {joinedRoleLabel || ROLE_LABELS[myRole] || myRole}.
           </p>
         </div>
       )}
