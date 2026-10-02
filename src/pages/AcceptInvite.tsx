@@ -54,23 +54,49 @@ export default function AcceptInvite() {
 
   const acceptInvite = async (authToken: string) => {
     setStatus('accepting')
+    let res: Response
     try {
-      const res = await fetch(`${API_BASE}/api/org/invites/${token}/accept`, {
+      res = await fetch(`${API_BASE}/api/org/invites/${token}/accept`, {
         method: 'POST',
+        credentials: 'include',
         headers: { Authorization: `Bearer ${authToken}` },
       })
-      const data = await res.json()
-      if (!res.ok || data.error) {
-        setStatus('error')
-        setErrorMsg(data.error || 'Could not accept invite.')
-        return
-      }
-      localStorage.removeItem('datapro_pending_invite')
-      navigate('/team', { replace: true })
-    } catch {
+    } catch (err) {
+      console.error('Invite accept network error:', err, 'API_BASE =', API_BASE)
       setStatus('error')
       setErrorMsg('Could not reach the server.')
+      return
     }
+
+    // 401 comes back with an empty body, so read the status BEFORE parsing JSON.
+    // The saved login is missing, expired, or rejected: send the user to sign in
+    // again and resume this invite afterwards.
+    if (res.status === 401) {
+      console.error('Invite accept: 401 (stored login token rejected by backend)')
+      localStorage.removeItem('datapro_token')
+      localStorage.setItem('datapro_pending_invite', token)
+      navigate('/', { replace: true })
+      return
+    }
+
+    let data: any = null
+    try {
+      data = await res.json()
+    } catch {
+      console.error('Invite accept: non-JSON response', res.status)
+      setStatus('error')
+      setErrorMsg(`Server error (${res.status}). Please try again later.`)
+      return
+    }
+
+    if (!res.ok || data?.error) {
+      setStatus('error')
+      setErrorMsg(data?.error || 'Could not accept invite.')
+      return
+    }
+
+    localStorage.removeItem('datapro_pending_invite')
+    navigate('/team', { replace: true })
   }
 
   return (
