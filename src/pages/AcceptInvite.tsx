@@ -14,27 +14,42 @@ export default function AcceptInvite() {
   useEffect(() => {
     if (!token) { setStatus('error'); setErrorMsg('No invite token provided.'); return }
 
-    fetch(`${API_BASE}/api/org/invites/${token}/info`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.valid) {
+    const run = async () => {
+      let data: any
+      try {
+        const res = await fetch(`${API_BASE}/api/org/invites/${token}/info`)
+        if (!res.ok) {
+          console.error('Invite info failed:', res.status, await res.text())
           setStatus('error')
-          setErrorMsg(data.error || 'This invite is no longer valid.')
+          setErrorMsg(`Server error (${res.status}). Please try again later.`)
           return
         }
-        setInfo({ orgName: data.orgName, roleLabel: data.roleLabel, email: data.email })
-        setStatus('ready')
+        data = await res.json()
+      } catch (err) {
+        console.error('Invite info network error:', err, 'API_BASE =', API_BASE)
+        setStatus('error')
+        setErrorMsg('Could not reach the server.')
+        return
+      }
 
-        const existingToken = localStorage.getItem('datapro_token')
-        const existingEmail = localStorage.getItem('datapro_email')
-        if (existingToken && existingEmail?.toLowerCase() === data.email.toLowerCase()) {
-          acceptInvite(existingToken)
-        } else {
-          localStorage.setItem('datapro_pending_invite', token)
-          navigate('/', { replace: true })
-        }
-      })
-      .catch(() => { setStatus('error'); setErrorMsg('Could not reach the server.') })
+      if (!data.valid) {
+        setStatus('error')
+        setErrorMsg(data.error || 'This invite is no longer valid.')
+        return
+      }
+      setInfo({ orgName: data.orgName, roleLabel: data.roleLabel, email: data.email })
+      setStatus('ready')
+
+      const existingToken = localStorage.getItem('datapro_token')
+      const existingEmail = localStorage.getItem('datapro_email')
+      if (existingToken && existingEmail?.toLowerCase() === data.email.toLowerCase()) {
+        acceptInvite(existingToken)
+      } else {
+        localStorage.setItem('datapro_pending_invite', token)
+        navigate('/', { replace: true })
+      }
+    }
+    run()
   }, [token])
 
   const acceptInvite = async (authToken: string) => {
