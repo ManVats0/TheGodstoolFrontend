@@ -77,6 +77,8 @@ async function acceptPendingInviteIfAny(token: string) {
     try { data = await res.json() } catch { /* empty body, e.g. 401 */ }
     if (res.ok && data && !data.error) {
       localStorage.setItem('datapro_invite_joined', '1')
+      if (data.orgName) localStorage.setItem('datapro_invite_joined_org', data.orgName)
+      if (data.roleLabel) localStorage.setItem('datapro_invite_joined_role', data.roleLabel)
     } else {
       localStorage.setItem(
         'datapro_invite_error',
