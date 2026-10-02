@@ -47,6 +47,16 @@ export default function TeamSettings() {
   const [inviteBusy, setInviteBusy] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
 
+  // One-time messages left by the invite flow (see acceptPendingInviteIfAny in App.tsx
+  // and AcceptInvite.tsx). Read once on mount, then cleared so they don't reappear.
+  const [joinedBanner] = useState(() => localStorage.getItem('datapro_invite_joined') === '1')
+  const [joinError] = useState(() => localStorage.getItem('datapro_invite_error') || '')
+
+  useEffect(() => {
+    localStorage.removeItem('datapro_invite_joined')
+    localStorage.removeItem('datapro_invite_error')
+  }, [])
+
   const load = async () => {
     setLoading(true)
     setError('')
@@ -170,6 +180,19 @@ export default function TeamSettings() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
+      {joinedBanner && (
+        <div className="mb-6 p-4 rounded-2xl" style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)' }}>
+          <p className="text-sm font-bold" style={{ color: '#4ade80' }}>
+            You joined {org?.name} as {ROLE_LABELS[myRole] || myRole}.
+          </p>
+        </div>
+      )}
+      {joinError && (
+        <div className="mb-6 p-4 rounded-2xl" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
+          <p className="text-sm font-bold" style={{ color: '#f87171' }}>{joinError}</p>
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-1">Team</h1>
         <p className="text-white/40">
