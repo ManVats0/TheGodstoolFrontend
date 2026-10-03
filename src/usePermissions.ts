@@ -1,0 +1,152 @@
+import { useEffect, useState } from 'react'
+import { API_BASE } from './config'
+
+export type OrgInfo = {
+  role: string
+  userId: string
+  orgName: string
+  permissions: Record<string, boolean>
+}
+
+export const ROLE_LABELS: Record<string, string> = {
+  owner: 'Organization Owner',
+  admin: 'Admin',
+  steward: 'Data Steward',
+  editor: 'Editor',
+  viewer: 'Viewer',
+}
+
+let cache: OrgInfo | null = null
+let inflight: Promise<OrgInfo | null> | null = null
+let version = 0
+const listeners = new Set<() => void>()
+
+async function fetchOrg(): Promise<OrgInfo | null> {
+  const token = localStorage.getItem('datapro_token') || ''
+  if (!token) return null
+  try {
+    const res = await fetch(`${API_BASE}/api/org`, {
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    if (!data || data.error) return null
+    return {
+      role: data.role || '',
+      userId: data.userId || '',
+      orgName: data.org?.name || '',
+      permissions: data.permissions || {},
+    }
+  } catch {
+    return null
+  }
+}
+
+export function loadPermissions(): Promise<OrgInfo | null> {
+  if (cache) return Promise.resolve(cache)
+  if (inflight) return inflight
+  const myVersion = version
+  const p: Promise<OrgInfo | null> = fetchOrg().then(info => {
+    if (myVersion === version) cache = info
+    if (inflight === p) inflight = null
+    return info
+  })
+  inflight = p
+  return p
+}
+
+// Call on logout and after an invite is accepted.
+export function clearPermissionsCache() {
+  cache = null
+  inflight = null
+  version++
+  listeners.forEach(l => l())
+}
+
+export function usePermissions() {
+  const [, setTick] = useState(0)
+  const [loading, setLoading] = useState<boolean>(() => !cache && !!localStorage.getItem('datapro_token'))
+
+  useEffect(() => {
+    let alive = true
+    const refresh = () => {
+      if (cache || !localStorage.getItem('datapro_token')) {
+        setLoading(false)
+        setTick(t => t + 1)
+        return
+      }
+      setLoading(true)
+      loadPermissions().then(() => {
+        if (alive) {
+          setLoading(false)
+          setTick(t => t + 1)
+        }
+      })
+    }
+    listeners.add(refresh)
+    refresh()
+    return () => {
+      alive = false
+      listeners.delete(refresh)
+    }
+  }, [])
+
+  const can = (key: string) => !!cache?.permissions?.[key]
+  const role = cache?.role || ''
+  return {
+    role,
+    roleLabel: ROLE_LABELS[role] || role,
+    userId: cache?.userId || '',
+    orgName: cache?.orgName || '',
+    loading,
+    can,
+  }
+}
+
+export function forbiddenMessage(): string {
+  const role = cache?.role || ''
+  if (!role) return "You don't have permission to do this."
+  return `Your role (${ROLE_LABELS[role] || role}) can't do this.`
+}
+
+function showToast(message: string) {
+  if (typeof document === 'undefined') return
+  const el = document.createElement('div')
+  el.textContent = message
+  el.setAttribute('role', 'alert')
+  el.style.cssText =
+    'position:fixed;top:20px;right:20px;z-index:9999;max-width:360px;padding:12px 16px;border-radius:12px;' +
+    'background:#1a1040;border:1px solid rgba(239,68,68,0.4);color:#fca5a5;' +
+    'font:600 13px Inter,-apple-system,sans-serif;box-shadow:0 8px 32px rgba(0,0,0,0.5)'
+  document.body.appendChild(el)
+  window.setTimeout(() => el.remove(), 4000)
+}
+
+// Item 8: any 403 on a write (POST/PUT/DELETE) to our API shows a friendly toast.
+export function installForbiddenHandler() {
+  if (typeof window === 'undefined') return
+  const w = window as any
+  if (w.__forbiddenHandlerInstalled) return
+  w.__forbiddenHandlerInstalled = true
+  const originalFetch = window.fetch.bind(window)
+  let lastShown = 0
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const res = await originalFetch(input, init)
+    try {
+      if (res.status === 403) {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+        const method = (
+          init?.method || (typeof input === 'string' || input instanceof URL ? 'GET' : input.method) || 'GET'
+        ).toUpperCase()
+        if (url.startsWith(API_BASE) && method !== 'GET' && Date.now() - lastShown > 3000) {
+          lastShown = Date.now()
+          showToast(forbiddenMessage())
+        }
+      }
+    } catch {
+      /* never break a request because of the toast */
+    }
+    return res
+  }
+}
