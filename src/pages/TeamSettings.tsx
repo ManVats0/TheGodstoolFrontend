@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
 import { API_BASE } from '../config'
+import { usePermissions, forbiddenMessage } from '../usePermissions'
+import NoAccess from '../components/NoAccess'
+import { usePermissions, forbiddenMessage } from '../usePermissions'
+import NoAccess from '../components/NoAccess'
 
 type OrgMember = {
   userId: string
@@ -34,6 +38,13 @@ const authHeaders = (): Record<string, string> => {
 }
 
 export default function TeamSettings() {
+  const { can, loading } = usePermissions()
+  if (loading) return null
+  if (!can('org.manageMembers')) return <NoAccess />
+  return <TeamSettingsInner />
+}
+
+function TeamSettingsInner() {
   const [org, setOrg] = useState<any>(null)
   const [myRole, setMyRole] = useState('')
   const [permissions, setPermissions] = useState<Record<string, boolean>>({})
@@ -118,9 +129,10 @@ export default function TeamSettings() {
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ email: inviteEmail.trim(), roleKey: inviteRole }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({} as any))
       if (!res.ok || data.error) {
-        setInviteMsg(data.error || 'Could not send invite.')
+        setInviteMsg(res.status === 403 ? forbiddenMessage() : (data.error || 'Could not send invite.'))
+        if (res.status !== 403) await load()
         return
       }
       if (data.addedImmediately) {
@@ -215,7 +227,8 @@ export default function TeamSettings() {
 
       {canManage && (
         <div className="mb-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}>
-          <p className="text-sm font-bold text-white mb-3">Invite someone</p>
+          <p className="text-sm font-bold text-white mb-1">Invite someone</p>
+          <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Members use your plan's AI limit and login limit.</p>
           <div className="flex gap-2 flex-wrap">
             <input
               type="email"
