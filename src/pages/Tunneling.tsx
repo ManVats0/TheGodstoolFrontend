@@ -1,6 +1,11 @@
 import { useState, JSX } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE } from '../config'
+import { usePermissions } from '../usePermissions'
+import NoAccess from '../components/NoAccess'
+import { usePermissions } from '../usePermissions'
+import { usePermissions } from '../usePermissions'
+import NoAccess from '../components/NoAccess'
 
 const STEPS_MYSQL = [
   {
@@ -204,9 +209,33 @@ const STEPS_REDSHIFT: typeof STEPS_MYSQL = [
   },
 ]
 
+// Fills in your real server URL and login token so the copied curl command works
+const renderCode = (code: string): string => {
+  if (!code.includes('/api/agent/token')) return code
+  const base = API_BASE && API_BASE.startsWith('http') ? API_BASE : 'http://localhost:8000'
+  const tok = localStorage.getItem('datapro_token') || 'YOUR_LOGIN_TOKEN'
+  return code
+    .replace('http://localhost:8000', base)
+    .replace('-H "Content-Type: application/json"', `-H "Authorization: Bearer ${tok}" \\\n  -H "Content-Type: application/json"`)
+}
+
 type DB = 'mysql' | 'postgres' | 'mongodb' | 'bigquery' | 'databricks' | 'redshift'
 
 export default function Tunneling() {
+  const { can, loading } = usePermissions()
+  if (loading) return null
+  if (!can('tunnel.use') && !can('tunnel.manage')) return <NoAccess />
+  return <TunnelingInner canManage={can('tunnel.manage')} />
+}
+
+function TunnelingInner({ canManage }: { canManage: boolean }) {
+  const { can, loading } = usePermissions()
+  if (loading) return null
+  if (!can('tunnel.use') && !can('tunnel.manage')) return <NoAccess />
+  return <TunnelingInner />
+}
+
+function TunnelingInner() {
   const navigate = useNavigate()
   const [db, setDb] = useState<DB>('mysql')
   const [copied, setCopied] = useState<number | null>(null)
@@ -289,6 +318,14 @@ export default function Tunneling() {
           Full Docs
         </button>
       </div>
+
+      {!canManage && (
+        <div className="rounded-2xl p-4 mb-6" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
+          <p className="text-sm" style={{ color: '#fbbf24' }}>
+            You can use tunnels your Admin has already set up. Creating new tunnel tokens needs an Admin.
+          </p>
+        </div>
+      )}
 
       {/* What is tunneling */}
       <div
@@ -405,7 +442,7 @@ export default function Tunneling() {
                       bash
                     </span>
                     <button
-                      onClick={() => copy(step.code!, i)}
+                      onClick={() => copy(renderCode(step.code!), i)}
                       className="text-xs px-2 py-0.5 rounded-md font-semibold transition-all"
                       style={{
                         background: copied === i ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.08)',
@@ -420,7 +457,7 @@ export default function Tunneling() {
                     className="p-4 text-xs leading-relaxed overflow-auto"
                     style={{ color: '#a5f3fc', fontFamily: "'JetBrains Mono','Fira Code',monospace", margin: 0 }}
                   >
-                    {step.code}
+                    {renderCode(step.code)}
                   </pre>
                 </div>
               )}
@@ -475,7 +512,7 @@ export default function Tunneling() {
         className="mt-6 rounded-2xl p-5 flex items-start gap-3"
         style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)' }}
       >
-        <span style={{ fontSize: '18px' }}>🔒</span>
+        <span style={{ fontSize: '18px' }}></span>
         <div>
           <p className="text-sm font-semibold text-white mb-1">Security model</p>
           <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
