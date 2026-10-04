@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { API_BASE } from '../config'
+import { usePermissions, forbiddenMessage } from '../usePermissions'
+import NoAccess from '../components/NoAccess'
 
 const CATEGORY_COLOR: Record<string, string> = {
   connection: '#22c55e',
@@ -44,6 +46,14 @@ const authHeaders = (): Record<string, string> => {
 }
 
 export default function AuditLogs() {
+  const { can, loading } = usePermissions()
+  if (loading) return null
+  if (!can('audit.view')) return <NoAccess />
+  return <AuditLogsInner />
+}
+
+function AuditLogsInner() {
+  const { can } = usePermissions()
   const [logs, setLogs] = useState<AuditLogDoc[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -80,6 +90,25 @@ export default function AuditLogs() {
   }
 
   useEffect(() => { loadLogs() }, [])
+
+  const exportLogs = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/audit-logs/export`, { credentials: 'include', headers: authHeaders() })
+      if (!res.ok) {
+        alert(res.status === 403 ? forbiddenMessage() : 'Export failed.')
+        return
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'audit_log_export.csv'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      alert('Could not reach server to export audit logs.')
+    }
+  }
 
   const filtered = logs.filter(l =>
     !filter ||
@@ -123,6 +152,12 @@ export default function AuditLogs() {
             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}>
             ↻ Refresh
           </button>
+          {can('audit.export') && (
+            <button onClick={exportLogs} className="px-3 py-2 rounded-xl text-sm font-semibold"
+              style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', color: '#a78bfa' }}>
+              ⬇ Export CSV
+            </button>
+          )}
           <input value={filter} onChange={e => setFilter(e.target.value)}
             placeholder="Search logs..."
             className="px-3 py-2 rounded-xl text-sm outline-none"
