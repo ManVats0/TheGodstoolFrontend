@@ -2,6 +2,7 @@
   import { useNavigate } from 'react-router-dom'
   import { useStore } from '../store'
   import { API_BASE } from '../config'
+import { usePermissions } from '../usePermissions'
 
   // ── DATA DICTIONARY ─────────────────────────────────────────────────────────
   // Full 17-column dictionary. Adjust column names/types/definitions to match
@@ -66,6 +67,7 @@
 
   export default function DataCatalog() {
     const navigate = useNavigate()
+    const { can } = usePermissions()  
     const { sources, activeSourceName, analysis, setActiveSourceName, addAuditLog } = useStore()
 
     // ── STATE ────────────────────────────────────────────────────────────────
@@ -388,9 +390,9 @@
                         </div>
                       ) : (
                         <p
-                          onClick={() => { setEditingDescKey(catalogKey); setDescDraft(description) }}
+                          onClick={() => { if (can('catalog.editText')) { setEditingDescKey(catalogKey); setDescDraft(description) } }}
                           className="text-sm leading-relaxed cursor-pointer"
-                          title="Click to edit description"
+                          title={can('catalog.editText') ? 'Click to edit description' : undefined}
                           style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '680px' }}>
                           {description}
                         </p>
@@ -407,7 +409,7 @@
                               style={{ background: style.bg, color: style.text, border: `1px solid ${style.border}` }}>
                               {tag}
                               <button
-                                onClick={() => saveCatalogField(source, 'tags', tags.filter(t => t !== tag))}
+                                hidden={!can('catalog.editText')} onClick={() => saveCatalogField(source, 'tags', tags.filter(t => t !== tag))}
                                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', opacity: 0.6, fontSize: '10px', lineHeight: 1 }}
                                 title="Remove tag">✕</button>
                             </span>
@@ -415,7 +417,7 @@
                         })}
                         <input
                           type="text"
-                          value={tagDraft[catalogKey] || ''}
+                          hidden={!can('catalog.editText')} value={tagDraft[catalogKey] || ''}
                           onChange={e => setTagDraft(prev => ({ ...prev, [catalogKey]: e.target.value }))}
                           onKeyDown={e => {
                             if (e.key === 'Enter' && tagDraft[catalogKey]?.trim()) {
@@ -502,9 +504,9 @@
                         </div>
                       ) : (
                         <span
-                          onClick={() => { setEditingOwnerKey(catalogKey); setOwnerDraft(catalogEntry?.owner || '') }}
+                          onClick={() => { if (can('catalog.assignOwner')) { setEditingOwnerKey(catalogKey); setOwnerDraft(catalogEntry?.owner || '') } }}
                           className="text-white text-sm cursor-pointer"
-                          title="Click to edit owner">
+                          title={can('catalog.assignOwner') ? 'Click to edit owner' : undefined}>
                           {catalogEntry?.owner || '<unassigned>'}
                         </span>
                       )}
@@ -624,7 +626,7 @@
                               {usingRealColumns && dictSource ? (
                                 <input
                                   type="text"
-                                  defaultValue={col.definition}
+                                  readOnly={!can('catalog.editText')} defaultValue={col.definition}
                                   placeholder="Add a definition…"
                                   onBlur={e => {
                                     if (e.target.value !== col.definition) {
@@ -642,7 +644,7 @@
                             <td className="px-4 py-3 whitespace-nowrap" style={{ width: '90px' }}>
                               {usingRealColumns && dictSource ? (
                                 <button
-                                  onClick={() => saveColumnPII(dictSource, col.name, !col.pii)}
+                                  disabled={!can('catalog.editLabels')} onClick={() => saveColumnPII(dictSource, col.name, !col.pii)}
                                   className="text-xs font-semibold px-2 py-0.5 rounded-full"
                                   style={col.pii
                                     ? { background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }
