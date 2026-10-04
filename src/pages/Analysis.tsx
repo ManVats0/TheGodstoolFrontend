@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
 import TimeSeriesChart from '../components/TimeSeriesChart'
+import { usePermissions } from '../usePermissions'
 import { API_BASE } from '../config'
 
   const IMPUTATION_METHODS = [
@@ -1023,6 +1024,9 @@ const assistantText = aiData.success
 
   export default function Analysis() {
     const navigate = useNavigate()
+    const { can, loading: permsLoading } = usePermissions()
+    const canRunAnalysis = can('analysis.run')
+    const [savedChecked, setSavedChecked] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {
       activeFile, activeSourceName, analysis, setAnalysis,
@@ -1095,6 +1099,29 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    // Viewers can't run new analyses, so they load the last saved result instead
+    const loadSavedAnalysis = async () => {
+      const srcObj = sources.find(s => s.name === activeSourceName)
+      const key = srcObj?.connectionId || activeSourceName
+      try {
+        const res = await fetch(`${API_BASE}/api/analysis-results/${encodeURIComponent(key)}`, {
+          credentials: 'include',
+          headers: analysisAuthHeaders(),
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.found && data.result) {
+            analysisSourceRef.current = activeSourceName
+            setAnalysis(data.result)
+          }
+        }
+      } catch {
+        // nothing saved yet; the "no saved analysis" message below covers it
+      } finally {
+        setSavedChecked(true)
+      }
+    }
+
     const liveSQLPreview = useMemo(() => {
       const tableName = activeSourceName?.replace('.csv', '').replace(/[^a-zA-Z0-9_]/g, '_') || 'raw_dataset'
       if (!Object.values(options).some(Boolean) && imputationMethod === 'none') {
@@ -1160,6 +1187,11 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       const hasSource = pipelineOutputFile || activeFile || sourceObj?.file || activeSourceName
       if (!hasSource) return
       if (analyzing) return
+      if (permsLoading) return
+      if (!canRunAnalysis) {
+        if (!analysis) { setSavedChecked(false); loadSavedAnalysis() }
+        return
+      }
 
       // First load only — no analysis yet and ref is empty
       if (analysis === null && analysisSourceRef.current === '') {
@@ -1171,7 +1203,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       if (analysisSourceRef.current !== '' && analysisSourceRef.current !== activeSourceName) {
         runAnalysis()
       }
-    }, [activeSourceName, pipelineOutputFile])
+    }, [activeSourceName, pipelineOutputFile, permsLoading])
     // this effect fires and re-runs automatically.
 
     // ── Scan ALL connected sources for notifications (throttled to 1/hour) ──
@@ -2677,7 +2709,21 @@ setAnalyzing(false)
       )
     }
 
-    if (!analysis) return null
+    if (!analysis) {
+      if (!permsLoading && !canRunAnalysis && savedChecked) {
+        return (
+          <div className="p-8 max-w-3xl mx-auto">
+            <div className="rounded-2xl p-8 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+              <p className="text-white font-bold text-lg mb-2">No saved analysis for this source yet</p>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Your role can view analysis results but can't run new ones. Ask an Admin, Data Steward or Editor to analyze "{activeSourceName}" first.
+              </p>
+            </div>
+          </div>
+        )
+      }
+      return null
+    }
 
     const info = analysis.dataset_info || {}
     const sample = analysis.sample_data || []
@@ -2744,7 +2790,7 @@ setAnalyzing(false)
           />
         )}
 
-        <FloatingCleanBtn />
+        {canRunAnalysis && <FloatingCleanBtn />}
 
         {showEditSource && (
           <EditSourceModal
@@ -2935,14 +2981,14 @@ setAnalyzing(false)
               Edit Flow Source
             </button>
             <button
-              onClick={() => setShowOriginal(true)}
+              hidden={!canRunAnalysis} onClick={() => setShowOriginal(true)}
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
             >
               View Original
             </button>
             <a
-              href={`${API_BASE}${analysis.original_file}`}
+              href={`${API_BASE}${analysis.original_file}`} hidden={!canRunAnalysis}
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
             >
@@ -2953,6 +2999,7 @@ setAnalyzing(false)
               className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ background: 'rgba(124,58,237,0.25)', border: '1px solid rgba(124,58,237,0.35)' }}
               title={staleness.isStale ? `Last analyzed ${staleness.hoursOld} hours ago` : 'Re-analyze fresh data'}
+              hidden={!canRunAnalysis}
             >
               {staleness.isStale ? '🔄 Re-analyze' : 'Re-analyze'}
             </button>
@@ -2960,7 +3007,7 @@ setAnalyzing(false)
         </div>
 
         {/* Staleness Warning Banner */}
-        {staleness.showWarning && (
+        {staleness.showWarning && canRunAnalysis && (
           <div
             className="rounded-2xl px-6 py-4 flex items-center justify-between"
             style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}
@@ -3130,7 +3177,7 @@ setAnalyzing(false)
             className="flex overflow-x-auto p-2 gap-1"
             style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
           >
-            {tabs.map(t => (
+            {tabs.filter(t => t.id !== 'aichat' || canRunAnalysis).map(t => (
               <button
                 key={t.id}
                 onClick={() => setAnalysisTab(t.id)}
@@ -3358,7 +3405,7 @@ setAnalyzing(false)
             {/* ── Problems tab ── */}
             {analysisTab === 'problems' && (
               <div>
-                {problems.length === 0 ? (
+                {problems.length === 0 && totalProblems === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-4xl mb-3">✨</div>
                     <p className="font-bold text-white mb-1">No problems found!</p>
@@ -3525,7 +3572,7 @@ setAnalyzing(false)
 
         {/* ── CLEAN SECTION ─────────────────────────────────────────────────── */}
         <div
-          id="clean-section"
+          id="clean-section" hidden={!canRunAnalysis}
           className="rounded-3xl overflow-hidden"
           style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.2)' }}
         >
