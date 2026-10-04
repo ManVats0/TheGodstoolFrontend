@@ -2,11 +2,12 @@
   import { useNavigate } from 'react-router-dom'
   import { useStore } from '../store'
   import { API_BASE } from '../config'
+import { usePermissions, forbiddenMessage } from '../usePermissions'
   import GuidedTour, { TourStep } from './FlowTutorial'
 
   const DATASOURCES_TOUR: TourStep[] = [
   {
-    title: 'Welcome to Data Sources',
+    title: 'Welcome to Data Sources 👋',
     body: 'This is where every project starts. Connect a CSV, Google Sheet, database, or API here and DataPipe will pull it in for cleaning and analysis.',
   },
   {
@@ -54,6 +55,7 @@
 
   export default function DataSources() {
     const navigate = useNavigate()
+    const { can } = usePermissions()
     const {
       sources, addSource, removeSource,
       switchActiveSource,
@@ -261,14 +263,18 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
       }
     }
 
-    const deleteConnectionFromBackend = async (connectionId: string) => {
+    const deleteConnectionFromBackend = async (connectionId: string): Promise<'ok' | 'forbidden' | 'error'> => {
       try {
-        await fetch(`${API_BASE}/api/connections/${connectionId}`, {
+        const res = await fetch(`${API_BASE}/api/connections/${connectionId}`, {
           method: 'DELETE',
           credentials: 'include',
           headers: authHeaders(),
         })
-      } catch { /* best-effort */ }
+        if (res.status === 403) return 'forbidden'
+        return res.ok ? 'ok' : 'error'
+      } catch {
+        return 'error'
+      }
     }
 
     const saveRetention = async (connectionId: string) => {
@@ -1065,7 +1071,7 @@ const handleLockedSource = () => {
         {/* Tabs */}
         <div data-tour="tour-datasources-tabs" className="flex gap-1 mb-6 p-1 rounded-xl w-fit"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          {(['existing', 'add'] as const).map(t => (
+          {(['existing', 'add'] as const).filter(t => t === 'existing' || can('connection.create')).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className="px-5 py-2 rounded-lg text-sm font-medium transition-all"
               style={{
@@ -1087,10 +1093,10 @@ const handleLockedSource = () => {
                 <div className="flex justify-center mb-4"><SourceIcon name="inbox" size={40} color="rgba(255,255,255,0.25)" /></div>
                 <p className="text-white font-medium mb-1">No sources yet</p>
                 <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.35)' }}>Add a data source to get started</p>
-                <button onClick={() => setTab('add')}
+                <button disabled={!can('connection.create')} onClick={() => setTab('add')}
                   className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'rgba(124,58,237,0.3)', border: '1px solid rgba(124,58,237,0.4)' }}>
-                  Add your first source
+                  {can('connection.create') ? 'Add your first source' : 'Ask an Admin or Editor to add one'}
                 </button>
               </div>
             ) : (
@@ -1145,14 +1151,19 @@ const handleLockedSource = () => {
                           return getCachedAnalysis(s.name) ? `${label} — Last Run →` : `${label} →`
                         })()}
                       </button>
-                      <button onClick={() => setExpandedSourceId(prev => prev === s.id ? null : s.id)}
+                      <button hidden={!can('connection.erase')} onClick={() => setExpandedSourceId(prev => prev === s.id ? null : s.id)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold"
                         style={{ background: expandedSourceId === s.id ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: expandedSourceId === s.id ? '#a78bfa' : 'rgba(255,255,255,0.5)' }}
                         title="Data governance: retention & erasure">
                         ⚙
                       </button>
                       <button onClick={() => {
-                        if (s.connectionId) { deleteConnectionFromBackend(s.connectionId) }
+                        if (s.connectionId) {
+                          if (!(can('connection.delete') || can('connection.deleteOwn'))) { alert(forbiddenMessage()); return }
+                          deleteConnectionFromBackend(s.connectionId).then(outcome => {
+                            if (outcome === 'forbidden') { alert(forbiddenMessage()); loadSourcesFromBackend() }
+                          })
+                        }
                         removeSource(s.id)
                         if (s.type === 'mysql') {
                           const filtered = savedMySQLConns.filter((c: any) => c.id !== s.id)
@@ -1211,7 +1222,7 @@ const handleLockedSource = () => {
                       </button>
                     </div>
                   </div>
-                  {expandedSourceId === s.id && (
+                  {expandedSourceId === s.id && can('connection.erase') && (
                     <div className="mt-2 p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)' }}>
                       <p className="text-xs font-bold text-white mb-3">Data Governance</p>
                       {s.connectionId ? (
