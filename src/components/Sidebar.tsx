@@ -1,5 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom'
-
+// import { usePermissions, ROLE_LABELS } from '../usePermissions'
+import { API_BASE } from '../config'
+import { clearPermissionsCache } from '../usePermissions'
 function SidebarIcon({ name, size = 19, active = false }: { name: string; size?: number; active?: boolean }) {
   const paths: Record<string, JSX.Element> = {
     plug: <><path d="M9 2v6M15 2v6M6 8h12l-1 6a5 5 0 0 1-5 4h0a5 5 0 0 1-5-4L6 8z" /><path d="M12 18v4" /></>,
@@ -11,7 +13,6 @@ function SidebarIcon({ name, size = 19, active = false }: { name: string; size?:
     shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
     message: <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />,
     bell: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>,
-    team: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>,
     team: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>,
   }
   return (
@@ -32,17 +33,20 @@ interface SidebarProps {
 export default function Sidebar({ onOpenNotif, unread, isExpanded, onToggleExpand, onLogout }: SidebarProps) {
   const location = useLocation();
 
-const navItems = [
+const { can, role } = usePermissions()
+
+  const allNavItems: { path: string; icon: string; label: string; show?: boolean }[] = [
     { path: '/sources', icon: 'plug', label: 'Sources' },
     { path: '/catalog', icon: 'folder', label: 'Catalog' },
     { path: '/flow', icon: 'flow', label: 'Pipeline Flow' },
     { path: '/analysis', icon: 'chart', label: 'Analysis' },
-    { path: '/audit', icon: 'file', label: 'Audit Logs' },
-    { path: '/team', icon: 'team', label: 'Team' },
+    { path: '/audit', icon: 'file', label: 'Audit Logs', show: can('audit.view') },
+    { path: '/team', icon: 'team', label: 'Team', show: can('org.manageMembers') },
     { path: '/docs', icon: 'book', label: 'Cosmic Documentation' },
-    { path: '/tunneling', icon: 'shield', label: 'Tunneling' },
+    { path: '/tunneling', icon: 'shield', label: 'Tunneling', show: can('tunnel.use') || can('tunnel.manage') },
     { path: '/feedback', icon: 'message', label: 'Feedback / Support' },
   ]
+  const navItems = allNavItems.filter(item => item.show !== false)
 
   return (
     <aside 
@@ -116,6 +120,15 @@ const navItems = [
 
       {/* Bottom Actions */}
       <div className="p-3 border-t border-white/5 space-y-2">
+        {isExpanded && role && (
+          <div className="px-3 py-2 mb-1">
+            <p className="text-xs text-white/70 truncate" title={localStorage.getItem('datapro_email') || ''}>
+              {localStorage.getItem('datapro_email') || ''}
+            </p>
+            <p className="text-xs font-semibold" style={{ color: '#a78bfa' }}>{ROLE_LABELS[role] || role}</p>
+          </div>
+        )}
+
         {/* Logout */}
         <button
           onClick={onLogout}
