@@ -30,8 +30,11 @@ import Blog from './pages/Blog'
 import Feedback from './pages/Feedback'
 import AcceptInvite from './pages/AcceptInvite'
 import { API_BASE } from './config'
+import { clearPermissionsCache, loadPermissions, installForbiddenHandler } from './usePermissions'
 
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
+
+installForbiddenHandler()
 
 const ROTATING_PHRASES = [
   'in one platform.',
@@ -39,7 +42,7 @@ const ROTATING_PHRASES = [
 ]
 
 function redirectToGoogleOAuth() {
-  const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/auth/google/callback`
+  const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/google/callback`
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: redirectUri,
@@ -79,6 +82,7 @@ async function acceptPendingInviteIfAny(token: string) {
       localStorage.setItem('datapro_invite_joined', '1')
       if (data.orgName) localStorage.setItem('datapro_invite_joined_org', data.orgName)
       if (data.roleLabel) localStorage.setItem('datapro_invite_joined_role', data.roleLabel)
+      clearPermissionsCache()
     } else {
       localStorage.setItem(
         'datapro_invite_error',
@@ -92,6 +96,14 @@ async function acceptPendingInviteIfAny(token: string) {
     localStorage.setItem('datapro_invite_error', 'Could not reach the server to accept the invite.')
   }
   localStorage.removeItem('datapro_pending_invite')
+}
+
+// Accept any pending team invite FIRST, then (re)load permissions, so everything
+// fetched afterwards (plan, permissions) reflects the team the user just joined.
+async function bootstrapSession(token: string) {
+  await acceptPendingInviteIfAny(token)
+  clearPermissionsCache()
+  await loadPermissions()
 }
 
 function LineIcon({ name, size = 32, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
@@ -144,7 +156,7 @@ const [forgotError, setForgotError] = useState('')
 const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 const [isLoginLoading, setIsLoginLoading] = useState(false)
 const [showForceLogout, setShowForceLogout] = useState(false)
-const [pendingGooglePayload, setPendingGooglePayload] = useState<{ email: string; googleId: string; name: string } | null>(null)
+const [pendingGooglePayload, setPendingGooglePayload] = useState<{ credential: string } | null>(null)
 const [regName, setRegName] = useState('')
 const [regNickname, setRegNickname] = useState('')
 const [confirmPassword, setConfirmPassword] = useState('')
@@ -154,6 +166,7 @@ const forceLogoutRef = useRef<HTMLButtonElement>(null)
 const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
 const [phraseIndex, setPhraseIndex] = useState(0)
 const [phraseVisible, setPhraseVisible] = useState(true)
+const [joinBanner, setJoinBanner] = useState<{ ok: boolean; text: string } | null>(null)
 
 useEffect(() => {
   const interval = setInterval(() => {
@@ -186,12 +199,57 @@ useEffect(() => {
   }
 }, [location.pathname]) // Default to true if you prefer it open
 
-// After an invite is accepted (or fails) during sign-in, show the result on the Team page.
+// Logout (or any time we're signed out): drop cached permissions.
+useEffect(() => {
+  if (!entered) clearPermissionsCache()
+}, [entered])
+
+// Arriving from an invite link while signed out: open the register modal with the invited email.
+useEffect(() => {
+  if (entered || location.pathname !== '/') return
+  const inviteEmail = localStorage.getItem('datapro_invite_email')
+  if (inviteEmail && localStorage.getItem('datapro_pending_invite')) {
+    setLoginEmail(inviteEmail)
+    setIsRegisterMode(true)
+    setShowLogin(true)
+    setLoginError('')
+    localStorage.removeItem('datapro_invite_email')
+  }
+}, [entered, location.pathname])
+
+// After an invite is accepted (or fails) during sign-in: go to "/" and show a welcome banner.
 useEffect(() => {
   if (!entered) return
-  if (localStorage.getItem('datapro_invite_joined') || localStorage.getItem('datapro_invite_error')) {
-    if (location.pathname !== '/team') navigate('/team', { replace: true })
+  const joined = localStorage.getItem('datapro_invite_joined')
+  const inviteErr = localStorage.getItem('datapro_invite_error')
+  if (!joined && !inviteErr) return
+  const orgName = localStorage.getItem('datapro_invite_joined_org') || 'your team'
+  const roleLabel = localStorage.getItem('datapro_invite_joined_role') || ''
+  ;['datapro_invite_joined', 'datapro_invite_joined_org', 'datapro_invite_joined_role', 'datapro_invite_error']
+    .forEach(k => localStorage.removeItem(k))
+  if (joined) {
+    setJoinBanner({
+      ok: true,
+      text: `Welcome to ${orgName}${roleLabel ? ` — you joined as ${roleLabel}` : ''}. You're now using your team's plan.`,
+    })
+    // Members see the owner's plan: refresh it now that we've joined.
+    const authToken = localStorage.getItem('datapro_token')
+    if (authToken) {
+      fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${authToken}` } })
+        .then(r => r.json())
+        .then(p => {
+          const plan = p.plan || 'none'
+          localStorage.setItem('datapro_plan', plan)
+          if (p.planExpiresAt) localStorage.setItem('datapro_plan_expires', p.planExpiresAt)
+          else localStorage.removeItem('datapro_plan_expires')
+          setUserPlan(plan)
+        })
+        .catch(() => { /* ignore */ })
+    }
+  } else {
+    setJoinBanner({ ok: false, text: inviteErr || 'Could not accept the invite.' })
   }
+  if (location.pathname !== '/') navigate('/', { replace: true })
 }, [entered, location.pathname])
 
 useEffect(() => {
@@ -234,13 +292,16 @@ useEffect(() => {
     if (email === 'vatsaman888@gmail.com') {
       localStorage.setItem('datapro_plan', 'enterprise')
       setUserPlan('enterprise')
-      setEntered(true)
-      navigate('/', { replace: true })
+      bootstrapSession(token).finally(() => {
+        setEntered(true)
+        navigate('/', { replace: true })
+      })
       return
     }
-    fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    bootstrapSession(token)
+      .then(() => fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }))
       .then(res => res.json())
       .then(planData => {
         const plan = planData.plan || 'none'
@@ -332,8 +393,12 @@ useEffect(() => {
       setShowForceLogout(false)
       localStorage.setItem('datapro_logged_in', '1')
       localStorage.setItem('datapro_token', data.token)
+      if (!res.ok) { setLoginError(data.error || 'Login failed'); return }
+      setShowForceLogout(false)
+      localStorage.setItem('datapro_logged_in', '1')
+      localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
-      // Founder bypass
+      await bootstrapSession(data.token)
       if (data.email === 'vatsaman888@gmail.com') {
         localStorage.setItem('datapro_plan', 'enterprise')
         setUserPlan('enterprise')
@@ -427,21 +492,16 @@ useEffect(() => {
       client_id: GOOGLE_CLIENT_ID,
       callback: async (response: any) => {
         try {
-          const payload = JSON.parse(atob(response.credential.split('.')[1]))
           const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: payload.email,
-              googleId: payload.sub,
-              name: payload.name
-            })
+            body: JSON.stringify({ credential: response.credential })
           })
           const data = await backendRes.json()
           if (!backendRes.ok) {
             setLoginError(data.error || 'Google login failed')
             if (backendRes.status === 429) {
-              setPendingGooglePayload({ email: payload.email, googleId: payload.sub, name: payload.name })
+              setPendingGooglePayload({ credential: response.credential })
               setShowForceLogout(true)
             }
             setIsGoogleLoading(false)
@@ -451,6 +511,7 @@ useEffect(() => {
           localStorage.setItem('datapro_logged_in', '1')
           localStorage.setItem('datapro_token', data.token)
           localStorage.setItem('datapro_email', data.email)
+          await bootstrapSession(data.token)
           // Founder bypass
           if (data.email === 'vatsaman888@gmail.com') {
             localStorage.setItem('datapro_plan', 'enterprise')
@@ -495,7 +556,7 @@ useEffect(() => {
       const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...pendingGooglePayload, forceLogout: true })
+        body: JSON.stringify({ credential: pendingGooglePayload.credential, forceLogout: true })
       })
       const data = await backendRes.json()
       if (!backendRes.ok) { setLoginError(data.error || 'Google login failed'); return }
@@ -504,6 +565,7 @@ useEffect(() => {
       localStorage.setItem('datapro_logged_in', '1')
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
+      await bootstrapSession(data.token)
       if (data.email === 'vatsaman888@gmail.com') {
         localStorage.setItem('datapro_plan', 'enterprise')
         setUserPlan('enterprise')
@@ -1373,6 +1435,19 @@ if (!entered) return (
       <main className={`flex-1 min-h-screen overflow-auto transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-16'}`}>
         {/* The floating hamburger menu that used to be here has been removed and moved inside the Sidebar */}
         
+        {joinBanner && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+            padding: '10px 16px',
+            background: joinBanner.ok ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+            borderBottom: `1px solid ${joinBanner.ok ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`,
+            fontFamily: 'monospace', fontSize: '0.78rem',
+            color: joinBanner.ok ? '#86efac' : '#fca5a5',
+          }}>
+            <span>{joinBanner.text}</span>
+            <button onClick={() => setJoinBanner(null)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>✕</button>
+          </div>
+        )}
         {trialDaysLeft !== null && (
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
