@@ -4,6 +4,7 @@ import { useStore } from '../store'
 import { API_BASE } from '../config'
 import { runSQLPreviewWasm } from '../duckdbClient'
 import GuidedTour, { TourStep } from './FlowTutorial'
+import { usePermissions, forbiddenMessage } from '../usePermissions'
 
 const EMPTY_STATE_TOUR: TourStep[] = [
   {
@@ -273,7 +274,7 @@ type SavedPipeline = {
   sourceConnectionId?: string | null  // Mongo connection _id for the source — lets Run Now execute
                                        // entirely server-side even when this pipeline's source was
                                        // never (re)loaded into local `sources` state this session
-  status?: 'approved' | 'pending_approval'
+  status?: 'approved' | 'pending_approval' | 'rejected'
   name: string
   sourceId: string
   destinationId: string
@@ -663,7 +664,7 @@ async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any,
   }
 }
 
-async function setPipelineApprovalStatus(serverId: string, status: 'approved' | 'pending_approval') {
+async function setPipelineApprovalStatus(serverId: string, status: 'approved' | 'pending_approval' | 'rejected') {
   const token = getAuthToken()
   if (!token) { alert('Not signed in — cannot change approval status on server.'); return null }
   try {
@@ -672,6 +673,7 @@ async function setPipelineApprovalStatus(serverId: string, status: 'approved' | 
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ status }),
     })
+    if (res.status === 403) { alert(forbiddenMessage()); return null }
     const result = await res.json()
     if (result.error) { alert(`Could not update approval status: ${result.error}`); return null }
     return result
@@ -1831,6 +1833,11 @@ function SQLEditorModal({ activeSourceName, colInfo, onConfirm, onClose }: {
 
 export default function Flow() {
   const navigate = useNavigate()
+  const { can } = usePermissions()
+  const canBuild = can('pipeline.create') || can('pipeline.edit')
+  // Always-current copy so timers and old closures never use a stale permission
+  const canExecuteRef = useRef(true)
+  canExecuteRef.current = can('pipeline.execute')
   const { sources, transformations, analysis, activeFile, addTransformation, removeTransformation, addAuditLog, setAnalysisTab, setPendingCleanOptions, switchActiveSource, setActiveDestinationName, setPipelineOutputFile, setLastPipelineRunAt, gsheetsDestination, setGsheetsDestination } = useStore()
   const [fullscreenTable, setFullscreenTable] = useState<{ title: string; subtitle?: string; columns: string[]; rows: any[]; accentColor?: string } | null>(null)
   const [tourKey, setTourKey] = useState(0)
@@ -2276,6 +2283,10 @@ useEffect(() => {
 }
 
     // ── Find the source file ─────────────────────────────────────────────
+    if (!canExecuteRef.current) {
+      if (triggeredBy !== 'schedule') alert(forbiddenMessage())
+      return log
+    }
     const sourceObj = sources.find(s => s.name === pipeline.sourceId)
     let fileToUse = sourceObj?.file || (sourceObj?.type !== ('sheets' as string) ? activeFile : null) || null 
 
@@ -3865,7 +3876,7 @@ setTimeout(() => {
           <button onClick={() => setShowAlertModal(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', color:'#f87171' }}>
             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alert
           </button>
-          <button data-tour="tour-add-transform" onClick={() => setShowTransformPicker(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)', boxShadow:'0 0 20px rgba(124,58,237,0.3)' }}>
+          <button data-tour="tour-add-transform" disabled={!canBuild} onClick={() => setShowTransformPicker(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)', boxShadow:'0 0 20px rgba(124,58,237,0.3)' }}>
             <span className="text-base">+</span> Add Transformation
           </button>
         </div>
@@ -4740,11 +4751,19 @@ setTimeout(() => {
               <div className="flex items-center gap-2">
                 <button onClick={() => { setSelectedPipelineForLogs(existingPipeline); setShowLogsPanel(true) }} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.25)', color:'#818cf8' }}>View Runs</button>
                 <button onClick={() => setShowScheduleModal(existingPipeline)} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.25)', color:'#a78bfa' }}>⏱ Schedule</button>
-                <button onClick={() => runPipeline(existingPipeline, 'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.2)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
+                <button disabled={!can('pipeline.execute')} onClick={() => runPipeline(existingPipeline, 'manual')}<button disabled={!can('pipeline.execute')} onClick={() => runPipeline(existingPipeline, 'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.2)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
               </div>
             </div>
           )}
         </div>
+
+        {!canBuild && (
+          <div className="rounded-2xl px-5 py-3" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
+            <p className="text-xs" style={{ color: '#fbbf24' }}>
+              View only: your role can look at pipelines{can('pipeline.approve') ? ' and approve or reject them' : ''}, but can't create or edit them.
+            </p>
+          </div>
+        )}
 
         {/* PIPELINE FLOW DIAGRAM */}
         <div data-tour="tour-pipeline-flow" className="rounded-2xl p-6 overflow-x-auto" style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)' }}>
@@ -4890,7 +4909,7 @@ setTimeout(() => {
                 <p className="text-xs mt-0.5" style={{ color:'rgba(255,255,255,0.35)' }}>Saved pipelines are unique to this source ↔ destination pair · You'll be redirected to Analysis after saving</p>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={() => setShowSaveModal(true)} disabled={!effectiveDestination.trim()}
+                <button onClick={() => setShowSaveModal(true)} disabled={!effectiveDestination.trim() || !(existingPipeline ? can('pipeline.edit') : can('pipeline.create'))}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-40"
                   style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)', boxShadow:'0 4px 20px rgba(124,58,237,0.35)' }}>
                   <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -4924,6 +4943,7 @@ setTimeout(() => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
                             <p className="font-bold text-white text-sm">{pipeline.name}</p>
+                            {pipeline.status === 'rejected' && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(239,68,68,0.15)', color:'#f87171' }}>✕ Rejected</span>}
                             {pipeline.status === 'pending_approval' && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(234,179,8,0.15)', color:'#fbbf24' }}>⏳ Pending Approval</span>}
                             {isRunningNow && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(34,197,94,0.12)', color:'#4ade80' }}>⏱ {pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
                             {!isRunningNow&&pipeline.scheduleLabel&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(234,179,8,0.1)', color:'#fbbf24' }}>⏸ {pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
@@ -4971,7 +4991,9 @@ setTimeout(() => {
                         {pipeline.serverId && (
                           <button
                             onClick={async () => {
-                              const newStatus = pipeline.status === 'pending_approval' ? 'approved' : 'pending_approval'
+                              const wantsApprove = pipeline.status === 'pending_approval' || pipeline.status === 'rejected'
+                              if (wantsApprove ? !can('pipeline.approve') : !can('pipeline.edit')) { alert(forbiddenMessage()); return }
+                              const newStatus = wantsApprove ? ('approved' as const) : ('pending_approval' as const)
                               const result = await setPipelineApprovalStatus(pipeline.serverId!, newStatus)
                               if (result) {
                                 setSavedPipelines(prev => {
@@ -4982,15 +5004,32 @@ setTimeout(() => {
                               }
                             }}
                             className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-                            style={pipeline.status === 'pending_approval'
+                            style={(pipeline.status === 'pending_approval' || pipeline.status === 'rejected')
                               ? { background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', color: '#4ade80' }
                               : { background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)', color: '#fbbf24' }}>
-                            {pipeline.status === 'pending_approval' ? '✓ Approve' : '⏳ Require Approval'}
+                            {(pipeline.status === 'pending_approval' || pipeline.status === 'rejected') ? '✓ Approve' : 'Require Approval'}
                           </button>
                         )}
-                        <button onClick={() => runPipeline(pipeline,'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.15)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
+                        {pipeline.serverId && pipeline.status === 'pending_approval' && can('pipeline.approve') && (
+                          <button
+                            onClick={async () => {
+                              const result = await setPipelineApprovalStatus(pipeline.serverId!, 'rejected')
+                              if (result) {
+                                setSavedPipelines(prev => {
+                                  const updated = prev.map(p => p.id === pipeline.id ? { ...p, status: 'rejected' as const } : p)
+                                  localStorage.setItem('datapipe_pipelines', JSON.stringify(updated))
+                                  return updated
+                                })
+                              }
+                            }}
+                            className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171' }}>
+                            ✕ Reject
+                          </button>
+                        )}
+                        <button disabled={!can('pipeline.execute')} onClick={() => runPipeline(pipeline,'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.15)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
                         {pipeline.serverId && (
-                          <button onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side — works even if this tab is closed">☁ Run on Server</button>
+                          <button disabled={!can('pipeline.execute')} onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side — works even if this tab is closed">☁ Run on Server</button>
                         )}
                         <button onClick={() => {
                           if (window.confirm(`Permanently delete pipeline "${pipeline.name}"? This cannot be undone.`)) {
@@ -4998,7 +5037,7 @@ setTimeout(() => {
                             persistPipelines(savedPipelines.filter(p => p.id!==pipeline.id))
                             addAuditLog({ id:crypto.randomUUID(), time:new Date().toLocaleString(), action:'delete_pipeline', entity_type:'pipeline', entity_id:pipeline.id, details:`Deleted pipeline "${pipeline.name}"`, user:'local_user' })
                           }
-                        }} className="text-xs px-2 py-1.5 rounded-lg" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.15)', color:'#f87171' }} title="Permanently delete pipeline">🗑</button>
+                        }} className="text-xs px-2 py-1.5 rounded-lg" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.15)', color:'#f87171' }} title="Permanently delete pipeline" hidden={!can('pipeline.delete')}>🗑</button>
                       </div>
                     </div>
                   </div>
@@ -5651,7 +5690,7 @@ setTimeout(() => {
       )}
 
       {/* TRANSFORM PICKER */}
-      {showTransformPicker&&(
+      {showTransformPicker && canBuild && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.75)' }} onClick={() => setShowTransformPicker(false)}>
           <div className="rounded-2xl p-6 max-w-lg w-full" style={{ background:'#0d0a1a', border:'1px solid rgba(255,255,255,0.1)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-2"><h3 className="font-bold text-white">Add Transformation</h3><button onClick={() => setShowTransformPicker(false)} style={{ color:'rgba(255,255,255,0.4)' }}>✕</button></div>
