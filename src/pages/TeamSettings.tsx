@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import { API_BASE } from '../config'
 import { usePermissions, forbiddenMessage } from '../usePermissions'
 import NoAccess from '../components/NoAccess'
-import { usePermissions, forbiddenMessage } from '../usePermissions'
-import NoAccess from '../components/NoAccess'
 
 type OrgMember = {
   userId: string
