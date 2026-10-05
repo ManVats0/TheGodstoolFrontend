@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { API_BASE } from '../config'
 import { usePermissions } from '../usePermissions'
 import NoAccess from '../components/NoAccess'
-import { usePermissions } from '../usePermissions'
-import { usePermissions } from '../usePermissions'
-import NoAccess from '../components/NoAccess'
 
 const STEPS_MYSQL = [
   {
@@ -229,13 +226,6 @@ export default function Tunneling() {
 }
 
 function TunnelingInner({ canManage }: { canManage: boolean }) {
-  const { can, loading } = usePermissions()
-  if (loading) return null
-  if (!can('tunnel.use') && !can('tunnel.manage')) return <NoAccess />
-  return <TunnelingInner />
-}
-
-function TunnelingInner() {
   const navigate = useNavigate()
   const [db, setDb] = useState<DB>('mysql')
   const [copied, setCopied] = useState<number | null>(null)
