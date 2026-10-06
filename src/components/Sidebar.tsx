@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { usePermissions, ROLE_LABELS } from '../usePermissions'
+// import { usePermissions, ROLE_LABELS } from '../usePermissions'
 import { API_BASE } from '../config'
 import { usePermissions, ROLE_LABELS } from '../usePermissions'
 function SidebarIcon({ name, size = 19, active = false }: { name: string; size?: number; active?: boolean }) {
