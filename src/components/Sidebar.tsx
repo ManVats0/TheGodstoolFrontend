@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom'
-// import { usePermissions, ROLE_LABELS } from '../usePermissions'
+import { usePermissions, ROLE_LABELS } from '../usePermissions'
 import { API_BASE } from '../config'
-import { clearPermissionsCache } from '../usePermissions'
+import { usePermissions, ROLE_LABELS } from '../usePermissions'
 function SidebarIcon({ name, size = 19, active = false }: { name: string; size?: number; active?: boolean }) {
   const paths: Record<string, JSX.Element> = {
     plug: <><path d="M9 2v6M15 2v6M6 8h12l-1 6a5 5 0 0 1-5 4h0a5 5 0 0 1-5-4L6 8z" /><path d="M12 18v4" /></>,
