@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { API_BASE } from '../config'
+import { clearPermissionsCache } from '../usePermissions'
 
 export default function AcceptInvite() {
   const location = useLocation()
@@ -47,22 +48,24 @@ export default function AcceptInvite() {
 
       if (existingToken && existingEmail?.toLowerCase() === data.email.toLowerCase()) {
         // Signed in as the invited person: accept right away.
-        acceptInvite(existingToken)
+        acceptInvite(existingToken, data.orgName, data.roleLabel)
       } else if (existingToken) {
         // Signed in, but as someone else (e.g. the team owner testing in the same browser).
         // The backend only accepts an invite for the exact email it was sent to.
         setStatus('mismatch')
       } else {
-        // Not signed in: App.tsx accepts the pending invite right after sign-in / sign-up.
+        // Not signed in: App.tsx opens the register modal with this email prefilled and
+        // accepts the pending invite right after sign-in / sign-up.
         setStatus('ready')
         localStorage.setItem('datapro_pending_invite', token)
+        localStorage.setItem('datapro_invite_email', data.email)
         navigate('/', { replace: true })
       }
     }
     run()
   }, [token])
 
-  const acceptInvite = async (authToken: string) => {
+  const acceptInvite = async (authToken: string, orgName: string, roleLabel: string) => {
     setStatus('accepting')
     let res: Response
     try {
@@ -104,9 +107,14 @@ export default function AcceptInvite() {
       return
     }
 
+    // Same hand-off App.tsx uses after a sign-in accept: it shows the welcome banner,
+    // refreshes the plan, and reloads permissions for the new team.
     localStorage.removeItem('datapro_pending_invite')
     localStorage.setItem('datapro_invite_joined', '1')
-    navigate('/team', { replace: true })
+    localStorage.setItem('datapro_invite_joined_org', data?.orgName || orgName || '')
+    localStorage.setItem('datapro_invite_joined_role', data?.roleLabel || roleLabel || '')
+    clearPermissionsCache()
+    navigate('/', { replace: true })
   }
 
   const signOutAndContinue = () => {
@@ -119,6 +127,7 @@ export default function AcceptInvite() {
       }).catch(() => {})
     }
     localStorage.setItem('datapro_pending_invite', token)
+    if (info?.email) localStorage.setItem('datapro_invite_email', info.email)
     localStorage.removeItem('datapro_logged_in')
     localStorage.removeItem('datapro_plan')
     localStorage.removeItem('datapro_token')
