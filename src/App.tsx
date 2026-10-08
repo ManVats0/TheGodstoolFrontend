@@ -30,7 +30,7 @@ import Blog from './pages/Blog'
 import Feedback from './pages/Feedback'
 import AcceptInvite from './pages/AcceptInvite'
 import { API_BASE } from './config'
-import { clearPermissionsCache, loadPermissions, installForbiddenHandler } from './usePermissions'
+import { clearPermissionsCache, loadPermissions, installForbiddenHandler, refreshPermissions, usePermissions } from './usePermissions'
 
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
@@ -135,6 +135,8 @@ function LineIcon({ name, size = 32, color = '#a78bfa' }: { name: string; size?:
 
 export default function App() {
   const [showNotif, setShowNotif] = useState(false)
+  const { orgName, roleLabel } = usePermissions()
+  const [inviteLockedEmail, setInviteLockedEmail] = useState('')
   const navigate = useNavigate()
   const [sidebarExpanded, setSidebarExpanded] = useState(true)
   const location = useLocation()
@@ -202,6 +204,21 @@ useEffect(() => {
 // Logout (or any time we're signed out): drop cached permissions.
 useEffect(() => {
   if (!entered) clearPermissionsCache()
+}, [entered])
+
+// Signed in: keep the org's connections + my role live, so teammates' changes appear
+// without a reload and role changes / removal take effect quickly.
+useEffect(() => {
+  if (!entered) return
+  const sync = () => {
+    if (document.hidden) return
+    refreshPermissions()
+    useStore.getState().loadSourcesFromBackend()
+  }
+  sync()
+  const t = setInterval(sync, 45000)
+  window.addEventListener('focus', sync)
+  return () => { clearInterval(t); window.removeEventListener('focus', sync) }
 }, [entered])
 
 // Arriving from an invite link while signed out: open the register modal with the invited email.
@@ -390,10 +407,6 @@ useEffect(() => {
         setShowForceLogout(false)
         return
       }
-      setShowForceLogout(false)
-      localStorage.setItem('datapro_logged_in', '1')
-      localStorage.setItem('datapro_token', data.token)
-      if (!res.ok) { setLoginError(data.error || 'Login failed'); return }
       setShowForceLogout(false)
       localStorage.setItem('datapro_logged_in', '1')
       localStorage.setItem('datapro_token', data.token)
@@ -875,7 +888,7 @@ if (!entered) return (
                   cursor: 'pointer', transition: 'all 0.15s'
                 }}
               >
-                <span>{f.emoji}</span>{f.label}
+                {f.label}
               </button>
             ))}
           </div>
@@ -1284,7 +1297,12 @@ if (!entered) return (
             <span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>OR</span>
             <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
           </div>
-          <input type="email" placeholder="you@example.com" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="auth-input" />
+          <input type="email" placeholder="you@example.com" value={loginEmail} readOnly={!!inviteLockedEmail} onChange={e => setLoginEmail(e.target.value)} className="auth-input" />
+          {inviteLockedEmail && (
+            <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#a78bfa', marginTop: '-10px' }}>
+              You were invited with this email. Use it to join the team.
+            </div>
+          )}
           <input type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} className="auth-input" />
 
           {isRegisterMode && (
@@ -1435,6 +1453,13 @@ if (!entered) return (
       <main className={`flex-1 min-h-screen overflow-auto transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-16'}`}>
         {/* The floating hamburger menu that used to be here has been removed and moved inside the Sidebar */}
         
+        {orgName && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 16px', fontFamily: 'monospace', fontSize: '0.72rem' }}>
+            <span style={{ padding: '4px 12px', borderRadius: '999px', background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#c4b5fd' }}>
+              {orgName} · {roleLabel}
+            </span>
+          </div>
+        )}
         {joinBanner && (
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
