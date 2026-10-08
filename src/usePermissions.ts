@@ -56,6 +56,15 @@ export function loadPermissions(): Promise<OrgInfo | null> {
   return p
 }
 
+// Silent refresh: updates role/permissions in place (no loading flash).
+export async function refreshPermissions() {
+  const info = await fetchOrg()
+  if (info) {
+    cache = info
+    listeners.forEach(l => l())
+  }
+}
+
 // Call on logout and after an invite is accepted.
 export function clearPermissionsCache() {
   cache = null
