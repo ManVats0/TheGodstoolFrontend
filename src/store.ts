@@ -74,6 +74,12 @@ export interface DataSource {
   // the source was created via /api/connections (i.e. anything except a
   // raw CSV upload or a catalog pick).
   connectionId?: string
+  // Which object inside the connection this source points at
+  table?: string
+  collection?: string
+  objectPath?: string   // GCS file / S3 key
+  endpoint?: string     // REST
+  report?: string       // GA4
 }
 
 export interface Transformation {
@@ -105,9 +111,10 @@ export interface SavedFlow {
 }
 
 // ── Backend connection doc shape (mirrors main.py's /api/connections) ────
-interface BackendConnection {
+export interface BackendConnection {
   _id: string
   userId: string
+  createdBy?: string
   name: string
   type: string
   config: Record<string, any>
@@ -121,10 +128,22 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+// Stable key for analysis_results / catalog. connectionId alone is NOT enough:
+// one connection has many tables, so include the object name.
+export function sourceKeyOf(s: {
+  name: string; connectionId?: string; table?: string; collection?: string
+  objectPath?: string; endpoint?: string; report?: string
+}): string {
+  if (!s.connectionId) return s.name
+  const sub = s.table || s.collection || s.objectPath || s.endpoint || s.report || ''
+  return sub ? `${s.connectionId}:${sub}` : s.connectionId
+}
+
 // Rebuild the per-table/per-collection/per-file DataSource entries this
 // app already expects, from one saved connection doc's `config`.
 function expandConnectionToSources(conn: BackendConnection): DataSource[] {
-  const { type, config } = conn
+  const { type } = conn
+  const config: Record<string, any> = conn.config || {}
   const addedAt = conn.updatedAt || conn.createdAt || new Date().toLocaleString()
   const mk = (idx: number, name: string, extra: Partial<DataSource> = {}): DataSource => ({
     id: `${conn._id}-${idx}`,
@@ -134,52 +153,53 @@ function expandConnectionToSources(conn: BackendConnection): DataSource[] {
     connectionId: conn._id,
     ...extra,
   })
+  // config may hold a list (tables) or a single value (table)
+  const list = (arr?: any, one?: any): string[] =>
+    Array.isArray(arr) && arr.length ? arr : (one ? [one] : [])
 
   switch (type) {
     case 'mysql':
     case 'postgres':
-      return (config.tables || []).map((t: string, i: number) =>
-        mk(i, `${config.database}.${t}@${config.host}`))
+      return list(config.tables, config.table).map((t, i) =>
+        mk(i, `${config.database}.${t}@${config.host}`, { table: t }))
     case 'cloudsql':
-      return (config.tables || []).map((t: string, i: number) =>
-        mk(i, `${config.database}.${t}@cloudsql.${config.project}`))
+      return list(config.tables, config.table).map((t, i) =>
+        mk(i, `${config.database}.${t}@cloudsql.${config.project}`, { table: t }))
     case 'bigquery':
-      return (config.tables || []).map((t: string, i: number) =>
-        mk(i, `${config.project}.${config.dataset}.${t}`))
+      return list(config.tables, config.table).map((t, i) =>
+        mk(i, `${config.project}.${config.dataset}.${t}`, { table: t }))
     case 'mongodb':
-      return (config.collections || []).map((c: string, i: number) =>
-        mk(i, `${config.database}.${c}@mongo`))
+      return list(config.collections, config.collection).map((c, i) =>
+        mk(i, `${config.database}.${c}@mongo`, { collection: c }))
     case 'gcs':
-      return (config.files || []).map((f: string, i: number) =>
-        mk(i, `gcs://${config.bucket}/${f}`))
+      return list(config.files, config.file).map((f, i) =>
+        mk(i, `gcs://${config.bucket}/${f}`, { objectPath: f }))
     case 'databricks':
-      return (config.tables || []).map((t: string, i: number) =>
-        mk(i, `${config.catalog}.${config.schema}.${t}@${config.host}`))
+      return list(config.tables, config.table).map((t, i) =>
+        mk(i, `${config.catalog}.${config.schema}.${t}@${config.host}`, { table: t }))
     case 'rest': {
       const host = (config.base_url || '').replace(/https?:\/\//, '')
-      return (config.endpoints || []).map((ep: string, i: number) =>
-        mk(i, `rest:${host}${ep}`))
+      return list(config.endpoints, config.endpoint).map((ep, i) =>
+        mk(i, `rest:${host}${ep}`, { endpoint: ep }))
     }
-    case 'ga4':
-      return (config.reports || []).map((r: string, i: number) =>
-        mk(i, `ga4:${config.propertyId}/${r}`))
+    case 'ga4': {
+      const pid = config.property_id || config.propertyId
+      return list(config.reports, config.report || 'report').map((r, i) =>
+        mk(i, `ga4:${pid}/${r}`, { report: r }))
+    }
     case 'aws': {
       const svc = config.service
-      return (config.tables || []).map((item: string, i: number) => {
+      return list(config.tables, config.table).map((item, i) => {
         const name =
           svc === 's3' ? `s3://${config.bucket}/${item}` :
           svc === 'dynamodb' ? `${item}@dynamodb.${config.region}` :
           svc === 'cost-explorer' ? `cost-explorer:${item}@${config.region}` :
           `${config.database}.${item}@${config.host}`
-        return mk(i, name)
+        return mk(i, name, { table: item })
       })
     }
-        case 'csv':
-      return [mk(0, config.filename || conn.name, { filename: config.filename })]
     case 'sheets':
-      return [mk(0, config.sheetName || conn.name, {
-        sheetId: config.sheetId, tab: config.tab,
-      })]
+      return [mk(0, config.sheetName || conn.name, { sheetId: config.sheetId, tab: config.tab })]
     default:
       return []
   }
@@ -195,6 +215,7 @@ interface AppState {
 
   // ── Backend-backed connections (MongoDB via main.py /api/connections) ──
   loadingSourcesFromBackend: boolean
+  connections: BackendConnection[]
   loadSourcesFromBackend: () => Promise<void>
   saveConnectionToBackend: (
     name: string,
@@ -276,6 +297,7 @@ export const useStore = create<AppState>((set, get) => ({
   removeSource: (id) => set((s) => ({ sources: s.sources.filter(src => src.id !== id) })),
 
   loadingSourcesFromBackend: false,
+  connections: [],
   loadSourcesFromBackend: async () => {
     set({ loadingSourcesFromBackend: true })
     try {
@@ -295,17 +317,23 @@ export const useStore = create<AppState>((set, get) => ({
         return
       }
       set((s) => {
-        const existingIds = new Set(s.sources.map(src => src.id))
-        const newSources: DataSource[] = []
+        const backendIds = new Set(conns.map(c => c._id))
+        // keep local-only sources (CSV, catalog) and still-valid backend ones
+        const next = s.sources.filter(src => !src.connectionId || backendIds.has(src.connectionId))
+        const indexById = new Map(next.map((src, i) => [src.id, i]))
         for (const conn of conns) {
           for (const src of expandConnectionToSources(conn)) {
-            if (!existingIds.has(src.id)) newSources.push(src)
+            const at = indexById.get(src.id)
+            if (at !== undefined) {
+              // refresh fields, keep any in-memory File (e.g. Sheets import)
+              next[at] = { ...src, file: next[at].file, filename: next[at].filename }
+            } else {
+              indexById.set(src.id, next.length)
+              next.push(src)
+            }
           }
         }
-        return {
-          sources: [...s.sources, ...newSources],
-          loadingSourcesFromBackend: false,
-        }
+        return { sources: next, connections: conns, loadingSourcesFromBackend: false }
       })
     } catch {
       set({ loadingSourcesFromBackend: false })
