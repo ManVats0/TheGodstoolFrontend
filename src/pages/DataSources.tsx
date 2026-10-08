@@ -1,6 +1,6 @@
   import { useState, useRef, useEffect } from 'react'
   import { useNavigate } from 'react-router-dom'
-  import { useStore } from '../store'
+  import { useStore, sourceKeyOf } from '../store'
   import { API_BASE } from '../config'
 import { usePermissions, forbiddenMessage } from '../usePermissions'
   import GuidedTour, { TourStep } from './FlowTutorial'
@@ -346,6 +346,13 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
       // via /api/connections. One call rebuilds the "Connected Sources" list
       // for this user regardless of which browser/device they're on.
       loadSourcesFromBackend()
+      ;['mysql','postgres','bigquery','mongo','aws','gcs','cloudsql','databricks','rest','ga4'].forEach(k => {
+        localStorage.removeItem(`datapro_${k}_connections`)
+        localStorage.removeItem(`datapro_${k}_dest`)
+        localStorage.removeItem(`datapro_active_${k}_source`)
+      })
+      localStorage.removeItem('datapro_mysql_dest')
+      localStorage.removeItem('datapro_postgres_dest')
 
       // Credits balance — shown right after login in the page header.
       const loadCredits = async () => {
@@ -738,6 +745,10 @@ const openGooglePicker = async () => {
       if (source.file) {
         switchActiveSource(source.file, source.name)
         navigate('/analysis')
+      } else if (source.connectionId && source.type !== 'sheets' && source.type !== 'catalog') {
+        // Credentials stay server-side; Analysis sends connection_id (+ source.table etc.)
+        switchActiveSource(null, source.name)
+        navigate('/analysis')
       } else if (source.type === 'catalog' || source.type === 'sheets') {
         switchActiveSource(null, source.name)
         navigate('/analysis')
@@ -1122,7 +1133,7 @@ const handleLockedSource = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       {badge(s.type.toUpperCase(), '#7c3aed')}
-                      {(getCachedAnalysis(s.name) || backendAnalysisBadges[s.connectionId || s.name]) && badge('Last Run', '#34d399')}
+                      {(getCachedAnalysis(s.name) || backendAnalysisBadges[sourceKeyOf(s)]) && badge('Last Run', '#34d399')}
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }} />
                       <button onClick={() => loadSource(s)}
                         className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white"
@@ -2675,30 +2686,27 @@ if (tablesData.tables?.length > 0) {
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (bqStatus !== 'ok' || bqSelectedTables.size === 0) return
-                    const id = crypto.randomUUID()
-                    const connRecord = {
-                      id,
-                      key_json: bqKeyJson,
-                      project: bqProject,
-                      dataset: bqDataset,
-                      table: [...bqSelectedTables][0],
-                      tables: [...bqSelectedTables],
-                      name: `${bqProject}@bigquery`,
-                      addedAt: new Date().toLocaleString(),
-                    }
-                    const existing = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
-                    const updated = [...existing, connRecord]
-                    localStorage.setItem('datapro_bigquery_connections', JSON.stringify(updated))
-                    setSavedBqConns(updated)
-                    ;[...bqSelectedTables].forEach((tbl, idx) => {
+                    const addedAt = new Date().toLocaleString()
+                    const tablesArr = [...bqSelectedTables]
+                    const backendId = await saveConnectionToBackend(
+                      `${bqProject}.${bqDataset}@bigquery`,
+                      'bigquery',
+                      { project: bqProject, dataset: bqDataset, tables: tablesArr },
+                      { key_json: bqKeyJson },
+                    )
+                    if (!backendId) { setBqError('Could not save the connection to the server. Make sure you are signed in and have permission.'); return }
+                    const id = backendId
+                    tablesArr.forEach((tbl, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${bqProject}.${bqDataset}.${tbl}`,
                         type: 'bigquery' as const,
-                        addedAt: connRecord.addedAt,
-                      })
+                        addedAt,
+                        connectionId: backendId,
+                        table: tbl,
+                      } as any)
                     })
                     addAuditLog({
                       id: crypto.randomUUID(),
@@ -3727,7 +3735,7 @@ if (tablesData.tables?.length > 0) {
                         setGcsStatus('ok')
                         setGcsFilesLoading(true)
                         try {
-                          const filesRes = await fetch(`${API_BASE}/api/gcs/files`, {
+                          const filesRes = await fetch(`${API_BASE}/api/gcs/list-files`, {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ key_json: gcs.keyJson, project: gcs.project, bucket: gcs.bucket, prefix: gcs.prefix }),
                           })
