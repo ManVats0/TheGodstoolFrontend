@@ -1,6 +1,6 @@
   import { useState, useEffect } from 'react'
   import { useNavigate } from 'react-router-dom'
-  import { useStore } from '../store'
+  import { useStore, sourceKeyOf } from '../store'
   import { API_BASE } from '../config'
 import { usePermissions } from '../usePermissions'
 
@@ -91,7 +91,7 @@ import { usePermissions } from '../usePermissions'
       return token ? { Authorization: `Bearer ${token}` } : {}
     }
 
-    const catalogKeyFor = (source: any) => source.connectionId || source.name
+    const catalogKeyFor = (source: any) => sourceKeyOf(source)
 
     useEffect(() => {
       const loadCatalog = async () => {
