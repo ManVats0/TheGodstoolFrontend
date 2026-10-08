@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { API_BASE } from '../config'
 import { clearPermissionsCache } from '../usePermissions'
+import { useStore } from '../store'
 
 export default function AcceptInvite() {
   const location = useLocation()
@@ -114,6 +115,7 @@ export default function AcceptInvite() {
     localStorage.setItem('datapro_invite_joined_org', data?.orgName || orgName || '')
     localStorage.setItem('datapro_invite_joined_role', data?.roleLabel || roleLabel || '')
     clearPermissionsCache()
+    useStore.getState().loadSourcesFromBackend()
     navigate('/', { replace: true })
   }
 
