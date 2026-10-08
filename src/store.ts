@@ -174,6 +174,8 @@ function expandConnectionToSources(conn: BackendConnection): DataSource[] {
         return mk(i, name)
       })
     }
+        case 'csv':
+      return [mk(0, config.filename || conn.name, { filename: config.filename })]
     case 'sheets':
       return [mk(0, config.sheetName || conn.name, {
         sheetId: config.sheetId, tab: config.tab,
