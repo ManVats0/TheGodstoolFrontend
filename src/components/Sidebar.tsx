@@ -41,7 +41,7 @@ const { can, role } = usePermissions()
     { path: '/flow', icon: 'flow', label: 'Pipeline Flow' },
     { path: '/analysis', icon: 'chart', label: 'Analysis' },
     { path: '/audit', icon: 'file', label: 'Audit Logs', show: can('audit.view') },
-    { path: '/team', icon: 'team', label: 'Team', show: can('org.manageMembers') },
+    { path: '/team', icon: 'team', label: 'Team' },
     { path: '/docs', icon: 'book', label: 'Cosmic Documentation' },
     { path: '/tunneling', icon: 'shield', label: 'Tunneling', show: can('tunnel.use') || can('tunnel.manage') },
     { path: '/feedback', icon: 'message', label: 'Feedback / Support' },
