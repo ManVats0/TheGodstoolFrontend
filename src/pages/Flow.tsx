@@ -4,11 +4,12 @@ import { useStore } from '../store'
 import { API_BASE } from '../config'
 import { runSQLPreviewWasm } from '../duckdbClient'
 import GuidedTour, { TourStep } from './FlowTutorial'
+import { usePermissions, forbiddenMessage } from '../usePermissions'
 
 const EMPTY_STATE_TOUR: TourStep[] = [
   {
     target: '[data-tour="tour-goto-sources"]',
-    title: 'Welcome to Pipeline Builder',
+    title: 'Welcome to Pipeline Builder 👋',
     body: 'Every pipeline starts with a data source. Click here to upload a CSV or connect a database, spreadsheet, or API — then come back to build your cleaning pipeline.',
     placement: 'top',
   },
@@ -16,7 +17,7 @@ const EMPTY_STATE_TOUR: TourStep[] = [
 
 const MAIN_TOUR: TourStep[] = [
   {
-    title: 'Welcome to Pipeline Builder! ',
+    title: 'Welcome to Pipeline Builder! 👋',
     body: "You've got a data source connected. Let's take a 60-second tour so you know exactly how to turn it into clean, automated output.",
   },
   {
@@ -44,7 +45,7 @@ const MAIN_TOUR: TourStep[] = [
     placement: 'top',
   },
   {
-    title: "You're all set!",
+    title: "You're all set! 🎉",
     body: 'Build your pipeline, save it, and DataPipe will keep your data clean automatically — on whatever schedule you choose.',
   },
 ]
@@ -220,8 +221,9 @@ const KIND_LABEL: Record<string, { icon: string; plain: string }> = {
   type_change: { icon: '🔄', plain: 'A column\'s data type changed (e.g. text → number)' },
 }
 
+const MIN_SCHEDULE_MS = 30_000 // matches the backend scheduler's poll interval — nothing faster can actually run more often anyway
+
 const SCHEDULE_PRESETS = [
-  { label: 'Live (5s)',  value: 'live',   cron: '',              ms: 5_000   },
   { label: '5 minutes',  value: '5m',     cron: '*/5 * * * *',  ms: 300_000 },
   { label: '15 minutes', value: '15m',    cron: '*/15 * * * *', ms: 900_000 },
   { label: '30 minutes', value: '30m',    cron: '*/30 * * * *', ms: 1_800_000 },
@@ -268,6 +270,11 @@ type PipelineLogEntry = {
 
 type SavedPipeline = {
   id: string
+  serverId?: string | null   // Mongo _id once synced via /api/pipelines — required to run on server
+  sourceConnectionId?: string | null  // Mongo connection _id for the source — lets Run Now execute
+                                       // entirely server-side even when this pipeline's source was
+                                       // never (re)loaded into local `sources` state this session
+  status?: 'approved' | 'pending_approval' | 'rejected'
   name: string
   sourceId: string
   destinationId: string
@@ -465,6 +472,234 @@ function applyTransforms(
       }
   }
   return data
+}
+
+const getAuthToken = () => localStorage.getItem('datapro_token') || ''
+
+async function resolveConnectionId(name: string, type: string, config: any, credentials: any): Promise<string | null> {
+  const token = getAuthToken()
+  if (!token) return null
+  try {
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+    const existingRes = await fetch(`${API_BASE}/api/connections`, { headers })
+    const existing = await existingRes.json()
+    if (Array.isArray(existing)) {
+      const match = existing.find((c: any) => c.type === type && c.name === name)
+      if (match?._id) {
+        // Refresh the existing connection with today's config/credentials
+        // instead of blindly reusing whatever was saved the first time —
+        // otherwise a connection created early with an incomplete config
+        // (e.g. before a working MongoDB URI existed locally) stays broken
+        // forever, since every later save just matched and reused it as-is.
+        // GUARD: only overwrite if the new credentials actually contain
+        // something — otherwise a stale/missing localStorage entry (e.g.
+        // after reopening the app) sends blank credentials and wipes out
+        // a previously-working, already-encrypted connection on the
+        // server, which is what caused "MongoDB source is missing
+        // uri/database/collection" even though the source looked connected.
+        const hasRealCredentials = credentials && Object.values(credentials).some(
+          (v: any) => typeof v === 'string' && v.trim().length > 0
+        )
+        if (hasRealCredentials) {
+          try {
+            await fetch(`${API_BASE}/api/connections/${match._id}`, {
+              method: 'PUT', headers, body: JSON.stringify({ name, type, config, credentials }),
+            })
+          } catch (e) {
+            console.error('resolveConnectionId: refresh of existing connection failed:', e)
+          }
+        } else {
+          console.warn(`resolveConnectionId: skipping refresh of "${name}" — new credentials were empty, keeping existing saved credentials intact.`)
+        }
+        return match._id
+      }
+    }
+    const createRes = await fetch(`${API_BASE}/api/connections`, {
+      method: 'POST', headers, body: JSON.stringify({ name, type, config, credentials }),
+    })
+    const created = await createRes.json()
+    return created?._id || null
+  } catch (e) {
+    console.error('resolveConnectionId failed:', e)
+    return null
+  }
+}
+
+// Best-effort mapping from Flow.tsx's local state shapes to the
+// {name, type, config, credentials} shape /api/connections expects.
+// Source types beyond mysql/postgres/mongodb aren't linked yet — those
+// pipelines will save locally as before but won't run on the server until
+// this mapping is extended for them.
+function buildConnectionPayload(kind: 'source' | 'destination', ctx: any): { name: string; type: string; config: any; credentials: any } | null {
+  if (kind === 'source') {
+    const s = ctx.activeSource
+    if (!s) return null
+    if (s.type === 'mysql' || s.type === 'postgres') {
+      const [dbPart, host] = String(s.name).split('@')
+      const [database, table] = (dbPart || '').split('.')
+      return { name: s.name, type: s.type, config: { host, database, table, tables: [table] }, credentials: {} }
+    }
+    if (s.type === 'mongodb') {
+      const dbPart = String(s.name).includes('@') ? String(s.name).split('@')[0] : String(s.name)
+      const [database, collection] = dbPart.split('.')
+      const savedMongoConnsForSync = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
+      const matchedMongoConn = savedMongoConnsForSync.find((c: any) => c.database === database)
+      // If this browser has no locally-saved URI for this database, don't
+      // sync at all — sending an empty uri would (via resolveConnectionId's
+      // refresh-on-match logic) overwrite a previously-working, already
+      // encrypted connection on the server with a blank one, breaking
+      // Run Now / Analysis for a pipeline that used to work fine.
+      if (!matchedMongoConn?.uri) {
+        console.warn(`buildConnectionPayload: no local MongoDB URI found for database "${database}" — skipping source connection sync to avoid wiping a working server-side connection.`)
+        return null
+      }
+      return { name: s.name, type: 'mongodb', config: { database, collection, collections: [collection] }, credentials: { uri: matchedMongoConn.uri } }
+    }
+    return null
+  }
+  if (ctx.gsheetsConnected) {
+    const d = ctx.gsheetsConnected
+    const sessionId = localStorage.getItem('datapro_session') || ''
+    return { name: d.sheetName, type: 'google_sheets',
+      config: { sheetId: d.sheetId, sheetName: d.sheetName },
+      credentials: { sessionId } }
+  }
+  if (ctx.mysqlDestination) {
+    const d = ctx.mysqlDestination
+    return { name: `${d.database}.${d.table}@${d.host}`, type: 'mysql',
+      config: { host: d.host, port: d.port, database: d.database, table: d.table, tables: d.tables, ssl: d.ssl },
+      credentials: { user: d.user, password: d.password } }
+  }
+  if (ctx.pgDestination) {
+    const d = ctx.pgDestination
+    return { name: `${d.database}.${d.table}@${d.host}`, type: 'postgres',
+      config: { host: d.host, port: d.port, database: d.database, table: d.table, tables: d.tables, ssl: d.ssl },
+      credentials: { user: d.user, password: d.password } }
+  }
+  if (ctx.mongoDestination) {
+    const d = ctx.mongoDestination
+    return { name: `${d.database}.${d.collection}`, type: 'mongodb',
+      config: { database: d.database, collection: d.collection, collections: d.collections },
+      credentials: { uri: d.uri } }
+  }
+  if (ctx.bqDestination) {
+    const d = ctx.bqDestination
+    return { name: `${d.project}.${d.dataset}.${d.table}`, type: 'bigquery',
+      config: { project: d.project, dataset: d.dataset, table: d.table, tables: d.tables },
+      credentials: { key_json: d.key_json } }
+  }
+  if (ctx.gcsDestination) {
+    const d = ctx.gcsDestination
+    return { name: `gcs://${d.bucket}/${d.file}`, type: 'gcs',
+      config: { project: d.project, bucket: d.bucket, file: d.file, files: d.files },
+      credentials: { key_json: d.keyJson } }
+  }
+  if (ctx.cloudsqlDestination) {
+    const d = ctx.cloudsqlDestination
+    return { name: `${d.database}.${d.table}@cloudsql.${d.project}`, type: 'cloudsql',
+      config: { instanceConnectionName: d.instanceConnectionName, project: d.project, database: d.database,
+        table: d.table, tables: d.tables, port: d.port, dbType: d.dbType },
+      credentials: { user: d.user, password: d.password } }
+  }
+  if (ctx.databricksDestination) {
+    const d = ctx.databricksDestination
+    return { name: `${d.catalog}.${d.schema}.${d.table}@${d.host}`, type: 'databricks',
+      config: { host: d.host, httpPath: d.httpPath, catalog: d.catalog, schema: d.schema, table: d.table, tables: d.tables },
+      credentials: { token: d.token } }
+  }
+  if (ctx.awsDestinationState) {
+    const d = ctx.awsDestinationState
+    return { name: `aws:${d.service}:${d.bucket || d.database || d.table}`, type: 'aws',
+      config: { service: d.service, region: d.region, bucket: d.bucket, host: d.host, port: d.port,
+        database: d.database, table: d.table, tables: d.tables },
+      credentials: { accessKeyId: d.accessKeyId, secretAccessKey: d.secretAccessKey, user: d.user, password: d.password } }
+  }
+  // Plain CSV / unrecognized destination — nothing to link.
+  return null
+}
+
+async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any, destPayload: any): Promise<{ serverId: string; sourceConnectionId: string | null } | null> {
+  const token = getAuthToken()
+  if (!token) {
+    console.warn('Not signed in — pipeline saved locally only and will NOT run automatically on the server.')
+    return null
+  }
+  const sourceConnectionId = pipeline.sourceConnectionId
+    || (sourcePayload
+      ? await resolveConnectionId(sourcePayload.name, sourcePayload.type, sourcePayload.config, sourcePayload.credentials)
+      : null)
+  const destinationConnectionId = destPayload
+    ? await resolveConnectionId(destPayload.name, destPayload.type, destPayload.config, destPayload.credentials)
+    : null
+  try {
+    const res = await fetch(`${API_BASE}/api/pipelines`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        id: pipeline.serverId || undefined,
+        name: pipeline.name,
+        sourceId: pipeline.sourceId,
+        destinationId: pipeline.destinationId,
+        sourceName: pipeline.sourceName,
+        destinationName: pipeline.destinationName,
+        sourceConnectionId,
+        destinationConnectionId,
+        destinationMode: pipeline.destinationMode,
+        transformations: pipeline.transformations,
+        schedule: pipeline.schedule,
+        scheduleLabel: pipeline.scheduleLabel,
+        scheduleMs: pipeline.scheduleMs,
+        scheduleTimezone: pipeline.scheduleTimezone,
+        scheduleStartDate: pipeline.scheduleStartDate,
+        isActive: pipeline.isActive,
+        status: pipeline.status || 'approved',
+      }),
+    })
+    const saved = await res.json()
+    if (saved?._id) return { serverId: saved._id as string, sourceConnectionId: sourceConnectionId || null }
+    console.error('Server pipeline sync failed:', saved)
+    return null
+  } catch (e) {
+    console.error('Server pipeline sync failed:', e)
+    return null
+  }
+}
+
+async function setPipelineApprovalStatus(serverId: string, status: 'approved' | 'pending_approval' | 'rejected') {
+  const token = getAuthToken()
+  if (!token) { alert('Not signed in — cannot change approval status on server.'); return null }
+  try {
+    const res = await fetch(`${API_BASE}/api/pipelines/${serverId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    })
+    if (res.status === 403) { alert(forbiddenMessage()); return null }
+    const result = await res.json()
+    if (result.error) { alert(`Could not update approval status: ${result.error}`); return null }
+    return result
+  } catch (e) {
+    alert(`Could not reach server: ${e}`)
+    return null
+  }
+}
+
+async function executePipelineOnServer(serverId: string) {
+  const token = getAuthToken()
+  if (!token) { alert('Not signed in — cannot run on server.'); return }
+  try {
+    const res = await fetch(`${API_BASE}/api/pipelines/${serverId}/execute`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}` },
+    })
+    const result = await res.json()
+    if (result.status === 'success') {
+      alert(`Ran on server: ${result.rowsIn ?? '?'} → ${result.rowsOut ?? '?'} rows`)
+    } else {
+      alert(`Server run failed: ${result.error || 'unknown error'}`)
+    }
+  } catch (e) {
+    alert(`Could not reach server: ${e}`)
+  }
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -774,9 +1009,9 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
       else { finalCron = `${min} ${hour} * * 0`; finalLabel = `Weekly at ${scheduleTime}` }
     } else if (isCustom) {
       finalCron  = customCron || '* * * * *'
-      finalLabel = `Custom (${fmtDur(customMs)})`
+      finalLabel = `Custom (${fmtDur(Math.max(MIN_SCHEDULE_MS, customMs))})`
     }
-    onSave(preset?.ms || customMs, finalLabel, finalCron, showTimezone ? timezone : 'UTC', finalStartDate)
+    onSave(preset?.ms || Math.max(MIN_SCHEDULE_MS, customMs), finalLabel, finalCron, showTimezone ? timezone : 'UTC', finalStartDate)
   }
 
   return (
@@ -837,7 +1072,7 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
                 <div className="mt-3 grid grid-cols-2 gap-3 p-3 rounded-xl" style={{ background:'rgba(124,58,237,0.06)', border:'1px solid rgba(124,58,237,0.2)' }}>
                   <div>
                     <label className="text-xs block mb-1" style={{ color:'rgba(255,255,255,0.4)' }}>Interval (ms)</label>
-                    <input type="number" min={60000} value={customMs} onChange={e => setCustomMs(Number(e.target.value))} className="w-full text-sm text-white rounded-lg px-3 py-2 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
+                    <input type="number" min={60000} value={customMs} onChange={e => setCustomMs(Math.max(MIN_SCHEDULE_MS, Number(e.target.value) || MIN_SCHEDULE_MS))} className="w-full text-sm text-white rounded-lg px-3 py-2 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
                     <p className="text-xs mt-1" style={{ color:'rgba(255,255,255,0.3)' }}>= {fmtDur(customMs)}</p>
                   </div>
                   <div>
@@ -1599,6 +1834,11 @@ function SQLEditorModal({ activeSourceName, colInfo, onConfirm, onClose }: {
 
 export default function Flow() {
   const navigate = useNavigate()
+  const { can } = usePermissions()
+  const canBuild = can('pipeline.create') || can('pipeline.edit')
+  // Always-current copy so timers and old closures never use a stale permission
+  const canExecuteRef = useRef(true)
+  canExecuteRef.current = can('pipeline.execute')
   const { sources, transformations, analysis, activeFile, addTransformation, removeTransformation, addAuditLog, setAnalysisTab, setPendingCleanOptions, switchActiveSource, setActiveDestinationName, setPipelineOutputFile, setLastPipelineRunAt, gsheetsDestination, setGsheetsDestination } = useStore()
   const [fullscreenTable, setFullscreenTable] = useState<{ title: string; subtitle?: string; columns: string[]; rows: any[]; accentColor?: string } | null>(null)
   const [tourKey, setTourKey] = useState(0)
@@ -1614,6 +1854,65 @@ export default function Flow() {
   })
   const persistPipelines = useCallback((pipes: SavedPipeline[]) => {
     setSavedPipelines(pipes); localStorage.setItem('datapipe_pipelines', JSON.stringify(pipes))
+  }, [])
+
+  // Hydrate saved pipelines from the server (Mongo) on mount, so pipelines
+  // persist across devices/browsers/incognito instead of only living in
+  // this browser's localStorage. Any pipeline that never got a serverId
+  // (failed to sync earlier) is kept from localStorage as a fallback so
+  // nothing already on this device is silently dropped.
+  useEffect(() => {
+    const token = getAuthToken()
+    const resumeSchedules = (pipes: SavedPipeline[]) => {
+      pipes.forEach(p => {
+        if (p.isActive && p.scheduleMs && p.scheduleMs > 0 && p.lastRun) {
+          startSchedule(p)
+        }
+      })
+    }
+    if (!token) {
+      resumeSchedules(savedPipelines)
+      return
+    }
+    fetch(`${API_BASE}/api/pipelines`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then((serverDocs: any[]) => {
+        if (!Array.isArray(serverDocs)) { resumeSchedules(savedPipelines); return }
+        const serverPipelines: SavedPipeline[] = serverDocs.map(d => ({
+          id: d._id,
+          serverId: d._id,
+          sourceConnectionId: d.sourceConnectionId || null,
+          status: d.status || 'approved',
+          name: d.name,
+          sourceId: d.sourceId,
+          destinationId: d.destinationId,
+          sourceName: d.sourceName,
+          destinationName: d.destinationName,
+          destinationMode: d.destinationMode || 'replace',
+          transformations: d.transformations || [],
+          createdAt: d.createdAt,
+          schedule: d.schedule,
+          scheduleLabel: d.scheduleLabel,
+          scheduleMs: d.scheduleMs,
+          scheduleTimezone: d.scheduleTimezone,
+          scheduleStartDate: d.scheduleStartDate,
+          lastRun: d.lastRun,
+          runCount: d.runCount || 0,
+          logs: [],
+          isActive: d.isActive || false,
+        }))
+        setSavedPipelines(prev => {
+          const localOnly = prev.filter(p => !p.serverId)
+          const merged = [...serverPipelines, ...localOnly]
+          localStorage.setItem('datapipe_pipelines', JSON.stringify(merged))
+          resumeSchedules(merged)
+          return merged
+        })
+      })
+      .catch(e => {
+        console.error('Failed to load pipelines from server:', e)
+        resumeSchedules(savedPipelines)
+      })
   }, [])
 
   const [selectedSourceId,  setSelectedSourceId]  = useState<string>(sources[0]?.name || '')
@@ -1723,6 +2022,7 @@ export default function Flow() {
     (awsDestinationState ? (awsDestinationState.service === 's3' ? `s3://${awsDestinationState.bucket}/${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}` : awsDestinationState.service === 'dynamodb' ? `${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}@dynamodb.${awsDestinationState.region}` : `${awsDestinationState.database}.${awsDestinationState.table || awsDestinationState.tables?.[0] || '?'}@${awsDestinationState.host}`) : null) ||
     (gcsDestination ? `gcs://${gcsDestination.bucket}/${gcsDestination.file || gcsDestination.files?.[0] || '?'}` : null) ||
     (cloudsqlDestination ? `${cloudsqlDestination.database}.${cloudsqlDestination.table || cloudsqlDestination.tables?.[0] || '?'}@cloudsql.${cloudsqlDestination.project}` : null) ||
+    (databricksDestination ? `${databricksDestination.catalog}.${databricksDestination.schema}.${databricksDestination.table || databricksDestination.tables?.[0] || '?'}@${databricksDestination.host}` : null) ||
     destinationName
   const existingPipeline = savedPipelines.find(p => p.sourceId === selectedSourceId && p.destinationId === effectiveDestination)
 
@@ -1754,10 +2054,12 @@ export default function Flow() {
   const [approvingFixes,          setApprovingFixes]          = useState(false)
   const [driftLoading,            setDriftLoading]            = useState(false)
   const [scheduledTimers,         setScheduledTimers]         = useState<Record<string, ReturnType<typeof setInterval>>>({})
+  const resumedScheduleIdsRef = useRef<Set<string>>(new Set())
   const [lastRunResult, setLastRunResult] = useState<{ pipelineName: string; rowsIn: number; rowsOut: number; rowsAffected: number; mode: string; destinationType?: string } | null>(null)
 const [postRunPreview, setPostRunPreview] = useState<{ columns: string[]; rows: any[] } | null>(null)
   // Save modal schedule state
   const [saveScheduleValue, setSaveScheduleValue] = useState('none')
+  const [requireApproval, setRequireApproval] = useState(false)
   const [saveCustomCron,    setSaveCustomCron]    = useState('')
   const [saveCustomMs,      setSaveCustomMs]      = useState(60000)
   const [saveTimezone,      setSaveTimezone]      = useState('UTC')
@@ -1789,11 +2091,12 @@ useEffect(() => {
 
 
   useEffect(() => {
-  // Only auto-set destination when source changes AND user hasn't manually set it
-  if (selectedSourceId && !destinationEdited) {
-    // Leave destination empty — user fills it via the dropdown
+  // Auto-set destination when source changes AND user hasn't manually set it
+  if (selectedSourceId && !destinationEdited && activeSource) {
+    const auto = `${activeSource.name.replace(/\.csv$/i, '')}_cleaned.csv`
+    setDestinationName(auto)
   }
-}, [selectedSourceId])
+}, [selectedSourceId, activeSource?.name, destinationEdited])
 
   useEffect(() => {
   // Only resume schedules that were already active — never auto-run on fresh upload
@@ -1807,14 +2110,160 @@ useEffect(() => {
 
   const startSchedule = (pipeline: SavedPipeline) => {
     if (!pipeline.scheduleMs || pipeline.scheduleMs <= 0) return
-    const timer = setInterval(() => { runPipeline(pipeline, 'schedule') }, pipeline.scheduleMs)
+    if (resumedScheduleIdsRef.current.has(pipeline.id)) return // already running — prevents duplicate intervals
+    resumedScheduleIdsRef.current.add(pipeline.id)
+    // Floors any pipeline saved before MIN_SCHEDULE_MS existed (e.g. an old
+    // "Live (5s)" pipeline) — single choke point, no DB migration needed.
+    const effectiveMs = Math.max(pipeline.scheduleMs, MIN_SCHEDULE_MS)
+    const timer = setInterval(() => { runPipeline(pipeline, 'schedule') }, effectiveMs)
     setScheduledTimers(prev => ({ ...prev, [pipeline.id]: timer }))
   }
 
   const stopSchedule = (pipelineId: string) => {
     const timer = scheduledTimers[pipelineId]
     if (timer) { clearInterval(timer); setScheduledTimers(prev => { const n={...prev}; delete n[pipelineId]; return n }) }
+    resumedScheduleIdsRef.current.delete(pipelineId)
   }
+
+  // ── Run a pipeline entirely server-side ─────────────────────────────────
+  // Used for any connection-backed source (MySQL/Postgres/MongoDB/BigQuery/
+  // AWS/GCS/CloudSQL/Databricks) once the pipeline has a serverId. Bypasses
+  // every localStorage `datapro_*_connections` lookup — the backend already
+  // has the encrypted credentials keyed by sourceConnectionId/
+  // destinationConnectionId, so this works from any browser/device and
+  // survives page refreshes and cleared local storage.
+  const runPipelineViaBackend = useCallback(async (
+    pipeline: SavedPipeline,
+    triggeredBy: 'manual' | 'schedule' | 'api'
+  ): Promise<PipelineLogEntry> => {
+    const startedAt = new Date().toISOString()
+    const baseLog: PipelineLogEntry = {
+      id: crypto.randomUUID(),
+      pipelineId: pipeline.id,
+      timestamp: startedAt,
+      status: 'running',
+      duration: 0,
+      rowsIn: 0,
+      rowsOut: 0,
+      steps: pipeline.transformations.map(t => ({ name: t.label, status: 'success' as const, duration: 0 })),
+      triggeredBy,
+      schedule: pipeline.scheduleLabel || undefined,
+    }
+
+    const token = getAuthToken()
+    if (!token) {
+      const failLog: PipelineLogEntry = {
+        ...baseLog,
+        status: 'failed',
+        steps: baseLog.steps.map(s => ({ ...s, status: 'failed' as const, message: 'Not signed in — cannot run this server-linked pipeline. Sign in and try again.' })),
+      }
+      const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: failLog.timestamp, runCount: p.runCount + 1, logs: [failLog, ...p.logs].slice(0, 50) } : p)
+      persistPipelines(updated)
+      return failLog
+    }
+
+    const clientStart = Date.now()
+    try {
+      const res = await fetch(`${API_BASE}/api/pipelines/${pipeline.serverId}/execute`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const result = await res.json()
+      const duration = typeof result.durationMs === 'number' ? result.durationMs : Date.now() - clientStart
+
+      if (result.status === 'success') {
+        const rowsIn = result.rowsIn ?? 0
+        const rowsOut = result.rowsOut ?? 0
+        const successLog: PipelineLogEntry = {
+          ...baseLog,
+          status: 'success',
+          duration,
+          rowsIn,
+          rowsOut,
+          steps: baseLog.steps.map(s => ({ ...s, status: 'success' as const, duration: Math.floor(duration / Math.max(baseLog.steps.length, 1)) })),
+        }
+        const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: successLog.timestamp, runCount: p.runCount + 1, logs: [successLog, ...p.logs].slice(0, 50) } : p)
+        persistPipelines(updated)
+        addAuditLog({
+          id: crypto.randomUUID(), time: new Date().toLocaleString(),
+          action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+          details: `Pipeline "${pipeline.name}" ran on server · success · ${rowsIn}→${rowsOut} rows · triggered by ${triggeredBy}`,
+          user: 'local_user',
+        })
+        setLastRunResult({
+          pipelineName: pipeline.name,
+          rowsIn,
+          rowsOut,
+          rowsAffected: rowsIn - rowsOut,
+          mode: pipeline.destinationMode,
+        })
+
+        // No destination connection was linked → backend returns a CSV
+        // download_url instead. Fetch it so the existing preview/download
+        // UI keeps working exactly as it does for the local CSV path.
+        if (result.download_url) {
+          try {
+            const fileRes = await fetch(`${API_BASE}${result.download_url}`)
+            const blob = await fileRes.blob()
+            const outputFile = new File([blob], pipeline.destinationName, { type: 'text/csv' })
+            useStore.setState({
+              pipelineOutputFile: outputFile,
+              activeFile: outputFile,
+              activeSourceName: pipeline.destinationName,
+              activeDestinationName: pipeline.destinationName,
+              analysis: null,
+              analysisTab: 'preview',
+              lastPipelineRunAt: new Date().toISOString(),
+            })
+            const csvText = await outputFile.text()
+            const { headers, rows } = parseCSV(csvText)
+            setPostRunPreview({ columns: headers, rows: rows.slice(0, 100) })
+          } catch (e) {
+            console.error('[Pipeline] Could not fetch server run output for preview:', e)
+          }
+        }
+
+        setTimeout(() => {
+          document.getElementById('saved-pipelines-section')?.scrollIntoView({ behavior: 'smooth' })
+        }, 300)
+
+        return successLog
+      }
+
+      const errMsg = result.error || 'Server run failed'
+      const failLog: PipelineLogEntry = {
+        ...baseLog,
+        status: 'failed',
+        duration,
+        steps: baseLog.steps.map(s => ({ ...s, status: 'failed' as const, message: errMsg })),
+      }
+      const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: failLog.timestamp, runCount: p.runCount + 1, logs: [failLog, ...p.logs].slice(0, 50) } : p)
+      persistPipelines(updated)
+      addAuditLog({
+        id: crypto.randomUUID(), time: new Date().toLocaleString(),
+        action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+        details: `Pipeline "${pipeline.name}" failed on server · ${errMsg} · triggered by ${triggeredBy}`,
+        user: 'local_user',
+      })
+      return failLog
+    } catch (e) {
+      const failLog: PipelineLogEntry = {
+        ...baseLog,
+        status: 'failed',
+        duration: Date.now() - clientStart,
+        steps: baseLog.steps.map(s => ({ ...s, status: 'failed' as const, message: `Could not reach server: ${String(e)}` })),
+      }
+      const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: failLog.timestamp, runCount: p.runCount + 1, logs: [failLog, ...p.logs].slice(0, 50) } : p)
+      persistPipelines(updated)
+      addAuditLog({
+        id: crypto.randomUUID(), time: new Date().toLocaleString(),
+        action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+        details: `Pipeline "${pipeline.name}" failed · could not reach server · ${String(e)} · triggered by ${triggeredBy}`,
+        user: 'local_user',
+      })
+      return failLog
+    }
+  }, [savedPipelines, persistPipelines, addAuditLog])
 
   const runPipeline = useCallback(async (pipeline: SavedPipeline, triggeredBy: 'manual'|'schedule'|'api' = 'manual') => {
     const log: PipelineLogEntry = {
@@ -1835,8 +2284,24 @@ useEffect(() => {
 }
 
     // ── Find the source file ─────────────────────────────────────────────
+    if (!canExecuteRef.current) {
+      if (triggeredBy !== 'schedule') alert(forbiddenMessage())
+      return log
+    }
     const sourceObj = sources.find(s => s.name === pipeline.sourceId)
     let fileToUse = sourceObj?.file || (sourceObj?.type !== ('sheets' as string) ? activeFile : null) || null 
+
+    // ── Connection-backed sources: if this pipeline is linked to the
+    // server (serverId set after a successful save while signed in), run
+    // it entirely server-side instead of trying every datapro_*_connections
+    // localStorage lookup below. This is what makes "Run Now" work after a
+    // refresh, on a different browser/device, or with cleared local
+    // storage — for MySQL, Postgres, MongoDB, BigQuery, AWS, GCS, Cloud SQL
+    // and Databricks alike, not just one of them.
+    const SERVER_ONLY_SOURCE_TYPES = ['mysql', 'postgres', 'mongodb', 'bigquery', 'aws', 'gcs', 'cloudsql', 'databricks']
+    if (pipeline.serverId && (pipeline.sourceConnectionId || (sourceObj && SERVER_ONLY_SOURCE_TYPES.includes(sourceObj.type as string)))) {
+      return await runPipelineViaBackend(pipeline, triggeredBy)
+    }
 
     // ── If source is MySQL, fetch table as CSV first ──────────────────────
     if (sourceObj?.type === 'mysql') {
@@ -2047,7 +2512,57 @@ if (mysqlConn) {
             console.log('[Pipeline] Fetched MongoDB collection as CSV:', mongoData.rows, 'rows')
           } else {
             console.error('[Pipeline] MongoDB fetch failed:', mongoData.error)
+            const mongoFetchFailLog: PipelineLogEntry = {
+              ...log,
+              status: 'failed',
+              duration: Date.now() - new Date(log.timestamp).getTime(),
+              steps: pipeline.transformations.map(t => ({
+                name: t.label,
+                status: 'failed' as const,
+                duration: 0,
+                message: `MongoDB fetch failed: ${mongoData.error || 'unknown error from /api/mongo/fetch-collection'}`,
+              })),
+            }
+            const updatedMongoFetchFail = savedPipelines.map(p =>
+              p.id === pipeline.id
+                ? { ...p, lastRun: mongoFetchFailLog.timestamp, runCount: p.runCount + 1, logs: [mongoFetchFailLog, ...p.logs].slice(0, 50) }
+                : p
+            )
+            persistPipelines(updatedMongoFetchFail)
+            addAuditLog({
+              id: crypto.randomUUID(), time: new Date().toLocaleString(),
+              action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+              details: `Pipeline "${pipeline.name}" failed · MongoDB fetch returned no download_url · ${mongoData.error || 'unknown'} · triggered by ${triggeredBy}`,
+              user: 'local_user'
+            })
+            return mongoFetchFailLog
           }
+        } else {
+          console.error('[Pipeline] No matching MongoDB connection found in localStorage for database:', srcDatabase)
+          const noMongoConnLog: PipelineLogEntry = {
+            ...log,
+            status: 'failed',
+            duration: Date.now() - new Date(log.timestamp).getTime(),
+            steps: pipeline.transformations.map(t => ({
+              name: t.label,
+              status: 'failed' as const,
+              duration: 0,
+              message: `No saved MongoDB connection found for database "${srcDatabase}" on this browser. Go to Data Sources → MongoDB and re-test the connection, then Run Now again.`,
+            })),
+          }
+          const updatedNoMongoConn = savedPipelines.map(p =>
+            p.id === pipeline.id
+              ? { ...p, lastRun: noMongoConnLog.timestamp, runCount: p.runCount + 1, logs: [noMongoConnLog, ...p.logs].slice(0, 50) }
+              : p
+          )
+          persistPipelines(updatedNoMongoConn)
+          addAuditLog({
+            id: crypto.randomUUID(), time: new Date().toLocaleString(),
+            action: 'pipeline_run', entity_type: 'pipeline', entity_id: pipeline.id,
+            details: `Pipeline "${pipeline.name}" failed · no MongoDB connection found for database "${srcDatabase}" · triggered by ${triggeredBy}`,
+            user: 'local_user'
+          })
+          return noMongoConnLog
         }
       } catch (e) {
         console.error('[Pipeline] MongoDB fetch failed:', e)
@@ -2505,7 +3020,7 @@ if (mysqlConn) {
 
         let data: any = null
 if (!fileToUse) {
-  console.error('[Pipeline] No file available to process — MySQL fetch may have failed or returned empty')
+  console.error(`[Pipeline] No file available to process — ${sourceObj?.type || 'source'} fetch may have failed or returned empty`)
   const failLog: PipelineLogEntry = {
     ...log,
     status: 'failed',
@@ -2514,7 +3029,7 @@ if (!fileToUse) {
       name: t.label,
       status: 'failed' as const,
       duration: 0,
-      message: 'Could not fetch source data — check MySQL connection and table name',
+      message: `Could not fetch source data from ${sourceObj?.type || 'the source'} "${sourceObj?.name || pipeline.sourceId}" — check its connection and table/collection name`,
     })),
   }
   const updated = savedPipelines.map(p =>
@@ -3054,7 +3569,7 @@ const realLog: PipelineLogEntry = {
     return log
   }, [savedPipelines, persistPipelines, addAuditLog, activeFile, sources,
       setPipelineOutputFile, setLastPipelineRunAt, setActiveDestinationName,
-      switchActiveSource, navigate])
+      switchActiveSource, navigate, runPipelineViaBackend])
 
   const loadPipelineData = async () => {
     setDriftLoading(true)
@@ -3158,9 +3673,9 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
       schedLabel = `Daily at ${fmt12Save(saveDailyAtTime)}`
     } else if (saveScheduleValue !== 'none') {
       const preset = SCHEDULE_PRESETS.find(p => p.value === saveScheduleValue)
-      schedMs    = saveScheduleValue === 'live' ? 5_000 : saveScheduleValue === 'custom' ? saveCustomMs : (preset?.ms || 0)
+      schedMs    = saveScheduleValue === 'custom' ? Math.max(MIN_SCHEDULE_MS, saveCustomMs) : (preset?.ms || 0)
       schedCron  = saveScheduleValue === 'custom' ? saveCustomCron : (preset?.cron || null)
-      schedLabel = saveScheduleValue === 'custom' ? `Custom (${fmtDur(saveCustomMs)})` : (preset?.label || null)
+      schedLabel = saveScheduleValue === 'custom' ? `Custom (${fmtDur(Math.max(MIN_SCHEDULE_MS, saveCustomMs))})` : (preset?.label || null)
       if (isSaveAbsolute) {
         const [h, m] = saveScheduleTime.split(':')
         const hour = parseInt(h || '0')
@@ -3190,7 +3705,9 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
       runCount:         existing?.runCount || 0,
       logs:             existing?.logs || [],
       isActive:         !!(schedMs && schedMs > 0),
-      destinationMode: destinationMode, 
+      destinationMode: destinationMode,
+      status:           requireApproval ? 'pending_approval' : 'approved',
+      sourceConnectionId: (activeSource as any)?.connectionId || null,
     }
 
     if (existing) stopSchedule(existing.id)
@@ -3200,12 +3717,35 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
     persistPipelines(newPipelines)
     if (schedMs && schedMs > 0) startSchedule(pipeline)
 
+    // Sync to the backend so it's persistent server-side and can be picked
+    // up by the scheduler / run without this tab being open. Fire-and-forget:
+    // local save above already succeeded, this just adds server capability.
+    const sourcePayload = (activeSource as any)?.connectionId ? null : buildConnectionPayload('source', { activeSource })
+    const destPayload = buildConnectionPayload('destination', {
+      gsheetsConnected, mysqlDestination, pgDestination, bqDestination, mongoDestination,
+      awsDestinationState, gcsDestination, cloudsqlDestination, databricksDestination,
+    })
+    syncPipelineToServer(pipeline, sourcePayload, destPayload).then(syncResult => {
+      if (syncResult) {
+        setSavedPipelines(prev => {
+          const updated = prev.map(p => p.id === pipeline.id
+            ? { ...p, serverId: syncResult.serverId, sourceConnectionId: syncResult.sourceConnectionId }
+            : p)
+          localStorage.setItem('datapipe_pipelines', JSON.stringify(updated))
+          return updated
+        })
+      } else {
+        console.warn(`Pipeline "${pipeline.name}" saved locally but not linked server-side — it will not run automatically unless this tab stays open.`)
+      }
+    })
+
     addAuditLog({ id:crypto.randomUUID(), time:new Date().toLocaleString(), action:'save_pipeline', entity_type:'pipeline', entity_id:pipeline.id, details:`Saved "${pipelineName}" · ${selectedSourceId} → ${effectiveDestination} · ${transformations.length} transforms${schedLabel ? ` · ${schedLabel}` : ''}${finalStartDate ? ` · starts ${finalStartDate}` : ''}`, user:'local_user' })
     setShowSaveModal(false)
 setPipelineName('')
 setSaveScheduleValue('none')
 setSaveStartDate('')
 setSaveScheduleTab('frequency')
+setRequireApproval(false)
 // Scroll to saved pipelines to show proof it was saved
 setTimeout(() => {
   document.getElementById('saved-pipelines-section')?.scrollIntoView({ behavior: 'smooth' })
@@ -3338,7 +3878,7 @@ setTimeout(() => {
           <button onClick={() => setShowAlertModal(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', color:'#f87171' }}>
             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alert
           </button>
-          <button data-tour="tour-add-transform" onClick={() => setShowTransformPicker(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)', boxShadow:'0 0 20px rgba(124,58,237,0.3)' }}>
+          <button data-tour="tour-add-transform" disabled={!canBuild} onClick={() => setShowTransformPicker(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)', boxShadow:'0 0 20px rgba(124,58,237,0.3)' }}>
             <span className="text-base">+</span> Add Transformation
           </button>
         </div>
@@ -3375,7 +3915,7 @@ setTimeout(() => {
     type === 'GCS'            ? activeSourceIsGCS :
     type === 'Cloud SQL'      ? activeSourceIsCloudSQL :
     type === 'Databricks'     ? activeSource?.type === 'databricks' :
-    type === 'REST API'       ? activeSource?.type === 'restapi' :
+    type === 'REST API'       ? (activeSource?.type as string) === 'rest' :
     type === 'GA4'            ? activeSource?.type === 'ga4' : false
   const sourceTooltips: Record<string, string> = {
     'CSV': 'CSV — Upload a comma-separated values file',
@@ -3408,7 +3948,7 @@ setTimeout(() => {
           else alert('No Databricks sources connected. Add one in Data Sources first.')
         }
         if (type === 'REST API') {
-          const restSrc = sources.find(s => s.type === 'restapi')
+          const restSrc = sources.find(s => (s.type as string) === 'rest')
           if (restSrc) { setSelectedSourceId(restSrc.name); setActiveSourceIsSheet(false) }
           else alert('No REST API sources connected. Add one in Data Sources first.')
         }
@@ -3528,7 +4068,7 @@ setTimeout(() => {
       type === 'AWS' ? !!awsDestinationState :
       type === 'GCS' ? !!gcsDestination :
       type === 'Cloud SQL' ? !!cloudsqlDestination :
-      type === 'CSV' ? (!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination) :
+      type === 'CSV' ? (!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination && !databricksDestination) :
       type === 'MySQL' ? !!mysqlDestination :
       type === 'PostgreSQL' ? !!pgDestination :
       type === 'BigQuery' ? !!bqDestination :
@@ -3550,7 +4090,7 @@ setTimeout(() => {
         title={destTooltips[type]}
         onClick={() => {
           if (type === 'Google Sheets' && !gsheetsConnected) { setGsheetsPickerFor('dest'); setShowGSheetsPicker(true) }
-          if (type === 'CSV') { setGsheetsConnected(null); setMysqlDest(null); setMongoDest(null); setPgDest(null); setBqDest(null); setAwsDest(null); setGcsDest(null); setCsqlDest(null) }
+          if (type === 'CSV') { setGsheetsConnected(null); setMysqlDest(null); setMongoDest(null); setPgDest(null); setBqDest(null); setAwsDest(null); setGcsDest(null); setCsqlDest(null); setDbxDest(null) }
           if (type === 'MongoDB' as any && !mongoDestination) {
             const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
             if (savedMongo.length > 0) {
@@ -4173,7 +4713,7 @@ setTimeout(() => {
                 </div>
                 ) : null}
               {/* Combobox with ✕ clear button — only show for CSV destination */}
-              {!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination && (
+              {!gsheetsConnected && !mysqlDestination && !pgDestination && !bqDestination && !mongoDestination && !awsDestinationState && !gcsDestination && !cloudsqlDestination && !databricksDestination && (
                 <DestinationSelect
                   value={destinationName}
                   onChange={v => { setDestinationName(v); setDestinationEdited(true) }}
@@ -4213,11 +4753,19 @@ setTimeout(() => {
               <div className="flex items-center gap-2">
                 <button onClick={() => { setSelectedPipelineForLogs(existingPipeline); setShowLogsPanel(true) }} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.25)', color:'#818cf8' }}>View Runs</button>
                 <button onClick={() => setShowScheduleModal(existingPipeline)} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.25)', color:'#a78bfa' }}>⏱ Schedule</button>
-                <button onClick={() => runPipeline(existingPipeline, 'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.2)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
+                <button disabled={!can('pipeline.execute')} onClick={() => runPipeline(existingPipeline, 'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.2)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
               </div>
             </div>
           )}
         </div>
+
+        {!canBuild && (
+          <div className="rounded-2xl px-5 py-3" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
+            <p className="text-xs" style={{ color: '#fbbf24' }}>
+              View only: your role can look at pipelines{can('pipeline.approve') ? ' and approve or reject them' : ''}, but can't create or edit them.
+            </p>
+          </div>
+        )}
 
         {/* PIPELINE FLOW DIAGRAM */}
         <div data-tour="tour-pipeline-flow" className="rounded-2xl p-6 overflow-x-auto" style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)' }}>
@@ -4363,7 +4911,7 @@ setTimeout(() => {
                 <p className="text-xs mt-0.5" style={{ color:'rgba(255,255,255,0.35)' }}>Saved pipelines are unique to this source ↔ destination pair · You'll be redirected to Analysis after saving</p>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={() => setShowSaveModal(true)} disabled={!effectiveDestination.trim()}
+                <button onClick={() => setShowSaveModal(true)} disabled={!effectiveDestination.trim() || !(existingPipeline ? can('pipeline.edit') : can('pipeline.create'))}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-40"
                   style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)', boxShadow:'0 4px 20px rgba(124,58,237,0.35)' }}>
                   <svg width="14" height="14" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -4397,6 +4945,8 @@ setTimeout(() => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
                             <p className="font-bold text-white text-sm">{pipeline.name}</p>
+                            {pipeline.status === 'rejected' && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(239,68,68,0.15)', color:'#f87171' }}>✕ Rejected</span>}
+                            {pipeline.status === 'pending_approval' && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(234,179,8,0.15)', color:'#fbbf24' }}>⏳ Pending Approval</span>}
                             {isRunningNow && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(34,197,94,0.12)', color:'#4ade80' }}>⏱ {pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
                             {!isRunningNow&&pipeline.scheduleLabel&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(234,179,8,0.1)', color:'#fbbf24' }}>⏸ {pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
                             {pipeline.scheduleStartDate&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(99,102,241,0.1)', color:'#818cf8' }}>📅 from {pipeline.scheduleStartDate}</span>}
@@ -4440,14 +4990,56 @@ setTimeout(() => {
                           style={{ background:latestLog?.status==='failed'?'rgba(239,68,68,0.12)':'rgba(99,102,241,0.1)', border:`1px solid ${latestLog?.status==='failed'?'rgba(239,68,68,0.25)':'rgba(99,102,241,0.2)'}`, color:latestLog?.status==='failed'?'#f87171':'#818cf8' }}>
                           {latestLog?.status==='failed'?'⚠ View Error':'Runs & Logs'}
                         </button>
-                        <button onClick={() => runPipeline(pipeline,'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.15)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
+                        {pipeline.serverId && (
+                          <button
+                            onClick={async () => {
+                              const wantsApprove = pipeline.status === 'pending_approval' || pipeline.status === 'rejected'
+                              if (wantsApprove ? !can('pipeline.approve') : !can('pipeline.edit')) { alert(forbiddenMessage()); return }
+                              const newStatus = wantsApprove ? ('approved' as const) : ('pending_approval' as const)
+                              const result = await setPipelineApprovalStatus(pipeline.serverId!, newStatus)
+                              if (result) {
+                                setSavedPipelines(prev => {
+                                  const updated = prev.map(p => p.id === pipeline.id ? { ...p, status: newStatus } : p)
+                                  localStorage.setItem('datapipe_pipelines', JSON.stringify(updated))
+                                  return updated
+                                })
+                              }
+                            }}
+                            className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                            style={(pipeline.status === 'pending_approval' || pipeline.status === 'rejected')
+                              ? { background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', color: '#4ade80' }
+                              : { background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)', color: '#fbbf24' }}>
+                            {(pipeline.status === 'pending_approval' || pipeline.status === 'rejected') ? '✓ Approve' : 'Require Approval'}
+                          </button>
+                        )}
+                        {pipeline.serverId && pipeline.status === 'pending_approval' && can('pipeline.approve') && (
+                          <button
+                            onClick={async () => {
+                              const result = await setPipelineApprovalStatus(pipeline.serverId!, 'rejected')
+                              if (result) {
+                                setSavedPipelines(prev => {
+                                  const updated = prev.map(p => p.id === pipeline.id ? { ...p, status: 'rejected' as const } : p)
+                                  localStorage.setItem('datapipe_pipelines', JSON.stringify(updated))
+                                  return updated
+                                })
+                              }
+                            }}
+                            className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171' }}>
+                            ✕ Reject
+                          </button>
+                        )}
+                        <button disabled={!can('pipeline.execute')} onClick={() => runPipeline(pipeline,'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.15)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
+                        {pipeline.serverId && (
+                          <button disabled={!can('pipeline.execute')} onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side — works even if this tab is closed">☁ Run on Server</button>
+                        )}
                         <button onClick={() => {
                           if (window.confirm(`Permanently delete pipeline "${pipeline.name}"? This cannot be undone.`)) {
                             stopSchedule(pipeline.id)
                             persistPipelines(savedPipelines.filter(p => p.id!==pipeline.id))
                             addAuditLog({ id:crypto.randomUUID(), time:new Date().toLocaleString(), action:'delete_pipeline', entity_type:'pipeline', entity_id:pipeline.id, details:`Deleted pipeline "${pipeline.name}"`, user:'local_user' })
                           }
-                        }} className="text-xs px-2 py-1.5 rounded-lg" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.15)', color:'#f87171' }} title="Permanently delete pipeline">🗑</button>
+                        }} className="text-xs px-2 py-1.5 rounded-lg" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.15)', color:'#f87171' }} title="Permanently delete pipeline" hidden={!can('pipeline.delete')}>🗑</button>
                       </div>
                     </div>
                   </div>
@@ -4742,6 +5334,15 @@ setTimeout(() => {
                 <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>Pipeline Name *</label>
                 <input type="text" value={pipelineName} onChange={e => setPipelineName(e.target.value)} placeholder="e.g. Daily Customer Cleanse" autoFocus className="w-full text-sm text-white rounded-xl px-4 py-3 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
               </div>
+              <div onClick={() => setRequireApproval(v => !v)} className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer" style={{ background: requireApproval ? 'rgba(234,179,8,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${requireApproval ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.07)'}` }}>
+                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: requireApproval ? '#eab308' : 'transparent', border: `2px solid ${requireApproval ? '#eab308' : 'rgba(255,255,255,0.25)'}` }}>
+                  {requireApproval && <span className="text-black font-black" style={{ fontSize: '10px' }}>✓</span>}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">Require approval before running</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Pipeline will be saved as pending — it won't execute (manually or on schedule) until approved</p>
+                </div>
+              </div>
               <div className="rounded-xl p-3" style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)' }}>
                 <p className="text-xs font-semibold mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>{transformations.length} transforms</p>
                 <div className="flex flex-wrap gap-1.5">{transformations.map(t => (<span key={t.id} className="text-xs px-2 py-1 rounded-lg flex items-center gap-1" style={{ background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.6)' }}>{t.icon} {t.label}</span>))}</div>
@@ -4785,7 +5386,7 @@ setTimeout(() => {
                       <div className="mt-3 grid grid-cols-2 gap-3 p-3 rounded-xl" style={{ background:'rgba(124,58,237,0.06)', border:'1px solid rgba(124,58,237,0.2)' }}>
                         <div>
                           <label className="text-xs block mb-1" style={{ color:'rgba(255,255,255,0.4)' }}>Interval (ms)</label>
-                          <input type="number" min={60000} value={saveCustomMs} onChange={e => setSaveCustomMs(Number(e.target.value))} className="w-full text-sm text-white rounded-lg px-3 py-2 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
+                          <input type="number" min={60000} value={saveCustomMs} onChange={e => setSaveCustomMs(Math.max(MIN_SCHEDULE_MS, Number(e.target.value) || MIN_SCHEDULE_MS))} className="w-full text-sm text-white rounded-lg px-3 py-2 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }} />
                           <p className="text-xs mt-1" style={{ color:'rgba(255,255,255,0.3)' }}>= {fmtDur(saveCustomMs)}</p>
                         </div>
                         <div>
@@ -5091,7 +5692,7 @@ setTimeout(() => {
       )}
 
       {/* TRANSFORM PICKER */}
-      {showTransformPicker&&(
+      {showTransformPicker && canBuild && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.75)' }} onClick={() => setShowTransformPicker(false)}>
           <div className="rounded-2xl p-6 max-w-lg w-full" style={{ background:'#0d0a1a', border:'1px solid rgba(255,255,255,0.1)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-2"><h3 className="font-bold text-white">Add Transformation</h3><button onClick={() => setShowTransformPicker(false)} style={{ color:'rgba(255,255,255,0.4)' }}>✕</button></div>
