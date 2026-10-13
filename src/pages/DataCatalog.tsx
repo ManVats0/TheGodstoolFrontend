@@ -146,6 +146,7 @@ import { usePermissions } from '../usePermissions'
           body: JSON.stringify({
             source_name: source.name,
             connection_id: source.connectionId || '',
+            source_key: catalogKeyFor(source),
             [field]: value,
           }),
         })
