@@ -1,8 +1,8 @@
   import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore } from '../store'
-import TimeSeriesChart from '../components/TimeSeriesChart'
+import { useStore, sourceKeyOf } from '../store'
 import { usePermissions } from '../usePermissions'
+import TimeSeriesChart from '../components/TimeSeriesChart'
 import { API_BASE } from '../config'
 
   const IMPUTATION_METHODS = [
@@ -56,7 +56,7 @@ import { API_BASE } from '../config'
     return token ? { Authorization: `Bearer ${token}` } : {}
   }
 
-  async function saveAnalysisResultToBackend(sourceName: string, connectionId: string | undefined, fullResult: any) {
+  async function saveAnalysisResultToBackend(sourceName: string, connectionId: string | undefined, fullResult: any, sourceKey?: string) {
     try {
       await fetch(`${API_BASE}/api/analysis-results`, {
         method: 'POST',
@@ -65,12 +65,33 @@ import { API_BASE } from '../config'
         body: JSON.stringify({
           source_name: sourceName,
           connection_id: connectionId || '',
+          source_key: sourceKey || '',
           result: toAnalysisMetadata(fullResult),
         }),
       })
     } catch {
       // Best-effort — the localStorage cache already has the full result
       // for this browser, so a failed backend save doesn't break the page.
+    }
+  }
+
+  // Fetches the last saved run for this source from the backend, so
+  // "what changed" insights work across devices/browsers — not just within
+  // the current one. Falls back silently (returns null) if not logged in
+  // or nothing has been saved for this source yet.
+  async function fetchPreviousAnalysisResult(sourceKey: string): Promise<any | null> {
+    try {
+      const headers = analysisAuthHeaders()
+      if (!headers.Authorization) return null
+      const res = await fetch(`${API_BASE}/api/analysis-results/latest?source_key=${encodeURIComponent(sourceKey)}`, {
+        credentials: 'include',
+        headers,
+      })
+      if (!res.ok) return null
+      const data = await res.json()
+      return data.result?.result || null
+    } catch {
+      return null
     }
   }
 
@@ -98,6 +119,7 @@ import { API_BASE } from '../config'
   }) {
     const [saving, setSaving] = React.useState(false)
     const [saveMsg, setSaveMsg] = React.useState('')
+    const { can } = usePermissions()
 
     const sourceObj = sources.find((s: any) => s.name === activeSourceName)
     const srcType = sourceObj?.type ? String(sourceObj.type) : ''
@@ -113,7 +135,7 @@ import { API_BASE } from '../config'
       cloudsql: 'Save to Cloud SQL',
     }
 
-    if (!srcType || !labelMap[srcType]) return null
+    if (!srcType || !labelMap[srcType] || !can('connection.edit')) return null
 
     const label = labelMap[srcType]
 
@@ -136,7 +158,10 @@ import { API_BASE } from '../config'
         formData.append('source_type', srcType)
         formData.append('source_name', activeSourceName)
 
-        if (srcType === 'sheets') {
+        if (sourceObj?.connectionId && srcType !== 'sheets') {
+          formData.append('connection_id', sourceObj.connectionId)
+          formData.append('target', sourceObj.table || sourceObj.collection || sourceObj.objectPath || sourceObj.endpoint || '')
+        } else if (srcType === 'sheets') {
           const storedSession = localStorage.getItem('datapro_session') || ''
           if (storedSession) formData.append('session_id', storedSession)
           if (sourceObj?.sheetId) formData.append('sheet_id', sourceObj.sheetId)
@@ -267,7 +292,7 @@ import { API_BASE } from '../config'
           formData.append('db_type', conn.dbType || 'postgres')
         }
 
-        const res = await fetch(`${API_BASE}/api/write-to-source`, { method: 'POST', body: formData })
+        const res = await fetch(`${API_BASE}/api/write-to-source`, { method: 'POST', headers: analysisAuthHeaders(), body: formData })
         const data = await res.json()
         if (data.success) {
           setSaveMsg(`✅ Saved successfully! ${data.rows_written ? `${data.rows_written} rows written.` : ''}`)
@@ -1026,7 +1051,6 @@ const assistantText = aiData.success
     const navigate = useNavigate()
     const { can, loading: permsLoading } = usePermissions()
     const canRunAnalysis = can('analysis.run')
-    const [savedChecked, setSavedChecked] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {
       activeFile, activeSourceName, analysis, setAnalysis,
@@ -1087,6 +1111,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
 
     // Track which source the current analysis belongs to
     const analysisSourceRef = useRef<string>('')
+    const [savedChecked, setSavedChecked] = useState(false)
     // Track if a re-run was triggered by a source switch (avoid double-running)
     // const switchTriggeredRef = useRef(false)
 
@@ -1099,10 +1124,10 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    // Viewers can't run new analyses, so they load the last saved result instead
+    // Roles that can't run analysis (e.g. Viewer) load the last saved result instead
     const loadSavedAnalysis = async () => {
       const srcObj = sources.find(s => s.name === activeSourceName)
-      const key = srcObj?.connectionId || activeSourceName
+      const key = srcObj ? sourceKeyOf(srcObj) : activeSourceName
       try {
         const res = await fetch(`${API_BASE}/api/analysis-results/${encodeURIComponent(key)}`, {
           credentials: 'include',
@@ -1116,7 +1141,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           }
         }
       } catch {
-        // nothing saved yet; the "no saved analysis" message below covers it
+        // nothing saved yet
       } finally {
         setSavedChecked(true)
       }
@@ -1241,6 +1266,20 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       try {
         if (src.type === 'csv' || src.type === 'sheets') {
           return src.file || null
+        }
+        if (src.connectionId && src.type !== 'catalog') {
+          const fd = new FormData()
+          fd.append('source_type', String(src.type))
+          fd.append('connection_id', src.connectionId)
+          fd.append('mysql_table', src.table || src.collection || src.objectPath || src.endpoint || src.report || '')
+          fd.append('alert_staleness', 'false'); fd.append('alert_schema', 'false')
+          fd.append('alert_anomalies', 'false'); fd.append('alert_flow', 'false')
+          const r = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', headers: analysisAuthHeaders(), body: fd })
+          const d = await r.json()
+          if (!d.original_file) return null
+          const csvRes = await fetch(`${API_BASE}${d.original_file}`)
+          const blob = await csvRes.blob()
+          return new File([blob], `${src.name}.csv`, { type: 'text/csv' })
         }
         if (src.type === 'rest') {
           const savedRestMeta = JSON.parse(localStorage.getItem('datapro_rest_connections') || '[]')
@@ -1408,7 +1447,12 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           const formData = new FormData()
           let usesDirectSourceType = false
 
-          if (src.type === 'csv' || src.type === 'sheets') {
+          if (src.connectionId && src.type !== 'csv' && src.type !== 'sheets' && src.type !== 'catalog') {
+            usesDirectSourceType = true
+            formData.append('source_type', String(src.type))
+            formData.append('connection_id', src.connectionId)
+            formData.append('mysql_table', src.table || src.collection || src.objectPath || src.endpoint || src.report || '')
+          } else if (src.type === 'csv' || src.type === 'sheets') {
             if (!src.file) continue
             formData.append('file', src.file)
           } else if (src.type === 'mysql') {
@@ -1497,7 +1541,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           formData.append('alert_anomalies', String(alertConditions.anomalies))
           formData.append('alert_flow', String(alertConditions.flow))
 
-          const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
+          const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', headers: analysisAuthHeaders(), body: formData })
           const data = await res.json()
           if (data.notifications?.length) {
             addNotifications(data.notifications.map((n: any) => ({ ...n, sourceName: src.name })))
@@ -1512,18 +1556,23 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
     const allSourcesScannedRef = useRef(false)
     useEffect(() => {
       if (allSourcesScannedRef.current) return
+      if (permsLoading || !canRunAnalysis) return
       if (sources.length === 0) return
       allSourcesScannedRef.current = true
       scanAllSourcesForNotificationsOnMount()
       scanAllSourcesForNotifications()
-    }, [sources.length, notifyEmail, alertConditions, addNotifications, fetchSourceAsCSVFile])
+    }, [sources.length, permsLoading, canRunAnalysis, notifyEmail, alertConditions, addNotifications, fetchSourceAsCSVFile])
 
     const scanAllSourcesForNotificationsOnMount = useCallback(async () => {
       for (const src of sources) {
         try {
           const formData = new FormData()
 
-          if (src.type === 'csv' || src.type === 'sheets') {
+          if (src.connectionId && src.type !== 'csv' && src.type !== 'sheets' && src.type !== 'catalog') {
+            formData.append('source_type', String(src.type))
+            formData.append('connection_id', src.connectionId)
+            formData.append('mysql_table', src.table || src.collection || src.objectPath || src.endpoint || src.report || '')
+          } else if (src.type === 'csv' || src.type === 'sheets') {
             if (!src.file) continue
             formData.append('file', src.file)
           } else if (src.type === 'mysql') {
@@ -1605,7 +1654,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           formData.append('alert_anomalies', String(alertConditions.anomalies))
           formData.append('alert_flow', String(alertConditions.flow))
 
-          const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
+          const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', headers: analysisAuthHeaders(), body: formData })
           const data = await res.json()
           if (data.notifications?.length) {
             addNotifications(data.notifications.map((n: any) => ({ ...n, sourceName: src.name })))
@@ -1683,6 +1732,11 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       const formData = new FormData()
       if (fileToUse) {
         formData.append('file', fileToUse)
+      } else if (sourceObj2?.connectionId && sourceObj2.type !== 'sheets' && sourceObj2.type !== 'csv' && sourceObj2.type !== 'catalog') {
+        // Credentials stay on the server: send only the connection id + which object to read.
+        formData.append('source_type', String(sourceObj2.type))
+        formData.append('connection_id', sourceObj2.connectionId)
+        formData.append('mysql_table', sourceObj2.table || sourceObj2.collection || sourceObj2.objectPath || sourceObj2.endpoint || sourceObj2.report || '')
       } else if (sourceObj2?.type === 'mysql') {
         const savedMySQL = JSON.parse(localStorage.getItem('datapro_mysql_connections') || '[]')
         const atIndex = activeSourceName.lastIndexOf('@')
@@ -1700,11 +1754,18 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         )
         console.log('MySQL debug:', { activeSourceName, database, table, host, savedMySQL, mysqlConn })
         if (!mysqlConn) {
-          console.error('❌ No MySQL connection found for', { database, host })
-          alert(`MySQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
-          return
-        }
-        if (mysqlConn) {
+          if (sourceObj2?.connectionId) {
+            // No local cache (new device / cleared storage) — let the backend
+            // resolve the saved connection by id instead of giving up.
+            formData.append('source_type', 'mysql')
+            formData.append('connection_id', sourceObj2.connectionId)
+            formData.append('mysql_table', table)
+          } else {
+            console.error('❌ No MySQL connection found for', { database, host })
+            alert(`MySQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
+            return
+          }
+        } else {
           const blocked = await checkSizeAndMaybeBlock({
             source_type: 'mysql', host: mysqlConn.host, port: mysqlConn.port,
             user: mysqlConn.user, password: mysqlConn.password,
@@ -1737,11 +1798,16 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         )
         console.log('PostgreSQL debug:', { activeSourceName, database, table, host, savedPG, pgConn })
         if (!pgConn) {
-          console.error('❌ No PostgreSQL connection found for', { database, host })
-          alert(`PostgreSQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
-          return
-        }
-        if (pgConn) {
+          if (sourceObj2?.connectionId) {
+            formData.append('source_type', 'postgres')
+            formData.append('connection_id', sourceObj2.connectionId)
+            formData.append('mysql_table', table)
+          } else {
+            console.error('❌ No PostgreSQL connection found for', { database, host })
+            alert(`PostgreSQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
+            return
+          }
+        } else {
           const blocked = await checkSizeAndMaybeBlock({
             source_type: 'postgres', host: pgConn.host, port: pgConn.port,
             user: pgConn.user, password: pgConn.password,
@@ -1767,27 +1833,34 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         const mongoConn = savedMongo.find((c: any) => c.database === database)
         console.log('MongoDB debug:', { activeSourceName, database, collection, savedMongo, mongoConn })
         if (!mongoConn) {
-          console.error('❌ No MongoDB connection found for', { database })
-          alert(`MongoDB connection not found for ${database}. Please reconnect in Sources.`)
-          setAnalyzing(false)
-          return
+          if (sourceObj2?.connectionId) {
+            formData.append('source_type', 'mongodb')
+            formData.append('connection_id', sourceObj2.connectionId)
+            formData.append('mysql_table', collection)
+          } else {
+            console.error('❌ No MongoDB connection found for', { database })
+            alert(`MongoDB connection not found for ${database}. Please reconnect in Sources.`)
+            setAnalyzing(false)
+            return
+          }
+        } else {
+          const mongoCollection = collection || mongoConn.collection || mongoConn.collections?.[0] || ''
+          if (!mongoCollection) {
+            alert(`No collection specified for MongoDB source "${activeSourceName}". Please reconnect in Sources.`)
+            setAnalyzing(false)
+            return
+          }
+          const blockedMongo = await checkSizeAndMaybeBlock({
+            source_type: 'mongodb', mongo_uri: mongoConn.uri,
+            mongo_database: mongoConn.database, mongo_collection: mongoCollection,
+          })
+          if (blockedMongo) return
+          formData.append('source_type', 'mongodb')
+          formData.append('mysql_host', mongoConn.uri)
+          formData.append('mysql_user', mongoConn.database)
+          formData.append('mysql_database', mongoConn.database)
+          formData.append('mysql_table', mongoCollection)
         }
-        const mongoCollection = collection || mongoConn.collection || mongoConn.collections?.[0] || ''
-        if (!mongoCollection) {
-          alert(`No collection specified for MongoDB source "${activeSourceName}". Please reconnect in Sources.`)
-          setAnalyzing(false)
-          return
-        }
-        const blockedMongo = await checkSizeAndMaybeBlock({
-          source_type: 'mongodb', mongo_uri: mongoConn.uri,
-          mongo_database: mongoConn.database, mongo_collection: mongoCollection,
-        })
-        if (blockedMongo) return
-        formData.append('source_type', 'mongodb')
-        formData.append('mysql_host', mongoConn.uri)
-        formData.append('mysql_user', mongoConn.database)
-        formData.append('mysql_database', mongoConn.database)
-        formData.append('mysql_table', mongoCollection)
       } else if ((sourceObj2?.type as string) === 'gcs') {
         const savedGCSMeta = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
         const withoutProto = activeSourceName.replace('gcs://', '')
@@ -2096,12 +2169,45 @@ setAnalyzing(false)
           return
         }
       } else if (sourceObj2?.type === 'sheets') {
-        if (!sourceObj2?.file) {
+        if (sourceObj2?.file) {
+          formData.append('file', sourceObj2.file)
+        } else if (sourceObj2?.sheetId) {
+          // No cached File object (fresh device/session/restart) — but we
+          // have the sheetId + tab, so re-fetch live from Google instead
+          // of failing. Mirrors confirmGSheet's import flow in DataSources.tsx.
+          try {
+            const storedSession = localStorage.getItem('datapro_session') || ''
+            const importRes = await fetch(
+              `${API_BASE}/api/auth/google/sheets/${sourceObj2.sheetId}/import?tab=${encodeURIComponent(sourceObj2.tab || 'Sheet1')}`,
+              {
+                method: 'POST',
+                credentials: 'include',
+                headers: storedSession ? { 'X-Session-ID': storedSession } : {},
+              }
+            )
+            const importData = await importRes.json()
+            if (!importRes.ok || importData.error || !importData.download_url) {
+              alert(`Could not refresh this Google Sheet (${importData.error || 'not signed in to Google'}). Please reconnect it from Data Sources.`)
+              setAnalyzing(false)
+              return
+            }
+            const csvRes = await fetch(`${API_BASE}${importData.download_url}`, {
+              credentials: 'include',
+              headers: storedSession ? { 'X-Session-ID': storedSession } : {},
+            })
+            const blob = await csvRes.blob()
+            const realFile = new File([blob], importData.filename, { type: 'text/csv' })
+            formData.append('file', realFile)
+          } catch (e) {
+            alert(`Could not refresh this Google Sheet: ${e}`)
+            setAnalyzing(false)
+            return
+          }
+        } else {
           alert('Google Sheet file not found. Please re-import the sheet from Data Sources.')
           setAnalyzing(false)
           return
         }
-        formData.append('file', sourceObj2.file)
       } else if (!sourceObj2 || sourceObj2.type === 'csv') {
         alert('CSV file not found in memory. Please re-upload the CSV from Data Sources — the file needs to be re-attached after a page refresh or source switch.')
         setAnalyzing(false)
@@ -2116,7 +2222,7 @@ setAnalyzing(false)
       formData.append('alert_anomalies', String(alertConditions.anomalies))
       formData.append('alert_flow', String(alertConditions.flow))
       try {
-        const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
+        const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', headers: analysisAuthHeaders(), body: formData })
         const rawText = await res.text()
         let data: any
         try {
@@ -2134,9 +2240,18 @@ setAnalyzing(false)
           return
         }
         // ── Read the previous snapshot BEFORE overwriting it, then diff ──
+        // Prefer the backend history (works across devices/browsers — e.g.
+        // yesterday's Google Sheets refresh was analyzed on a different
+        // machine); fall back to this browser's local cache if the backend
+        // has nothing yet (first run, or not logged in).
         try {
-          const prevRaw = localStorage.getItem(`analysis_cache_${activeSourceName}`)
-          const prevData = prevRaw ? JSON.parse(prevRaw) : null
+          const sourceKeyForPrev = sourceObj2 ? sourceKeyOf(sourceObj2) : activeSourceName
+          const backendPrev = await fetchPreviousAnalysisResult(sourceKeyForPrev)
+          let prevData = backendPrev
+          if (!prevData) {
+            const prevRaw = localStorage.getItem(`analysis_cache_${activeSourceName}`)
+            prevData = prevRaw ? JSON.parse(prevRaw) : null
+          }
           setInsights(computeInsights(prevData, data))
         } catch {
           setInsights([])
@@ -2151,7 +2266,7 @@ setAnalyzing(false)
 
         // Cross-device "Last Run" badge + quality trend — metadata only.
         // Full `data` (with sample rows) stays local via the cache above.
-        saveAnalysisResultToBackend(activeSourceName, sourceObj2?.connectionId, data)
+        saveAnalysisResultToBackend(activeSourceName, sourceObj2?.connectionId, data, sourceObj2 ? sourceKeyOf(sourceObj2) : undefined)
 
         // ── Approach 2: Save analysis metadata ──
         const now = Date.now()
@@ -2729,15 +2844,6 @@ setAnalyzing(false)
     const sample = analysis.sample_data || []
     const firstRow = sample[0] || {}
     const colInfo = analysis.col_info || []
-    const piiColumns = analysis.pii_columns || {}
-    const maskValue = (colName: string, val: any): string => {
-      if (!piiColumns[colName]?.pii) {
-        return typeof val === 'number' ? val.toLocaleString() : String(val)
-      }
-      const str = val === null || val === undefined ? '' : String(val)
-      if (str.length <= 4) return '•'.repeat(str.length)
-      return str.slice(0, 2) + '•'.repeat(Math.max(str.length - 4, 3)) + str.slice(-2)
-    }
     const describe = analysis.describe || {}
     const describeStats = ['count','mean','std','min','25%','50%','75%','max']
     const describeCols = Object.keys(describe)
@@ -2763,16 +2869,9 @@ setAnalyzing(false)
     ]
 
     // Build row/col arrays for fullscreen from current tab
-    const getPreviewFullscreenData = () => {
+const getPreviewFullscreenData = () => {
       const cols = Object.keys(firstRow)
-      const maskedRows = sample.map((row: any) => {
-        const maskedRow: any = {}
-        cols.forEach(c => {
-          maskedRow[c] = piiColumns[c]?.pii ? maskValue(c, row[c]) : row[c]
-        })
-        return maskedRow
-      })
-      return { columns: cols, rows: maskedRows }
+      return { columns: cols, rows: sample }
     }
 
     return (
@@ -2790,7 +2889,7 @@ setAnalyzing(false)
           />
         )}
 
-        {canRunAnalysis && <FloatingCleanBtn />}
+        <FloatingCleanBtn />
 
         {showEditSource && (
           <EditSourceModal
@@ -2981,14 +3080,14 @@ setAnalyzing(false)
               Edit Flow Source
             </button>
             <button
-              hidden={!canRunAnalysis} onClick={() => setShowOriginal(true)}
+              onClick={() => setShowOriginal(true)}
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
             >
               View Original
             </button>
             <a
-              href={`${API_BASE}${analysis.original_file}`} hidden={!canRunAnalysis}
+              href={`${API_BASE}${analysis.original_file}`}
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
             >
@@ -2999,7 +3098,6 @@ setAnalyzing(false)
               className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ background: 'rgba(124,58,237,0.25)', border: '1px solid rgba(124,58,237,0.35)' }}
               title={staleness.isStale ? `Last analyzed ${staleness.hoursOld} hours ago` : 'Re-analyze fresh data'}
-              hidden={!canRunAnalysis}
             >
               {staleness.isStale ? '🔄 Re-analyze' : 'Re-analyze'}
             </button>
@@ -3007,7 +3105,7 @@ setAnalyzing(false)
         </div>
 
         {/* Staleness Warning Banner */}
-        {staleness.showWarning && canRunAnalysis && (
+        {staleness.showWarning && (
           <div
             className="rounded-2xl px-6 py-4 flex items-center justify-between"
             style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}
@@ -3177,7 +3275,7 @@ setAnalyzing(false)
             className="flex overflow-x-auto p-2 gap-1"
             style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}
           >
-            {tabs.filter(t => t.id !== 'aichat' || canRunAnalysis).map(t => (
+            {tabs.map(t => (
               <button
                 key={t.id}
                 onClick={() => setAnalysisTab(t.id)}
@@ -3231,8 +3329,8 @@ setAnalyzing(false)
                         <th
                           key={k}
                           className="p-2.5 text-left font-semibold whitespace-nowrap"
-                          style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: piiColumns[k]?.pii ? '#f87171' : 'rgba(255,255,255,0.8)' }}
-                        >{piiColumns[k]?.pii ? `${k}` : k}</th>
+                          style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)' }}
+                        >{k}</th>
                       ))}</tr>
                     </thead>
                     <tbody>
@@ -3243,10 +3341,10 @@ setAnalyzing(false)
                           onMouseEnter={e => (e.currentTarget.style.background = 'rgba(124,58,237,0.05)')}
                           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                         >
-                          {Object.entries(row).map(([colName, val]: [string, any], j) => (
+                          {Object.values(row).map((val: any, j) => (
                             <td key={j} className="p-2.5 whitespace-nowrap">
                               {val === '' ? <span style={{ color: '#f87171', fontStyle: 'italic' }}>null</span>
-                                : maskValue(colName, val)}
+                                : typeof val === 'number' ? val.toLocaleString() : String(val)}
                             </td>
                           ))}
                         </tr>
@@ -3309,7 +3407,6 @@ setAnalyzing(false)
                             {col.column}
                             {col.column === analysis.primary_key && <Pill color="#3b82f6">PK</Pill>}
                             {col.column === ts.date_col && <span className="ml-1"><Pill color="#06b6d4">Date</Pill></span>}
-                            {piiColumns[col.column]?.pii && <span className="ml-1"><Pill color="#f87171">PII</Pill></span>}
                           </td>
                           <td className="p-3"><Pill color="#6366f1">{col.dtype}</Pill></td>
                           <td className="p-3" style={{ color: '#4ade80' }}>{col.non_null.toLocaleString()}</td>
@@ -3319,7 +3416,7 @@ setAnalyzing(false)
                               : <span style={{ color: '#4ade80' }}>0</span>}
                           </td>
                           <td className="p-3" style={{ color: 'rgba(255,255,255,0.4)' }}>{col.unique.toLocaleString()}</td>
-                          <td className="p-3 whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.4)' }}>{piiColumns[col.column]?.pii ? maskValue(col.column, col.sample) : col.sample}</td>
+                          <td className="p-3 whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.4)' }}>{col.sample}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -3405,7 +3502,7 @@ setAnalyzing(false)
             {/* ── Problems tab ── */}
             {analysisTab === 'problems' && (
               <div>
-                {problems.length === 0 && totalProblems === 0 ? (
+                {problems.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-4xl mb-3">✨</div>
                     <p className="font-bold text-white mb-1">No problems found!</p>
@@ -3572,7 +3669,7 @@ setAnalyzing(false)
 
         {/* ── CLEAN SECTION ─────────────────────────────────────────────────── */}
         <div
-          id="clean-section" hidden={!canRunAnalysis}
+          id="clean-section"
           className="rounded-3xl overflow-hidden"
           style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.2)' }}
         >
