@@ -56,20 +56,6 @@ function TeamSettingsInner() {
   const [inviteBusy, setInviteBusy] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
 
-  // One-time messages left by the invite flow (see acceptPendingInviteIfAny in App.tsx
-  // and AcceptInvite.tsx). Read once on mount, then cleared so they don't reappear.
-  const [joinedBanner] = useState(() => localStorage.getItem('datapro_invite_joined') === '1')
-  const [joinedOrgName] = useState(() => localStorage.getItem('datapro_invite_joined_org') || '')
-  const [joinedRoleLabel] = useState(() => localStorage.getItem('datapro_invite_joined_role') || '')
-  const [joinError] = useState(() => localStorage.getItem('datapro_invite_error') || '')
-
-  useEffect(() => {
-    localStorage.removeItem('datapro_invite_joined')
-    localStorage.removeItem('datapro_invite_joined_org')
-    localStorage.removeItem('datapro_invite_joined_role')
-    localStorage.removeItem('datapro_invite_error')
-  }, [])
-
   // Owner-side live confirmation: refetch members/invites whenever this tab
   // regains focus, so a newly-accepted invite shows up as a Member without
   // a manual page reload.
@@ -133,11 +119,7 @@ function TeamSettingsInner() {
         if (res.status !== 403) await load()
         return
       }
-      if (data.addedImmediately) {
-        setInviteMsg(`Added ${inviteEmail.trim()} as ${ROLE_LABELS[inviteRole]}.`)
-      } else {
-        setInviteMsg(`Invite sent to ${inviteEmail.trim()}.`)
-      }
+      setInviteMsg(`${inviteEmail.trim()} can join as ${ROLE_LABELS[inviteRole]} after verifying their email in Team.`)
       setInviteEmail('')
       await load()
     } catch {
@@ -182,18 +164,6 @@ function TeamSettingsInner() {
     } catch {}
   }
 
-  const handleResendInvite = async (invite: OrgInvite) => {
-    try {
-      await fetch(`${API_BASE}/api/org/invites`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ email: invite.email, roleKey: invite.roleKey }),
-      })
-      await load()
-    } catch {}
-  }
-
   if (loading) {
     return <div className="p-8 max-w-4xl mx-auto"><p style={{ color: 'rgba(255,255,255,0.4)' }}>Loading team…</p></div>
   }
@@ -203,18 +173,6 @@ function TeamSettingsInner() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      {joinedBanner && (
-        <div className="mb-6 p-4 rounded-2xl" style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)' }}>
-          <p className="text-sm font-bold" style={{ color: '#4ade80' }}>
-            You joined {joinedOrgName || org?.name} as {joinedRoleLabel || ROLE_LABELS[myRole] || myRole}.
-          </p>
-        </div>
-      )}
-      {joinError && (
-        <div className="mb-6 p-4 rounded-2xl" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
-          <p className="text-sm font-bold" style={{ color: '#f87171' }}>{joinError}</p>
-        </div>
-      )}
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-1">Team</h1>
@@ -255,7 +213,7 @@ function TeamSettingsInner() {
               {inviteBusy ? 'Sending…' : 'Add to team'}
             </button>
           </div>
-          {inviteMsg && <p className="text-xs mt-2" style={{ color: inviteMsg.startsWith('Added') || inviteMsg.startsWith('Invite sent') ? '#4ade80' : '#f87171' }}>{inviteMsg}</p>}
+          {inviteMsg && <p className="text-xs mt-2" style={{ color: inviteMsg.includes('can join as') ? '#4ade80' : '#f87171' }}>{inviteMsg}</p>}
         </div>
       )}
 
@@ -305,7 +263,7 @@ function TeamSettingsInner() {
       {canManage && invites.length > 0 && (
         <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
           <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-            <p className="font-bold text-white">Pending Invites ({invites.length})</p>
+            <p className="font-bold text-white">Approved emails - waiting for verification ({invites.length})</p>
           </div>
           <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
             {invites.map(inv => (
@@ -313,17 +271,10 @@ function TeamSettingsInner() {
                 <div>
                   <p className="text-sm text-white">{inv.email}</p>
                   <p className="text-xs" style={{ color: inv.status === 'expired' ? '#f87171' : 'rgba(255,255,255,0.35)' }}>
-                    {ROLE_LABELS[inv.roleKey] || inv.roleKey} · {inv.status === 'expired' ? 'expired' : `expires ${new Date(inv.expiresAt).toLocaleDateString()}`}
+                    {ROLE_LABELS[inv.roleKey] || inv.roleKey}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleResendInvite(inv)}
-                    className="text-xs px-2.5 py-1.5 rounded-lg"
-                    style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#a78bfa' }}
-                  >
-                    Resend
-                  </button>
                   <button
                     onClick={() => handleRevokeInvite(inv)}
                     className="text-xs px-2.5 py-1.5 rounded-lg"
