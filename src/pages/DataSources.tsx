@@ -2,7 +2,7 @@
   import { useNavigate } from 'react-router-dom'
   import { useStore, sourceKeyOf } from '../store'
   import { API_BASE } from '../config'
-import { usePermissions, forbiddenMessage } from '../usePermissions'
+  import { usePermissions, forbiddenMessage, retryPermissions } from '../usePermissions'
   import GuidedTour, { TourStep } from './FlowTutorial'
 
   const DATASOURCES_TOUR: TourStep[] = [
@@ -55,7 +55,7 @@ import { usePermissions, forbiddenMessage } from '../usePermissions'
 
   export default function DataSources() {
     const navigate = useNavigate()
-    const { can } = usePermissions()
+    const { can, loading: permsLoading, error: permsError } = usePermissions()
     const {
       sources, addSource, removeSource,
       switchActiveSource,
@@ -346,13 +346,6 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
       // via /api/connections. One call rebuilds the "Connected Sources" list
       // for this user regardless of which browser/device they're on.
       loadSourcesFromBackend()
-      ;['mysql','postgres','bigquery','mongo','aws','gcs','cloudsql','databricks','rest','ga4'].forEach(k => {
-        localStorage.removeItem(`datapro_${k}_connections`)
-        localStorage.removeItem(`datapro_${k}_dest`)
-        localStorage.removeItem(`datapro_active_${k}_source`)
-      })
-      localStorage.removeItem('datapro_mysql_dest')
-      localStorage.removeItem('datapro_postgres_dest')
 
       // Credits balance — shown right after login in the page header.
       const loadCredits = async () => {
@@ -742,6 +735,10 @@ const openGooglePicker = async () => {
         navigate('/analysis')
         return
       }
+      if (!source.file && (source.type === 'csv' || source.type === 'sheets')) {
+        alert('Re-import this source: CSV and Google Sheets data lives in the browser it was added from. Open "+ Add New" and import it again.')
+        return
+      }
       if (source.file) {
         switchActiveSource(source.file, source.name)
         navigate('/analysis')
@@ -1097,6 +1094,11 @@ const handleLockedSource = () => {
 
         {/* Existing sources */}
         {tab === 'existing' && (
+          <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            Sources added earlier for AWS, Cloud Storage, Cloud SQL, Databricks, REST API or GA4 were stored in one browser only. Re-add each one once and your whole team will see it.
+          </p>
+        )}
+        {tab === 'existing' && (
           <div>
             {sources.length === 0 ? (
               <div className="text-center py-20 rounded-2xl"
@@ -1104,11 +1106,24 @@ const handleLockedSource = () => {
                 <div className="flex justify-center mb-4"><SourceIcon name="inbox" size={40} color="rgba(255,255,255,0.25)" /></div>
                 <p className="text-white font-medium mb-1">No sources yet</p>
                 <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.35)' }}>Add a data source to get started</p>
-                <button disabled={!can('connection.create')} onClick={() => setTab('add')}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: 'rgba(124,58,237,0.3)', border: '1px solid rgba(124,58,237,0.4)' }}>
-                  {can('connection.create') ? 'Add your first source' : 'Ask an Admin or Editor to add one'}
-                </button>
+                {permsError ? (
+                  <div>
+                    <p className="text-sm mb-3" style={{ color: '#f87171' }}>Couldn't load your permissions</p>
+                    <button onClick={() => retryPermissions()}
+                      className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+                      style={{ background: 'rgba(124,58,237,0.3)', border: '1px solid rgba(124,58,237,0.4)' }}>
+                      Retry
+                    </button>
+                  </div>
+                ) : permsLoading ? (
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Loading…</p>
+                ) : (
+                  <button disabled={!can('connection.create')} onClick={() => setTab('add')}
+                    className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+                    style={{ background: 'rgba(124,58,237,0.3)', border: '1px solid rgba(124,58,237,0.4)' }}>
+                    {can('connection.create') ? 'Add your first source' : 'Ask an Admin or Editor to add one'}
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-3">
@@ -1228,6 +1243,7 @@ const handleLockedSource = () => {
                         }
                       }}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                        hidden={!(can('connection.delete') || can('connection.deleteOwn'))}
                         style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
                         ✕
                       </button>
@@ -3370,27 +3386,28 @@ if (tablesData.tables?.length > 0) {
                 </button>
 
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (awsStatus !== 'ok' || awsSelectedTables.size === 0) return
-                    const id = crypto.randomUUID()
-                    const connRecord = {
-                      id, service: awsService, region: aws.region,
-                      accessKeyId: aws.accessKeyId, secretAccessKey: aws.secretAccessKey,
-                      host: aws.host, port: aws.port, user: aws.user,
-                      password: aws.password, database: aws.database, ssl: aws.ssl,
-                      bucket: aws.bucket, prefix: aws.prefix, tableName: aws.tableName,
-                      costStartDate: awsCostStartDate, costEndDate: awsCostEndDate,
-                      costGranularity: awsCostGranularity, costGroupBy: awsCostGroupBy,
-                      table: [...awsSelectedTables][0],
-                      tables: [...awsSelectedTables],
-                      name: awsService === 's3' ? `s3://${aws.bucket}` : awsService === 'dynamodb' ? `dynamodb.${aws.region}` : awsService === 'cost-explorer' ? `cost-explorer@${aws.region}` : `${aws.database}@${aws.host}`,
-                      addedAt: new Date().toLocaleString(),
-                    }
-                    const existing = JSON.parse(localStorage.getItem('datapro_aws_connections') || '[]')
-                    const updated = [...existing, connRecord]
-                    localStorage.setItem('datapro_aws_connections', JSON.stringify(updated))
-                    setSavedAWSConns(updated)
-                    ;[...awsSelectedTables].forEach((item, idx) => {
+                    const addedAt = new Date().toLocaleString()
+                    const itemsArr = [...awsSelectedTables]
+                    const connName = awsService === 's3' ? `s3://${aws.bucket}` : awsService === 'dynamodb' ? `dynamodb.${aws.region}` : awsService === 'cost-explorer' ? `cost-explorer@${aws.region}` : `${aws.database}@${aws.host}`
+                    const backendId = await saveConnectionToBackend(
+                      connName,
+                      'aws',
+                      {
+                        service: awsService, region: aws.region, host: aws.host,
+                        port: aws.port || (awsService === 'rds-mysql' ? '3306' : awsService === 'redshift' ? '5439' : '5432'),
+                        database: aws.database, ssl: aws.ssl, bucket: aws.bucket, prefix: aws.prefix,
+                        tables: itemsArr,
+                        costStartDate: awsCostStartDate, costEndDate: awsCostEndDate,
+                        costGranularity: awsCostGranularity, costGroupBy: awsCostGroupBy,
+                      },
+                      { accessKeyId: aws.accessKeyId, secretAccessKey: aws.secretAccessKey, user: aws.user, password: aws.password },
+                    )
+                    if (!backendId) { setAwsError('Could not save the connection to the server. Make sure you are signed in and have permission.'); return }
+                    const id = backendId
+                    const connRecord = { name: connName, addedAt }
+                    itemsArr.forEach((item, idx) => {
                       const srcName = awsService === 's3'
                         ? `s3://${aws.bucket}/${item}`
                         : awsService === 'dynamodb'
@@ -3398,7 +3415,7 @@ if (tablesData.tables?.length > 0) {
                         : awsService === 'cost-explorer'
                         ? `cost-explorer:${item}@${aws.region}`
                         : `${aws.database}.${item}@${aws.host}`
-                      addSource({ id: `${id}-${idx}`, name: srcName, type: 'aws' as any, addedAt: connRecord.addedAt })
+                      addSource({ id: `${id}-${idx}`, name: srcName, type: 'aws' as any, addedAt, connectionId: backendId, table: item } as any)
                     })
                     addAuditLog({
                       id: crypto.randomUUID(), time: new Date().toLocaleString(),
@@ -3751,16 +3768,20 @@ if (tablesData.tables?.length > 0) {
                   {gcsStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (gcsStatus !== 'ok' || gcsSelectedFiles.size === 0) return
-                    const id = crypto.randomUUID()
-                    const connRecord = { id, keyJson: gcs.keyJson, project: gcs.project, bucket: gcs.bucket, prefix: gcs.prefix, files: [...gcsSelectedFiles], file: [...gcsSelectedFiles][0], name: `gcs://${gcs.bucket}`, addedAt: new Date().toLocaleString() }
-                    const existing = JSON.parse(localStorage.getItem('datapro_gcs_connections') || '[]')
-                    const updated = [...existing, connRecord]
-                    localStorage.setItem('datapro_gcs_connections', JSON.stringify(updated))
-                    setSavedGcsConns(updated)
-                    ;[...gcsSelectedFiles].forEach((f, idx) => {
-                      addSource({ id: `${id}-${idx}`, name: `gcs://${gcs.bucket}/${f}`, type: 'gcs' as any, addedAt: connRecord.addedAt })
+                    const addedAt = new Date().toLocaleString()
+                    const filesArr = [...gcsSelectedFiles]
+                    const backendId = await saveConnectionToBackend(
+                      `gcs://${gcs.bucket}`,
+                      'gcs',
+                      { project: gcs.project, bucket: gcs.bucket, prefix: gcs.prefix, files: filesArr },
+                      { key_json: gcs.keyJson },
+                    )
+                    if (!backendId) { setGcsError('Could not save the connection to the server. Make sure you are signed in and have permission.'); return }
+                    const id = backendId
+                    filesArr.forEach((f, idx) => {
+                      addSource({ id: `${id}-${idx}`, name: `gcs://${gcs.bucket}/${f}`, type: 'gcs' as any, addedAt, connectionId: backendId, objectPath: f } as any)
                     })
                     addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected GCS: ${gcs.bucket} (${gcsSelectedFiles.size} file(s))`, user: 'local_user' })
                     setShowGCSFlow(false); setGcsStatus('idle'); setGcsError('')
@@ -3947,16 +3968,20 @@ if (tablesData.tables?.length > 0) {
                   {cloudSQLStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (cloudSQLStatus !== 'ok' || cloudSQLSelectedTables.size === 0) return
-                    const id = crypto.randomUUID()
-                    const connRecord = { id, ...cloudSQL, tables: [...cloudSQLSelectedTables], table: [...cloudSQLSelectedTables][0], name: `${cloudSQL.database}@cloudsql.${cloudSQL.project}`, addedAt: new Date().toLocaleString() }
-                    const existing = JSON.parse(localStorage.getItem('datapro_cloudsql_connections') || '[]')
-                    const updated = [...existing, connRecord]
-                    localStorage.setItem('datapro_cloudsql_connections', JSON.stringify(updated))
-                    setSavedCloudSQLConns(updated)
-                    ;[...cloudSQLSelectedTables].forEach((tbl, idx) => {
-                      addSource({ id: `${id}-${idx}`, name: `${cloudSQL.database}.${tbl}@cloudsql.${cloudSQL.project}`, type: 'cloudsql' as any, addedAt: connRecord.addedAt })
+                    const addedAt = new Date().toLocaleString()
+                    const tablesArr = [...cloudSQLSelectedTables]
+                    const backendId = await saveConnectionToBackend(
+                      `${cloudSQL.database}@cloudsql.${cloudSQL.project}`,
+                      'cloudsql',
+                      { project: cloudSQL.project, instanceConnectionName: cloudSQL.instanceConnectionName, port: cloudSQL.port, database: cloudSQL.database, dbType: cloudSQL.dbType, tables: tablesArr },
+                      { user: cloudSQL.user, password: cloudSQL.password },
+                    )
+                    if (!backendId) { setCloudSQLError('Could not save the connection to the server. Make sure you are signed in and have permission.'); return }
+                    const id = backendId
+                    tablesArr.forEach((tbl, idx) => {
+                      addSource({ id: `${id}-${idx}`, name: `${cloudSQL.database}.${tbl}@cloudsql.${cloudSQL.project}`, type: 'cloudsql' as any, addedAt, connectionId: backendId, table: tbl } as any)
                     })
                     addAuditLog({ id: crypto.randomUUID(), time: new Date().toLocaleString(), action: 'add_source', entity_type: 'data_source', entity_id: id, details: `Connected Cloud SQL: ${cloudSQL.database}@${cloudSQL.instanceConnectionName} (${cloudSQLSelectedTables.size} table(s))`, user: 'local_user' })
                     setShowCloudSQLFlow(false); setCloudSQLStatus('idle'); setCloudSQLError('')
@@ -4208,32 +4233,27 @@ if (tablesData.tables?.length > 0) {
                 </button>
 
                 <button
-                  onClick={() => {
+                                    onClick={async () => {
                     if (databricksStatus !== 'ok' || databricksSelectedTables.size === 0) return
-                    const id = crypto.randomUUID()
-                    const connRecord = {
-                      id,
-                      host: databricks.host,
-                      httpPath: databricks.httpPath,
-                      token: databricks.token,
-                      catalog: databricks.catalog,
-                      schema: databricks.schema,
-                      table: [...databricksSelectedTables][0],
-                      tables: [...databricksSelectedTables],
-                      name: `${databricks.catalog}.${databricks.schema}@${databricks.host}`,
-                      addedAt: new Date().toLocaleString(),
-                    }
-                    const existing = JSON.parse(localStorage.getItem('datapro_databricks_connections') || '[]')
-                    const updated = [...existing, connRecord]
-                    localStorage.setItem('datapro_databricks_connections', JSON.stringify(updated))
-                    setSavedDatabricksConns(updated)
-                    ;[...databricksSelectedTables].forEach((tbl, idx) => {
+                    const addedAt = new Date().toLocaleString()
+                    const tablesArr = [...databricksSelectedTables]
+                    const backendId = await saveConnectionToBackend(
+                      `${databricks.catalog}.${databricks.schema}@${databricks.host}`,
+                      'databricks',
+                      { host: databricks.host, httpPath: databricks.httpPath, catalog: databricks.catalog, schema: databricks.schema, tables: tablesArr },
+                      { token: databricks.token },
+                    )
+                    if (!backendId) { setDatabricksError('Could not save the connection to the server. Make sure you are signed in and have permission.'); return }
+                    const id = backendId
+                    tablesArr.forEach((tbl, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `${databricks.catalog}.${databricks.schema}.${tbl}@${databricks.host}`,
                         type: 'databricks' as any,
-                        addedAt: connRecord.addedAt,
-                      })
+                        addedAt,
+                        connectionId: backendId,
+                        table: tbl,
+                      } as any)
                     })
                     addAuditLog({
                       id: crypto.randomUUID(),
@@ -4515,39 +4535,32 @@ if (tablesData.tables?.length > 0) {
                 </button>
 
                 <button
-                  onClick={() => {
+                                    onClick={async () => {
                     if (restStatus !== 'ok' || restSelectedEndpoints.size === 0) return
-                    const id = crypto.randomUUID()
+                    const addedAt = new Date().toLocaleString()
+                    const endpointsArr = [...restSelectedEndpoints]
                     const headers: Record<string, string> = {}
                     if (restApi.api_key) {
                       headers[restApi.auth_header] = `${restApi.auth_prefix} ${restApi.api_key}`.trim()
                     }
-                    const connRecord = {
-                      id,
-                      base_url: restApi.base_url,
-                      api_key: restApi.api_key,
-                      auth_header: restApi.auth_header,
-                      auth_prefix: restApi.auth_prefix,
-                      headers,
-                      verify_ssl: restApi.verify_ssl,
-                      test_path: restApi.test_path,
-                      timeout: restApi.timeout,
-                      endpoints: [...restSelectedEndpoints],
-                      endpoint: [...restSelectedEndpoints][0],
-                      name: restApi.base_url.replace(/https?:\/\//, ''),
-                      addedAt: new Date().toLocaleString(),
-                    }
-                    const existing = JSON.parse(localStorage.getItem('datapro_rest_connections') || '[]')
-                    const updated = [...existing, connRecord]
-                    localStorage.setItem('datapro_rest_connections', JSON.stringify(updated))
-                    setSavedRestConns(updated)
-                    ;[...restSelectedEndpoints].forEach((ep, idx) => {
+                    const hostName = restApi.base_url.replace(/https?:\/\//, '')
+                    const backendId = await saveConnectionToBackend(
+                      hostName,
+                      'rest',
+                      { base_url: restApi.base_url, endpoints: endpointsArr, verify_ssl: restApi.verify_ssl, test_path: restApi.test_path, timeout: restApi.timeout },
+                      { headers },
+                    )
+                    if (!backendId) { setRestError('Could not save the connection to the server. Make sure you are signed in and have permission.'); return }
+                    const id = backendId
+                    endpointsArr.forEach((ep, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
-                        name: `rest:${restApi.base_url.replace(/https?:\/\//, '')}${ep}`,
+                        name: `rest:${hostName}${ep}`,
                         type: 'rest' as any,
-                        addedAt: connRecord.addedAt,
-                      })
+                        addedAt,
+                        connectionId: backendId,
+                        endpoint: ep,
+                      } as any)
                     })
                     addAuditLog({
                       id: crypto.randomUUID(),
@@ -4739,33 +4752,27 @@ if (tablesData.tables?.length > 0) {
                 </button>
 
                 <button
-                  onClick={() => {
+                                    onClick={async () => {
                     if (ga4Status !== 'ok' || ga4SelectedReports.size === 0) return
-                    const id = crypto.randomUUID()
-                    const connRecord = {
-                      id,
-                      keyJson: ga4.keyJson,
-                      propertyId: ga4.propertyId,
-                      metrics: ga4.metrics,
-                      dimensions: ga4.dimensions,
-                      startDate: '365daysAgo',
-                      endDate: 'today',
-                      reports: [...ga4SelectedReports],
-                      report: [...ga4SelectedReports][0],
-                      name: `ga4:${ga4.propertyId}`,
-                      addedAt: new Date().toLocaleString(),
-                    }
-                    const existing = JSON.parse(localStorage.getItem('datapro_ga4_connections') || '[]')
-                    const updated = [...existing, connRecord]
-                    localStorage.setItem('datapro_ga4_connections', JSON.stringify(updated))
-                    setSavedGa4Conns(updated)
-                    ;[...ga4SelectedReports].forEach((report, idx) => {
+                    const addedAt = new Date().toLocaleString()
+                    const reportsArr = [...ga4SelectedReports]
+                    const backendId = await saveConnectionToBackend(
+                      `ga4:${ga4.propertyId}`,
+                      'ga4',
+                      { property_id: ga4.propertyId, metrics: ga4.metrics, dimensions: ga4.dimensions, start_date: '365daysAgo', end_date: 'today', reports: reportsArr },
+                      { key_json: ga4.keyJson },
+                    )
+                    if (!backendId) { setGa4Error('Could not save the connection to the server. Make sure you are signed in and have permission.'); return }
+                    const id = backendId
+                    reportsArr.forEach((report, idx) => {
                       addSource({
                         id: `${id}-${idx}`,
                         name: `ga4:${ga4.propertyId}/${report}`,
                         type: 'ga4' as any,
-                        addedAt: connRecord.addedAt,
-                      })
+                        addedAt,
+                        connectionId: backendId,
+                        report,
+                      } as any)
                     })
                     addAuditLog({
                       id: crypto.randomUUID(), time: new Date().toLocaleString(),
