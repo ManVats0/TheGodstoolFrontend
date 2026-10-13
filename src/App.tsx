@@ -15,20 +15,19 @@ import Terms from './pages/Terms'
 import { useState, useEffect, useRef } from 'react'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import NotificationPanel from './components/NotificationPanel'
+import Notific♣ationPanel from './components/NotificationPanel'
 import DataSources from './pages/DataSources'
 import DataCatalog from './pages/DataCatalog'
 import Flow from './pages/Flow'
 import Analysis from './pages/Analysis'
 import AuditLogs from './pages/AuditLogs'
-import TeamSettings from './pages/TeamSettings'
 import { useStore } from './store'
 import Documentation from './pages/Documentation'
 import Tunneling from './pages/Tunneling'
 import Contact from './pages/Contact'
 import Blog from './pages/Blog'
 import Feedback from './pages/Feedback'
-import AcceptInvite from './pages/AcceptInvite'
+import TeamGate from './pages/TeamGate'
 import { API_BASE } from './config'
 import { clearPermissionsCache, loadPermissions, installForbiddenHandler, refreshPermissions, usePermissions } from './usePermissions'
 
@@ -67,41 +66,7 @@ function getPasswordStrength(pw: string) {
   return { label: 'Strong', color: '#22c55e', pct: 100 }
 }
 
-async function acceptPendingInviteIfAny(token: string) {
-  const inviteToken = localStorage.getItem('datapro_pending_invite')
-  if (!inviteToken) return
-  try {
-    const res = await fetch(`${API_BASE}/api/org/invites/${inviteToken}/accept`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    let data: any = null
-    try { data = await res.json() } catch { /* empty body, e.g. 401 */ }
-    if (res.ok && data && !data.error) {
-      localStorage.setItem('datapro_invite_joined', '1')
-      if (data.orgName) localStorage.setItem('datapro_invite_joined_org', data.orgName)
-      if (data.roleLabel) localStorage.setItem('datapro_invite_joined_role', data.roleLabel)
-      clearPermissionsCache()
-    } else {
-      localStorage.setItem(
-        'datapro_invite_error',
-        data?.error ||
-          (res.status === 401
-            ? 'Your sign-in could not be verified, so the invite was not accepted. Sign in again and reopen the invite link.'
-            : `Could not accept the invite (${res.status}).`)
-      )
-    }
-  } catch {
-    localStorage.setItem('datapro_invite_error', 'Could not reach the server to accept the invite.')
-  }
-  localStorage.removeItem('datapro_pending_invite')
-}
-
-// Accept any pending team invite FIRST, then (re)load permissions, so everything
-// fetched afterwards (plan, permissions) reflects the team the user just joined.
-async function bootstrapSession(token: string) {
-  await acceptPendingInviteIfAny(token)
+async function bootstrapSession(_token: string) {
   clearPermissionsCache()
   await loadPermissions()
 }
@@ -136,7 +101,6 @@ function LineIcon({ name, size = 32, color = '#a78bfa' }: { name: string; size?:
 export default function App() {
   const [showNotif, setShowNotif] = useState(false)
   const { orgName, roleLabel } = usePermissions()
-  const [inviteLockedEmail, setInviteLockedEmail] = useState('')
   const navigate = useNavigate()
   const [sidebarExpanded, setSidebarExpanded] = useState(true)
   const location = useLocation()
@@ -168,7 +132,6 @@ const forceLogoutRef = useRef<HTMLButtonElement>(null)
 const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
 const [phraseIndex, setPhraseIndex] = useState(0)
 const [phraseVisible, setPhraseVisible] = useState(true)
-const [joinBanner, setJoinBanner] = useState<{ ok: boolean; text: string } | null>(null)
 
 useEffect(() => {
   const interval = setInterval(() => {
@@ -221,53 +184,29 @@ useEffect(() => {
   return () => { clearInterval(t); window.removeEventListener('focus', sync) }
 }, [entered])
 
-// Arriving from an invite link while signed out: open the register modal with the invited email.
+// TeamGate finished a join: reload permissions, plan and the org's connections, then go to Sources.
 useEffect(() => {
-  if (entered || location.pathname !== '/') return
-  const inviteEmail = localStorage.getItem('datapro_invite_email')
-  if (inviteEmail && localStorage.getItem('datapro_pending_invite')) {
-    setLoginEmail(inviteEmail)
-    setIsRegisterMode(true)
-    setShowLogin(true)
-    setLoginError('')
-    localStorage.removeItem('datapro_invite_email')
-  }
-}, [entered, location.pathname])
-
-// After an invite is accepted (or fails) during sign-in: go to "/" and show a welcome banner.
-useEffect(() => {
-  if (!entered) return
-  const joined = localStorage.getItem('datapro_invite_joined')
-  const inviteErr = localStorage.getItem('datapro_invite_error')
-  if (!joined && !inviteErr) return
-  const orgName = localStorage.getItem('datapro_invite_joined_org') || 'your team'
-  const roleLabel = localStorage.getItem('datapro_invite_joined_role') || ''
-  ;['datapro_invite_joined', 'datapro_invite_joined_org', 'datapro_invite_joined_role', 'datapro_invite_error']
-    .forEach(k => localStorage.removeItem(k))
-  if (joined) {
-    setJoinBanner({
-      ok: true,
-      text: `Welcome to ${orgName}${roleLabel ? ` — you joined as ${roleLabel}` : ''}. You're now using your team's plan.`,
-    })
-    // Members see the owner's plan: refresh it now that we've joined.
+  const onJoined = async () => {
+    clearPermissionsCache()
+    await loadPermissions()
     const authToken = localStorage.getItem('datapro_token')
     if (authToken) {
-      fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${authToken}` } })
-        .then(r => r.json())
-        .then(p => {
-          const plan = p.plan || 'none'
-          localStorage.setItem('datapro_plan', plan)
-          if (p.planExpiresAt) localStorage.setItem('datapro_plan_expires', p.planExpiresAt)
-          else localStorage.removeItem('datapro_plan_expires')
-          setUserPlan(plan)
-        })
-        .catch(() => { /* ignore */ })
+      try {
+        const r = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${authToken}` } })
+        const p = await r.json()
+        const plan = p.plan || 'none'
+        localStorage.setItem('datapro_plan', plan)
+        if (p.planExpiresAt) localStorage.setItem('datapro_plan_expires', p.planExpiresAt)
+        else localStorage.removeItem('datapro_plan_expires')
+        setUserPlan(plan)
+      } catch { /* ignore */ }
     }
-  } else {
-    setJoinBanner({ ok: false, text: inviteErr || 'Could not accept the invite.' })
+    useStore.getState().loadSourcesFromBackend()
+    navigate('/sources')
   }
-  if (location.pathname !== '/') navigate('/', { replace: true })
-}, [entered, location.pathname])
+  window.addEventListener('datapro:team-joined', onJoined)
+  return () => window.removeEventListener('datapro:team-joined', onJoined)
+}, [])
 
 useEffect(() => {
   const titles: Record<string, string> = {
@@ -432,7 +371,6 @@ useEffect(() => {
         setUserPlan(plan)
         if (isRegisterMode && plan === 'trial') setShowTrialWelcome(true)
       } catch { /* ignore */ }
-      await acceptPendingInviteIfAny(data.token)
       setEntered(true)
       setShowLogin(false)
     } catch (err) {
@@ -472,7 +410,6 @@ useEffect(() => {
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
       } catch { /* ignore */ }
-      await acceptPendingInviteIfAny(data.token)
       setEntered(true)
       setShowLogin(false)
     } catch {
@@ -542,7 +479,6 @@ useEffect(() => {
             localStorage.setItem('datapro_plan', plan)
             setUserPlan(plan)
           } catch { /* ignore */ }
-          await acceptPendingInviteIfAny(data.token)
           setEntered(true)
           setShowLogin(false)
         } catch {
@@ -595,7 +531,6 @@ useEffect(() => {
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
       } catch { /* ignore */ }
-      await acceptPendingInviteIfAny(data.token)
       setEntered(true)
       setShowLogin(false)
     } catch {
@@ -615,7 +550,6 @@ if (location.pathname === '/contact') return <Routes><Route path="/contact" elem
 if (location.pathname === '/blog') return <Routes><Route path="/blog" element={<Blog />} /></Routes>
 if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
 if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
-if (location.pathname === '/accept-invite') return <Routes><Route path="/accept-invite" element={<AcceptInvite />} /></Routes>
 
 if (location.pathname === '/auth/callback') return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1rem' }}>
@@ -1297,12 +1231,7 @@ if (!entered) return (
             <span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>OR</span>
             <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
           </div>
-          <input type="email" placeholder="you@example.com" value={loginEmail} readOnly={!!inviteLockedEmail} onChange={e => setLoginEmail(e.target.value)} className="auth-input" />
-          {inviteLockedEmail && (
-            <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#a78bfa', marginTop: '-10px' }}>
-              You were invited with this email. Use it to join the team.
-            </div>
-          )}
+          <input type="email" placeholder="you@example.com" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="auth-input" />
           <input type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} className="auth-input" />
 
           {isRegisterMode && (
@@ -1460,19 +1389,6 @@ if (!entered) return (
             </span>
           </div>
         )}
-        {joinBanner && (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
-            padding: '10px 16px',
-            background: joinBanner.ok ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-            borderBottom: `1px solid ${joinBanner.ok ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`,
-            fontFamily: 'monospace', fontSize: '0.78rem',
-            color: joinBanner.ok ? '#86efac' : '#fca5a5',
-          }}>
-            <span>{joinBanner.text}</span>
-            <button onClick={() => setJoinBanner(null)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>✕</button>
-          </div>
-        )}
         {trialDaysLeft !== null && (
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -1499,7 +1415,7 @@ if (!entered) return (
           <Route path="/flow" element={<Flow />} />
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/audit" element={<AuditLogs />} />
-          <Route path="/team" element={<TeamSettings />} />
+          <Route path="/team" element={<TeamGate />} />
           <Route path="/docs" element={<Documentation />} />
           <Route path="/tunneling" element={<Tunneling />} />
           <Route path="/reset-password" element={<ResetPassword />} />
