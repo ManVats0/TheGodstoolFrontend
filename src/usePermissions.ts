@@ -43,12 +43,28 @@ async function fetchOrg(): Promise<OrgInfo | null> {
   }
 }
 
+let loadFailed = false
+
+// Up to 3 attempts with backoff, so one blip doesn't look like "no permissions".
+async function fetchOrgRetry(): Promise<OrgInfo | null> {
+  if (!localStorage.getItem('datapro_token')) return null
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const info = await fetchOrg()
+    if (info) return info
+    await new Promise(r => setTimeout(r, 600 * (attempt + 1)))
+  }
+  return null
+}
+
 export function loadPermissions(): Promise<OrgInfo | null> {
   if (cache) return Promise.resolve(cache)
   if (inflight) return inflight
   const myVersion = version
-  const p: Promise<OrgInfo | null> = fetchOrg().then(info => {
-    if (myVersion === version) cache = info
+  const p: Promise<OrgInfo | null> = fetchOrgRetry().then(info => {
+    if (myVersion === version) {
+      cache = info
+      loadFailed = !info && !!localStorage.getItem('datapro_token')
+    }
     if (inflight === p) inflight = null
     return info
   })
@@ -65,11 +81,17 @@ export async function refreshPermissions() {
   }
 }
 
-// Call on logout and after an invite is accepted.
+// Re-fetch after a failed load (used by the Retry button).
+export function retryPermissions() {
+  clearPermissionsCache()
+}
+
+// Call on logout and after joining a team.
 export function clearPermissionsCache() {
   cache = null
   inflight = null
   version++
+  loadFailed = false
   listeners.forEach(l => l())
 }
 
@@ -109,6 +131,7 @@ export function usePermissions() {
     userId: cache?.userId || '',
     orgName: cache?.orgName || '',
     loading,
+    error: loadFailed && !cache,
     can,
   }
 }
