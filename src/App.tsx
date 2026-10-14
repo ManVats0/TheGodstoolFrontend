@@ -9,7 +9,6 @@ import heroClipB from './preview_B_stats_reveal.mp4'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
-import { acceptPendingInviteIfAny } from './usePermissions'
 // import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 // import Faq from './pages/Faq'
@@ -268,8 +267,7 @@ useEffect(() => {
         setUserPlan(plan)
       })
       .catch(() => { /* ignore */ })
-      .finally(async () => {
-        await acceptPendingInviteIfAny(token)
+      .finally(() => {
         setEntered(true)
         navigate('/', { replace: true })
       })
