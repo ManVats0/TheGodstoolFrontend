@@ -2361,7 +2361,11 @@ setAnalyzing(false)
           const formData = new FormData()
           formData.append('file', fileToClean)
           formData.append('instruction', op.instruction)
-          const res = await fetch(`${API_BASE}/api/ai-custom-clean`, { method: 'POST', body: formData })
+          const res = await fetch(`${API_BASE}/api/ai-custom-clean`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${localStorage.getItem('datapro_token') || ''}` },
+            body: formData
+          })
           const aiResult = await res.json()
           if (aiResult.success && aiResult.download_url) {
             lastResult = {
