@@ -748,7 +748,7 @@ import { API_BASE } from '../config'
           setLoading(false)
           return
         }
-        const gateRes = await fetch(`${API_BASE}/api/ai-usage`, {
+        const gateRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/ai-usage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
         })
@@ -845,6 +845,10 @@ const assistantText = aiData.success
             style={{ color: 'rgba(255,255,255,0.75)' }}
             dangerouslySetInnerHTML={{
               __html: part
+                // Security: escape HTML first so AI output / cell values can't inject markup (XSS)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
                 .replace(/\*\*(.*?)\*\*/g, '<strong style="color:white">$1</strong>')
                 .replace(/`(.*?)`/g, '<code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:11px;color:#c4b5fd">$1</code>'),
             }}
@@ -2361,7 +2365,11 @@ setAnalyzing(false)
           const formData = new FormData()
           formData.append('file', fileToClean)
           formData.append('instruction', op.instruction)
-          const res = await fetch(`${API_BASE}/api/ai-custom-clean`, { method: 'POST', body: formData })
+          const res = await fetch(`${API_BASE}/api/ai-custom-clean`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${localStorage.getItem('datapro_token') || ''}` },
+            body: formData
+          })
           const aiResult = await res.json()
           if (aiResult.success && aiResult.download_url) {
             lastResult = {
