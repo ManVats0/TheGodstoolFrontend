@@ -845,6 +845,10 @@ const assistantText = aiData.success
             style={{ color: 'rgba(255,255,255,0.75)' }}
             dangerouslySetInnerHTML={{
               __html: part
+                // Security: escape HTML first so AI output / cell values can't inject markup (XSS)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
                 .replace(/\*\*(.*?)\*\*/g, '<strong style="color:white">$1</strong>')
                 .replace(/`(.*?)`/g, '<code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:11px;color:#c4b5fd">$1</code>'),
             }}
