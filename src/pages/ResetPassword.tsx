@@ -13,7 +13,7 @@ export default function ResetPassword() {
   const handleReset = async () => {
     if (!password || !confirm) { setError('Please fill both fields.'); return }
     if (password !== confirm) { setError('Passwords do not match.'); return }
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
+    if (password.length < 8) { setError('Password must be at least 8 characters.'); return }
     try {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL || 'http://localhost:4000'}/api/reset-password`, {
         method: 'POST',
