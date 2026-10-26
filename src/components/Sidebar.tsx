@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 // import { usePermissions, ROLE_LABELS } from '../usePermissions'
 import { API_BASE } from '../config'
 import { usePermissions, ROLE_LABELS } from '../usePermissions'
+import WorkspaceSwitcher from './WorkspaceSwitcher'
 function SidebarIcon({ name, size = 19, active = false }: { name: string; size?: number; active?: boolean }) {
   const paths: Record<string, JSX.Element> = {
     plug: <><path d="M9 2v6M15 2v6M6 8h12l-1 6a5 5 0 0 1-5 4h0a5 5 0 0 1-5-4L6 8z" /><path d="M12 18v4" /></>,
@@ -120,6 +121,7 @@ const { can, role } = usePermissions()
 
       {/* Bottom Actions */}
       <div className="p-3 border-t border-white/5 space-y-2">
+        {isExpanded && <WorkspaceSwitcher />}
         {isExpanded && role && (
           <div className="px-3 py-2 mb-1">
             <p className="text-xs text-white/70 truncate" title={localStorage.getItem('datapro_email') || ''}>
