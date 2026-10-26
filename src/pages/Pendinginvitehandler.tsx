@@ -112,8 +112,10 @@ export default function TeamSettings() {
       }
       if (data.addedImmediately) {
         setInviteMsg(`Added ${inviteEmail.trim()} as ${ROLE_LABELS[inviteRole]}.`)
+      } else if (data.emailed) {
+        setInviteMsg(`Invitation emailed to ${inviteEmail.trim()}. They accept it under Team after signing in.`)
       } else {
-        setInviteMsg(`Invite sent to ${inviteEmail.trim()}.`)
+        setInviteMsg(`${inviteEmail.trim()} can now join: ask them to sign in with this email and open Team.`)
       }
       setInviteEmail('')
       await load()
