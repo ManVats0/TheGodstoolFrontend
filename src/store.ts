@@ -118,6 +118,8 @@ export interface BackendConnection {
   name: string
   type: string
   config: Record<string, any>
+  // Who may use this source. Absent / 'workspace' = everyone whose role allows it.
+  access?: { mode: 'workspace' | 'restricted'; userIds: string[] }
   status: string
   createdAt: string
   updatedAt: string
@@ -200,9 +202,21 @@ function expandConnectionToSources(conn: BackendConnection): DataSource[] {
     }
     case 'sheets':
       return [mk(0, config.sheetName || conn.name, { sheetId: config.sheetId, tab: config.tab })]
+    case 'csv':
+      // Uploaded files are stored server-side per workspace, so teammates see them too.
+      return [mk(0, config.filename || conn.name, { filename: config.filename || conn.name })]
     default:
       return []
   }
+}
+
+// True when a source must be read by the SERVER (via its connection id) rather than from this browser:
+// every database / API source, and any CSV or Google Sheet that has no file held in this browser
+// (e.g. one a teammate uploaded). Credentials and file bytes never travel to the browser.
+export function isServerSource(s?: Pick<DataSource, 'connectionId' | 'type' | 'file'> | null): boolean {
+  if (!s || !s.connectionId || s.type === 'catalog') return false
+  if (s.type === 'csv' || s.type === 'sheets') return !s.file
+  return true
 }
 
 interface AppState {

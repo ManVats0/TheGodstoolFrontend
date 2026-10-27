@@ -1,6 +1,6 @@
   import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore, sourceKeyOf } from '../store'
+import { useStore, sourceKeyOf, isServerSource } from '../store'
 import { usePermissions } from '../usePermissions'
 import TimeSeriesChart from '../components/TimeSeriesChart'
 import { API_BASE } from '../config'
@@ -158,7 +158,7 @@ import { API_BASE } from '../config'
         formData.append('source_type', srcType)
         formData.append('source_name', activeSourceName)
 
-        if (sourceObj?.connectionId && srcType !== 'sheets') {
+        if (sourceObj?.connectionId && (srcType !== 'sheets' || !localStorage.getItem('datapro_session'))) {
           formData.append('connection_id', sourceObj.connectionId)
           formData.append('target', sourceObj.table || sourceObj.collection || sourceObj.objectPath || sourceObj.endpoint || '')
         } else if (srcType === 'sheets') {
@@ -1268,7 +1268,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
 
     const fetchSourceAsCSVFile = useCallback(async (src: any): Promise<File | null> => {
       try {
-        if (src.type === 'csv' || src.type === 'sheets') {
+        if ((src.type === 'csv' || src.type === 'sheets') && !isServerSource(src)) {
           return src.file || null
         }
         if (src.connectionId && src.type !== 'catalog') {
@@ -1451,7 +1451,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
           const formData = new FormData()
           let usesDirectSourceType = false
 
-          if (src.connectionId && src.type !== 'csv' && src.type !== 'sheets' && src.type !== 'catalog') {
+          if (src.connectionId && isServerSource(src)) {
             usesDirectSourceType = true
             formData.append('source_type', String(src.type))
             formData.append('connection_id', src.connectionId)
@@ -1572,7 +1572,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         try {
           const formData = new FormData()
 
-          if (src.connectionId && src.type !== 'csv' && src.type !== 'sheets' && src.type !== 'catalog') {
+          if (src.connectionId && isServerSource(src)) {
             formData.append('source_type', String(src.type))
             formData.append('connection_id', src.connectionId)
             formData.append('mysql_table', src.table || src.collection || src.objectPath || src.endpoint || src.report || '')
@@ -1736,7 +1736,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
       const formData = new FormData()
       if (fileToUse) {
         formData.append('file', fileToUse)
-      } else if (sourceObj2?.connectionId && sourceObj2.type !== 'sheets' && sourceObj2.type !== 'csv' && sourceObj2.type !== 'catalog') {
+      } else if (sourceObj2?.connectionId && isServerSource(sourceObj2)) {
         // Credentials stay on the server: send only the connection id + which object to read.
         formData.append('source_type', String(sourceObj2.type))
         formData.append('connection_id', sourceObj2.connectionId)
