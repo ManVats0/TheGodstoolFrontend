@@ -1,6 +1,7 @@
   import { useState, useRef, useEffect } from 'react'
   import { useNavigate } from 'react-router-dom'
-  import { useStore, sourceKeyOf } from '../store'
+  import { useStore, sourceKeyOf, isServerSource } from '../store'
+  import SourceAccess from '../components/SourceAccess'
   import { API_BASE } from '../config'
   import { usePermissions, forbiddenMessage, retryPermissions } from '../usePermissions'
   import GuidedTour, { TourStep } from './FlowTutorial'
@@ -61,7 +62,8 @@
       switchActiveSource,
       loadCachedAnalysis,
       addAuditLog,
-      loadSourcesFromBackend
+      loadSourcesFromBackend,
+      connections
     } = useStore()
     const [tab, setTab] = useState<'existing' | 'add'>('existing')
     const [dragging, setDragging] = useState(false)
@@ -260,6 +262,43 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
         return data._id || null
       } catch {
         return null
+      }
+    }
+
+    // Saves a Google Sheet to the workspace (stores the importer's refresh token encrypted, server-side)
+    // so teammates with the right role can read it too.
+    const saveSheetToBackend = async (name: string, sheetId: string, tab: string, sessionId: string): Promise<{ id: string | null; error: string }> => {
+      try {
+        const res = await fetch(`${API_BASE}/api/connections/google-sheets`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ sheetName: name, sheetId, tab, sessionId }),
+        })
+        const data = await res.json().catch(() => ({} as any))
+        if (!res.ok) return { id: null, error: data?.error || `Server error (${res.status})` }
+        return { id: data._id || null, error: '' }
+      } catch {
+        return { id: null, error: 'Could not reach the server.' }
+      }
+    }
+
+    // Stores an uploaded CSV on the server (per workspace) so teammates can open it too.
+    const uploadCsvToBackend = async (file: File): Promise<{ id: string | null; error: string }> => {
+      try {
+        const fd = new FormData()
+        fd.append('file', file)
+        const res = await fetch(`${API_BASE}/api/connections/upload-csv`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: authHeaders(),
+          body: fd,
+        })
+        const data = await res.json().catch(() => ({} as any))
+        if (!res.ok) return { id: null, error: data?.error || `Server error (${res.status})` }
+        return { id: data._id || null, error: '' }
+      } catch {
+        return { id: null, error: 'Could not reach the server.' }
       }
     }
 
@@ -659,15 +698,14 @@ const openGooglePicker = async () => {
   const realFile = new File([blob], data.filename, { type: 'text/csv' })
   setGsheetsProgress(100)
 
-  const backendId = await saveConnectionToBackend(
-    sheet.name,
-    'sheets',
-    { sheetName: sheet.name, sheetId: sheet.id, tab: tabToImport },
-    {},
-  )
+  const saved = await saveSheetToBackend(sheet.name, sheet.id, tabToImport, storedSession2)
+  const backendId = saved.id
+  if (!backendId) {
+    alert(`Imported for you, but it could not be shared with your team:\n${saved.error}`)
+  }
 
   const source = {
-    id: crypto.randomUUID(),
+    id: backendId ? `${backendId}-0` : crypto.randomUUID(),
     name: sheet.name,
     type: 'sheets' as const,
     file: realFile,
@@ -702,15 +740,20 @@ const openGooglePicker = async () => {
       }
     }
 
-    const confirmSource = () => {
+    const confirmSource = async () => {
       if (!pendingFile) return
+      const saved = await uploadCsvToBackend(pendingFile)
+      if (!saved.id) {
+        alert(`Added for you, but it could not be shared with your team:\n${saved.error}`)
+      }
       const source = {
-        id: crypto.randomUUID(),
+        id: saved.id ? `${saved.id}-0` : crypto.randomUUID(),
         name: pendingFile.name,
         type: 'csv' as const,
         file: pendingFile,
         filename: pendingFile.name,
-        addedAt: new Date().toLocaleString()
+        addedAt: new Date().toLocaleString(),
+        connectionId: saved.id || undefined,
       }
       addSource(source)
       switchActiveSource(pendingFile, pendingFile.name)
@@ -735,14 +778,14 @@ const openGooglePicker = async () => {
         navigate('/analysis')
         return
       }
-      if (!source.file && (source.type === 'csv' || source.type === 'sheets')) {
+      if (!source.file && (source.type === 'csv' || source.type === 'sheets') && !isServerSource(source)) {
         alert('Re-import this source: CSV and Google Sheets data lives in the browser it was added from. Open "+ Add New" and import it again.')
         return
       }
       if (source.file) {
         switchActiveSource(source.file, source.name)
         navigate('/analysis')
-      } else if (source.connectionId && source.type !== 'sheets' && source.type !== 'catalog') {
+      } else if (isServerSource(source)) {
         // Credentials stay server-side; Analysis sends connection_id (+ source.table etc.)
         switchActiveSource(null, source.name)
         navigate('/analysis')
@@ -1148,6 +1191,8 @@ const handleLockedSource = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       {badge(s.type.toUpperCase(), '#7c3aed')}
+                      {s.connectionId && connections.find(c => c._id === s.connectionId)?.access?.mode === 'restricted' && badge('Restricted', '#f59e0b')}
+                      {!s.connectionId && badge('Only on this device', '#64748b')}
                       {(getCachedAnalysis(s.name) || backendAnalysisBadges[sourceKeyOf(s)]) && badge('Last Run', '#34d399')}
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }} />
                       <button onClick={() => loadSource(s)}
@@ -1254,6 +1299,11 @@ const handleLockedSource = () => {
                       <p className="text-xs font-bold text-white mb-3">Data Governance</p>
                       {s.connectionId ? (
                         <div className="space-y-3">
+                          <SourceAccess
+                            connectionId={s.connectionId}
+                            current={connections.find(c => c._id === s.connectionId)?.access}
+                            onSaved={() => { loadSourcesFromBackend() }}
+                          />
                           <div>
                             <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                               Retention (days) — auto-erase data after this many days of inactivity
@@ -1293,7 +1343,7 @@ const handleLockedSource = () => {
                         </div>
                       ) : (
                         <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                          Retention and erasure require a saved connection (not available for plain CSV uploads).
+                          This source exists only in this browser, so it can't be shared, restricted or erased centrally. Re-add it while signed in to share it with your team.
                         </p>
                       )}
                     </div>
@@ -2140,7 +2190,12 @@ if (tablesData.tables?.length > 0) {
                       { host: mysql.host, port: mysql.port, database: mysql.database, ssl: mysql.ssl, tables: tablesArr },
                       { user: mysql.user, password: mysql.password },
                     )
-                    const id = backendId || crypto.randomUUID()
+                    if (!backendId) {
+                      setMysqlError('\u274c Could not save this connection to your workspace, so teammates would not see it.\n   \u2192 Check that you are signed in and that your role allows connecting data sources, then try again.')
+                      setMysqlStatus('error')
+                      return
+                    }
+                    const id = backendId
 
                     // Keep a local cache too — needed until /api/analyze accepts
                     // connection_id directly (see get_decrypted_connection in main.py).
@@ -2414,7 +2469,12 @@ if (tablesData.tables?.length > 0) {
                       { host: postgres.host, port: postgres.port, database: postgres.database, ssl: postgres.ssl, tables: tablesArr },
                       { user: postgres.user, password: postgres.password },
                     )
-                    const id = backendId || crypto.randomUUID()
+                    if (!backendId) {
+                      setPostgresError('\u274c Could not save this connection to your workspace, so teammates would not see it.\n   \u2192 Check that you are signed in and that your role allows connecting data sources, then try again.')
+                      setPostgresStatus('error')
+                      return
+                    }
+                    const id = backendId
 
                     const connRecord = {
                       id, host: postgres.host, port: postgres.port, user: postgres.user,
@@ -2948,7 +3008,12 @@ if (tablesData.tables?.length > 0) {
                       { database: mongo.database, collections: collectionsArr },
                       { uri: mongo.uri },
                     )
-                    const id = backendId || crypto.randomUUID()
+                    if (!backendId) {
+                      setMongoError('\u274c Could not save this connection to your workspace, so teammates would not see it.\n   \u2192 Check that you are signed in and that your role allows connecting data sources, then try again.')
+                      setMongoStatus('error')
+                      return
+                    }
+                    const id = backendId
 
                     const connRecord = {
                       id,
