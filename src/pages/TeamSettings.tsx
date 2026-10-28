@@ -44,6 +44,9 @@ export default function TeamSettings() {
 
 function TeamSettingsInner() {
   const [org, setOrg] = useState<any>(null)
+  const [requireApproval, setRequireApproval] = useState(false)
+  const [seats, setSeats] = useState<{ used: number; limit: number; pending: number; plan: string; enforced: boolean } | null>(null)
+  const [policyMsg, setPolicyMsg] = useState('')
   const [myRole, setMyRole] = useState('')
   const [permissions, setPermissions] = useState<Record<string, boolean>>({})
   const [members, setMembers] = useState<OrgMember[]>([])
@@ -87,6 +90,8 @@ function TeamSettingsInner() {
       const invitesData = invitesRes.ok ? await invitesRes.json() : []
       if (orgData?.error) { setError(orgData.error); return }
       setOrg(orgData.org)
+      setRequireApproval(!!orgData.settings?.requirePipelineApproval)
+      setSeats(orgData.seats || null)
       setMyRole(orgData.role)
       setPermissions(orgData.permissions || {})
       setMembers(Array.isArray(membersData) ? membersData : [])
@@ -101,6 +106,27 @@ function TeamSettingsInner() {
   useEffect(() => { load() }, [])
 
   const canManage = !!permissions['org.manageMembers']
+
+  const toggleApproval = async (next: boolean) => {
+    setPolicyMsg('')
+    setRequireApproval(next)
+    try {
+      const res = await fetch(`${API_BASE}/api/org/settings`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ requirePipelineApproval: next }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({} as any))
+        setRequireApproval(!next)
+        setPolicyMsg(d?.error || 'Could not save this setting.')
+      }
+    } catch {
+      setRequireApproval(!next)
+      setPolicyMsg('Could not reach the server.')
+    }
+  }
 
   const handleInvite = async () => {
     if (!inviteEmail.trim()) return
@@ -119,7 +145,11 @@ function TeamSettingsInner() {
         if (res.status !== 403) await load()
         return
       }
-      setInviteMsg(`${inviteEmail.trim()} can join as ${ROLE_LABELS[inviteRole]} after verifying their email in Team.`)
+      setInviteMsg(
+        data?.emailed
+          ? `Invitation emailed to ${inviteEmail.trim()} (${ROLE_LABELS[inviteRole]}). They accept it under Team after signing in.`
+          : `${inviteEmail.trim()} can now join as ${ROLE_LABELS[inviteRole]}: ask them to sign in with this email and open Team.`
+      )
       setInviteEmail('')
       await load()
     } catch {
@@ -180,6 +210,28 @@ function TeamSettingsInner() {
           {org?.name} · you are <span style={{ color: '#a78bfa' }}>{ROLE_LABELS[myRole] || myRole}</span>
         </p>
       </div>
+
+      {canManage && (
+        <div className="mb-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}>
+          <p className="text-sm font-bold text-white mb-3">Workspace policies</p>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" className="mt-1" checked={requireApproval} onChange={e => toggleApproval(e.target.checked)} />
+            <span>
+              <span className="text-sm font-semibold text-white block">Require approval for pipelines</span>
+              <span className="text-xs block" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                Pipelines built or changed by Editors wait for a Data Steward, Admin or Owner before they can run or be scheduled.
+              </span>
+            </span>
+          </label>
+          {policyMsg && <p className="text-xs mt-2" style={{ color: '#f87171' }}>{policyMsg}</p>}
+          {seats && (
+            <p className="text-xs mt-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Users: {seats.used} of {seats.limit} on the {seats.plan} plan{seats.pending ? ` (+${seats.pending} pending)` : ''}
+              {seats.enforced ? '' : ' · limit not enforced yet'}
+            </p>
+          )}
+        </div>
+      )}
 
       {canManage && (
         <div className="mb-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}>
