@@ -6,6 +6,7 @@ import WorkspaceSwitcher from './WorkspaceSwitcher'
 import CreditsBadge from './CreditsBadge'
 function SidebarIcon({ name, size = 19, active = false }: { name: string; size?: number; active?: boolean }) {
   const paths: Record<string, JSX.Element> = {
+    home: <><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /><path d="M10 21v-6h4v6" /></>,
     plug: <><path d="M9 2v6M15 2v6M6 8h12l-1 6a5 5 0 0 1-5 4h0a5 5 0 0 1-5-4L6 8z" /><path d="M12 18v4" /></>,
     folder: <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />,
     flow: <><circle cx="6" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M6 9v6" /><path d="M18 6a9 9 0 0 1-9 9" /></>,
@@ -38,6 +39,7 @@ export default function Sidebar({ onOpenNotif, unread, isExpanded, onToggleExpan
 const { can, role } = usePermissions()
 
   const allNavItems: { path: string; icon: string; label: string; show?: boolean }[] = [
+    { path: '/dashboard', icon: 'home', label: 'Dashboard' },
     { path: '/sources', icon: 'plug', label: 'Sources' },
     { path: '/catalog', icon: 'folder', label: 'Catalog' },
     { path: '/flow', icon: 'flow', label: 'Pipeline Flow' },
@@ -82,8 +84,8 @@ const { can, role } = usePermissions()
       {/* Navigation Links */}
       <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
-          // Highlight if current path matches, or if we are on root '/' and the item is '/sources'
-          const isActive = location.pathname === item.path || (location.pathname === '/' && item.path === '/sources');
+          // Highlight if current path matches, or if we are on root '/' and the item is '/dashboard'
+          const isActive = location.pathname === item.path || (location.pathname === '/' && item.path === '/dashboard');
           
           return (
             <NavLink
