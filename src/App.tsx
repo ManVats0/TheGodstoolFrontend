@@ -246,15 +246,6 @@ useEffect(() => {
     localStorage.setItem('datapro_logged_in', '1')
     localStorage.setItem('datapro_token', token)
     localStorage.setItem('datapro_email', email)
-    if (email === 'vatsaman888@gmail.com') {
-      localStorage.setItem('datapro_plan', 'enterprise')
-      setUserPlan('enterprise')
-      bootstrapSession(token).finally(() => {
-        setEntered(true)
-        navigate('/', { replace: true })
-      })
-      return
-    }
     bootstrapSession(token)
       .then(() => fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -351,13 +342,6 @@ useEffect(() => {
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
       await bootstrapSession(data.token)
-      if (data.email === 'vatsaman888@gmail.com') {
-        localStorage.setItem('datapro_plan', 'enterprise')
-        setUserPlan('enterprise')
-        setEntered(true)
-        setShowLogin(false)
-        return
-      }
       // Fetch plan
       try {
         const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
@@ -394,13 +378,6 @@ useEffect(() => {
       localStorage.setItem('datapro_logged_in', '1')
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
-      if (data.email === 'vatsaman888@gmail.com') {
-        localStorage.setItem('datapro_plan', 'enterprise')
-        setUserPlan('enterprise')
-        setEntered(true)
-        setShowLogin(false)
-        return
-      }
       try {
         const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
           headers: { Authorization: `Bearer ${data.token}` }
@@ -462,14 +439,6 @@ useEffect(() => {
           localStorage.setItem('datapro_token', data.token)
           localStorage.setItem('datapro_email', data.email)
           await bootstrapSession(data.token)
-          // Founder bypass
-          if (data.email === 'vatsaman888@gmail.com') {
-            localStorage.setItem('datapro_plan', 'enterprise')
-            setUserPlan('enterprise')
-            setEntered(true)
-            setShowLogin(false)
-            return
-          }
           try {
             const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
               headers: { Authorization: `Bearer ${data.token}` }
@@ -515,13 +484,6 @@ useEffect(() => {
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
       await bootstrapSession(data.token)
-      if (data.email === 'vatsaman888@gmail.com') {
-        localStorage.setItem('datapro_plan', 'enterprise')
-        setUserPlan('enterprise')
-        setEntered(true)
-        setShowLogin(false)
-        return
-      }
       try {
         const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
           headers: { Authorization: `Bearer ${data.token}` }
@@ -1323,7 +1285,7 @@ if (!entered) return (
               <span style={{ color: '#4ade80', fontFamily: 'monospace', fontSize: '0.78rem', background: 'rgba(74,222,128,0.1)', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>No credit card</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
-              {['✓ CSV upload', '✓ Google Sheets', '✓ Google Analytics', '✓ Data profiling (view only)', '✗ AI cleaning: pay per use with credits', '✗ Other data sources (locked)'].map(f => (
+              {['✓ CSV files (up to 5 MB) and Google Sheets', '✓ Clean the first 5,000 rows of every file', '✓ Download your cleaned data', '✓ 1 saved pipeline, run by hand', '✗ AI cleaning: pay per use with credits', '✗ Databases, cloud, schedules and teammates (paid)'].map(f => (
                 <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: f.startsWith('✗') ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)' }}>{f}</div>
               ))}
             </div>

@@ -4,6 +4,7 @@
   import SourceAccess from '../components/SourceAccess'
   import { API_BASE } from '../config'
   import { usePermissions, forbiddenMessage, retryPermissions } from '../usePermissions'
+  import { useEntitlements, refreshEntitlements, showUpgrade } from '../entitlements'
   import GuidedTour, { TourStep } from './FlowTutorial'
 
   const DATASOURCES_TOUR: TourStep[] = [
@@ -72,6 +73,8 @@
     const [backendAnalysisBadges, setBackendAnalysisBadges] = useState<Record<string, any>>({})
     const [expandedSourceId, setExpandedSourceId] = useState<string | null>(null)
     const [credits, setCredits] = useState<number | null>(null)
+    const ent = useEntitlements()
+    useEffect(() => { refreshEntitlements() }, [])
     const [retentionDraft, setRetentionDraft] = useState<Record<string, string>>({})
     const [retentionSaving, setRetentionSaving] = useState<Record<string, boolean>>({})
     const [erasingId, setErasingId] = useState<string | null>(null)
@@ -986,10 +989,10 @@ const openGooglePicker = async () => {
   }, []);
 
   const userPlan = localStorage.getItem('datapro_plan') || 'none'
-  const isPaid = ['trial', 'lite', 'starter', 'pro', 'team', 'enterprise'].includes(userPlan)
+  // The server's answer decides what is unlocked; the browser's saved copy is only a fallback while that loads.
+  const isPaid = ent.loaded ? ent.paid : ['trial', 'lite', 'starter', 'pro', 'team', 'enterprise'].includes(userPlan)
 const handleLockedSource = () => {
-    alert('This data source requires a paid plan.\n\nUpgrade to unlock all connectors.')
-    window.location.href = '/pricing'
+    showUpgrade('Databases, cloud storage and APIs are part of the paid plans. CSV files and Google Sheets stay free - upgrade to connect everything else.', 'connectors')
   }
 
   return (
@@ -1010,6 +1013,12 @@ const handleLockedSource = () => {
               <h1 className="text-2xl font-bold text-white">Data Sources</h1>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Manage your data connections</p>
             </div>
+            {ent.loaded && !ent.paid && ent.limits && (
+              <span className="ml-2 px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)', color: '#c4b5fd' }}>
+                Free plan · {ent.usage.sources}/{ent.limits.maxSources} sources · cleans {ent.limits.maxCleanRows.toLocaleString()} rows per file
+              </span>
+            )}
             {credits !== null && credits > 0 && (
               <span className="ml-2 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
                 style={{ background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }}>
