@@ -5,6 +5,7 @@ import { API_BASE } from '../config'
 import { runSQLPreviewWasm } from '../duckdbClient'
 import GuidedTour, { TourStep } from './FlowTutorial'
 import { usePermissions, forbiddenMessage } from '../usePermissions'
+import { checkAiAllowance } from '../credits'
 
 const EMPTY_STATE_TOUR: TourStep[] = [
   {
@@ -1595,6 +1596,11 @@ CONFIRM: <one sentence describing what will happen>
 If the instruction is unclear, ask ONE clarifying question instead, without the LABEL/CONFIRM format.`
 
       const token = localStorage.getItem('datapro_token') || ''
+      const gate = await checkAiAllowance()
+      if (!gate.ok) {
+        setMessages(prev => [...prev, { role: 'assistant', content: `${gate.message} Open Pricing to buy credits.` }])
+        return
+      }
       const response = await fetch(`${API_BASE}/api/ai-clean`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

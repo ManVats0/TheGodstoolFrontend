@@ -1,20 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { refreshCredits } from '../credits'
+
+const AUTH_URL = (import.meta.env.VITE_AUTH_URL as string) || ''
 
 export default function ThankYou() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [showIndra, setShowIndra] = useState(true)
+  const [receipt, setReceipt] = useState<any>(null)
+  const paymentParam = searchParams.get('payment')
 
   // Optional tailored message for a custom-credits top-up (see Pricing.tsx
   // handleCustomPayment). When ?type is absent, every branch below falls
   // back to the original generic subscription copy — untouched.
   const purchaseType = searchParams.get('type')
   const isCreditsPurchase = purchaseType === 'credits'
-  const creditsCurrency = searchParams.get('currency') === 'USD' ? 'USD' : 'INR'
-  const creditsCurrencySymbol = creditsCurrency === 'USD' ? '$' : '₹'
-  const creditsAmountParam = searchParams.get('amount')
-  const creditsAmount = creditsAmountParam && !isNaN(Number(creditsAmountParam)) ? Number(creditsAmountParam) : null
 
 useEffect(() => {
     // Verify user is logged in. A plan is only required for the subscription
@@ -69,7 +70,30 @@ useEffect(() => {
   }, [])
 
   
+  useEffect(() => {
+    if (!paymentParam) return
+    let cancelled = false
+    ;(async () => {
+      const token = localStorage.getItem('datapro_token') || ''
+      for (let i = 0; i < 10 && !cancelled; i++) {
+        try {
+          const r = await fetch(`${AUTH_URL}/api/payments/by-razorpay/${encodeURIComponent(paymentParam)}`, { headers: { Authorization: `Bearer ${token}` } })
+          if (r.ok) { if (!cancelled) { setReceipt(await r.json()); refreshCredits() } return }
+        } catch { /* retry */ }
+        await new Promise(res => setTimeout(res, 1000))
+      }
+    })()
+    return () => { cancelled = true }
+  }, [paymentParam])
+
   const handleContinue = () => {
+    // A credits-only buyer has no plan: let them in on the free tier, where AI runs on credits.
+    if (isCreditsPurchase) {
+      const p = localStorage.getItem('datapro_plan')
+      if (!p || p === 'none') localStorage.setItem('datapro_plan', 'free')
+      window.location.href = '/'
+      return
+    }
     // Navigate to the main app (Data Sources)
     // This will render the app with sidebar since user has plan now
     navigate('/')
@@ -148,9 +172,17 @@ useEffect(() => {
           lineHeight: 1.8,
           margin: '0 0 24px'
         }}>
-          {isCreditsPurchase
-            ? `You've added ${creditsCurrencySymbol}${creditsAmount !== null ? creditsAmount.toLocaleString() : ''} in credits to The God's Tool! 🎉`
-            : "Your subscription is now active. Welcome to The God's Tool! 🎉"}
+          {receipt
+            ? (receipt.kind === 'credits'
+                ? `You added ${Number(receipt.credits).toLocaleString('en-IN')} AI credits. Your balance is now ${Number(receipt.balanceAfter ?? 0).toLocaleString('en-IN')}.`
+                : `Your ${receipt.description} is active. Welcome to The God's Tool!`)
+            : paymentParam
+              ? 'Your payment went through. We are preparing your receipt...'
+              : (
+          isCreditsPurchase
+            ? "Your credits have been added to The God's Tool!"
+            : "Your subscription is now active. Welcome to The God's Tool! 🎉"
+            )}
         </p>
 
         <div style={{
@@ -165,11 +197,22 @@ useEffect(() => {
             {isCreditsPurchase ? '✓ Credits Added' : '✓ Subscription Active'}
           </div>
           <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', fontFamily: 'monospace', lineHeight: 1.7 }}>
-            {isCreditsPurchase
-              ? `Your ${creditsCurrency} credit balance has been topped up${creditsAmount !== null ? ` by ${creditsCurrencySymbol}${creditsAmount.toLocaleString()}` : ''}. Credits never expire and stack with any active plan.`
-              : 'You now have full access to all data sources, AI cleaning, and pipeline automation. Start by connecting your first data source.'}
+            {receipt && receipt.kind === 'credits' ? `1 credit = 1 AI action. Your ${Number(receipt.balanceAfter ?? 0).toLocaleString('en-IN')} credits never expire, and they work with or without a plan.` : (isCreditsPurchase
+              ? 'Your credit balance has been topped up. Credits never expire and work with or without a plan.'
+              : 'You now have full access to all data sources, AI cleaning, and pipeline automation. Start by connecting your first data source.')}
           </div>
         </div>
+
+        {receipt && (
+          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '20px', marginBottom: '24px', textAlign: 'left', fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' }}>
+            <div style={{ color: '#a78bfa', fontWeight: 700, marginBottom: '10px' }}>Receipt {receipt.receiptNo}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>Item</span><span>{receipt.description}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>Amount paid</span><span>{(receipt.currency === 'USD' ? '$' : '\u20B9') + Number(receipt.amount).toLocaleString(receipt.currency === 'USD' ? 'en-US' : 'en-IN', { minimumFractionDigits: 2 })}</span></div>
+            {receipt.kind === 'credits' && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>Credits added</span><span>+{Number(receipt.credits).toLocaleString('en-IN')}</span></div>}
+            {receipt.kind === 'subscription' && receipt.periodEnd && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>Access paid until</span><span>{new Date(receipt.periodEnd).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>}
+            <button onClick={() => navigate(`/billing/${receipt.id}`)} style={{ marginTop: '12px', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#c4b5fd', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontFamily: 'monospace' }}>View / print receipt</button>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
           <button
@@ -225,7 +268,7 @@ useEffect(() => {
           marginTop: '24px',
           lineHeight: 1.6
         }}>
-          A confirmation email has been sent to {localStorage.getItem('datapro_email')}
+          {receipt?.emailed ? `We emailed your receipt to ${receipt.customerEmail}.` : receipt ? 'Your receipt is saved under Billing in the sidebar.' : paymentParam ? '' : `A confirmation email has been sent to ${localStorage.getItem('datapro_email')}`}
         </p>
       </div>
 
