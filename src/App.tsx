@@ -18,6 +18,7 @@ import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import NotificationPanel from './components/NotificationPanel'
 import DataSources from './pages/DataSources'
+import Dashboard from './pages/Dashboard'
 import DataCatalog from './pages/DataCatalog'
 import Flow from './pages/Flow'
 import Analysis from './pages/Analysis'
@@ -1371,7 +1372,8 @@ if (!entered) return (
         )}
 
         <Routes>
-          <Route path="/" element={<DataSources />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/sources" element={<DataSources />} />
           <Route path="/catalog" element={<DataCatalog />} />
           <Route path="/flow" element={<Flow />} />
