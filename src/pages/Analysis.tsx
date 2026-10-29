@@ -4,6 +4,7 @@ import { useStore, sourceKeyOf, isServerSource } from '../store'
 import { usePermissions } from '../usePermissions'
 import TimeSeriesChart from '../components/TimeSeriesChart'
 import { API_BASE } from '../config'
+import { checkAiAllowance, refreshCredits } from '../credits'
 
   const IMPUTATION_METHODS = [
     { value:'none',               label:'None',            desc:'Do not impute.' },
@@ -753,16 +754,15 @@ import { API_BASE } from '../config'
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
         })
         const gateData = await gateRes.json()
+        if (gateRes.ok) refreshCredits()
         if (!gateRes.ok) {
           const isNoPlan = gateData.error === 'no_plan'
           const isLimit = gateData.error === 'limit_reached'
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: isNoPlan
-              ? `🔒 **AI access requires a paid plan.**\n\nYou are on the free tier. [Upgrade your plan](/pricing) to use AI-powered cleaning.\n\nClick **Upgrade** in the sidebar or go to /pricing.`
-              : isLimit
-              ? `⚡ **Daily AI limit reached (50/day).**\n\nYou've used all 50 AI queries for today on the Starter plan. Upgrade to Pro for unlimited AI access.\n\n[View plans →](/pricing)`
-              : `⚠️ ${gateData.message || 'AI unavailable'}`
+            content: isNoPlan || isLimit
+              ? `**${isNoPlan ? 'AI needs a plan or credits.' : 'Daily AI limit reached.'}**\n\n${gateData.message}\n\n[Buy credits](/pricing#credits) \u00b7 [See plans](/pricing)`
+              : `${gateData.message || 'AI unavailable'}`
           }])
           setLoading(false)
           return
@@ -2362,6 +2362,12 @@ setAnalyzing(false)
 
         // Run each custom AI op sequentially
         for (const op of activeCustomOps) {
+          const gate = await checkAiAllowance()
+          if (!gate.ok) {
+            alert(`${gate.message}\n\nBuy credits: ${window.location.origin}/pricing#credits`)
+            setCleaning(false)
+            return
+          }
           const formData = new FormData()
           formData.append('file', fileToClean)
           formData.append('instruction', op.instruction)

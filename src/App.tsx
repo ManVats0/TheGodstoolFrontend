@@ -9,6 +9,7 @@ import heroClipB from './preview_B_stats_reveal.mp4'
 import ResetPassword from './pages/ResetPassword'
 import Pricing from './pages/Pricing'
 import ThankYou from './pages/ThankYou'
+import Billing from './pages/Billing'
 // import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 // import Faq from './pages/Faq'
@@ -1322,7 +1323,7 @@ if (!entered) return (
               <span style={{ color: '#4ade80', fontFamily: 'monospace', fontSize: '0.78rem', background: 'rgba(74,222,128,0.1)', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>No credit card</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
-              {['✓ CSV upload', '✓ Google Sheets', '✓ Google Analytics', '✓ Data profiling (view only)', '✗ AI-powered cleaning (locked)', '✗ Other data sources (locked)'].map(f => (
+              {['✓ CSV upload', '✓ Google Sheets', '✓ Google Analytics', '✓ Data profiling (view only)', '✗ AI cleaning: pay per use with credits', '✗ Other data sources (locked)'].map(f => (
                 <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: f.startsWith('✗') ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)' }}>{f}</div>
               ))}
             </div>
@@ -1415,6 +1416,8 @@ if (!entered) return (
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/audit" element={<AuditLogs />} />
           <Route path="/team" element={<TeamGate />} />
+          <Route path="/billing" element={<Billing />} />
+          <Route path="/billing/:id" element={<Billing />} />
           <Route path="/docs" element={<Documentation />} />
           <Route path="/tunneling" element={<Tunneling />} />
           <Route path="/reset-password" element={<ResetPassword />} />

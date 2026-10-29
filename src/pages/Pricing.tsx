@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useCredits } from '../credits'
 
 type Cycle = 'monthly' | 'yearly'
 
@@ -89,6 +90,15 @@ export default function Pricing() {
   const [customCurrency, setCustomCurrency] = useState<'INR' | 'USD'>('INR')
   const [customLoading, setCustomLoading] = useState(false)
   const [customError, setCustomError] = useState('')
+  const { rates } = useCredits()
+  const customAmountNum = customCurrency === 'USD' ? Number(customAmountUSD) : Number(customAmount)
+  const customSym = customCurrency === 'USD' ? '$' : '\u20B9'
+  const previewCredits = customAmountNum > 0 ? Math.floor(customAmountNum / rates[customCurrency].perCredit + 1e-9) : 0
+
+  // /pricing#credits jumps straight to the top-up box
+  useEffect(() => {
+    if (window.location.hash === '#credits') setTimeout(() => document.getElementById('credits')?.scrollIntoView({ behavior: 'smooth' }), 300)
+  }, [])
 
   // Approximate display-only conversion rate. This is NOT what the person
   // is actually charged — Razorpay/the card network applies the real rate
@@ -149,9 +159,9 @@ export default function Pricing() {
   if (verifyData.success) {
     localStorage.setItem('datapro_plan', planKey)
     // ← CHANGED: Redirect to thank you page instead of home
-    window.location.href = '/thank-you'
+    window.location.href = `/thank-you?payment=${encodeURIComponent(response.razorpay_payment_id)}`
   } else {
-    setError('Payment verified failed. Contact support.')
+    setError(`We received your payment but could not activate your plan yet. It should activate within a few minutes. If it does not, contact support with payment ID ${response.razorpay_payment_id}.`)
   }
   setLoading(null)
 },
@@ -186,6 +196,9 @@ export default function Pricing() {
       setCustomError('Enter a valid amount')
       return
     }
+    const lim = rates[customCurrency]
+    if (amountNum < lim.min) { setCustomError(`The minimum top-up is ${customSym}${lim.min.toLocaleString('en-IN')}.`); return }
+    if (amountNum > lim.max) { setCustomError(`The maximum single top-up is ${customSym}${lim.max.toLocaleString('en-IN')}. For more, contact us.`); return }
     setCustomLoading(true)
     const token = localStorage.getItem('datapro_token')
     if (!token) { navigate('/'); return }
@@ -205,7 +218,7 @@ export default function Pricing() {
         key,
         order_id: orderId,
         name: "The God's Tool",
-        description: 'Custom payment',
+        description: `${(Number(data.credits) || 0).toLocaleString('en-IN')} AI credits`,
         handler: async (response: any) => {
           const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-custom-payment`, {
             method: 'POST',
@@ -217,15 +230,19 @@ export default function Pricing() {
             setCustomAmount('')
             // ← CHANGED: Redirect to thank-you page (tailored credits message)
             // instead of alert(), matching handleSubscribe's pattern above.
-            window.location.href = `/thank-you?type=credits&currency=${customCurrency}&amount=${amountNum}`
+            window.location.href = `/thank-you?type=credits&currency=${customCurrency}&amount=${amountNum}&payment=${encodeURIComponent(response.razorpay_payment_id)}`
           } else {
-            setCustomError('Payment verification failed. Contact support.')
+            setCustomError(`We received your payment but could not confirm it yet. Your credits will appear shortly. If they do not, contact support with payment ID ${response.razorpay_payment_id}.`)
           }
           setCustomLoading(false)
         },
         modal: { ondismiss: () => setCustomLoading(false) },
         prefill: { email: localStorage.getItem('datapro_email') || '' },
         theme: { color: '#7c3aed' }
+      })
+      rzp.on('payment.failed', (resp: any) => {
+        setCustomError(`Payment failed: ${resp?.error?.description || 'please try again'}. If money was deducted, your bank refunds it automatically, usually within 5 to 7 days.`)
+        setCustomLoading(false)
       })
       rzp.open()
     } catch (err) {
@@ -336,7 +353,7 @@ export default function Pricing() {
         ))}
       </div>
 
-      <div style={{ marginTop: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '24px 28px', maxWidth: '420px', width: '100%', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div id="credits" style={{ marginTop: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '24px 28px', maxWidth: '420px', width: '100%', display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <div>
           <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
             Flexible Credit Top-Up
@@ -370,7 +387,10 @@ export default function Pricing() {
           </div>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.68rem', fontFamily: 'monospace' }}>
-          Estimated conversion — actual rate applied at checkout
+          {previewCredits > 0
+            ? <span style={{ color: '#34d399', fontWeight: 700 }}>You get {previewCredits.toLocaleString('en-IN')} AI credits</span>
+            : <span>Minimum {customSym}{rates[customCurrency].min.toLocaleString('en-IN')} · 1 credit = 1 AI action ({customSym}{rates[customCurrency].perCredit} each)</span>}
+          <br />USD shown is an estimate; the exact rate is applied at checkout.
         </p>
         {customError && (
           <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>⚠ {customError}</div>
@@ -396,7 +416,7 @@ export default function Pricing() {
           {customLoading ? 'Opening...' : 'Add Credits'}
         </button>
         <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem', fontFamily: 'monospace', textAlign: 'center' }}>
-          Credits never expire and stack with any active plan
+          Credits never expire. They are used after your plan's daily AI allowance, or on their own with no subscription. A receipt is emailed and saved under Billing.
         </p>
       </div>
 
