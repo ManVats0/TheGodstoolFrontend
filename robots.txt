@@ -7,7 +7,34 @@ Disallow: /analysis
 Disallow: /audit
 Disallow: /docs
 Disallow: /tunneling
+Disallow: /dashboard
 Disallow: /reset-password
 Disallow: /auth/callback
+
+# AI search and assistant crawlers are welcome on the public pages.
+User-agent: GPTBot
+Allow: /
+Disallow: /sources
+Disallow: /dashboard
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: Bingbot
+Allow: /
 
 Sitemap: https://thegodstool.com/sitemap.xml

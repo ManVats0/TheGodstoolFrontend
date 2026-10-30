@@ -1,13 +1,49 @@
 {
   "cleanUrls": false,
   "rewrites": [
-    { "source": "/privacy.html", "destination": "/privacy.html" },
-    { "source": "/terms.html", "destination": "/terms.html" },
-    { "source": "/faq.html", "destination": "/faq.html" },
-    { "source": "/refund.html", "destination": "/refund.html" },
-    { "source": "/robots.txt", "destination": "/robots.txt" },
-    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
-    { "source": "/blog/rss.xml", "destination": "/blog/rss.xml" },
-    { "source": "/**", "destination": "/index.html" }
+    {
+      "source": "/privacy.html",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/terms.html",
+      "destination": "/terms.html"
+    },
+    {
+      "source": "/faq.html",
+      "destination": "/faq.html"
+    },
+    {
+      "source": "/refund.html",
+      "destination": "/refund.html"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/blog/rss.xml",
+      "destination": "/blog/rss.xml"
+    },
+    {
+      "source": "/llms.txt",
+      "destination": "/llms.txt"
+    },
+    {
+      "source": "/og-image.png",
+      "destination": "/og-image.png"
+    },
+    {
+      "source": "/the_gods_tool_logo_3d.png",
+      "destination": "/the_gods_tool_logo_3d.png"
+    },
+    {
+      "source": "/**",
+      "destination": "/index.html"
+    }
   ]
 }

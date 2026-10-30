@@ -1,0 +1,47 @@
+.hm-sec { padding: 88px 24px; max-width: 1100px; margin: 0 auto; font-family: 'Inter', -apple-system, sans-serif; }
+.hm-tint { max-width: none; background: rgba(124,58,237,0.045); border-top: 1px solid rgba(167,139,250,0.08); border-bottom: 1px solid rgba(167,139,250,0.08); }
+.hm-narrow { max-width: 720px; margin: 0 auto; }
+.hm-head { text-align: center; margin-bottom: 44px; }
+.hm-head h2, .hm-quote h2 { font-size: clamp(1.7rem, 3.6vw, 2.5rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin: 0; color: #fff; }
+.hm-head p { color: rgba(255,255,255,0.62); font-size: 1rem; line-height: 1.65; max-width: 640px; margin: 14px auto 0; }
+.hm-grid { display: grid; gap: 18px; }
+.hm-grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.hm-grid-4 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.hm-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(167,139,250,0.14); border-radius: 12px; padding: 22px; }
+.hm-card h3 { font-size: 1.02rem; font-weight: 700; margin: 0 0 8px; color: rgba(255,255,255,0.93); }
+.hm-card p { font-size: 0.9rem; line-height: 1.65; color: rgba(255,255,255,0.66); margin: 0; }
+.hm-icon { margin-bottom: 12px; }
+.hm-fix { max-width: 700px; margin: 36px auto 0; text-align: center; font-size: 1.05rem; line-height: 1.7; color: rgba(255,255,255,0.88); }
+.hm-link { margin-top: 14px; background: none; border: none; padding: 0; color: #a78bfa; font: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+.hm-link:hover { color: #c4b5fd; text-decoration: underline; }
+.hm-steps { list-style: none; padding: 0; margin: 0 0 40px; display: flex; flex-direction: column; gap: 30px; }
+.hm-steps li { display: flex; gap: 20px; align-items: flex-start; }
+.hm-steps h3 { margin: 0 0 6px; font-size: 1.12rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.hm-steps p { margin: 0; color: rgba(255,255,255,0.66); line-height: 1.65; font-size: 0.95rem; }
+.hm-num { flex: 0 0 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #7c3aed; color: #fff; font-weight: 700; }
+.hm-center { text-align: center; }
+.hm-quote { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; align-items: start; }
+.hm-lead { color: rgba(255,255,255,0.72); line-height: 1.7; margin: 16px 0; }
+.hm-points { padding-left: 18px; margin: 0 0 18px; color: rgba(255,255,255,0.8); line-height: 1.9; font-size: 0.95rem; }
+.hm-small { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin: 0; }
+.hm-form { background: rgba(10,15,28,0.8); border: 1px solid rgba(167,139,250,0.2); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.hm-form label { display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.8); }
+.hm-form input, .hm-form select, .hm-form textarea { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; color: #fff; padding: 10px 12px; font: inherit; font-weight: 400; font-size: 0.9rem; }
+.hm-form select option { color: #111; }
+.hm-form input:focus, .hm-form select:focus, .hm-form textarea:focus { outline: 2px solid #7c3aed; outline-offset: 1px; }
+.hm-opt { font-weight: 400; color: rgba(255,255,255,0.45); }
+.hm-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.hm-err { background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.3); color: #fca5a5; border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; }
+.hm-thanks { color: #86efac; font-size: 1rem; line-height: 1.6; text-align: center; padding: 40px 22px; }
+.hm-faq { border-bottom: 1px solid rgba(255,255,255,0.09); padding: 16px 0; }
+.hm-faq summary { cursor: pointer; font-weight: 600; font-size: 1rem; color: rgba(255,255,255,0.92); }
+.hm-faq p { margin: 10px 0 0; color: rgba(255,255,255,0.68); line-height: 1.7; font-size: 0.93rem; }
+.hm-credits { max-width: 700px; margin: 28px auto 0; text-align: center; background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.22); border-radius: 12px; padding: 16px 20px; }
+.hm-credits strong { color: #fbbf24; display: block; margin-bottom: 4px; }
+.hm-credits span { color: rgba(255,255,255,0.72); font-size: 0.9rem; line-height: 1.6; }
+.hm-foot { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center; margin-bottom: 26px; }
+.hm-foot a { color: rgba(255,255,255,0.6); font-size: 0.85rem; text-decoration: none; }
+.hm-foot a:hover { color: #c4b5fd; }
+@media (max-width: 720px) { .hm-sec { padding: 60px 18px; } }
+
+.hm-points li::marker { color: #a78bfa; }
