@@ -28,6 +28,7 @@ import Documentation from './pages/Documentation'
 import Tunneling from './pages/Tunneling'
 import Contact from './pages/Contact'
 import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
 import Feedback from './pages/Feedback'
 import TeamGate from './pages/TeamGate'
 import { API_BASE } from './config'
@@ -219,6 +220,8 @@ useEffect(() => {
     '/terms': "Terms of Service — The God's Tool",
     '/feedback': "Feedback — The God's Tool",
   }
+  // Blog pages set their own title (and share-card tags) for search engines.
+  if (location.pathname.startsWith('/blog')) return
   document.title = titles[location.pathname] || "The God's Tool"
 }, [location.pathname])
   const notifications = useStore(s => s.notifications)
@@ -510,7 +513,7 @@ if (location.pathname === '/pricing') return <Routes><Route path="/pricing" elem
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
 // if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
-if (location.pathname === '/blog') return <Routes><Route path="/blog" element={<Blog />} /></Routes>
+if (location.pathname === '/blog' || location.pathname.startsWith('/blog/')) return <Routes><Route path="/blog" element={<Blog />} /><Route path="/blog/:slug" element={<BlogPost />} /></Routes>
 if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
 if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
 

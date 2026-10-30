@@ -7,6 +7,7 @@
     { "source": "/refund.html", "destination": "/refund.html" },
     { "source": "/robots.txt", "destination": "/robots.txt" },
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/blog/rss.xml", "destination": "/blog/rss.xml" },
     { "source": "/**", "destination": "/index.html" }
   ]
 }
