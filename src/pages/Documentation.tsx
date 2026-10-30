@@ -49,6 +49,90 @@ const DOCS: Record<string, {
   badge?: string
   sections: DocSection[]
 }> = {
+  '/dashboard': {
+    title: 'Getting Started',
+    icon: 'lightbulb',
+    color: '#a78bfa',
+    badge: 'Start here',
+    sections: [
+      {
+        heading: 'Your first clean in about five minutes',
+        body: 'Sign in and you land on the Dashboard. It shows a short checklist: add your data, clean it, then run it and take the result. Start with a CSV you already have. Open Data Sources, upload the file, then open Flow to pick the fixes you want, such as removing duplicates, filling blanks or fixing dates. Run it and download the clean file.',
+        tip: 'Use a copy of a real file that annoys you. You will see the value faster than with sample data.',
+      },
+      {
+        heading: 'What the Dashboard shows',
+        body: 'Pipelines: how many you have, how many run on a schedule, and how many are waiting for approval. Runs this week: how many ran and what share succeeded. Rows cleaned in the last 7 days. Data sources: how many you have, grouped by type. Recent pipelines show their status, which is Scheduled, Manual or Awaiting approval.',
+        note: 'Numbers come from your own account. In a team workspace they cover the whole workspace.',
+      },
+      {
+        heading: 'Free plan and trial',
+        body: 'New accounts get 14 days with everything unlocked and no card. After that the account moves to the Free plan, which keeps working with these limits: up to 3 sources, CSV files up to 5 MB, 5,000 rows per run and 1 pipeline. Nothing is deleted when the trial ends. If a limit stops you, the app tells you which one and what to change.',
+        warning: 'The limits are enforced on the server, so they apply however you reach the app.',
+      },
+      {
+        heading: 'Where to go next',
+        body: 'Data Sources explains every connector. Data Catalog is where you label what your columns mean. Flow is the cleaning and pipeline builder. Analysis profiles a source and lists what is wrong. Billing and Credits explains paying for AI actions, and Teams and Roles covers working with other people.',
+      },
+    ],
+  },
+  '/team': {
+    title: 'Teams and Roles',
+    icon: 'shield',
+    color: '#34d399',
+    sections: [
+      {
+        heading: 'Overview',
+        body: 'A team workspace lets several people use the same sources and pipelines. The person who creates it is the Owner. Everyone else is invited by email and given a role. Invitations that have not been accepted yet show up as pending until the person signs in.',
+      },
+      {
+        heading: 'The four roles',
+        body: 'Admin: manages members, policies and tunnel tokens, and can do everything below. Data Steward: runs analysis, builds pipelines and approves pipelines made by others. Editor: adds sources, builds and runs pipelines, but pipelines they build or change can wait for approval. Viewer: can look at results and saved analyses, and cannot run new ones or change anything.',
+        tip: 'Give most people Editor. Keep Admin for one or two people.',
+      },
+      {
+        heading: 'Approval policy',
+        body: 'Turn on "Require approval for pipelines" under Workspace policies in Team settings. From then on, pipelines built or changed by Editors wait for a Data Steward, Admin or Owner. A pipeline that is waiting cannot be run by hand or by its schedule until someone approves it. Every approval is written to Audit Logs with who did it and when.',
+      },
+      {
+        heading: 'Restricted sources',
+        body: 'A source can be marked Restricted so only the people you pick can use it. Other members see a Restricted badge on it and need to be added before they can use it. Use this for sources that hold personal or confidential data.',
+        note: 'A source added while you were signed out stays in your browser only. It cannot be shared, restricted or erased centrally. Re-add it while signed in to share it.',
+      },
+      {
+        heading: 'Seats and logins',
+        body: 'The Free plan is single user. Pro allows 5 concurrent logins and Team allows 15. If you need more seats, request a custom quote from the homepage.',
+      },
+    ],
+  },
+  '/billing': {
+    title: 'Billing and Credits',
+    icon: 'file',
+    color: '#fbbf24',
+    sections: [
+      {
+        heading: 'Plans or credits',
+        body: 'You can pay two ways. Monthly plans (Lite $19, Starter $39, Pro $79, Team $199) unlock every source and give a daily AI allowance. Credits are pay as you go, with no subscription. They suit people who clean data a few days a month, such as freelancers.',
+      },
+      {
+        heading: 'How credits work',
+        body: 'One credit pays for one AI action, for example asking the AI to write a cleaning step. Plain actions that do not use AI do not cost credits. A credit costs about $0.03 (Rs 2 in India) and the smallest top-up is $2 (Rs 99). If your plan has a daily AI allowance, that is used first and credits cover whatever is left. Credits never expire. Rupee and dollar top-ups are kept as two separate balances, based on the currency you paid in.',
+        tip: 'Credits do not need a plan, but free-plan limits on sources, file size and rows still apply.',
+      },
+      {
+        heading: 'Receipts and invoices',
+        body: 'Every payment creates a receipt you can open and print from Billing. If you added a GSTIN, the document is titled Tax invoice. Credit purchases show the balance after the top-up.',
+      },
+      {
+        heading: 'Refunds',
+        body: 'Paid plans have a 14-day money-back guarantee. A credit top-up can be refunded within 14 days if none of the credits from that top-up have been used. The Refund Policy page has the full rules.',
+      },
+      {
+        heading: 'Custom quotes',
+        body: 'For bulk credits at a better rate, more seats, database or API sources, or invoicing and annual billing, use the quote form on the homepage or email contact@thegodstool.com. A quote covers access to the tool. It is not a service where someone cleans your data for you.',
+      },
+    ],
+  },
   '/sources': {
     title: 'Data Sources',
     icon: 'database',
@@ -58,7 +142,7 @@ const DOCS: Record<string, {
       {
         heading: 'Overview',
         body: 'Data Sources is the ingestion layer of the platform. It accepts CSV files, live relational databases, cloud data warehouses, document stores, and Google Sheets. Every source registered here becomes available across Analysis, Data Catalog, and Pipeline Flow without re-uploading.',
-        note: 'All credentials are stored in browser localStorage only. Nothing is transmitted to any third-party service.',
+        note: 'Sources added while you are signed in belong to your account, so they can be shared with a team. Sources added while signed out stay in your browser only. Credentials are never sent to third parties.',
       },
       {
         heading: 'Supported source types',
@@ -557,7 +641,25 @@ const DOCS: Record<string, {
     title: 'Secure Tunneling',
     icon: 'shield',
     color: '#f59e0b',
-    sections: [],
+    sections: [
+      {
+        heading: 'Why you might need it',
+        body: 'If your database sits behind a firewall or on a private network, the app cannot reach it directly. A tunnel agent runs on a machine that can reach the database and opens an outbound connection to the app. You do not open any inbound ports or change firewall rules.',
+      },
+      {
+        heading: 'Setting one up',
+        body: 'Open the Tunneling page, pick your database type and follow the steps. In short: create an agent token, start the agent on a machine that can reach the database, enter the server URL, token and database details when asked, then add the source as usual. The page fills in your real server URL and token in the commands so they can be copied as they are.',
+        tip: 'Run the agent on a small always-on machine or server, not a laptop that sleeps.',
+      },
+      {
+        heading: 'Who can create tunnels',
+        body: 'You can use tunnels your Admin has already set up. Creating new tunnel tokens needs an Admin.',
+      },
+      {
+        heading: 'If it does not connect',
+        body: 'Check that the agent is still running, that the token has not been replaced, and that the machine running the agent can reach the database host and port. The Tunneling page has a Common problems list for each database type.',
+      },
+    ],
   },
 }
 

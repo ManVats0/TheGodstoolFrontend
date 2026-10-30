@@ -1,0 +1,21 @@
+# The God's Tool
+
+> A web app that cleans messy data. Upload a CSV, link a Google Sheet or connect a database, review the problems it finds, and fix them by describing what you want in plain English. Cleaning steps can be saved, edited as SQL and run again on a schedule.
+
+It is made for freelancers, analysts, small teams and companies who regularly receive messy spreadsheets and exports.
+
+## Key facts
+- Free plan: up to 3 sources, CSV files up to 5 MB, 5,000 rows per run, 1 pipeline. New accounts get a 14-day trial with everything unlocked, no card needed.
+- Paid plans (USD per month): Lite $19, Starter $39, Pro $79, Team $199.
+- Credits: pay as you go with no subscription. One credit pays for one AI action, about $0.03 each, minimum top-up $2.
+- Quotes: bulk credits, team plans, database or API sources and invoicing are quoted by email. Request one at https://thegodstool.com/#quote or write to contact@thegodstool.com. Quotes cover access to the tool, not a done-for-you cleaning service.
+- Sources: CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS (RDS, S3, DynamoDB, Redshift), Google Cloud Storage, Cloud SQL, Databricks, REST APIs, Google Analytics 4.
+- Security: data is encrypted in transit and is not shared with third parties.
+
+## Pages
+- [Home](https://thegodstool.com/): what it does, who it is for, pricing, quote form and FAQ
+- [FAQ](https://thegodstool.com/faq.html): common questions
+- [Pricing](https://thegodstool.com/pricing): plans and credits
+- [Blog](https://thegodstool.com/blog): guides on cleaning data and keeping it safe
+- [Contact](https://thegodstool.com/contact)
+- [Privacy](https://thegodstool.com/privacy.html), [Terms](https://thegodstool.com/terms.html), [Refunds](https://thegodstool.com/refund.html)

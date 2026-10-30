@@ -2,7 +2,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp serve.json dist/serve.json && cp privacy.html dist/privacy.html && cp terms.html dist/terms.html && cp faq.html dist/faq.html && cp refund.html dist/refund.html && cp robots.txt dist/robots.txt && cp sitemap.xml dist/sitemap.xml && node scripts/blog-feeds.mjs",
+    "build": "vite build && cp serve.json dist/serve.json && cp privacy.html dist/privacy.html && cp terms.html dist/terms.html && cp faq.html dist/faq.html && cp refund.html dist/refund.html && cp robots.txt dist/robots.txt && cp sitemap.xml dist/sitemap.xml && cp llms.txt dist/llms.txt && cp og-image.png dist/og-image.png && cp the_gods_tool_logo_3d.png dist/the_gods_tool_logo_3d.png && node scripts/home-static.mjs && node scripts/blog-feeds.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

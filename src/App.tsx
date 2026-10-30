@@ -32,16 +32,14 @@ import BlogPost from './pages/BlogPost'
 import Feedback from './pages/Feedback'
 import TeamGate from './pages/TeamGate'
 import { API_BASE } from './config'
+import content from './home/content.json'
+import { ProblemSection, AudienceSection, FeaturesSection, StepsSection, QuoteSection, FaqSection, scrollToQuote } from './home/HomeSections'
 import { clearPermissionsCache, loadPermissions, installForbiddenHandler, refreshPermissions, usePermissions } from './usePermissions'
 
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
 installForbiddenHandler()
 
-const ROTATING_PHRASES = [
-  'in one platform.',
-  'in minutes, not weeks.',
-]
 
 function redirectToGoogleOAuth() {
   const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/google/callback`
@@ -133,19 +131,6 @@ const [showTrialWelcome, setShowTrialWelcome] = useState(false)
 const [regFeeling, setRegFeeling] = useState('')
 const forceLogoutRef = useRef<HTMLButtonElement>(null)
 const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
-const [phraseIndex, setPhraseIndex] = useState(0)
-const [phraseVisible, setPhraseVisible] = useState(true)
-
-useEffect(() => {
-  const interval = setInterval(() => {
-    setPhraseVisible(false)
-    setTimeout(() => {
-      setPhraseIndex(i => (i + 1) % ROTATING_PHRASES.length)
-      setPhraseVisible(true)
-    }, 350)
-  }, 2600)
-  return () => clearInterval(interval)
-}, [])
 
 useEffect(() => {
   if (userPlan !== 'trial') { setTrialDaysLeft(null); return }
@@ -213,7 +198,7 @@ useEffect(() => {
 
 useEffect(() => {
   const titles: Record<string, string> = {
-    '/': "The God's Tool — No-Code ETL & Data Pipeline Platform",
+    '/': content.site.title,
     '/pricing': "Pricing — The God's Tool",
     '/contact': "Contact — The God's Tool",
     '/blog': "Blog — The God's Tool",
@@ -271,7 +256,6 @@ useEffect(() => {
 
   const [heroClipIndex, setHeroClipIndex] = useState(0)
   const heroClips = [heroClipA, heroClipB]
-  const [showAllFeatures, setShowAllFeatures] = useState(false)
   const [sideEmail, setSideEmail] = useState('')
   const [sidePassword, setSidePassword] = useState('')
   const [sideConfirmPassword, setSideConfirmPassword] = useState('')
@@ -671,6 +655,7 @@ if (!entered) return (
         <span className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</span>
         <span className="nav-link" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>How It Works</span>
         <span className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</span>
+        <span className="nav-link" onClick={scrollToQuote}>Get a quote</span>
         <a href="/contact" className="nav-link" style={{ textDecoration: 'none' }}>Contact</a>
 <a href="/blog" className="nav-link" style={{ textDecoration: 'none' }}>Blog</a>
         <button onClick={() => handleEnter('login')} style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', padding: '8px 20px', borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}
@@ -681,6 +666,7 @@ if (!entered) return (
       </div>
     </nav>
 
+    <main>
     {/* ── HERO ── */}
     <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: '85px 24px 40px', position: 'relative', overflow: 'hidden' }}>
       {/* Grid bg */}
@@ -698,64 +684,25 @@ if (!entered) return (
 
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '1180px', width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '32px', animation: 'fadeUp 0.8s ease both' }}>
       <div style={{ flex: '1 1 480px', maxWidth: '620px', minWidth: '300px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(167,139,250,0.25)', borderRadius: '20px', padding: '5px 16px', marginBottom: '10px', fontFamily: 'monospace', fontSize: '0.68rem', color: '#a78bfa', letterSpacing: '0.15em' }}>
-           ETL SOFTWARE AND DATA INTELLIGENCE PLATFORM
-        </div>
-
-        <p style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', marginBottom: '8px', textTransform: 'uppercase' }}>
-          For Teams Who care about data quality, speed, and security
-        </p>
-        <h1 className="hero-title" style={{ margin: '0 0 8px' }}>
-  Everything your data needs{' '}
-  <span
-    className="accent"
-    style={{
-      display: 'inline-block',
-      minWidth: '15ch',
-      textAlign: 'left',
-      whiteSpace: 'nowrap',
-      opacity: phraseVisible ? 1 : 0,
-      transition: 'opacity 0.35s ease',
-    }}
-  >
-    {ROTATING_PHRASES[phraseIndex]}
-  </span>
-</h1>
-
-        {/* */}
-<p style={{ fontSize: 'clamp(0.88rem, 1.5vw, 1.02rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.55, maxWidth: '600px', margin: '0 auto 10px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-  Connect your database, sheet, or CRM. AI profiles it, cleans it, and pipelines it out — the work a data engineer would spend hours on, done in minutes.
-</p>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', rowGap: '6px', columnGap: '10px', marginBottom: '12px', maxWidth: '640px', margin: '0 auto 12px' }}>
-          {['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'Cloud Storage', 'Cloud SQL', 'Databricks', 'REST API', 'Google Analytics 4'].map((src, i, arr) => (
-            <span key={src} style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#6d5fc7', letterSpacing: '0.08em', opacity: 0.7, whiteSpace: 'nowrap' }}>
-              {src}{i < arr.length - 1 && <span style={{ marginLeft: '10px', opacity: 0.5 }}>·</span>}
-            </span>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: '#a78bfa', letterSpacing: '0.08em', marginBottom: '14px', textTransform: 'uppercase', fontWeight: 600 }}>{content.hero.eyebrow}</p>
+        <h1 className="hero-title" style={{ margin: '0 0 16px' }}>{content.hero.h1}</h1>
+        <p style={{ fontSize: 'clamp(0.95rem, 1.6vw, 1.1rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.65, maxWidth: '600px', margin: '0 auto 16px', fontFamily: "'Inter', -apple-system, sans-serif" }}>{content.hero.sub}</p>
+        <ul aria-label="Supported data sources" style={{ listStyle: 'none', padding: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 12px', maxWidth: '640px', margin: '0 auto 14px' }}>
+          {content.hero.sources.map(src => (
+            <li key={src} style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.74rem', color: 'rgba(167,139,250,0.85)', whiteSpace: 'nowrap' }}>{src}</li>
           ))}
+        </ul>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note}</p>
+        <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="cta-btn" onClick={() => handleEnter('register')}>{content.hero.primary}</button>
+          <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={scrollToQuote}>{content.hero.secondary}</button>
         </div>
-
-        <p style={{ fontFamily: 'monospace', fontSize: '0.66rem', color: 'rgba(255,255,255,0.35)', marginBottom: '14px' }}>
-           14-day free trial · Full platform unlocked · No credit card required
-        </p>
-
-        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="cta-btn" onClick={() => handleEnter('register')}>Connect a Source</button>
-          <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.65)', padding: '13px 32px', borderRadius: '6px', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', letterSpacing: '0.05em' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.4)'; e.currentTarget.style.color = '#a78bfa' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}>
-            See How It Works
-          </button>
-        </div>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginTop: '12px' }}>
-          Built with years of experience handling sensitive, large-scale, systems in production · Data Security Guaranteed · Google OAuth Verified
-        </p>
       </div>
 
       {/* ── SIDE SIGNUP FORM ── */}
       <form onSubmit={handleSideFormSubmit} style={{ flex: '1 1 340px', maxWidth: '380px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '7px', textAlign: 'left', backdropFilter: 'blur(6px)' }}>
         <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>Start your 14-day free trial</div>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 2px' }}>Full access, no card needed. Fill this once — confirm on the next screen.</p>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 2px' }}>Full access, no card needed. Fill this once. confirm on the next screen.</p>
         <input type="email" placeholder="you@example.com" value={sideEmail} onChange={e => setSideEmail(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px' }}>
           <input type="password" placeholder="Password" value={sidePassword} onChange={e => setSidePassword(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
@@ -806,121 +753,16 @@ if (!entered) return (
       </div>
     </section>
 
-    {/* ── STATS BAR ── */}
-    <div style={{ background: 'rgba(124,58,237,0.08)', borderTop: '1px solid rgba(167,139,250,0.1)', borderBottom: '1px solid rgba(167,139,250,0.1)', padding: '0 24px' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {[
-          { val: 'SQL', label: 'Editable & Copyable Pipelines' },
-          { val: 'AUTO', label: 'Schema Change Detector' },
-          { val: 'AI', label: 'Powered Cleaning' },
-          { val: 'ALERT', label: 'Email Alerts on Data Anomalies' },
-        ].map((s, i) => (
-          <div key={i} className="stat-item" style={{ padding: '28px 40px' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 900, background: 'linear-gradient(135deg, #e9d5ff, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 }}>{s.val}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', marginTop: '6px', textTransform: 'uppercase' }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* ── FEATURES ── */}
-    <section id="features" style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-        <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>What It Does</div>
-        <h2 style={{ 
-  fontFamily: "'Inter', -apple-system, sans-serif", 
-  fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', 
-  fontWeight: 700, 
-  margin: 0, 
-  letterSpacing: '-0.03em', 
-  lineHeight: 1.15 
-}}>Messy data in. Clean answers out</h2>
-        <p style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'monospace', fontSize: '0.85rem', marginTop: '12px' }}>Connect, clean, automate — one platform, zero hires.</p>
-        <p style={{ color: 'rgba(255,255,255,0.45)', fontFamily: 'monospace', fontSize: '0.72rem', marginTop: '8px' }}>Engineered with years of hands-on experience handling sensitive, large-scale, and multilingual data systems.</p>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-        {[
-          { icon: 'zap', title: 'AI-Powered Cleaning', desc: 'Detect nulls, fix formats, remove duplicates, and standardize columns — automatically. Or just write in plain English to generate a cleaning step. Claude AI does the heavy lifting.', delay: '0s' },
-          { icon: 'shield', title: 'Your Data Never Leaves Home', desc: 'We tunnel into your database to clean it — nothing sits exposed on the internet, and you never touch a firewall setting.', delay: '0.1s' },
-          { icon: 'alert', title: 'Issue Detector', desc: 'Auto-detects issues in your data before they break downstream.', delay: '0.2s' },
-        ].map((f, i) => (
-          <div key={i} className="feature-card" style={{ animationDelay: f.delay }}>
-            <div style={{ marginBottom: '16px' }}><LineIcon name={f.icon} size={30} /></div>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.05rem', fontWeight: 700, marginBottom: '10px', color: 'rgba(255,255,255,0.9)' }}>{f.title}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.7 }}>{f.desc}</div>
-          </div>
-        ))}
-        {showAllFeatures && [
-          { icon: 'link', title: 'Connect Anything', desc: 'CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, GA4 — plug in any source in seconds.', delay: '0s' },
-          { icon: 'refresh', title: 'Pipeline Automation', desc: 'Build no-code data flows that run on a schedule. Transform, join, filter, and export without writing a line.', delay: '0.05s' },
-          { icon: 'chart', title: 'Instant Analysis', desc: 'Profile your data instantly. Distributions, correlations, outliers — visualized before you even ask.', delay: '0.1s' },
-          { icon: 'database', title: 'Build Pipelines in SQL', desc: 'Skip the drag-and-drop if you\'d rather not. Write plain SQL in our built-in editor and get a live, editable pipeline — a real SQL interface for people who just want to do ground-level work on their data.', delay: '0.15s' },
-          { icon: 'clock', title: 'Schedule Your Runs', desc: 'Set it once, then stop thinking about it. Every 5 seconds or once a month — pick your rhythm and the tool keeps the beat, even when you\'re not watching.', delay: '0.2s' },
-          { icon: 'filter', title: 'Advanced Filter', desc: 'Instantly isolate the exact rows or values causing a data quality issue — no more scrolling through thousands of rows by hand.', delay: '0.25s' },
-          { icon: 'book', title: 'Analyse', desc: 'Free analysis on every connected data source — a full data dictionary and data info, ready for you.', delay: '0.3s' },
-          { icon: 'shield', title: 'Team & Data Governance', desc: 'Invite teammates, assign roles like Admin, Data Steward, Editor, and Viewer, and control exactly who can view, edit, or manage your organization\'s data.', delay: '0.35s' },
-        ].map((f, i) => (
-          <div key={`extra-${i}`} className="feature-card" style={{ animationDelay: f.delay }}>
-            <div style={{ marginBottom: '16px' }}><LineIcon name={f.icon} size={30} /></div>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.05rem', fontWeight: 700, marginBottom: '10px', color: 'rgba(255,255,255,0.9)' }}>{f.title}</div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.7 }}>{f.desc}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ textAlign: 'center', marginTop: '32px' }}>
-        <button
-          onClick={() => setShowAllFeatures(v => !v)}
-          style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.3)', color: '#a78bfa', padding: '10px 28px', borderRadius: '6px', fontSize: '0.78rem', letterSpacing: '0.08em', cursor: 'pointer', transition: 'all 0.2s' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.15)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-        >
-          {showAllFeatures ? 'SHOW LESS ↑' : 'SEE ALL FEATURES ↓'}
-        </button>
-      </div>
-    </section>
-
-    {/* ── HOW IT WORKS ── */}
-    <section id="how" style={{ padding: '100px 24px', background: 'rgba(124,58,237,0.04)', borderTop: '1px solid rgba(167,139,250,0.07)', borderBottom: '1px solid rgba(167,139,250,0.07)' }}>
-      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-          <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>The Process</div>
-          <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>Three steps to clean data.</h2>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-          {[
-            { n: '1', icon: 'link', title: 'Connect Your Source', body: 'Upload a CSV, paste a Google Sheet link, or connect your database. The God\'s Tool recognizes your schema instantly.' },
-            { n: '2', icon: 'zap', title: 'Let AI Clean & Profile', body: 'Our AI scans every column, flags issues, suggests fixes, and applies transformations — all reviewable before you confirm.' },
-            { n: '3', icon: 'refresh', title: 'Automate & Export', body: 'Set a pipeline schedule, push to your warehouse, or download clean data. Your workflow, fully automated.' },
-          ].map((step, i) => (
-            <div key={i} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-              <div className="step-num" style={{ position: 'relative' }}>
-                <LineIcon name={step.icon} size={22} color="#fff" />
-                <span style={{
-                  position: 'absolute', bottom: '-6px', right: '-6px',
-                  width: '18px', height: '18px', borderRadius: '50%',
-                  background: '#0d0a1a', border: '1px solid rgba(167,139,250,0.4)',
-                  fontSize: '0.62rem', fontWeight: 800, color: '#a78bfa',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>{step.n}</span>
-              </div>
-              <div style={{ paddingTop: '8px' }}>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.15rem', fontWeight: 700, marginBottom: '8px' }}>{step.title}</div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75 }}>{step.body}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '48px' }}>
-          <button className="cta-btn" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>See Plans & Pricing</button>
-        </div>
-      </div>
-    </section>
+    <ProblemSection />
+    <AudienceSection onRegister={() => handleEnter('register')} />
+    <FeaturesSection Icon={LineIcon} />
+    <StepsSection Icon={LineIcon} onRegister={() => handleEnter('register')} />
 
 {/* ── LIVE DEMO REEL ── */}
 <section style={{ padding: '80px 24px 20px', maxWidth: '900px', margin: '0 auto' }}>
   <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-    <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>See It Live</div>
-    <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 3.2vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>Cleaning rules run. SQL gets generated. Row counts update.</h2>
+    <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Watch it work</div>
+    <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 3.2vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>Watch a cleanup run, start to finish</h2>
   </div>
   <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.25)', background: '#0a0714', boxShadow: '0 12px 50px rgba(124,58,237,0.2)', maxWidth: '760px', margin: '0 auto' }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
@@ -945,8 +787,8 @@ if (!entered) return (
 <section style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
   <div style={{ textAlign: 'center', marginBottom: '56px' }}>
     <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Real Output</div>
-    <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>From messy to production-ready.</h2>
-    <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.58)', marginTop: '12px' }}>37,880 rows analyzed, cleaned, and scheduled to stay clean — no code written.</p>
+    <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>{content.showcase.h2}</h2>
+    <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.58)', marginTop: '12px' }}>{content.showcase.caption}</p>
   </div>
 
   <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '28px' }}>
@@ -958,7 +800,7 @@ if (!entered) return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
         <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#f87171', display: 'inline-block' }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#f87171', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Before — 221 problems found</span>
+        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#f87171', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Before: 221 problems found</span>
       </div>
       <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)', background: '#0a0714', boxShadow: '0 12px 40px rgba(0,0,0,0.4)' }}>
         {/* Fake browser chrome bar */}
@@ -976,7 +818,7 @@ if (!entered) return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
         <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>After — 100% dataset quality</span>
+        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>After: 100% dataset quality</span>
       </div>
       <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
@@ -999,7 +841,7 @@ if (!entered) return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
         <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#a78bfa', display: 'inline-block' }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Build — visual pipeline flow</span>
+        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Build: visual pipeline flow</span>
       </div>
       <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)', background: '#0a0714', boxShadow: '0 12px 40px rgba(0,0,0,0.4)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
@@ -1016,7 +858,7 @@ if (!entered) return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Then — pick a transform &amp; schedule it</span>
+        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Then: pick a transform &amp; schedule it</span>
       </div>
       <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
@@ -1049,19 +891,19 @@ if (!entered) return (
         <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '20px', padding: '6px 18px', marginBottom: '28px', fontFamily: 'monospace', fontSize: '0.72rem', color: '#f87171', letterSpacing: '0.15em' }}>
-            ANOMALY ALERTS
+            ALERTS
           </div>
           <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 700, margin: '0 0 20px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
-            Know about data problems before they reach your reports.
+            {content.alerts.h2}
           </h2>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '580px', margin: '0 auto 40px' }}>
-            When a pipeline breaks at 2 AM — data drifts, a schema changes, row counts drop to zero — you get an alert immediately, not when someone notices the report looks wrong.
+            {content.alerts.body}
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px', textAlign: 'left' }}>
             {[
-              { icon: 'trendDown', title: 'Data drift detected', desc: 'Unusual volume drops, column nulls spiking, distribution shifts — caught the moment they happen.' },
-              { icon: 'link', title: 'Pipeline failures', desc: 'A connector went silent, a cron job missed its window, a schema changed upstream. You hear it first.' },
-              { icon: 'layers', title: 'Schema anomalies', desc: 'Your client won\'t call you asking why the columns moved and the numbers don\'t match last week\'s report — because you\'ll already know, and it\'ll already be fixed.' },
+              { icon: 'trendDown', title: 'Data drift detected', desc: 'Row counts that suddenly drop, blanks that spike, values that shift. You get told as it happens.' },
+              { icon: 'link', title: 'Pipeline failures', desc: 'A connection went quiet or a scheduled run missed its slot. You hear about it first.' },
+              { icon: 'layers', title: 'Schema anomalies', desc: 'A column got renamed or dropped upstream. The alert tells you first, so your client never has to.' },
             ].map((item, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(167,139,250,0.1)', borderRadius: '12px', padding: '20px' }}>
                 <div style={{ marginBottom: '10px' }}><LineIcon name={item.icon} size={22} /></div>
@@ -1083,18 +925,13 @@ if (!entered) return (
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '64px' }}>
           <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Pricing</div>
-          <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>Priced by how much data you actually touch.</h2>
+          <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>{content.pricing.h2}</h2>
           <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#fbbf24', marginTop: '16px', letterSpacing: '0.05em' }}>
-            Priced for teams who care about their data quality, not for the number of users or rows in a database.
+            {content.pricing.sub}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {[
-            { name: 'Lite', price: '$19', period: '/month', features: ['All data sources', 'Full pipeline builder', 'CSV cleaning', 'SQL translator'], featured: false },
-            { name: 'Starter', price: '$39', period: '/month', features: ['Everything in Lite', '35 AI transforms/day', 'Email support'], featured: false },
-            { name: 'Pro', price: '$79', period: '/month', features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'], featured: true },
-            { name: 'Team', price: '$199', period: '/month', features: ['Everything in Pro', '150 AI transforms/day', '15 concurrent logins', 'Priority support'], featured: false },
-          ].map((plan, i) => (
+          {content.pricing.plans.map(pl => ({ ...pl, price: '$' + pl.price, period: '/month' })).map((plan, i) => (
             <div key={i} className={`pricing-card${plan.featured ? ' featured' : ''}`}>
               {plan.featured && <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontFamily: 'monospace', fontSize: '0.65rem', letterSpacing: '0.15em', padding: '4px 16px', borderRadius: '20px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>}
               <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.1rem', fontWeight: 700, marginBottom: '8px' }}>{plan.name}</div>
@@ -1118,22 +955,29 @@ if (!entered) return (
           ))}
         </div>
         <p style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '32px' }}>
-         Cancel anytime · 14-day money-back guarantee on all paid plans
+         {content.pricing.foot}
         </p>
+        <p style={{ textAlign: 'center', fontFamily: "'Inter', sans-serif", fontSize: '0.84rem', color: 'rgba(255,255,255,0.55)', marginTop: '18px' }}>{content.pricing.freeLine}</p>
+        <div className="hm-credits"><strong>{content.pricing.creditsTitle}</strong><span>{content.pricing.creditsBody}</span></div>
         <p style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '12px' }}>
-          Need more than Team? <a href="/pricing" style={{ color: '#a78bfa', textDecoration: 'underline' }}>View Enterprise pricing →</a>
+          Need more than Team? <a href="#quote" onClick={e => { e.preventDefault(); scrollToQuote() }} style={{ color: '#a78bfa', textDecoration: 'underline' }}>Get a quote →</a>
         </p>
       </div>
     </section>
 
+    <QuoteSection />
+    <FaqSection />
+
     {/* ── FINAL CTA ── */}
     <section style={{ padding: '80px 24px', textAlign: 'center', borderTop: '1px solid rgba(167,139,250,0.08)' }}>
       <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-        <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>Still deciding?</h2>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', marginBottom: '32px' }}>No sales call. No onboarding call. Connect a source and see what it finds.</p>
-        <button className="cta-btn" onClick={() => handleEnter('register')}>Connect a Source</button>
+        <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>{content.cta.h2}</h2>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', marginBottom: '32px' }}>{content.cta.body}</p>
+        <button className="cta-btn" onClick={() => handleEnter('register')}>{content.cta.button}</button>
       </div>
     </section>
+
+    </main>
 
     {/* ── FOOTER ── */}
     <footer style={{ padding: '48px 24px 32px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
@@ -1164,8 +1008,9 @@ if (!entered) return (
         <a href="/feedback" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Feedback</a>
 <a href="/contact" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Contact</a>
 <a href="/blog" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Blog</a>
+<a href="#quote" onClick={e => { e.preventDefault(); scrollToQuote() }} style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Get a quote</a>
       </div>
-      <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2026 The God's Tool · Built for data professionals</div>
+      <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2026 The God's Tool · Made for anyone who gets handed messy data</div>
     </footer>
 
     {/* ── LOGIN MODAL ── */}

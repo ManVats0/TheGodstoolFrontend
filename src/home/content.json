@@ -1,0 +1,133 @@
+{
+  "site": {
+    "name": "The God's Tool",
+    "url": "https://thegodstool.com",
+    "email": "contact@thegodstool.com",
+    "title": "Clean Messy CSV & Google Sheets Data Fast | The God's Tool",
+    "description": "Fix duplicates, blanks and messy dates in CSV files and Google Sheets by typing what you want in plain English. Free plan, 14-day trial, pay-as-you-go credits.",
+    "ogTitle": "Clean messy spreadsheets in minutes, not hours",
+    "ogDescription": "Upload a CSV or link a Google Sheet. It finds the problems, you approve the fixes. Free plan, no card needed.",
+    "updated": "2026-10-30"
+  },
+  "hero": {
+    "eyebrow": "For freelancers, analysts and small data teams",
+    "h1": "Clean messy spreadsheets in minutes, not hours.",
+    "sub": "Drop in a CSV or link a Google Sheet. The God's Tool spots the duplicates, blanks, broken dates and inconsistent names, then fixes them when you say what you want in plain English. No formulas, no scripts.",
+    "note": "14-day trial with everything unlocked. The free plan stays after that. No card needed.",
+    "primary": "Clean a file free",
+    "secondary": "Get a quote",
+    "sources": ["CSV", "Google Sheets", "MySQL", "PostgreSQL", "BigQuery", "MongoDB", "AWS", "Google Cloud Storage", "Cloud SQL", "Databricks", "REST API", "Google Analytics 4"]
+  },
+  "problem": {
+    "h2": "You know how this goes.",
+    "intro": "A client sends an export. Half the dates are text. The same customer is spelled four different ways. Somebody typed N/A into a number column. You open the file, sigh, and clear the afternoon.",
+    "items": [
+      { "title": "Hours of find and replace", "body": "The same fixes, again, for every new file that lands in your inbox." },
+      { "title": "Formulas nobody can read", "body": "Last month's cleanup sheet falls apart the moment a column moves." },
+      { "title": "Mistakes found too late", "body": "A duplicate row or a shifted column makes it into the report before anyone notices." }
+    ],
+    "fix": "With The God's Tool you upload the file, read the list of problems it found, and approve the fixes. Save those steps once and run them again on next month's file."
+  },
+  "audience": {
+    "h2": "Built for people who get handed bad data.",
+    "items": [
+      {
+        "title": "Freelancers and consultants",
+        "body": "Take on more cleanup work without the late nights. Stay on the free plan, or buy credits only for the days you need the AI. No monthly commitment.",
+        "cta": "Start free",
+        "action": "register"
+      },
+      {
+        "title": "Small teams and agencies",
+        "body": "Share one set of cleaning steps so every analyst's output looks the same. Roles, approvals and an audit trail are already there.",
+        "cta": "Ask for a team quote",
+        "action": "quote"
+      },
+      {
+        "title": "Companies with databases",
+        "body": "Connect MySQL, PostgreSQL, BigQuery, MongoDB and more. Schedule runs, get alerts when data drifts, and keep sensitive sources behind approvals.",
+        "cta": "Get a quote",
+        "action": "quote"
+      }
+    ]
+  },
+  "features": {
+    "h2": "What you actually get",
+    "intro": "Connect it, clean it, set it to repeat. That's most of it.",
+    "items": [
+      { "icon": "zap", "title": "Plain English cleaning", "body": "Type something like \"make every date YYYY-MM-DD\" or \"treat Acme Inc and ACME as one customer\". It writes the step and shows you the result before anything changes." },
+      { "icon": "alert", "title": "A list of what's wrong", "body": "Each column is scanned for blanks, duplicates, odd values and mixed formats. You see the full list first, then decide." },
+      { "icon": "link", "title": "Works with what you already use", "body": "CSV files, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS, Databricks, Google Analytics 4 and more." },
+      { "icon": "refresh", "title": "Steps you can reuse", "body": "Save a cleanup once and run it on every new file. Put it on a schedule if you'd rather not think about it." },
+      { "icon": "database", "title": "SQL you can see and edit", "body": "Every step has SQL behind it. Copy it, change it, or write your own in the built-in editor." },
+      { "icon": "clock", "title": "Alerts before reports break", "body": "Get an email when a column changes shape or the numbers start to look off." },
+      { "icon": "shield", "title": "Private databases, handled", "body": "Reach a database behind a firewall through a secure tunnel. You don't open any ports." },
+      { "icon": "book", "title": "Teams and approvals", "body": "Admin, Data Steward, Editor and Viewer roles. Sensitive sources can sit behind an approval step." }
+    ]
+  },
+  "steps": {
+    "h2": "Three steps. That's it.",
+    "items": [
+      { "icon": "link", "title": "Add your data", "body": "Upload a CSV, paste a Google Sheet link, or connect a database." },
+      { "icon": "zap", "title": "Check what it found", "body": "Every problem is listed by column. Accept the fixes you like and describe the rest in your own words." },
+      { "icon": "refresh", "title": "Download or repeat", "body": "Grab the clean file, send it to a destination, or save the steps to run again later." }
+    ]
+  },
+  "showcase": {
+    "h2": "From a mess to something you can send.",
+    "caption": "37,880 rows checked, cleaned and put on a schedule. Nobody wrote any code."
+  },
+  "alerts": {
+    "h2": "Know when your data changes",
+    "body": "Schedule a run and get an email if a column disappears, a type flips or the values drift. You hear about it before your client does."
+  },
+  "pricing": {
+    "h2": "Start free. Pay when you need more.",
+    "sub": "The free plan covers small CSV and Google Sheets jobs. Paid plans unlock every source and more AI each day.",
+    "freeLine": "Free plan: 3 sources, CSV files up to 5 MB, 5,000 rows per run, 1 pipeline.",
+    "creditsTitle": "No subscription? Buy credits.",
+    "creditsBody": "One credit pays for one AI action. It's about $0.03 a credit (Rs 2 in India), and you can top up from $2. Handy if you clean data a few days a month.",
+    "plans": [
+      { "name": "Lite", "price": "19", "features": ["All data sources", "Full pipeline builder", "CSV cleaning", "SQL translator"], "featured": false },
+      { "name": "Starter", "price": "39", "features": ["Everything in Lite", "35 AI transforms a day", "Email support"], "featured": false },
+      { "name": "Pro", "price": "79", "features": ["Everything in Starter", "110 AI transforms a day", "5 concurrent logins", "Priority support"], "featured": true },
+      { "name": "Team", "price": "199", "features": ["Everything in Pro", "150 AI transforms a day", "15 concurrent logins", "Priority support"], "featured": false }
+    ],
+    "foot": "Cancel any time. 14-day money-back guarantee on paid plans."
+  },
+  "quote": {
+    "id": "quote",
+    "h2": "Need something that isn't on the price list?",
+    "body": "Tell us what you're cleaning and roughly how much. We'll answer by email with a price. It works for bulk credits, team plans, private databases or an unusual setup.",
+    "points": [
+      "Bulk credits at a better rate for regular work",
+      "Team plans with more seats or logins",
+      "Databases, APIs and private networks",
+      "Invoices and annual billing"
+    ],
+    "note": "This is a quote for access to the tool, not a done-for-you cleaning service.",
+    "roles": ["Freelancer or consultant", "Small team or agency", "Company", "Something else"],
+    "needs": ["Bulk or custom credits", "A team plan", "Database or API sources", "Not sure yet"],
+    "button": "Send my request",
+    "thanks": "Got it. We'll reply to your email with a quote."
+  },
+  "faq": {
+    "h2": "Questions people ask",
+    "items": [
+      { "q": "What does The God's Tool do?", "a": "It cleans messy data. You upload a CSV or connect a Google Sheet or database, it lists the problems it finds, and you approve the fixes or describe your own in plain English. The steps can be saved and run again." },
+      { "q": "Can I clean a CSV or Google Sheet for free?", "a": "Yes. The free plan handles CSV files up to 5 MB and 5,000 rows per run, with up to 3 sources and 1 pipeline. New accounts also get 14 days with everything unlocked." },
+      { "q": "Do I need to know SQL or code?", "a": "No. You can do all of it by clicking and typing in plain English. If you do know SQL, every step shows the query behind it and you can edit it." },
+      { "q": "What are credits, and who are they for?", "a": "One credit covers one AI action, like asking it to write a cleaning step. They're useful if you only clean data now and then, because there is no monthly fee. They cost about $0.03 each, with a $2 minimum top-up." },
+      { "q": "Can I use it for client work?", "a": "Yes, plenty of freelancers do. The files are processed under your account, so check that your agreement with the client allows sharing their data with a tool like this." },
+      { "q": "Is my data safe?", "a": "Data is encrypted in transit and we don't share it with third parties. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself." },
+      { "q": "Which data sources can I connect?", "a": "CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS RDS, S3, DynamoDB and Redshift, Google Cloud Storage, Cloud SQL, Databricks, REST APIs and Google Analytics 4." },
+      { "q": "What happens when the trial ends?", "a": "Your account moves to the free plan with its limits. Nothing is deleted, and you can upgrade or buy credits whenever you like." },
+      { "q": "How does a quote work?", "a": "Fill in the short form on this page. We read it and reply by email with a price for credits, seats or sources. There's no obligation to buy." }
+    ]
+  },
+  "cta": {
+    "h2": "Try it on the file that's annoying you right now.",
+    "body": "Free for 14 days with everything on. No card.",
+    "button": "Clean a file free"
+  }
+}
