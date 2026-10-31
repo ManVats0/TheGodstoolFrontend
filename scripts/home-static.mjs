@@ -82,6 +82,7 @@ ${li(c.hero.sources.map(esc))}
 <section id="pricing"><h2>${esc(c.pricing.h2)}</h2><p>${esc(c.pricing.sub)}</p>
 <ul>${c.pricing.plans.map((p) => `<li><h3>${esc(p.name)}: $${esc(p.price)} a month</h3>${li(p.features.map(esc))}</li>`).join('')}</ul>
 <p>${esc(c.pricing.freeLine)}</p><p><strong>${esc(c.pricing.creditsTitle)}</strong> ${esc(c.pricing.creditsBody)}</p><p>${esc(c.pricing.foot)}</p></section>
+<section id="estimate"><h2>${esc(c.estimate.h2)}</h2><p>${esc(c.estimate.body)} ${esc(c.estimate.note)}</p></section>
 <section id="quote"><h2>${esc(c.quote.h2)}</h2><p>${esc(c.quote.body)}</p>${li(c.quote.points.map(esc))}<p>${esc(c.quote.note)} Email <a href="mailto:${c.site.email}">${c.site.email}</a> or use the form on this page.</p></section>
 <section id="faq"><h2>${esc(c.faq.h2)}</h2>${c.faq.items.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>
 <section><h2>${esc(c.cta.h2)}</h2><p>${esc(c.cta.body)}</p></section>

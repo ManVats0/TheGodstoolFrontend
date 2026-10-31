@@ -97,7 +97,7 @@ export function StepsSection({ Icon, onRegister }: { Icon: IconType; onRegister:
 
 export function QuoteSection() {
   const q = content.quote
-  const [form, setForm] = useState({ name: '', email: '', role: q.roles[0], need: q.needs[0], details: '', website: '' })
+  const [form, setForm] = useState({ name: '', email: '', role: q.roles[0], need: q.needs[0], volume: q.volumes[0], team: q.teams[0], details: '', website: '' })
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [err, setErr] = useState('')
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
@@ -116,6 +116,8 @@ export function QuoteSection() {
       'QUOTE REQUEST',
       `I am: ${form.role}`,
       `Looking for: ${form.need}`,
+      `Volume: ${form.volume}`,
+      `Team size: ${form.team}`,
       '',
       form.details.trim() || '(no details given)',
     ].join('\n')
@@ -167,6 +169,16 @@ export function QuoteSection() {
             <label>Looking for
               <select value={form.need} onChange={e => set('need', e.target.value)}>
                 {q.needs.map(r => <option key={r}>{r}</option>)}
+              </select>
+            </label>
+            <label>Volume
+              <select value={form.volume} onChange={e => set('volume', e.target.value)}>
+                {q.volumes.map(r => <option key={r}>{r}</option>)}
+              </select>
+            </label>
+            <label>Team size
+              <select value={form.team} onChange={e => set('team', e.target.value)}>
+                {q.teams.map(r => <option key={r}>{r}</option>)}
               </select>
             </label>
             <label><span>What does your data look like? <span className="hm-opt">(optional)</span></span>
