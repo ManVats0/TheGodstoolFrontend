@@ -33,6 +33,7 @@ import Feedback from './pages/Feedback'
 import TeamGate from './pages/TeamGate'
 import { API_BASE } from './config'
 import content from './home/content.json'
+import { EstimateSection } from './home/EstimateSection'
 import { ProblemSection, AudienceSection, FeaturesSection, StepsSection, QuoteSection, FaqSection, scrollToQuote } from './home/HomeSections'
 import { clearPermissionsCache, loadPermissions, installForbiddenHandler, refreshPermissions, usePermissions } from './usePermissions'
 
@@ -965,6 +966,7 @@ if (!entered) return (
       </div>
     </section>
 
+    <EstimateSection />
     <QuoteSection />
     <FaqSection />
 

@@ -16,15 +16,37 @@
     "note": "14-day trial with everything unlocked. The free plan stays after that. No card needed.",
     "primary": "Clean a file free",
     "secondary": "Get a quote",
-    "sources": ["CSV", "Google Sheets", "MySQL", "PostgreSQL", "BigQuery", "MongoDB", "AWS", "Google Cloud Storage", "Cloud SQL", "Databricks", "REST API", "Google Analytics 4"]
+    "sources": [
+      "CSV",
+      "Google Sheets",
+      "MySQL",
+      "PostgreSQL",
+      "BigQuery",
+      "MongoDB",
+      "AWS",
+      "Google Cloud Storage",
+      "Cloud SQL",
+      "Databricks",
+      "REST API",
+      "Google Analytics 4"
+    ]
   },
   "problem": {
     "h2": "You know how this goes.",
     "intro": "A client sends an export. Half the dates are text. The same customer is spelled four different ways. Somebody typed N/A into a number column. You open the file, sigh, and clear the afternoon.",
     "items": [
-      { "title": "Hours of find and replace", "body": "The same fixes, again, for every new file that lands in your inbox." },
-      { "title": "Formulas nobody can read", "body": "Last month's cleanup sheet falls apart the moment a column moves." },
-      { "title": "Mistakes found too late", "body": "A duplicate row or a shifted column makes it into the report before anyone notices." }
+      {
+        "title": "Hours of find and replace",
+        "body": "The same fixes, again, for every new file that lands in your inbox."
+      },
+      {
+        "title": "Formulas nobody can read",
+        "body": "Last month's cleanup sheet falls apart the moment a column moves."
+      },
+      {
+        "title": "Mistakes found too late",
+        "body": "A duplicate row or a shifted column makes it into the report before anyone notices."
+      }
     ],
     "fix": "With The God's Tool you upload the file, read the list of problems it found, and approve the fixes. Save those steps once and run them again on next month's file."
   },
@@ -55,22 +77,66 @@
     "h2": "What you actually get",
     "intro": "Connect it, clean it, set it to repeat. That's most of it.",
     "items": [
-      { "icon": "zap", "title": "Plain English cleaning", "body": "Type something like \"make every date YYYY-MM-DD\" or \"treat Acme Inc and ACME as one customer\". It writes the step and shows you the result before anything changes." },
-      { "icon": "alert", "title": "A list of what's wrong", "body": "Each column is scanned for blanks, duplicates, odd values and mixed formats. You see the full list first, then decide." },
-      { "icon": "link", "title": "Works with what you already use", "body": "CSV files, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS, Databricks, Google Analytics 4 and more." },
-      { "icon": "refresh", "title": "Steps you can reuse", "body": "Save a cleanup once and run it on every new file. Put it on a schedule if you'd rather not think about it." },
-      { "icon": "database", "title": "SQL you can see and edit", "body": "Every step has SQL behind it. Copy it, change it, or write your own in the built-in editor." },
-      { "icon": "clock", "title": "Alerts before reports break", "body": "Get an email when a column changes shape or the numbers start to look off." },
-      { "icon": "shield", "title": "Private databases, handled", "body": "Reach a database behind a firewall through a secure tunnel. You don't open any ports." },
-      { "icon": "book", "title": "Teams and approvals", "body": "Admin, Data Steward, Editor and Viewer roles. Sensitive sources can sit behind an approval step." }
+      {
+        "icon": "zap",
+        "title": "Plain English cleaning",
+        "body": "Type something like \"make every date YYYY-MM-DD\" or \"treat Acme Inc and ACME as one customer\". It writes the step and shows you the result before anything changes."
+      },
+      {
+        "icon": "alert",
+        "title": "A list of what's wrong",
+        "body": "Each column is scanned for blanks, duplicates, odd values and mixed formats. You see the full list first, then decide."
+      },
+      {
+        "icon": "link",
+        "title": "Works with what you already use",
+        "body": "CSV files, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS, Databricks, Google Analytics 4 and more."
+      },
+      {
+        "icon": "refresh",
+        "title": "Steps you can reuse",
+        "body": "Save a cleanup once and run it on every new file. Put it on a schedule if you'd rather not think about it."
+      },
+      {
+        "icon": "database",
+        "title": "SQL you can see and edit",
+        "body": "Every step has SQL behind it. Copy it, change it, or write your own in the built-in editor."
+      },
+      {
+        "icon": "clock",
+        "title": "Alerts before reports break",
+        "body": "Get an email when a column changes shape or the numbers start to look off."
+      },
+      {
+        "icon": "shield",
+        "title": "Private databases, handled",
+        "body": "Reach a database behind a firewall through a secure tunnel. You don't open any ports."
+      },
+      {
+        "icon": "book",
+        "title": "Teams and approvals",
+        "body": "Admin, Data Steward, Editor and Viewer roles. Sensitive sources can sit behind an approval step."
+      }
     ]
   },
   "steps": {
     "h2": "Three steps. That's it.",
     "items": [
-      { "icon": "link", "title": "Add your data", "body": "Upload a CSV, paste a Google Sheet link, or connect a database." },
-      { "icon": "zap", "title": "Check what it found", "body": "Every problem is listed by column. Accept the fixes you like and describe the rest in your own words." },
-      { "icon": "refresh", "title": "Download or repeat", "body": "Grab the clean file, send it to a destination, or save the steps to run again later." }
+      {
+        "icon": "link",
+        "title": "Add your data",
+        "body": "Upload a CSV, paste a Google Sheet link, or connect a database."
+      },
+      {
+        "icon": "zap",
+        "title": "Check what it found",
+        "body": "Every problem is listed by column. Accept the fixes you like and describe the rest in your own words."
+      },
+      {
+        "icon": "refresh",
+        "title": "Download or repeat",
+        "body": "Grab the clean file, send it to a destination, or save the steps to run again later."
+      }
     ]
   },
   "showcase": {
@@ -88,10 +154,49 @@
     "creditsTitle": "No subscription? Buy credits.",
     "creditsBody": "One credit pays for one AI action. It's about $0.03 a credit (Rs 2 in India), and you can top up from $2. Handy if you clean data a few days a month.",
     "plans": [
-      { "name": "Lite", "price": "19", "features": ["All data sources", "Full pipeline builder", "CSV cleaning", "SQL translator"], "featured": false },
-      { "name": "Starter", "price": "39", "features": ["Everything in Lite", "35 AI transforms a day", "Email support"], "featured": false },
-      { "name": "Pro", "price": "79", "features": ["Everything in Starter", "110 AI transforms a day", "5 concurrent logins", "Priority support"], "featured": true },
-      { "name": "Team", "price": "199", "features": ["Everything in Pro", "150 AI transforms a day", "15 concurrent logins", "Priority support"], "featured": false }
+      {
+        "name": "Lite",
+        "price": "19",
+        "features": [
+          "All data sources",
+          "Full pipeline builder",
+          "CSV cleaning",
+          "SQL translator"
+        ],
+        "featured": false
+      },
+      {
+        "name": "Starter",
+        "price": "39",
+        "features": [
+          "Everything in Lite",
+          "35 AI transforms a day",
+          "Email support"
+        ],
+        "featured": false
+      },
+      {
+        "name": "Pro",
+        "price": "79",
+        "features": [
+          "Everything in Starter",
+          "110 AI transforms a day",
+          "5 concurrent logins",
+          "Priority support"
+        ],
+        "featured": true
+      },
+      {
+        "name": "Team",
+        "price": "199",
+        "features": [
+          "Everything in Pro",
+          "150 AI transforms a day",
+          "15 concurrent logins",
+          "Priority support"
+        ],
+        "featured": false
+      }
     ],
     "foot": "Cancel any time. 14-day money-back guarantee on paid plans."
   },
@@ -106,28 +211,86 @@
       "Invoices and annual billing"
     ],
     "note": "This is a quote for access to the tool, not a done-for-you cleaning service.",
-    "roles": ["Freelancer or consultant", "Small team or agency", "Company", "Something else"],
-    "needs": ["Bulk or custom credits", "A team plan", "Database or API sources", "Not sure yet"],
+    "roles": [
+      "Freelancer or consultant",
+      "Small team or agency",
+      "Company",
+      "Something else"
+    ],
+    "needs": [
+      "Bulk or custom credits",
+      "A team plan",
+      "Database or API sources",
+      "Not sure yet"
+    ],
     "button": "Send my request",
-    "thanks": "Got it. We'll reply to your email with a quote."
+    "thanks": "Got it. We'll reply to your email with a quote.",
+    "volumes": [
+      "Under 10 files a month",
+      "10 to 50 files a month",
+      "50 to 200 files a month",
+      "More than 200 files a month"
+    ],
+    "teams": [
+      "Just me",
+      "2 to 5 people",
+      "6 to 15 people",
+      "More than 15 people"
+    ]
   },
   "faq": {
     "h2": "Questions people ask",
     "items": [
-      { "q": "What does The God's Tool do?", "a": "It cleans messy data. You upload a CSV or connect a Google Sheet or database, it lists the problems it finds, and you approve the fixes or describe your own in plain English. The steps can be saved and run again." },
-      { "q": "Can I clean a CSV or Google Sheet for free?", "a": "Yes. The free plan handles CSV files up to 5 MB and 5,000 rows per run, with up to 3 sources and 1 pipeline. New accounts also get 14 days with everything unlocked." },
-      { "q": "Do I need to know SQL or code?", "a": "No. You can do all of it by clicking and typing in plain English. If you do know SQL, every step shows the query behind it and you can edit it." },
-      { "q": "What are credits, and who are they for?", "a": "One credit covers one AI action, like asking it to write a cleaning step. They're useful if you only clean data now and then, because there is no monthly fee. They cost about $0.03 each, with a $2 minimum top-up." },
-      { "q": "Can I use it for client work?", "a": "Yes, plenty of freelancers do. The files are processed under your account, so check that your agreement with the client allows sharing their data with a tool like this." },
-      { "q": "Is my data safe?", "a": "Data is encrypted in transit and we don't share it with third parties. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself." },
-      { "q": "Which data sources can I connect?", "a": "CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS RDS, S3, DynamoDB and Redshift, Google Cloud Storage, Cloud SQL, Databricks, REST APIs and Google Analytics 4." },
-      { "q": "What happens when the trial ends?", "a": "Your account moves to the free plan with its limits. Nothing is deleted, and you can upgrade or buy credits whenever you like." },
-      { "q": "How does a quote work?", "a": "Fill in the short form on this page. We read it and reply by email with a price for credits, seats or sources. There's no obligation to buy." }
+      {
+        "q": "What does The God's Tool do?",
+        "a": "It cleans messy data. You upload a CSV or connect a Google Sheet or database, it lists the problems it finds, and you approve the fixes or describe your own in plain English. The steps can be saved and run again."
+      },
+      {
+        "q": "Can I clean a CSV or Google Sheet for free?",
+        "a": "Yes. The free plan handles CSV files up to 5 MB and 5,000 rows per run, with up to 3 sources and 1 pipeline. New accounts also get 14 days with everything unlocked."
+      },
+      {
+        "q": "Do I need to know SQL or code?",
+        "a": "No. You can do all of it by clicking and typing in plain English. If you do know SQL, every step shows the query behind it and you can edit it."
+      },
+      {
+        "q": "What are credits, and who are they for?",
+        "a": "One credit covers one AI action, like asking it to write a cleaning step. They're useful if you only clean data now and then, because there is no monthly fee. They cost about $0.03 each, with a $2 minimum top-up."
+      },
+      {
+        "q": "Can I use it for client work?",
+        "a": "Yes, plenty of freelancers do. The files are processed under your account, so check that your agreement with the client allows sharing their data with a tool like this."
+      },
+      {
+        "q": "Is my data safe?",
+        "a": "Data is encrypted in transit and we don't share it with third parties. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself."
+      },
+      {
+        "q": "Which data sources can I connect?",
+        "a": "CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS RDS, S3, DynamoDB and Redshift, Google Cloud Storage, Cloud SQL, Databricks, REST APIs and Google Analytics 4."
+      },
+      {
+        "q": "What happens when the trial ends?",
+        "a": "Your account moves to the free plan with its limits. Nothing is deleted, and you can upgrade or buy credits whenever you like."
+      },
+      {
+        "q": "How does a quote work?",
+        "a": "Fill in the short form on this page. We read it and reply by email with a price for credits, seats or sources. There's no obligation to buy."
+      }
     ]
   },
   "cta": {
     "h2": "Try it on the file that's annoying you right now.",
     "body": "Free for 14 days with everything on. No card.",
     "button": "Clean a file free"
+  },
+  "estimate": {
+    "id": "estimate",
+    "h2": "Work out your price in a minute",
+    "body": "Answer a few questions and see what you would pay each month. You can download the result as a PDF estimate with our letterhead.",
+    "button": "Download PDF estimate",
+    "optin": "Also tell the team I downloaded this, so they can follow up",
+    "note": "An estimate, not an invoice. Final billing happens at checkout.",
+    "customMsg": "That setup needs a custom plan. Send us a quote request and we'll price it by hand."
   }
 }
