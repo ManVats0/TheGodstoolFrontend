@@ -649,20 +649,50 @@ const DOCS: Record<string, {
     sections: [
       {
         heading: 'Why you might need it',
-        body: 'If your database sits behind a firewall or on a private network, the app cannot reach it directly. A tunnel agent runs on a machine that can reach the database and opens an outbound connection to the app. You do not open any inbound ports or change firewall rules.',
+        body: 'If your database sits behind a firewall or on a private network, the app cannot reach it directly. A small program called the agent runs on a computer that can reach the database and makes an outbound connection to us. You do not open any inbound ports or change firewall rules.',
       },
       {
-        heading: 'Setting one up',
-        body: 'Open the Tunneling page, pick your database type and follow the steps. In short: create an agent token, start the agent on a machine that can reach the database, enter the server URL, token and database details when asked, then add the source as usual. The page fills in your real server URL and token in the commands so they can be copied as they are.',
-        tip: 'Run the agent on a small always-on machine or server, not a laptop that sleeps.',
+        heading: 'Two ways to set it up',
+        body: 'The Tunneling page offers two options. "One click" is selected by default and is the quickest. "Follow the steps" is the manual route, and it also covers BigQuery, Databricks and REST APIs, which One click does not.',
       },
       {
-        heading: 'Who can create tunnels',
-        body: 'You can use tunnels your Admin has already set up. Creating new tunnel tokens needs an Admin.',
+        heading: 'One click: use your own computer as the connector',
+        body: 'Open Tunneling, leave "One click" selected and press "Connect this computer". You get a command with a one-time pairing code. Paste it into Terminal (Mac or Linux) or PowerShell (Windows) on the computer that can reach your database.\n\nThe command installs the agent, pairs it with your workspace, and opens a page on that same computer. Pick your database type, enter the host, user, password and database name, and press "Test and connect". The agent tests the connection from that computer first, and only saves the details if it works. The Tunneling page then turns green and shows the host and database name to use.\n\nFinally, add the database in Data Sources and type the same host and database name. The app finds the connector and sends the requests through your computer.',
+        tip: 'The pairing code works once and expires after 10 minutes. If it runs out, press "Connect this computer" again for a new one.',
+      },
+      {
+        heading: 'What stays on your computer',
+        body: 'Your database password, the connection to the database, and every query run on your computer. The password is saved in a private file in your user folder (~/.thegodstool/agent.json) that only your account can read, and it is never sent to us. Your database never needs a public address.\n\nThe rows a query returns do travel, over an encrypted connection, to our server. That is where the cleaning steps run. One click does not run the cleaning engine on your computer.',
+      },
+      {
+        heading: 'Read-only by default',
+        body: 'A new connector can only read. It accepts SELECT-style queries and refuses anything that could change data, such as DROP, DELETE or UPDATE. This is checked twice: on our server, and again by the agent on your computer, so even a problem on our side cannot delete your data. An Admin can allow writes when creating the pairing code by turning off the read-only box. Do that only when you write cleaned data back, and use a database user with limited permissions.',
+        warning: 'Read-only is decided when you pair. To change it, disconnect the computer and pair it again.',
+      },
+      {
+        heading: 'Starting it again later',
+        body: 'The agent runs while its window is open and reconnects by itself after a network drop. If you close it or restart the computer, run the start command it printed (the start.sh or start.cmd file in the .thegodstool folder in your home directory). You do not need a new code, because the computer stays paired. To enter different database details, run it with --reset.',
+        tip: 'Run it on a small always-on machine or server rather than a laptop that sleeps.',
+      },
+      {
+        heading: 'Connected computers',
+        body: 'The Tunneling page lists every connected computer with its status, name, the database it is linked to and whether it is read-only. An Admin can press Disconnect to cut a computer off straight away. It stops working until it is paired again.',
+      },
+      {
+        heading: 'Follow the steps (manual)',
+        body: 'Pick your database type on the Tunneling page and follow the numbered steps: install the libraries, download agent.py, create a token, run python agent.py --manual and answer the prompts, then add the source as usual. The page fills in your real server URL and token in the commands so they can be copied as they are. Manual agents are read-only too, unless you start them with --allow-writes and the token was created for writes.',
+      },
+      {
+        heading: 'Who can create connectors',
+        body: 'Everyone with tunnel access can use connectors that are online. Pairing a new computer and disconnecting one needs an Admin. Each connector belongs to your workspace only. Other workspaces cannot see it or send queries through it.',
+      },
+      {
+        heading: 'Moving over from an older agent',
+        body: 'Agent tokens made before this update stop working, because they were not tied to a workspace. Open Tunneling and pair the computer again. It takes about a minute.',
       },
       {
         heading: 'If it does not connect',
-        body: 'Check that the agent is still running, that the token has not been replaced, and that the machine running the agent can reach the database host and port. The Tunneling page has a Common problems list for each database type.',
+        body: '"That code is wrong, already used, or expired": make a new code and paste the new command.\n"Could not connect from this computer": that computer cannot reach the database. Check the host, port, user and password, and whether the database allows connections from that machine.\n"No agent connected": the agent is not running. Start it again. The Tunneling page shows it as offline until it reconnects.\n"This connector is read-only": the query tried to change data. Pair a new connector with writes allowed if you really need that.',
       },
     ],
   },
@@ -1142,24 +1172,20 @@ export default function Documentation() {
 
             {/* Tunneling special case */}
             {currentPage === '/tunneling' ? (
-              <div style={{ textAlign: 'center', padding: '60px 20px', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.1)' }}>
-                <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
-                  <Icon name="shield" size={40} color="rgba(245,158,11,0.55)" />
+              <div>
+                {doc.sections.map((section, i) => renderSection(section, i, currentPage!))}
+                <div style={{ marginTop: 24 }}>
+                  <button
+                    onClick={() => navigate('/tunneling')}
+                    style={{
+                      padding: '10px 22px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                      background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                      color: '#fff', fontWeight: 700, fontSize: 13,
+                    }}
+                  >
+                    Go to Tunneling →
+                  </button>
                 </div>
-                <p style={{ fontWeight: 600, color: '#fff', fontSize: 15, marginBottom: 8 }}>Secure Tunneling documentation</p>
-                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginBottom: 24 }}>
-                  Step-by-step guides live directly on the Tunneling page.
-                </p>
-                <button
-                  onClick={() => navigate('/tunneling')}
-                  style={{
-                    padding: '10px 22px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                    color: '#fff', fontWeight: 700, fontSize: 13,
-                  }}
-                >
-                  Go to Tunneling →
-                </button>
               </div>
             ) : (
               <div>
