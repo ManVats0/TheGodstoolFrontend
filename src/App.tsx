@@ -17,20 +17,12 @@ import { useState, useEffect, useRef } from 'react'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import NotificationPanel from './components/NotificationPanel'
-import DataSources from './pages/DataSources'
-import Dashboard from './pages/Dashboard'
-import DataCatalog from './pages/DataCatalog'
-import Flow from './pages/Flow'
-import Analysis from './pages/Analysis'
-import AuditLogs from './pages/AuditLogs'
 import { useStore } from './store'
-import Documentation from './pages/Documentation'
-import Tunneling from './pages/Tunneling'
+import { lazy, Suspense } from 'react'
 import Contact from './pages/Contact'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
 import Feedback from './pages/Feedback'
-import TeamGate from './pages/TeamGate'
 import { API_BASE } from './config'
 import content from './home/content.json'
 import { EstimateSection } from './home/EstimateSection'
@@ -40,6 +32,43 @@ import { clearPermissionsCache, loadPermissions, installForbiddenHandler, refres
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
 installForbiddenHandler()
+
+// The signed-in pages are big. They load in their own files, so the homepage opens faster,
+// and they are fetched ahead of time as soon as someone starts to sign in.
+const pageLoaders = {
+  dashboard: () => import('./pages/Dashboard'),
+  sources: () => import('./pages/DataSources'),
+  catalog: () => import('./pages/DataCatalog'),
+  flow: () => import('./pages/Flow'),
+  analysis: () => import('./pages/Analysis'),
+  audit: () => import('./pages/AuditLogs'),
+  docs: () => import('./pages/Documentation'),
+  tunneling: () => import('./pages/Tunneling'),
+  team: () => import('./pages/TeamGate'),
+}
+const Dashboard = lazy(pageLoaders.dashboard)
+const DataSources = lazy(pageLoaders.sources)
+const DataCatalog = lazy(pageLoaders.catalog)
+const Flow = lazy(pageLoaders.flow)
+const Analysis = lazy(pageLoaders.analysis)
+const AuditLogs = lazy(pageLoaders.audit)
+const Documentation = lazy(pageLoaders.docs)
+const Tunneling = lazy(pageLoaders.tunneling)
+const TeamGate = lazy(pageLoaders.team)
+let preloaded = false
+function preloadAppPages() {
+  if (preloaded) return
+  preloaded = true
+  Object.values(pageLoaders).forEach(load => { load().catch(() => { preloaded = false }) })
+}
+
+// Sign-in speed: the plan lookup runs at the same time as the permissions lookup, not after it.
+let planPrefetch: { token: string; p: Promise<any> } | null = null
+function fetchPlanJson(token: string): Promise<any> {
+  if (planPrefetch && planPrefetch.token === token) { const p = planPrefetch.p; planPrefetch = null; return p }
+  return fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
+}
+let lastLoginAt = 0
 
 
 function redirectToGoogleOAuth() {
@@ -68,9 +97,17 @@ function getPasswordStrength(pw: string) {
   return { label: 'Strong', color: '#22c55e', pct: 100 }
 }
 
-async function bootstrapSession(_token: string) {
+async function bootstrapSession(token: string) {
   clearPermissionsCache()
+  lastLoginAt = Date.now()
+  preloadAppPages()
+  planPrefetch = { token, p: fetchPlanRaw(token) }
+  planPrefetch.p.catch(() => {})
+  useStore.getState().loadSourcesFromBackend()
   await loadPermissions()
+}
+function fetchPlanRaw(token: string): Promise<any> {
+  return fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
 }
 
 function LineIcon({ name, size = 32, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
@@ -122,6 +159,7 @@ const [forgotEmail, setForgotEmail] = useState('')
 const [forgotMsg, setForgotMsg] = useState('')
 const [forgotError, setForgotError] = useState('')
 const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+const [signingIn, setSigningIn] = useState(false)
 const [isLoginLoading, setIsLoginLoading] = useState(false)
 const [showForceLogout, setShowForceLogout] = useState(false)
 const [pendingGooglePayload, setPendingGooglePayload] = useState<{ credential: string } | null>(null)
@@ -164,6 +202,7 @@ useEffect(() => {
   if (!entered) return
   const sync = () => {
     if (document.hidden) return
+    if (Date.now() - lastLoginAt < 15000) return   // just signed in: permissions and sources were fetched a moment ago
     refreshPermissions()
     useStore.getState().loadSourcesFromBackend()
   }
@@ -237,10 +276,7 @@ useEffect(() => {
     localStorage.setItem('datapro_token', token)
     localStorage.setItem('datapro_email', email)
     bootstrapSession(token)
-      .then(() => fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }))
-      .then(res => res.json())
+      .then(() => fetchPlanJson(token))
       .then(planData => {
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
@@ -333,10 +369,7 @@ useEffect(() => {
       await bootstrapSession(data.token)
       // Fetch plan
       try {
-        const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
-          headers: { Authorization: `Bearer ${data.token}` }
-        })
-        const planData = await planRes.json()
+        const planData = await fetchPlanJson(data.token)
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
         if (planData.planExpiresAt) localStorage.setItem('datapro_plan_expires', planData.planExpiresAt)
@@ -368,10 +401,7 @@ useEffect(() => {
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
       try {
-        const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
-          headers: { Authorization: `Bearer ${data.token}` }
-        })
-        const planData = await planRes.json()
+        const planData = await fetchPlanJson(data.token)
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
@@ -407,6 +437,7 @@ useEffect(() => {
     ;(window as any).google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: async (response: any) => {
+        setSigningIn(true)
         try {
           const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
             method: 'POST',
@@ -421,6 +452,7 @@ useEffect(() => {
               setShowForceLogout(true)
             }
             setIsGoogleLoading(false)
+            setSigningIn(false)
             return
           }
           setShowForceLogout(false)
@@ -429,19 +461,18 @@ useEffect(() => {
           localStorage.setItem('datapro_email', data.email)
           await bootstrapSession(data.token)
           try {
-            const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
-              headers: { Authorization: `Bearer ${data.token}` }
-            })
-            const planData = await planRes.json()
+            const planData = await fetchPlanJson(data.token)
             const plan = planData.plan || 'none'
             localStorage.setItem('datapro_plan', plan)
             setUserPlan(plan)
           } catch { /* ignore */ }
           setEntered(true)
           setShowLogin(false)
+          setSigningIn(false)
         } catch {
           setLoginError('Google login failed. Try again.')
           setIsGoogleLoading(false)
+          setSigningIn(false)
         }
       }
     })
@@ -474,10 +505,7 @@ useEffect(() => {
       localStorage.setItem('datapro_email', data.email)
       await bootstrapSession(data.token)
       try {
-        const planRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
-          headers: { Authorization: `Bearer ${data.token}` }
-        })
-        const planData = await planRes.json()
+        const planData = await fetchPlanJson(data.token)
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
@@ -510,6 +538,12 @@ if (location.pathname === '/auth/callback') return (
 
 if (!entered) return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: "'Inter', -apple-system, sans-serif", overflowX: 'hidden' }}>
+    {(signingIn || location.pathname === '/auth/callback') && (
+      <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(5,3,15,0.94)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        <span className="btn-spinner" style={{ width: 34, height: 34 }} />
+        <div style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.85)' }}>Signing you in...</div>
+      </div>
+    )}
     <style>{`
       @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
       @keyframes fadeUp { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
@@ -1034,7 +1068,7 @@ if (!entered) return (
             <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#38bdf8', letterSpacing: '0.2em', marginTop: '6px', opacity: 0.7 }}>DATA · INTELLIGENCE · PIPELINE</div>
           </div>
           <div style={{ borderTop: '1px solid rgba(99,179,237,0.1)' }} />
-          <button onClick={handleGoogleLogin} className="auth-btn-google" disabled={isGoogleLoading}>
+          <button onClick={handleGoogleLogin} onPointerEnter={preloadAppPages} onFocus={preloadAppPages} className="auth-btn-google" disabled={isGoogleLoading}>
             {isGoogleLoading ? <span className="btn-spinner" /> : (<>
               <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
               Continue with Google
@@ -1222,6 +1256,7 @@ if (!entered) return (
           </div>
         )}
 
+        <Suspense fallback={<div style={{ padding: 40, color: 'rgba(255,255,255,0.5)', fontFamily: 'Inter, sans-serif' }}>Loading...</div>}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -1238,6 +1273,7 @@ if (!entered) return (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/pricing" element={<Pricing />} />
         </Routes>
+        </Suspense>
       </main>
       
       {showNotif && <NotificationPanel onClose={() => setShowNotif(false)} />}

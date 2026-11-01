@@ -3,15 +3,15 @@
     "name": "The God's Tool",
     "url": "https://thegodstool.com",
     "email": "contact@thegodstool.com",
-    "title": "Clean Messy CSV & Google Sheets Data Fast | The God's Tool",
-    "description": "Fix duplicates, blanks and messy dates in CSV files and Google Sheets by typing what you want in plain English. Free plan, 14-day trial, pay-as-you-go credits.",
-    "ogTitle": "Clean messy spreadsheets in minutes, not hours",
-    "ogDescription": "Upload a CSV or link a Google Sheet. It finds the problems, you approve the fixes. Free plan, no card needed.",
-    "updated": "2026-10-30"
+    "title": "AI Data Cleaning for CSV, Sheets & Databases | The God's Tool",
+    "description": "The God's Tool cleans messy data in CSV files, Google Sheets and databases. Say what you want fixed in plain English, review it, then reuse it. Free plan.",
+    "ogTitle": "Clean messy data in minutes, not hours",
+    "ogDescription": "Upload a CSV, link a Google Sheet or connect a database. It finds the problems, you approve the fixes. Free plan, no card needed.",
+    "updated": "2026-11-01"
   },
   "hero": {
     "eyebrow": "For freelancers, analysts and small data teams",
-    "h1": "Clean messy spreadsheets in minutes, not hours.",
+    "h1": "Clean messy data in minutes, not hours.",
     "sub": "Drop in a CSV or link a Google Sheet. The God's Tool spots the duplicates, blanks, broken dates and inconsistent names, then fixes them when you say what you want in plain English. No formulas, no scripts.",
     "note": "14-day trial with everything unlocked. The free plan stays after that. No card needed.",
     "primary": "Clean a file free",
