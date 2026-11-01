@@ -1,4 +1,6 @@
   import { profileFromRows } from '../privateProfile'
+import { useAiShare, AiShareSwitch } from '../aiShare'
+import toolLogo from '../../the_gods_tool_logo_3d.png'
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, sourceKeyOf, isServerSource } from '../store'
@@ -728,8 +730,11 @@ import { checkAiAllowance, refreshCredits } from '../credits'
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
 
-    // Only the structure of the data goes to the AI, never real rows.
-    const sampleContext = profileFromRows(sampleData.slice(0, 20))
+    // Private by default: only the structure of the data goes to the AI. Real rows only if the workspace opted in.
+    const aiShare = useAiShare()
+    const sampleContext = aiShare.shared
+      ? sampleData.slice(0, 3).map((row, i) => `Row ${i + 1}: ${JSON.stringify(row)}`).join('\n')
+      : profileFromRows(sampleData.slice(0, 20))
 
     const sendMessage = async () => {
       const trimmed = input.trim()
@@ -869,7 +874,7 @@ const assistantText = aiData.success
         {/* Info banner */}
         <div className="flex items-start gap-3 mb-4 px-4 py-3 rounded-xl"
           style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}>
-          <span style={{ fontSize: '16px' }}>✨</span>
+          <img src={toolLogo} alt="" width={20} height={20} style={{ flexShrink: 0 }} />
           <div>
             <p className="text-xs font-bold text-white mb-0.5">AI-Powered Natural Language Cleaning</p>
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
@@ -897,8 +902,8 @@ const assistantText = aiData.success
             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'assistant' && (
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mr-3 mt-1"
-                  style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)', fontSize: '12px' }}>
-                  ✨
+                  style={{ background: 'rgba(124,58,237,0.18)', border: '1px solid rgba(167,139,250,0.3)' }}>
+                  <img src={toolLogo} alt="" width={16} height={16} />
                 </div>
               )}
               <div className="max-w-[85%] rounded-2xl px-4 py-3"
@@ -919,16 +924,11 @@ const assistantText = aiData.success
           {loading && (
             <div className="flex justify-start">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mr-3 mt-1"
-                style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)', fontSize: '12px' }}>✨</div>
+                style={{ background: 'rgba(124,58,237,0.18)', border: '1px solid rgba(167,139,250,0.3)' }}><img src={toolLogo} alt="" width={16} height={16} /></div>
               <div className="px-4 py-3 rounded-2xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    {[0,1,2].map(i => (
-                      <div key={i} className="w-1.5 h-1.5 rounded-full animate-bounce"
-                        style={{ background: '#a78bfa', animationDelay: `${i * 0.15}s` }} />
-                    ))}
-                  </div>
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Analyzing your data...</span>
+                  <img src={toolLogo} alt="" width={20} height={20} className="animate-pulse" />
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>The God's Tool is working on it...</span>
                 </div>
               </div>
             </div>
@@ -959,6 +959,11 @@ const assistantText = aiData.success
             Send
           </button>
         </div>
+        <div className="mt-2"><AiShareSwitch {...aiShare} /></div>
+        <p className="text-center" style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', marginTop: 4 }}>
+          AI by Claude (Anthropic). {aiShare.shared ? 'Your instruction, column names and a few sample rows are sent.' : 'Only your instruction, column names and the structure of your data are sent, never your actual rows.'}{' '}
+          <a href="/privacy.html" target="_blank" rel="noreferrer" style={{ color: '#a78bfa', textDecoration: 'underline' }}>Privacy policy</a>
+        </p>
       </div>
     )
   }

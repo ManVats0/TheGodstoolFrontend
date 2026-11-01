@@ -67,7 +67,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'What the AI sees',
-        body: 'The AI cleaning features use Claude, made by Anthropic. They run in private mode: the AI receives your instruction, your column names and a summary of each column (its type and the pattern of its values), but never your rows or cell values. It writes a cleaning step and our servers run it on your data. Text you type into the instruction box is sent as written, so leave personal data out of it.',
+        body: 'The AI cleaning features use Claude, made by Anthropic. They run in private mode: the AI receives your instruction, your column names and a summary of each column (its type and the pattern of its values), but never your rows or cell values. It writes a cleaning step and our servers run it on your data. Text you type into the instruction box is sent as written, so leave personal data out of it. If you want better results on value-based fixes such as typos, an Admin or Owner can tick "share a few sample rows" in the AI window. It is off by default and applies to the whole workspace.',
         tip: 'The AI cannot see values, so mention examples in your instruction when they matter, such as "change M to Male and F to Female".',
       },
       {
