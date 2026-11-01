@@ -6,6 +6,7 @@ import { runSQLPreviewWasm } from '../duckdbClient'
 import GuidedTour, { TourStep } from './FlowTutorial'
 import { usePermissions, forbiddenMessage } from '../usePermissions'
 import { checkAiAllowance } from '../credits'
+import toolLogo from '../../the_gods_tool_logo_3d.png'
 
 const EMPTY_STATE_TOUR: TourStep[] = [
   {
@@ -1661,8 +1662,8 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
           style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: 'rgba(236,72,153,0.2)', border: '1px solid rgba(236,72,153,0.35)' }}>
-              🤖
+              style={{ background: 'rgba(124,58,237,0.18)', border: '1px solid rgba(167,139,250,0.35)' }}>
+              <img src={toolLogo} alt="The God's Tool" width={20} height={20} />
             </div>
             <div>
               <h3 className="font-bold text-white text-sm">Add AI Custom Rule</h3>
@@ -1691,7 +1692,7 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'assistant' && (
                 <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 mr-2 mt-1 text-xs"
-                  style={{ background: 'rgba(236,72,153,0.2)' }}>🤖</div>
+                  style={{ background: 'rgba(124,58,237,0.18)' }}><img src={toolLogo} alt="" width={16} height={16} /></div>
               )}
               <div className="max-w-[85%] rounded-xl px-4 py-2.5 text-sm leading-relaxed"
                 style={{
@@ -1704,15 +1705,11 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
             </div>
           ))}
           {loading && (
-            <div className="flex justify-start">
-              <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 mr-2 mt-1 text-xs"
-                style={{ background: 'rgba(236,72,153,0.2)' }}>🤖</div>
-              <div className="px-4 py-2.5 rounded-xl flex items-center gap-2"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                {[0,1,2].map(i => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full animate-bounce"
-                    style={{ background: '#f472b6', animationDelay: `${i * 0.15}s` }} />
-                ))}
+            <div className="flex justify-start" role="status" aria-live="polite">
+              <div className="px-4 py-3 rounded-xl flex items-center gap-3"
+                style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(167,139,250,0.2)' }}>
+                <img src={toolLogo} alt="" width={22} height={22} className="animate-pulse" />
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>The God's Tool is working on your rule...</span>
               </div>
             </div>
           )}
@@ -1726,7 +1723,7 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
               onClick={() => onConfirm(pendingLabel, pendingInstruction)}
               className="w-full py-2.5 rounded-xl font-bold text-white text-sm"
               style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)' }}>
-              🤖 Add "{pendingLabel}" to Pipeline
+              Add "{pendingLabel}" to Pipeline
             </button>
           </div>
         )}
@@ -1750,6 +1747,10 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
             Send
           </button>
         </div>
+        <p className="px-5 pb-4 text-center flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
+          AI by Claude (Anthropic). Your instruction, column names and a few sample rows are sent to write the rule.{' '}
+          <a href="/privacy.html" target="_blank" rel="noreferrer" style={{ color: '#a78bfa', textDecoration: 'underline' }}>Privacy policy</a>
+        </p>
       </div>
     </div>
   )

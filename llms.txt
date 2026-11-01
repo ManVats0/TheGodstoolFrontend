@@ -10,7 +10,7 @@ It is made for freelancers, analysts, small teams and companies who regularly re
 - Credits: pay as you go with no subscription. One credit pays for one AI action, about $0.03 each, minimum top-up $2.
 - Quotes: bulk credits, team plans, database or API sources and invoicing are quoted by email. Request one at https://thegodstool.com/#quote or write to contact@thegodstool.com. Quotes cover access to the tool, not a done-for-you cleaning service.
 - Sources: CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS (RDS, S3, DynamoDB, Redshift), Google Cloud Storage, Cloud SQL, Databricks, REST APIs, Google Analytics 4.
-- Security: data is encrypted in transit and is not shared with third parties.
+- Security: data is encrypted in transit and is not sold. AI features use Claude (Anthropic), which receives the instruction, column names and a few sample rows. See https://thegodstool.com/privacy.html
 
 ## Pages
 - [Home](https://thegodstool.com/): what it does, who it is for, pricing, quote form and FAQ

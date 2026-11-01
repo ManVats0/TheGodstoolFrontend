@@ -263,7 +263,7 @@
       },
       {
         "q": "Is my data safe?",
-        "a": "Data is encrypted in transit and we don't share it with third parties. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself."
+        "a": "Data is encrypted in transit and we don't sell it or share it for marketing. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself. If you use the AI features, your instruction, column names and a few sample rows are sent to Claude, made by Anthropic, to write the cleaning step. The privacy policy has the details."
       },
       {
         "q": "Which data sources can I connect?",
