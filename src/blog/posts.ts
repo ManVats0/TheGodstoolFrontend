@@ -6,6 +6,7 @@
 //   4. If the topic was listed in UPCOMING, delete that line. Save, merge, done: the post appears on the blog
 //      home, gets its own page, and is added to the sitemap and RSS feed automatically at the next build.
 // Body blocks:  { type: 'p', text }  paragraph      { type: 'h', text }   section heading
+//               { type: 'diagram', id: 'journey' | 'seen' | 'steps' | 'modes', caption }  picture (see diagrams.tsx)
 //               { type: 'ul', items: [...] }  bullet list   { type: 'quote', text }  pull quote   { type: 'tip', text }  highlighted tip
 // Inside text you can use **bold**, `code` and [link text](https://example.com).
 // ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -16,6 +17,7 @@ export type PostBlock =
   | { type: 'ul'; items: string[] }
   | { type: 'quote'; text: string }
   | { type: 'tip'; text: string }
+  | { type: 'diagram'; id: 'journey' | 'seen' | 'steps' | 'modes'; caption?: string }
 
 export type Post = {
   slug: string
@@ -50,6 +52,43 @@ export const PUBLISHED: Post[] = [
       { type: 'p', text: `Try the free trial before you put a card down. Run it against a test source first if you want zero risk while you're figuring things out, and only connect the real database once it feels right. If something's still unclear, just ask and we'll happily walk through it.` },
     ],
   },
+  {
+    slug: 'how-ai-cleaning-keeps-your-data-private',
+    tag: 'Privacy',
+    readTime: '6 min read',
+    published: '2026-11-01',
+    title: 'How AI cleaning works without ever seeing your data',
+    excerpt: `You type "remove duplicate customers" and your file gets cleaned. Here's what happens in between, with pictures, and why the AI never reads a single row.`,
+    body: [
+      { type: 'p', text: `You type "remove duplicate customers", press send, and a few seconds later the file is clean. It feels a bit like magic, and magic makes careful people nervous. Where did my file go? Who read it? Fair questions. This post answers them with pictures, so you don't need to know anything technical.` },
+      { type: 'p', text: `The short version: **the AI that helps you clean never gets your rows.** It gets your instruction and a description of what kind of columns you have. That's all.` },
+      { type: 'h', text: 'What happens when you ask for a clean-up' },
+      { type: 'p', text: `Five things happen, and only one of them involves the AI. Look at the picture below, then we'll go through it.` },
+      { type: 'diagram', id: 'steps', caption: 'Five steps from request to clean file. The AI only takes part in step 3.' },
+      { type: 'p', text: `Step one is you, typing in plain English. Step two is our server looking at your table and writing a short description of each column. Step three is the only time the AI is involved: it reads your sentence and that description, then writes a small set of cleaning instructions, a recipe. Step four is us checking the recipe and running it on your full file. Step five is you downloading the result.` },
+      { type: 'h', text: 'Where your file actually goes' },
+      { type: 'p', text: `Think of three places. Your computer, our servers, and the AI. The full file travels from you to our servers, and no further.` },
+      { type: 'diagram', id: 'journey', caption: 'Green is your full data. Pink is the only thing the AI receives.' },
+      { type: 'p', text: `The AI sits at the bottom of that picture for a reason. It's a helper that writes the recipe. The cooking, meaning the actual cleaning of your rows, happens on our side.` },
+      { type: 'h', text: 'What "a description of your columns" really means' },
+      { type: 'p', text: `This is the part people ask about most, so here's a real example. Say your file has names, emails and salaries. We don't send "Anna Smith, anna@mail.com, 82,000". We send something closer to "a text column that looks like Aaaa Aaaaa", "an email column", "a whole number column". The AI learns the shape of the data, not the data.` },
+      { type: 'diagram', id: 'seen', caption: 'Top: what is in your file. Bottom: everything the AI is told about it.' },
+      { type: 'p', text: `Why does shape matter at all? Because a recipe for dates looks different from a recipe for phone numbers. Knowing that a column holds dates written like 03/04/1990 is enough to write a good date fix. Knowing whose birthday it is adds nothing.` },
+      { type: 'h', text: 'Do you just trust whatever the AI sends back?' },
+      { type: 'p', text: `No. The recipe is treated like a note from a stranger. Before we run it we read it, and we refuse anything that tries to do more than tidy a table: reading other files, reaching the internet, running system commands, or looping forever. A recipe that passes runs inside a tight box on our server. One that doesn't is thrown away, and you see a plain "this rule couldn't be applied" message.` },
+      { type: 'tip', text: `A recipe can only change the table you gave it. It has no way to look at anyone else's data, because it never gets access to anything else.` },
+      { type: 'h', text: 'What you give up' },
+      { type: 'p', text: `Honesty time. Because the AI can't see your values, some jobs get harder. Fixing typos in a city column is the classic one: the AI doesn't know your column contains "Bombay" and "Mumbay" unless you say so. The easy fix is to name them in your instruction, like "change Bombay and Mumbay to Mumbai". Everything that works from structure, such as removing duplicates, trimming spaces, fixing date formats, filling blanks and converting numbers stored as text, works the same as before.` },
+      { type: 'h', text: 'The optional switch' },
+      { type: 'p', text: `Some teams would rather have better results on value-based fixes and are happy to let the AI see a few sample rows. So there's a switch. **Private mode is on by default.** An admin can turn it off for the whole workspace, and turn it back on whenever they like. If you never touch it, the AI never sees a row.` },
+      { type: 'diagram', id: 'modes', caption: 'The two modes side by side. Private mode is the default.' },
+      { type: 'h', text: 'What we do still send' },
+      { type: 'p', text: `Two things, so nobody is surprised. The sentence you type is sent exactly as you wrote it, so don't paste personal details into it. And column names are sent, so a column called "diagnosis" tells the AI that a column called "diagnosis" exists. If a name itself is sensitive, rename it before you upload.` },
+      { type: 'p', text: `The AI behind the feature is Claude, made by Anthropic. We say so in the app and in our [privacy policy](/privacy.html), and we send it only what's described above.` },
+      { type: 'h', text: 'Check it yourself' },
+      { type: 'p', text: `Open the AI window in the app. Under the input box there's a line saying whether private mode is on, and what gets sent. Everything in this post is also written down in the [privacy policy](/privacy.html). If something there ever disagrees with what you see, tell us at contact@thegodstool.com and we'll fix it.` },
+    ],
+  },
 ]
 
 // Topics you plan to write. They show as "Coming soon" cards. Edit freely, or empty the list to hide the section.
@@ -75,7 +114,7 @@ export function plain(text: string): string {
 }
 
 export function wordCount(p: Post): number {
-  const words = p.body.map(b => ('text' in b ? b.text : b.items.join(' '))).join(' ')
+  const words = p.body.map(b => ('text' in b ? b.text : 'items' in b ? b.items.join(' ') : (b.caption || ''))).join(' ')
   return plain(words).split(/\s+/).filter(Boolean).length
 }
 

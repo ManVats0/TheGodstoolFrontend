@@ -100,3 +100,6 @@ a.gb-card:hover { transform: translateY(-3px); border-color: rgba(167,139,250,0.
   .gb-prose { font-size: 1.03rem; }
   .gb-wrap { padding: 0 18px; }
 }
+
+.gb-fig { margin: 32px auto; max-width: 520px; padding: 18px 16px 12px; background: rgba(124,58,237,0.06); border: 1px solid rgba(167,139,250,0.18); border-radius: 16px; }
+.gb-fig figcaption { text-align: center; font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-top: 10px; line-height: 1.5; }

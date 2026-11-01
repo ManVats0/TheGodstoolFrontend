@@ -268,7 +268,11 @@
       },
       {
         "q": "Is my data safe?",
-        "a": "Data is encrypted in transit and we don't sell it or share it for marketing. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself. The AI features run in private mode: they get your instruction, column names and a summary of each column's structure, never your actual rows. The privacy policy has the details."
+        "a": "Data is encrypted in transit and we don't sell it or share it for marketing. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself. The AI features run in private mode: they get your instruction, column names and a summary of each column's structure, never your actual rows. Read how it works in plain words, with diagrams, on our blog, or see the privacy policy for the details."
+      },
+      {
+        "q": "Does the AI see my data?",
+        "a": "Not by default. The AI gets your instruction and a description of each column's structure, then writes cleaning steps that we run on our side. Your rows and cell values aren't sent to it. A workspace admin can switch on sharing a few sample rows for better results on value-based fixes, and it stays off until they do. The blog post \"How AI cleaning works without ever seeing your data\" explains the whole path with diagrams."
       },
       {
         "q": "Which data sources can I connect?",
@@ -297,5 +301,19 @@
     "optin": "Also tell the team I downloaded this, so they can follow up",
     "note": "An estimate, not an invoice. Final billing happens at checkout.",
     "customMsg": "That setup needs a custom plan. Send us a quote request and we'll price it by hand."
+  },
+  "privacy": {
+    "id": "private-ai",
+    "eyebrow": "Private by default",
+    "h2": "The AI helps you clean. It never reads your rows.",
+    "body": "When you ask for a fix in plain English, the AI gets your sentence and a short description of each column, such as \"a column of emails\" or \"dates written like 03/04/1990\". It writes the cleaning steps. We run them on your full file, on our side. By default, none of your rows or cell values are sent to the AI.",
+    "points": [
+      "Your full file goes to our servers, never to the AI",
+      "The AI only sees column names and the shape of each column",
+      "Every AI-written step is checked before it runs",
+      "Admins can choose to share sample rows. It is off until they do"
+    ],
+    "link": "See how it works, with pictures",
+    "href": "/blog/how-ai-cleaning-keeps-your-data-private"
   }
 }

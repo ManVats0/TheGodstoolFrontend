@@ -43,16 +43,20 @@ export function useAiShare() {
 }
 
 export function AiShareSwitch({ shared, allowed, canChange, error, change }: ReturnType<typeof useAiShare>) {
-  if (!allowed) return null
+  const priv = !shared || !allowed
+  const editable = canChange && allowed
   return (
     <div className="px-5 pb-2 flex-shrink-0" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
-      <label className="flex items-start gap-2" style={{ cursor: canChange ? 'pointer' : 'default' }}>
-        <input type="checkbox" checked={shared} disabled={!canChange} onChange={e => change(e.target.checked)} style={{ marginTop: 2 }} />
+      <label className="flex items-start gap-2" style={{ cursor: editable ? 'pointer' : 'default' }}>
+        <input type="checkbox" checked={priv} disabled={!editable} onChange={e => change(!e.target.checked)} style={{ marginTop: 2 }} />
         <span>
-          <b style={{ color: 'rgba(255,255,255,0.75)' }}>{shared ? 'Sharing a few sample rows with the AI' : 'Private mode: the AI never sees your rows'}</b>
-          {' '}{shared
-            ? 'for better results on value-based fixes like typos. Untick to go back to private mode.'
-            : canChange ? 'Tick to share a few sample rows for better results on value-based fixes like typos.' : 'An admin can switch on sample sharing for better results.'}
+          <b style={{ color: priv ? '#86efac' : 'rgba(255,255,255,0.75)' }}>
+            {priv ? 'Private mode is on (recommended): the AI never sees your rows.' : 'Private mode is off: a few sample rows are shared with the AI.'}
+          </b>
+          {' '}
+          {!allowed ? 'Sample sharing is not available on this service.'
+            : priv ? (canChange ? 'Untick only if you want better results on value-based fixes like typos.' : 'An admin can turn it off for better results on value-based fixes.')
+            : (canChange ? 'Tick the box to go back to private mode.' : 'An admin can turn private mode back on.')}
           {error && <span style={{ color: '#f87171' }}> {error}</span>}
         </span>
       </label>

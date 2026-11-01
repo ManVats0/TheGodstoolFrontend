@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { PostBlock } from './posts'
 import { headingId } from './posts'
+import { DIAGRAMS } from './diagrams'
 
 /** **bold**, `code` and [text](https://link). Anything else is shown exactly as written (never executed as HTML). */
 export function rich(text: string): ReactNode[] {
@@ -30,6 +31,10 @@ export function Body({ blocks }: { blocks: PostBlock[] }) {
           case 'ul': return <ul key={i}>{b.items.map((it, j) => <li key={j}>{rich(it)}</li>)}</ul>
           case 'quote': return <blockquote key={i}>{rich(b.text)}</blockquote>
           case 'tip': return <div key={i} className="gb-tip">💡 {rich(b.text)}</div>
+          case 'diagram': {
+            const D = DIAGRAMS[b.id]
+            return D ? <figure key={i} className="gb-fig"><D />{b.caption && <figcaption>{rich(b.caption)}</figcaption>}</figure> : null
+          }
           default: return <p key={i}>{rich(b.text)}</p>
         }
       })}
