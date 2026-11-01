@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { API_BASE } from '../config'
 import { usePermissions } from '../usePermissions'
 import NoAccess from '../components/NoAccess'
+import TunnelOneClick from './TunnelOneClick'
 
 const STEPS_MYSQL = [
   {
@@ -27,7 +28,7 @@ const STEPS_MYSQL = [
     n: 4,
     title: 'Run the agent',
     body: 'Start the agent on the machine with database access. It will prompt you for the server URL, your token, and the database credentials. Nothing is sent to any third party. All traffic goes directly between your machine and your own backend server.',
-    code: 'python ~/datapro/agent.py',
+    code: 'python agent.py --manual',
   },
   {
     n: 5,
@@ -73,7 +74,7 @@ const STEPS_MONGODB: typeof STEPS_MYSQL = [
     n: 4,
     title: 'Run the agent',
     body: 'Start the agent on the machine with database access.',
-    code: 'python ~/datapro/agent.py',
+    code: 'python agent.py --manual',
   },
   {
     n: 5,
@@ -112,7 +113,7 @@ const STEPS_BIGQUERY: typeof STEPS_MYSQL = [
     n: 4,
     title: 'Run the agent',
     body: 'Start the agent on the machine with GCP credentials.',
-    code: 'python ~/datapro/agent.py',
+    code: 'python agent.py --manual',
   },
   {
     n: 5,
@@ -144,19 +145,19 @@ const STEPS_DATABRICKS: typeof STEPS_MYSQL = [
   {
     n: 3,
     title: 'Get an agent token',
-    body: 'Generate a DataPro agent token by calling the admin endpoint.',
+    body: 'Generate a agent token by calling the admin endpoint.',
     code: 'curl -X POST http://localhost:8000/api/agent/token \\\n  -H "Content-Type: application/json" \\\n  -d \'{"label": "my-laptop"}\'',
   },
   {
     n: 4,
     title: 'Run the agent',
     body: 'Start the agent on your machine.',
-    code: 'python ~/datapro/agent.py',
+    code: 'python agent.py --manual',
   },
   {
     n: 5,
     title: 'Fill in the prompts',
-    body: 'The agent asks you:\n\n  Server URL  , the URL of your running backend\n  Token       , the DataPro agent token from step 3\n  DB type     , type "databricks"\n  Workspace   , your Databricks workspace hostname, e.g. adb-123.azuredatabricks.net\n  HTTP Path   . Found in SQL Warehouse → Connection Details, e.g. /sql/1.0/warehouses/abc123\n  Access Token, your Databricks Personal Access Token (hidden while you type)\n  Schema      , optional catalog/schema name, default is "default"',
+    body: 'The agent asks you:\n\n  Server URL  , the URL of your running backend\n  Token       , the agent token from step 3\n  DB type     , type "databricks"\n  Workspace   , your Databricks workspace hostname, e.g. adb-123.azuredatabricks.net\n  HTTP Path   . Found in SQL Warehouse → Connection Details, e.g. /sql/1.0/warehouses/abc123\n  Access Token, your Databricks Personal Access Token (hidden while you type)\n  Schema      , optional catalog/schema name, default is "default"',
     code: '',
   },
   {
@@ -183,14 +184,14 @@ const STEPS_REDSHIFT: typeof STEPS_MYSQL = [
   {
     n: 3,
     title: 'Get an agent token',
-    body: 'Generate a DataPro agent token by calling the admin endpoint once.',
+    body: 'Generate a agent token by calling the admin endpoint once.',
     code: 'curl -X POST http://localhost:8000/api/agent/token \\\n  -H "Content-Type: application/json" \\\n  -d \'{"label": "my-laptop"}\'',
   },
   {
     n: 4,
     title: 'Run the agent',
     body: 'Start the agent on the machine with access to the Redshift cluster.',
-    code: 'python ~/datapro/agent.py',
+    code: 'python agent.py --manual',
   },
   {
     n: 5,
@@ -206,6 +207,45 @@ const STEPS_REDSHIFT: typeof STEPS_MYSQL = [
   },
 ]
 
+const STEPS_REST: typeof STEPS_MYSQL = [
+  {
+    n: 1,
+    title: 'Install the dependencies',
+    body: 'Open a terminal on the machine that can reach your internal API. Run the command below.',
+    code: 'pip install websockets aiohttp',
+  },
+  {
+    n: 2,
+    title: 'Download the agent script',
+    body: 'Click the button below to download agent.py to your computer. Save it somewhere you can find it, like your Desktop or Downloads folder.',
+    code: '',
+  },
+  {
+    n: 3,
+    title: 'Get an agent token',
+    body: 'Generate an agent token by calling the admin endpoint once. You will paste it into the agent next.',
+    code: 'curl -X POST http://localhost:8000/api/agent/token \\\n  -H "Content-Type: application/json" \\\n  -d \'{"label": "my-laptop"}\'',
+  },
+  {
+    n: 4,
+    title: 'Run the agent',
+    body: 'Start the agent on the machine that can reach the API.',
+    code: 'python agent.py --manual',
+  },
+  {
+    n: 5,
+    title: 'Fill in the prompts',
+    body: 'The agent asks you:\n\n  Token        , the token from step 3\n  DB type      , type "rest"\n  Base URL     , e.g. https://internal-api.company.com/v1\n  API key      , leave blank if none (hidden while you type)\n  Auth header  , usually Authorization\n  Auth prefix  , usually Bearer\n  Endpoints    , the paths to expose as tables, e.g. /users,/orders\n  Verify SSL   , y unless the API uses a self-signed certificate\n\nThe agent only talks to the API you enter here. It refuses requests to any other address, and refuses anything except GET unless you allowed writes.',
+    code: '',
+  },
+  {
+    n: 6,
+    title: 'Add the source in the browser',
+    body: 'Go to Data Sources, add a REST API, and enter the same base URL. Click "Test Connection". The backend finds the connected agent and sends the requests through it.',
+    code: '',
+  },
+]
+
 // Fills in your real server URL and login token so the copied curl command works
 const renderCode = (code: string): string => {
   if (!code.includes('/api/agent/token')) return code
@@ -216,7 +256,7 @@ const renderCode = (code: string): string => {
     .replace('-H "Content-Type: application/json"', `-H "Authorization: Bearer ${tok}" \\\n  -H "Content-Type: application/json"`)
 }
 
-type DB = 'mysql' | 'postgres' | 'mongodb' | 'bigquery' | 'databricks' | 'redshift'
+type DB = 'mysql' | 'postgres' | 'mongodb' | 'bigquery' | 'databricks' | 'redshift' | 'rest'
 
 export default function Tunneling() {
   const { can, loading } = usePermissions()
@@ -227,6 +267,7 @@ export default function Tunneling() {
 
 function TunnelingInner({ canManage }: { canManage: boolean }) {
   const navigate = useNavigate()
+  const [mode, setMode] = useState<'oneclick' | 'steps'>('oneclick')
   const [db, setDb] = useState<DB>('mysql')
   const [copied, setCopied] = useState<number | null>(null)
 
@@ -237,6 +278,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
     bigquery:   STEPS_BIGQUERY,
     databricks: STEPS_DATABRICKS,
     redshift:   STEPS_REDSHIFT,
+    rest:       STEPS_REST,
   }
   const steps = STEPS_MAP[db]
 
@@ -267,6 +309,10 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
     databricks: {
       accent: '#fb923c', accentBg: 'rgba(251,146,60,0.2)', accentBorder: 'rgba(251,146,60,0.45)', label: 'Databricks',
       icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3L3 8.5V15l9 5.5 9-5.5V8.5z" stroke="#fb923c" strokeWidth="1.6" fill="none"/><path d="M3 8.5l9 5 9-5" stroke="#fb923c" strokeWidth="1.4"/></svg>,
+    },
+    rest: {
+      accent: '#2dd4bf', accentBg: 'rgba(45,212,191,0.2)', accentBorder: 'rgba(45,212,191,0.45)', label: 'REST API',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6" stroke="#2dd4bf" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     },
     redshift: {
       accent: '#f472b6', accentBg: 'rgba(244,114,182,0.2)', accentBorder: 'rgba(244,114,182,0.45)', label: 'Redshift',
@@ -324,7 +370,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
       >
         <h2 className="font-bold text-white text-base mb-2">What is tunneling and why do I need it?</h2>
         <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          Most company databases live inside a private network. Behind a VPN, behind a corporate firewall, or on a server with no public IP. Your DataPro backend (the FastAPI server) cannot reach those databases directly.
+          Most company databases live inside a private network. Behind a VPN, behind a corporate firewall, or on a server with no public IP. The God's Tool server cannot reach those databases directly.
         </p>
         <p className="text-sm leading-relaxed mt-3" style={{ color: 'rgba(255,255,255,0.6)' }}>
           The agent is a small Python script you run on a machine that <em>can</em> reach the database. It opens a secure WebSocket connection to your backend and waits. When you run a pipeline or analysis in the browser, the backend sends the SQL query through that connection, the agent runs it locally on your database, and sends the results back. Your database never needs a public IP or an open firewall port.
@@ -334,7 +380,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}
         >
           <span style={{ fontSize: '20px' }}>💻</span>
-          <span>Your machine (runs agent.py)</span>
+          <span>Your computer (runs the agent)</span>
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
             <path d="M1 6h18M13 1l5 5-5 5"/>
           </svg>
@@ -342,7 +388,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
             <path d="M1 6h18M13 1l5 5-5 5"/>
           </svg>
-          <span>🖥️ Your DataPro backend</span>
+          <span>🖥️ The God's Tool server</span>
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
             <path d="M1 6h18M13 1l5 5-5 5"/>
           </svg>
@@ -350,6 +396,21 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
         </div>
       </div>
 
+      {/* Mode */}
+      <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+        {([
+          ['oneclick', 'One click', 'Recommended. Run one command and your computer becomes the connector.'],
+          ['steps', 'Follow the steps', 'Install and configure the agent yourself. Supports every database type.'],
+        ] as const).map(([k, title, sub]) => (
+          <button key={k} onClick={() => setMode(k)} aria-pressed={mode === k} className="text-left rounded-2xl p-4"
+            style={{ background: mode === k ? 'rgba(124,92,255,0.14)' : 'rgba(255,255,255,0.03)', border: `1px solid ${mode === k ? 'rgba(124,92,255,0.6)' : 'rgba(255,255,255,0.08)'}` }}>
+            <div className="font-semibold text-white text-sm">{title}{k === 'oneclick' && <span className="text-xs ml-2" style={{ color: '#a78bfa' }}>Selected by default</span>}</div>
+            <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>{sub}</div>
+          </button>
+        ))}
+      </div>
+
+      {mode === 'oneclick' ? <TunnelOneClick canManage={canManage} onNeedSteps={(d) => { setDb(d as DB); setMode('steps') }} /> : (<>
       {/* DB selector */}
       <div className="flex flex-wrap gap-2 mb-6">
         {(Object.keys(DB_META) as DB[]).map(d => {
@@ -497,6 +558,8 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
         </div>
       </div>
 
+      </>)}
+
       {/* Security note */}
       <div
         className="mt-6 rounded-2xl p-5 flex items-start gap-3"
@@ -506,7 +569,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
         <div>
           <p className="text-sm font-semibold text-white mb-1">Security model</p>
           <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Your database credentials are entered interactively on the agent machine and never stored anywhere on the server. The WebSocket connection uses TLS (wss://) end-to-end. Tokens are random 32-byte secrets. The agent only executes SELECT queries. It cannot write to your database.
+            Your database password is entered on your own computer and is never sent to or stored on our server. The WebSocket connection uses TLS (wss://) end-to-end. Tokens are random 32-byte secrets. The agent only executes SELECT queries. It cannot write to your database.
           </p>
         </div>
       </div>
