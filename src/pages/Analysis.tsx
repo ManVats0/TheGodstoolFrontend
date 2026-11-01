@@ -1,4 +1,5 @@
-  import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+  import { profileFromRows } from '../privateProfile'
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, sourceKeyOf, isServerSource } from '../store'
 import { usePermissions } from '../usePermissions'
@@ -727,9 +728,8 @@ import { checkAiAllowance, refreshCredits } from '../credits'
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
 
-    const sampleContext = sampleData.slice(0, 3).map((row, i) =>
-      `Row ${i + 1}: ${JSON.stringify(row)}`
-    ).join('\n')
+    // Only the structure of the data goes to the AI, never real rows.
+    const sampleContext = profileFromRows(sampleData.slice(0, 20))
 
     const sendMessage = async () => {
       const trimmed = input.trim()

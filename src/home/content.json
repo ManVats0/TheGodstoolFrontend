@@ -116,6 +116,11 @@
         "icon": "book",
         "title": "Teams and approvals",
         "body": "Admin, Data Steward, Editor and Viewer roles. Sensitive sources can sit behind an approval step."
+      },
+      {
+        "icon": "shield",
+        "title": "The AI never sees your rows",
+        "body": "Plain English cleaning works from the shape of your data, such as column types and value patterns. Your actual rows and cell values stay on our side and are never sent to the AI."
       }
     ]
   },
@@ -263,7 +268,7 @@
       },
       {
         "q": "Is my data safe?",
-        "a": "Data is encrypted in transit and we don't sell it or share it for marketing. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself. If you use the AI features, your instruction, column names and a few sample rows are sent to Claude, made by Anthropic, to write the cleaning step. The privacy policy has the details."
+        "a": "Data is encrypted in transit and we don't sell it or share it for marketing. Google sign-in is only used to log you in, and a Google Sheet is read only when you connect it yourself. The AI features run in private mode: they get your instruction, column names and a summary of each column's structure, never your actual rows. The privacy policy has the details."
       },
       {
         "q": "Which data sources can I connect?",
