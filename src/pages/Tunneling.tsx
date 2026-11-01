@@ -207,6 +207,45 @@ const STEPS_REDSHIFT: typeof STEPS_MYSQL = [
   },
 ]
 
+const STEPS_REST: typeof STEPS_MYSQL = [
+  {
+    n: 1,
+    title: 'Install the dependencies',
+    body: 'Open a terminal on the machine that can reach your internal API. Run the command below.',
+    code: 'pip install websockets aiohttp',
+  },
+  {
+    n: 2,
+    title: 'Download the agent script',
+    body: 'Click the button below to download agent.py to your computer. Save it somewhere you can find it, like your Desktop or Downloads folder.',
+    code: '',
+  },
+  {
+    n: 3,
+    title: 'Get an agent token',
+    body: 'Generate an agent token by calling the admin endpoint once. You will paste it into the agent next.',
+    code: 'curl -X POST http://localhost:8000/api/agent/token \\\n  -H "Content-Type: application/json" \\\n  -d \'{"label": "my-laptop"}\'',
+  },
+  {
+    n: 4,
+    title: 'Run the agent',
+    body: 'Start the agent on the machine that can reach the API.',
+    code: 'python agent.py --manual',
+  },
+  {
+    n: 5,
+    title: 'Fill in the prompts',
+    body: 'The agent asks you:\n\n  Token        , the token from step 3\n  DB type      , type "rest"\n  Base URL     , e.g. https://internal-api.company.com/v1\n  API key      , leave blank if none (hidden while you type)\n  Auth header  , usually Authorization\n  Auth prefix  , usually Bearer\n  Endpoints    , the paths to expose as tables, e.g. /users,/orders\n  Verify SSL   , y unless the API uses a self-signed certificate\n\nThe agent only talks to the API you enter here. It refuses requests to any other address, and refuses anything except GET unless you allowed writes.',
+    code: '',
+  },
+  {
+    n: 6,
+    title: 'Add the source in the browser',
+    body: 'Go to Data Sources, add a REST API, and enter the same base URL. Click "Test Connection". The backend finds the connected agent and sends the requests through it.',
+    code: '',
+  },
+]
+
 // Fills in your real server URL and login token so the copied curl command works
 const renderCode = (code: string): string => {
   if (!code.includes('/api/agent/token')) return code
@@ -217,7 +256,7 @@ const renderCode = (code: string): string => {
     .replace('-H "Content-Type: application/json"', `-H "Authorization: Bearer ${tok}" \\\n  -H "Content-Type: application/json"`)
 }
 
-type DB = 'mysql' | 'postgres' | 'mongodb' | 'bigquery' | 'databricks' | 'redshift'
+type DB = 'mysql' | 'postgres' | 'mongodb' | 'bigquery' | 'databricks' | 'redshift' | 'rest'
 
 export default function Tunneling() {
   const { can, loading } = usePermissions()
@@ -239,6 +278,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
     bigquery:   STEPS_BIGQUERY,
     databricks: STEPS_DATABRICKS,
     redshift:   STEPS_REDSHIFT,
+    rest:       STEPS_REST,
   }
   const steps = STEPS_MAP[db]
 
@@ -269,6 +309,10 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
     databricks: {
       accent: '#fb923c', accentBg: 'rgba(251,146,60,0.2)', accentBorder: 'rgba(251,146,60,0.45)', label: 'Databricks',
       icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3L3 8.5V15l9 5.5 9-5.5V8.5z" stroke="#fb923c" strokeWidth="1.6" fill="none"/><path d="M3 8.5l9 5 9-5" stroke="#fb923c" strokeWidth="1.4"/></svg>,
+    },
+    rest: {
+      accent: '#2dd4bf', accentBg: 'rgba(45,212,191,0.2)', accentBorder: 'rgba(45,212,191,0.45)', label: 'REST API',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6" stroke="#2dd4bf" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     },
     redshift: {
       accent: '#f472b6', accentBg: 'rgba(244,114,182,0.2)', accentBorder: 'rgba(244,114,182,0.45)', label: 'Redshift',
@@ -366,7 +410,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
         ))}
       </div>
 
-      {mode === 'oneclick' ? <TunnelOneClick canManage={canManage} /> : (<>
+      {mode === 'oneclick' ? <TunnelOneClick canManage={canManage} onNeedSteps={(d) => { setDb(d as DB); setMode('steps') }} /> : (<>
       {/* DB selector */}
       <div className="flex flex-wrap gap-2 mb-6">
         {(Object.keys(DB_META) as DB[]).map(d => {

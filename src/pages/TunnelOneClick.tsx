@@ -16,7 +16,18 @@ const headers = (): Record<string, string> => {
 const card = { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' } as const
 const mute = 'rgba(255,255,255,0.55)'
 
-export default function TunnelOneClick({ canManage }: { canManage: boolean }) {
+const SOURCES: { key: string; label: string; oneClick: boolean }[] = [
+  { key: 'mysql', label: 'MySQL', oneClick: true },
+  { key: 'postgres', label: 'PostgreSQL', oneClick: true },
+  { key: 'mongodb', label: 'MongoDB', oneClick: true },
+  { key: 'redshift', label: 'Redshift', oneClick: true },
+  { key: 'bigquery', label: 'BigQuery', oneClick: false },
+  { key: 'databricks', label: 'Databricks', oneClick: false },
+  { key: 'rest', label: 'REST API', oneClick: false },
+]
+
+export default function TunnelOneClick({ canManage, onNeedSteps }: { canManage: boolean; onNeedSteps: (db: string) => void }) {
+  const [source, setSource] = useState('mysql')
   const [os, setOs] = useState<'mac' | 'win'>(() => (/Win/i.test(navigator.platform) ? 'win' : 'mac'))
   const [allowWrites, setAllowWrites] = useState(false)
   const [label, setLabel] = useState('')
@@ -100,7 +111,34 @@ export default function TunnelOneClick({ canManage }: { canManage: boolean }) {
         </p>
       </div>
 
-      {canManage ? (
+      <div className="rounded-2xl p-5" style={card}>
+        <p className="text-xs font-semibold mb-2" style={{ color: mute }}>Which database are you connecting?</p>
+        <div className="flex flex-wrap gap-2">
+          {SOURCES.map(x => (
+            <button key={x.key} onClick={() => setSource(x.key)} aria-pressed={source === x.key}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+              style={{ background: source === x.key ? (x.oneClick ? 'rgba(124,92,255,0.3)' : 'rgba(245,158,11,0.22)') : 'rgba(255,255,255,0.05)',
+                       color: source === x.key ? '#fff' : mute,
+                       border: `1px solid ${source === x.key ? (x.oneClick ? 'rgba(124,92,255,0.6)' : 'rgba(245,158,11,0.5)') : 'rgba(255,255,255,0.08)'}` }}>
+              {x.label}{x.oneClick ? '' : ' *'}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>* needs the step-by-step setup</p>
+        {!SOURCES.find(x => x.key === source)!.oneClick && (
+          <div className="mt-4 rounded-xl p-4" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)' }} role="status">
+            <p className="text-sm" style={{ color: '#fbbf24' }}>
+              <b>{SOURCES.find(x => x.key === source)!.label}</b> can't be set up with one click yet.
+              It needs a key, token or API settings that are easier to enter step by step.
+            </p>
+            <button onClick={() => onNeedSteps(source)} className="mt-3 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#f59e0b', color: '#111' }}>
+              Use Follow the steps for {SOURCES.find(x => x.key === source)!.label}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {!SOURCES.find(x => x.key === source)!.oneClick ? null : canManage ? (
         !code ? (
           <div className="rounded-2xl p-6" style={card}>
             <label className="block text-xs font-semibold mb-1" style={{ color: mute }}>Name for this computer (optional)</label>
@@ -163,7 +201,8 @@ export default function TunnelOneClick({ canManage }: { canManage: boolean }) {
             <ol className="text-sm mt-5 space-y-2 list-decimal pl-5" style={{ color: 'rgba(255,255,255,0.7)' }}>
               <li>The command installs the agent and pairs the computer.</li>
               <li>A page opens on that computer. Pick your database type and enter host, user and password.</li>
-              <li>It tests the connection from that computer. When it works, this box turns green.</li>
+              <li>It tests the connection from that computer. Leave "Start automatically" ticked and it keeps running in the background and starts with the computer.</li>
+              <li>When it works, this box turns green.</li>
             </ol>
             <button onClick={() => setCode('')} className="mt-4 text-xs underline" style={{ color: mute }}>Cancel and start over</button>
           </div>

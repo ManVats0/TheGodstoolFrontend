@@ -670,9 +670,21 @@ const DOCS: Record<string, {
         warning: 'Read-only is decided when you pair. To change it, disconnect the computer and pair it again.',
       },
       {
-        heading: 'Starting it again later',
-        body: 'The agent runs while its window is open and reconnects by itself after a network drop. If you close it or restart the computer, run the start command it printed (the start.sh or start.cmd file in the .thegodstool folder in your home directory). You do not need a new code, because the computer stays paired. To enter different database details, run it with --reset.',
-        tip: 'Run it on a small always-on machine or server rather than a laptop that sleeps.',
+        heading: 'Which databases One click covers',
+        body: 'One click works for MySQL, PostgreSQL, MongoDB and Redshift. BigQuery, Databricks and REST APIs need a key file, token or API settings, so they use "Follow the steps". On the Tunneling page, choose your database in the "Which database are you connecting?" row. If it needs the step-by-step setup, a notice tells you and takes you to the right guide.',
+      },
+      {
+        heading: 'Start automatically when the computer starts',
+        body: 'The setup page has a box, "Start automatically when this computer starts", ticked by default. With it ticked, the agent installs itself as a background job. On Windows that is a scheduled task that runs when you sign in. On Mac it is a login item. On Linux it is a systemd user service, or a cron entry when systemd is not available. It restarts by itself if it stops, and you can close the terminal window.\n\nIf the background job cannot be set up, the agent says why and keeps running in that window instead. You can try again later with: python agent.py --install-service. To remove it: python agent.py --remove-service.',
+        tip: 'On a Linux server that nobody logs in to, the service starts at boot. On Windows and Mac it starts when you sign in, so use an account that stays signed in.',
+      },
+      {
+        heading: 'Starting it by hand',
+        body: 'If you did not turn on start-on-boot, the agent runs while its window is open and reconnects by itself after a network drop. To start it again, run the start command it printed (the start.sh or start.cmd file in the .thegodstool folder in your home directory). You do not need a new code, because the computer stays paired. To enter different database details, run it with --reset.',
+      },
+      {
+        heading: 'Two computers, one database',
+        body: 'Only one connected computer can serve a given database name and host at a time. If a second one tries, it stops with a message naming the first. Disconnect the first in the app, or give the second a different host name, then start it again.',
       },
       {
         heading: 'Connected computers',
@@ -680,7 +692,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Follow the steps (manual)',
-        body: 'Pick your database type on the Tunneling page and follow the numbered steps: install the libraries, download agent.py, create a token, run python agent.py --manual and answer the prompts, then add the source as usual. The page fills in your real server URL and token in the commands so they can be copied as they are. Manual agents are read-only too, unless you start them with --allow-writes and the token was created for writes.',
+        body: 'Pick your database type on the Tunneling page and follow the numbered steps: install the libraries, download agent.py, create a token, run python agent.py --manual and answer the prompts, then add the source as usual. The page fills in your real server URL and token in the commands so they can be copied as they are. Manual agents are read-only too, unless you start them with --allow-writes and the token was created for writes. A REST agent only calls the API you entered, and it refuses every request except GET unless writes are allowed.',
       },
       {
         heading: 'Who can create connectors',
