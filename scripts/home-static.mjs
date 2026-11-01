@@ -29,7 +29,7 @@ const ld = [
   { '@context': 'https://schema.org', '@type': 'WebSite', name: c.site.name, url },
   {
     '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: c.site.name, url,
-    applicationCategory: 'BusinessApplication', operatingSystem: 'Web',
+    applicationCategory: 'BusinessApplication', applicationSubCategory: 'Data cleaning', operatingSystem: 'Web',
     description: c.site.description,
     featureList: c.features.items.map((f) => f.title),
     offers,

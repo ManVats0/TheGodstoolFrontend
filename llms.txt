@@ -2,7 +2,17 @@
 
 > A web app that cleans messy data. Upload a CSV, link a Google Sheet or connect a database, review the problems it finds, and fix them by describing what you want in plain English. Cleaning steps can be saved, edited as SQL and run again on a schedule.
 
-It is made for freelancers, analysts, small teams and companies who regularly receive messy spreadsheets and exports.
+It is made for freelancers, analysts, small teams and companies who regularly receive messy spreadsheets and exports, and for data teams that need to keep database tables clean on a schedule.
+
+## When it fits
+- Cleaning a messy CSV export: duplicates, blanks, broken dates, inconsistent names, numbers stored as text.
+- Fixing a Google Sheet without writing formulas or scripts.
+- Cleaning a MySQL, PostgreSQL, BigQuery or MongoDB table, including databases behind a firewall, with reviewable SQL.
+- Repeating the same cleanup every week or month, with an alert when a column changes shape.
+
+## When it does not fit
+- It is software you operate yourself, not a done-for-you cleaning service.
+- It is not a data warehouse, BI dashboard or ETL platform for moving large volumes of data.
 
 ## Key facts
 - Free plan: up to 3 sources, CSV files up to 5 MB, 5,000 rows per run, 1 pipeline. New accounts get a 14-day trial with everything unlocked, no card needed.
