@@ -3,8 +3,8 @@
     "name": "The God's Tool",
     "url": "https://thegodstool.com",
     "email": "contact@thegodstool.com",
-    "title": "AI Data Cleaning for CSV, Sheets & Databases | The God's Tool",
-    "description": "The God's Tool cleans messy data in CSV files, Google Sheets and databases. Say what you want fixed in plain English, review it, then reuse it. Free plan.",
+    "title": "AI Data Cleaning for CSV, Google Sheets & Databases",
+    "description": "Fix duplicates, blanks and messy dates in CSV files, Google Sheets and databases. Describe the fix in plain English, review it, and repeat it. Free plan.",
     "ogTitle": "Clean messy data in minutes, not hours",
     "ogDescription": "Upload a CSV, link a Google Sheet or connect a database. It finds the problems, you approve the fixes. Free plan, no card needed.",
     "updated": "2026-11-01"

@@ -71,6 +71,34 @@ function fetchPlanJson(token: string): Promise<any> {
 let lastLoginAt = 0
 
 
+function SigningInOverlay({ stage }: { stage: 'verify' | 'workspace' | 'redirect' }) {
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 7000)
+    return () => clearTimeout(t)
+  }, [])
+  const steps = ['Google', 'Your account', 'Your workspace']
+  const active = stage === 'redirect' ? 0 : stage === 'verify' ? 1 : 2
+  const label = stage === 'redirect' ? 'Taking you to Google...' : stage === 'verify' ? 'Verifying your account...' : 'Loading your workspace...'
+  return (
+    <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(5,3,15,0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 24, textAlign: 'center' }}>
+      <span className="btn-spinner" style={{ width: 38, height: 38, borderWidth: 3 }} />
+      <div style={{ fontSize: '1.05rem', color: 'rgba(255,255,255,0.92)', fontWeight: 600 }}>{label}</div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {steps.map((t, i) => (
+          <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: i <= active ? '#c4b5fd' : 'rgba(255,255,255,0.35)' }}>
+            <span style={{ width: 8, height: 8, borderRadius: 99, background: i < active ? '#4ade80' : i === active ? '#a78bfa' : 'rgba(255,255,255,0.2)' }} />
+            {t}{i < steps.length - 1 && <span style={{ margin: '0 4px', opacity: 0.4 }}>&rarr;</span>}
+          </span>
+        ))}
+      </div>
+      <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', minHeight: 18 }}>
+        {slow ? 'Still working. Thanks for waiting, this can take a few seconds on a first sign-in.' : 'This only takes a few seconds.'}
+      </div>
+    </div>
+  )
+}
+
 function redirectToGoogleOAuth() {
   const redirectUri = `${import.meta.env.VITE_AUTH_URL}/api/google/callback`
   const params = new URLSearchParams({
@@ -159,7 +187,7 @@ const [forgotEmail, setForgotEmail] = useState('')
 const [forgotMsg, setForgotMsg] = useState('')
 const [forgotError, setForgotError] = useState('')
 const [isGoogleLoading, setIsGoogleLoading] = useState(false)
-const [signingIn, setSigningIn] = useState(false)
+const [signStage, setSignStage] = useState<'' | 'google' | 'verify' | 'workspace' | 'redirect'>('')
 const [isLoginLoading, setIsLoginLoading] = useState(false)
 const [showForceLogout, setShowForceLogout] = useState(false)
 const [pendingGooglePayload, setPendingGooglePayload] = useState<{ credential: string } | null>(null)
@@ -434,10 +462,16 @@ useEffect(() => {
 
  const handleGoogleLogin = () => {
     setIsGoogleLoading(true)
+    setSignStage('google')
+    if (!(window as any).google?.accounts?.id) {   // Google's script has not loaded yet: use the redirect sign-in right away
+      setSignStage('redirect')
+      redirectToGoogleOAuth()
+      return
+    }
     ;(window as any).google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: async (response: any) => {
-        setSigningIn(true)
+        setSignStage('verify')
         try {
           const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
             method: 'POST',
@@ -452,10 +486,11 @@ useEffect(() => {
               setShowForceLogout(true)
             }
             setIsGoogleLoading(false)
-            setSigningIn(false)
+            setSignStage('')
             return
           }
           setShowForceLogout(false)
+          setSignStage('workspace')
           localStorage.setItem('datapro_logged_in', '1')
           localStorage.setItem('datapro_token', data.token)
           localStorage.setItem('datapro_email', data.email)
@@ -468,21 +503,26 @@ useEffect(() => {
           } catch { /* ignore */ }
           setEntered(true)
           setShowLogin(false)
-          setSigningIn(false)
+          setSignStage('')
         } catch {
           setLoginError('Google login failed. Try again.')
           setIsGoogleLoading(false)
-          setSigningIn(false)
+          setSignStage('')
         }
       }
     })
     ;(window as any).google.accounts.id.prompt((notification: any) => {
       if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
+        setSignStage('redirect')
         redirectToGoogleOAuth()
         return
       }
       if (notification?.isDismissedMoment?.()) {
-        setIsGoogleLoading(false)
+        const why = notification.getDismissedReason?.()
+        if (why !== 'credential_returned') {   // closed without choosing an account
+          setIsGoogleLoading(false)
+          setSignStage('')
+        }
       }
     })
   }
@@ -490,6 +530,7 @@ useEffect(() => {
   const handleForceGoogleLogin = async () => {
     if (!pendingGooglePayload) return
     setIsGoogleLoading(true)
+    setSignStage('verify')
     try {
       const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
         method: 'POST',
@@ -515,6 +556,7 @@ useEffect(() => {
     } catch {
       setLoginError('Cannot connect to server. Make sure backend is running.')
     } finally {
+      setSignStage('')
       setIsGoogleLoading(false)
     }
   }
@@ -538,11 +580,8 @@ if (location.pathname === '/auth/callback') return (
 
 if (!entered) return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: "'Inter', -apple-system, sans-serif", overflowX: 'hidden' }}>
-    {(signingIn || location.pathname === '/auth/callback') && (
-      <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(5,3,15,0.94)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <span className="btn-spinner" style={{ width: 34, height: 34 }} />
-        <div style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.85)' }}>Signing you in...</div>
-      </div>
+    {(signStage === 'verify' || signStage === 'workspace' || signStage === 'redirect' || location.pathname === '/auth/callback') && (
+      <SigningInOverlay stage={location.pathname === '/auth/callback' ? 'workspace' : signStage as 'verify' | 'workspace' | 'redirect'} />
     )}
     <style>{`
       @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
@@ -1074,6 +1113,13 @@ if (!entered) return (
               Continue with Google
             </>)}
           </button>
+          {signStage === 'google' && (
+            <div role="status" aria-live="polite" style={{ marginTop: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.3)', color: '#bfdbfe', fontSize: '0.82rem', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span className="btn-spinner" style={{ flexShrink: 0 }} />
+              <span style={{ flex: 1 }}>Waiting for Google. Choose your account in the Google window or sign-in box.</span>
+              <button type="button" onClick={() => { setSignStage(''); setIsGoogleLoading(false) }} style={{ background: 'none', border: 'none', color: '#93c5fd', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.8rem' }}>Cancel</button>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
             <span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>OR</span>
