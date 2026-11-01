@@ -200,11 +200,11 @@ useEffect(() => {
 useEffect(() => {
   const titles: Record<string, string> = {
     '/': content.site.title,
-    '/pricing': "Pricing — The God's Tool",
-    '/contact': "Contact — The God's Tool",
-    '/blog': "Blog — The God's Tool",
-    '/terms': "Terms of Service — The God's Tool",
-    '/feedback': "Feedback — The God's Tool",
+    '/pricing': "Pricing | The God's Tool",
+    '/contact': "Contact | The God's Tool",
+    '/blog': "Blog | The God's Tool",
+    '/terms': "Terms of Service | The God's Tool",
+    '/feedback': "Feedback | The God's Tool",
   }
   // Blog pages set their own title (and share-card tags) for search engines.
   if (location.pathname.startsWith('/blog')) return
@@ -1214,7 +1214,7 @@ if (!entered) return (
             <span>
               {trialDaysLeft === 0
                 ? ' Your free trial ends today'
-                : ` Free trial — ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`}
+                : ` Free trial: ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`}
             </span>
             <a href="/pricing" style={{ color: trialDaysLeft <= 3 ? '#f87171' : '#a78bfa', fontWeight: 700, textDecoration: 'underline' }}>
               Upgrade now →
@@ -1251,7 +1251,7 @@ if (!entered) return (
               Your 14-day free trial has started
             </div>
             <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '24px' }}>
-              Every data source and AI feature is unlocked for the next 14 days — no credit card needed. Connect a real database and see how it feels before you decide on a plan.
+              Every data source and AI feature is unlocked for the next 14 days. No credit card needed. Connect a real database and see how it feels before you decide on a plan.
             </p>
             <button onClick={() => setShowTrialWelcome(false)} className="cta-btn" style={{ width: '100%' }}>
               Let's go →

@@ -4,7 +4,7 @@ export default function Privacy() {
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '2rem', color: '#a78bfa' }}>Privacy Policy</h1>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', marginBottom: '40px' }}>Last updated: June 2026</p>
-                <p>Welcome to The God's Tool. Protecting your data isn't an afterthought here — it's built into how the platform works, from encrypted credential storage to retention controls you manage yourself. This Privacy Policy explains exactly how we collect, use, and protect your information.</p>
+                <p>Welcome to The God's Tool. Protecting your data isn't an afterthought here. It's built into how the platform works, from encrypted credential storage to retention controls you manage yourself. This Privacy Policy explains exactly how we collect, use, and protect your information.</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '24px 0', padding: '16px 20px', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: '12px' }}>
           {['🔒 Encrypted database credentials', '🗑️ Self-service data erasure', '🚫 Never sold to third parties', '📄 Google-verified data handling'].map(item => (
             <span key={item} style={{ fontSize: '0.8rem', color: '#c4b5fd', fontFamily: 'monospace' }}>{item}</span>
@@ -30,7 +30,7 @@ export default function Privacy() {
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>7. Security Measures</h2>
         <p>Account passwords are hashed with bcrypt and never stored in plain text. Database and connector credentials you provide (MySQL, MongoDB, cloud service accounts, etc.) are encrypted at rest before being saved, and decrypted only when a pipeline you configured needs to run.</p>
         <p style={{ marginTop: '12px' }}>All traffic between your browser and our servers is encrypted via HTTPS/TLS. Login sessions use signed tokens with configurable device limits per plan, so you control how many places your account can be active at once.</p>
-        <p style={{ marginTop: '12px' }}>You are never locked into your data with us: every connected source in your Data Sources panel has a "Right to Erasure" control that permanently and immediately deletes that source's data on request — no support ticket required.</p>
+        <p style={{ marginTop: '12px' }}>You are never locked into your data with us: every connected source in your Data Sources panel has a "Right to Erasure" control that permanently and immediately deletes that source's data on request. No support ticket required.</p>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>8. Contact</h2>
         <p>Email us at <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>contact@thegodstool.com</a></p>
         <a href="/" style={{ display: 'inline-block', marginTop: '40px', color: '#a78bfa' }}>← Back to The God's Tool</a>

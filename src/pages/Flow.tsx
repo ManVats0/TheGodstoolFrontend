@@ -14,7 +14,7 @@ const EMPTY_STATE_TOUR: TourStep[] = [
   {
     target: '[data-tour="tour-goto-sources"]',
     title: 'Welcome to Pipeline Builder 👋',
-    body: 'Every pipeline starts with a data source. Click here to upload a CSV or connect a database, spreadsheet, or API — then come back to build your cleaning pipeline.',
+    body: 'Every pipeline starts with a data source. Click here to upload a CSV or connect a database, spreadsheet, or API. Then come back to build your cleaning pipeline.',
     placement: 'top',
   },
 ]
@@ -26,31 +26,31 @@ const MAIN_TOUR: TourStep[] = [
   },
   {
     target: '[data-tour="tour-source-select"]',
-    title: 'Step 1 — Pick your source',
+    title: 'Step 1. Pick your source',
     body: 'Choose which uploaded file, database table, sheet, or connected source you want to clean and transform.',
     placement: 'bottom',
   },
   {
     target: '[data-tour="tour-destination"]',
-    title: 'Step 2 — Set your destination',
+    title: 'Step 2. Set your destination',
     body: 'Name your cleaned output file, or connect Google Sheets, MySQL, BigQuery, and more as a live write-back destination.',
     placement: 'bottom',
   },
   {
     target: '[data-tour="tour-add-transform"]',
-    title: 'Step 3 — Add transformations',
+    title: 'Step 3. Add transformations',
     body: 'Click "+ Add Transformation" to remove duplicates, fill missing values, standardize text, cap outliers, fix dates, or write your own SQL and AI rules.',
     placement: 'bottom',
   },
   {
     target: '[data-tour="tour-pipeline-flow"]',
-    title: 'Step 4 — Watch it connect',
+    title: 'Step 4. Watch it connect',
     body: 'Your source, transformations, and destination link up here in real time. Once you\'ve added at least one transformation, hit "Save Pipeline" below to schedule automatic runs.',
     placement: 'top',
   },
   {
     title: "You're all set! 🎉",
-    body: 'Build your pipeline, save it, and DataPipe will keep your data clean automatically — on whatever schedule you choose.',
+    body: 'Build your pipeline, save it, and DataPipe will keep your data clean automatically. On whatever schedule you choose.',
   },
 ]
 
@@ -225,7 +225,7 @@ const KIND_LABEL: Record<string, { icon: string; plain: string }> = {
   type_change: { icon: '🔄', plain: 'A column\'s data type changed (e.g. text → number)' },
 }
 
-const MIN_SCHEDULE_MS = 30_000 // matches the backend scheduler's poll interval — nothing faster can actually run more often anyway
+const MIN_SCHEDULE_MS = 30_000 // matches the backend scheduler's poll interval. Nothing faster can actually run more often anyway
 
 const SCHEDULE_PRESETS = [
   { label: '5 minutes',  value: '5m',     cron: '*/5 * * * *',  ms: 300_000 },
@@ -513,7 +513,7 @@ async function resolveConnectionId(name: string, type: string, config: any, cred
             console.error('resolveConnectionId: refresh of existing connection failed:', e)
           }
         } else {
-          console.warn(`resolveConnectionId: skipping refresh of "${name}" — new credentials were empty, keeping existing saved credentials intact.`)
+          console.warn(`resolveConnectionId: skipping refresh of "${name}". New credentials were empty, keeping existing saved credentials intact.`)
         }
         return match._id
       }
@@ -554,7 +554,7 @@ function buildConnectionPayload(kind: 'source' | 'destination', ctx: any): { nam
       // encrypted connection on the server with a blank one, breaking
       // Run Now / Analysis for a pipeline that used to work fine.
       if (!matchedMongoConn?.uri) {
-        console.warn(`buildConnectionPayload: no local MongoDB URI found for database "${database}" — skipping source connection sync to avoid wiping a working server-side connection.`)
+        console.warn(`buildConnectionPayload: no local MongoDB URI found for database "${database}". Skipping source connection sync to avoid wiping a working server-side connection.`)
         return null
       }
       return { name: s.name, type: 'mongodb', config: { database, collection, collections: [collection] }, credentials: { uri: matchedMongoConn.uri } }
@@ -625,7 +625,7 @@ function buildConnectionPayload(kind: 'source' | 'destination', ctx: any): { nam
 async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any, destPayload: any): Promise<{ serverId: string; sourceConnectionId: string | null } | null> {
   const token = getAuthToken()
   if (!token) {
-    console.warn('Not signed in — pipeline saved locally only and will NOT run automatically on the server.')
+    console.warn('Not signed in. Pipeline saved locally only and will NOT run automatically on the server.')
     return null
   }
   const sourceConnectionId = pipeline.sourceConnectionId
@@ -671,7 +671,7 @@ async function syncPipelineToServer(pipeline: SavedPipeline, sourcePayload: any,
 
 async function setPipelineApprovalStatus(serverId: string, status: 'approved' | 'pending_approval' | 'rejected') {
   const token = getAuthToken()
-  if (!token) { alert('Not signed in — cannot change approval status on server.'); return null }
+  if (!token) { alert('Not signed in. Cannot change approval status on server.'); return null }
   try {
     const res = await fetch(`${API_BASE}/api/pipelines/${serverId}/status`, {
       method: 'POST',
@@ -690,7 +690,7 @@ async function setPipelineApprovalStatus(serverId: string, status: 'approved' | 
 
 async function executePipelineOnServer(serverId: string) {
   const token = getAuthToken()
-  if (!token) { alert('Not signed in — cannot run on server.'); return }
+  if (!token) { alert('Not signed in. Cannot run on server.'); return }
   try {
     const res = await fetch(`${API_BASE}/api/pipelines/${serverId}/execute`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}` },
@@ -1043,7 +1043,7 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
             <div className="space-y-4">
               <div className="px-4 py-3 rounded-xl" style={{ background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-0.5">Run every day at a fixed time</p>
-                <p className="text-xs" style={{ color:'rgba(255,255,255,0.4)' }}>Pick a time — the pipeline runs automatically at that hour every day.</p>
+                <p className="text-xs" style={{ color:'rgba(255,255,255,0.4)' }}>Pick a time. The pipeline runs automatically at that hour every day.</p>
               </div>
               <div><label className="text-xs font-bold uppercase tracking-widest block mb-3" style={{ color:'rgba(255,255,255,0.4)' }}>Pick a time</label><DailyAtTimePicker value={dailyAtTime} onChange={setDailyAtTime} /></div>
               {dailyAtTime && (
@@ -1115,7 +1115,7 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
                 </button>
               </div>
             </div>
-            <p className="text-xs mb-3" style={{ color:'rgba(255,255,255,0.3)' }}>Optional — pipeline won't run before this date.</p>
+            <p className="text-xs mb-3" style={{ color:'rgba(255,255,255,0.3)' }}>Optional. Pipeline won't run before this date.</p>
             {showCalendar && <MiniCalendar value={startDate} onChange={d => { setStartDate(d); if (d) setShowCalendar(false) }} />}
             {startDate && !showCalendar && (
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)' }}>
@@ -1125,7 +1125,7 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
           </div>
           {scheduleTab==='frequency' && scheduleValue==='live' && (
   <div className="rounded-xl px-4 py-3" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)' }}>
-    <p className="text-xs font-bold" style={{ color:'#f87171' }}>⚡ Live mode polls every 5 seconds. Use only for actively updating sources — it makes a backend call every 5s.</p>
+    <p className="text-xs font-bold" style={{ color:'#f87171' }}>⚡ Live mode polls every 5 seconds. Use only for actively updating sources. It makes a backend call every 5s.</p>
   </div>
 )}
           {scheduleTab==='frequency' && scheduleValue!=='none' && scheduleValue!=='custom' && (
@@ -1311,7 +1311,7 @@ const popup = window.open(url, 'google-auth', 'width=500,height=600')
               <div className="rounded-xl p-4" style={{ background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1.5">🔒 Secure OAuth via Google</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  We use Google's standard sign-in screen. If you're already logged into Google in your browser, your accounts will be pre-populated for one-click selection — no URL copy-pasting needed.
+                  We use Google's standard sign-in screen. If you're already logged into Google in your browser, your accounts will be pre-populated for one-click selection. No URL copy-pasting needed.
                 </p>
               </div>
               <button
@@ -1428,7 +1428,7 @@ const popup = window.open(url, 'google-auth', 'width=500,height=600')
                         {isUnsupported && (
           <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
             style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>
-            Not a Sheet — upload as .xlsx to Drive then convert
+            Not a Sheet. Upload as .xlsx to Drive then convert
           </span>
         )}
         {selectedSheet === sheet && !isUnsupported && (
@@ -2163,7 +2163,7 @@ useEffect(() => {
       const failLog: PipelineLogEntry = {
         ...baseLog,
         status: 'failed',
-        steps: baseLog.steps.map(s => ({ ...s, status: 'failed' as const, message: 'Not signed in — cannot run this server-linked pipeline. Sign in and try again.' })),
+        steps: baseLog.steps.map(s => ({ ...s, status: 'failed' as const, message: 'Not signed in. Cannot run this server-linked pipeline. Sign in and try again.' })),
       }
       const updated = savedPipelines.map(p => p.id === pipeline.id ? { ...p, lastRun: failLog.timestamp, runCount: p.runCount + 1, logs: [failLog, ...p.logs].slice(0, 50) } : p)
       persistPipelines(updated)
@@ -2323,7 +2323,7 @@ const beforeAt = atIdx >= 0 ? (sourceObj?.name || '').slice(0, atIdx) : sourceOb
 const dotIdx = beforeAt.indexOf('.')
 const srcDatabase = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
 const srcTable = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
-console.log('[Pipeline] Parsed MySQL source — database:', srcDatabase, 'table:', srcTable, 'host:', srcHost)
+console.log('[Pipeline] Parsed MySQL source. Database:', srcDatabase, 'table:', srcTable, 'host:', srcHost)
         const mysqlConn = savedMySQL.find((c: any) =>
   c.host === srcHost && c.database === srcDatabase
 )
@@ -2394,7 +2394,7 @@ if (mysqlConn) {
         const dotIdx = beforeAt.indexOf('.')
         const srcDatabase = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
         const srcTable = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
-        console.log('[Pipeline] Parsed PostgreSQL source — database:', srcDatabase, 'table:', srcTable, 'host:', srcHost)
+        console.log('[Pipeline] Parsed PostgreSQL source. Database:', srcDatabase, 'table:', srcTable, 'host:', srcHost)
         const pgConn = savedPG.find((c: any) =>
           c.host === srcHost && c.database === srcDatabase
         )
@@ -3028,7 +3028,7 @@ if (mysqlConn) {
 
         let data: any = null
 if (!fileToUse) {
-  console.error(`[Pipeline] No file available to process — ${sourceObj?.type || 'source'} fetch may have failed or returned empty`)
+  console.error(`[Pipeline] No file available to process. ${sourceObj?.type || 'source'} fetch may have failed or returned empty`)
   const failLog: PipelineLogEntry = {
     ...log,
     status: 'failed',
@@ -3037,7 +3037,7 @@ if (!fileToUse) {
       name: t.label,
       status: 'failed' as const,
       duration: 0,
-      message: `Could not fetch source data from ${sourceObj?.type || 'the source'} "${sourceObj?.name || pipeline.sourceId}" — check its connection and table/collection name`,
+      message: `Could not fetch source data from ${sourceObj?.type || 'the source'} "${sourceObj?.name || pipeline.sourceId}". Check its connection and table/collection name`,
     })),
   }
   const updated = savedPipelines.map(p =>
@@ -3102,7 +3102,7 @@ if (writeModeVal === 'append') {
     formData.append('destination_file', destFile)
     console.log('[Pipeline] Appending onto:', destFile.name, destFile.size, 'bytes')
   } else {
-    console.warn('[Pipeline] Append mode but no destination file found — running as replace')
+    console.warn('[Pipeline] Append mode but no destination file found. Running as replace')
   }
 }
 
@@ -3174,7 +3174,7 @@ if (actualRowsIn > 0 || data?.download_url) {
         const csvText = await sheetRes.text()
 
         if (!csvText || csvText.trim().length === 0) {
-          console.error('[GSheets] Empty CSV — skipping sheet update')
+          console.error('[GSheets] Empty CSV. Skipping sheet update')
         } else {
           const storedSession = localStorage.getItem('datapro_session') || ''
           const updateRes = await fetch(`${API_BASE}/api/update-gsheet`, {
@@ -3364,7 +3364,7 @@ if (writeData.success) {
           })
           const writeData6 = await writeRes6.json()
           if (writeData6.success) {
-            console.log(`✅ AWS ${awsDestConn.service} write: ${destItem6} — ${writeData6.rows_written} rows`)
+            console.log(`✅ AWS ${awsDestConn.service} write: ${destItem6}. ${writeData6.rows_written} rows`)
           } else {
             console.error('[AWS write-back] failed:', writeData6.error)
             alert(`⚠️ AWS write failed: ${writeData6.error}`)
@@ -3552,7 +3552,7 @@ const realLog: PipelineLogEntry = {
     name: t.label,
     status: (data?.download_url ? 'success' : 'failed') as 'success' | 'failed' | 'skipped',
     duration: Math.floor((Date.now() - new Date(log.timestamp).getTime()) / pipeline.transformations.length),
-    message: !data?.download_url ? 'Transform failed — check backend logs' : undefined,
+    message: !data?.download_url ? 'Transform failed. Check backend logs' : undefined,
   })),
 }
     const updated = savedPipelines.map(p =>
@@ -3743,7 +3743,7 @@ allTransforms.forEach(tr => { const key=TRANSFORM_TO_CLEAN[tr.id]; if (key) clea
           return updated
         })
       } else {
-        console.warn(`Pipeline "${pipeline.name}" saved locally but not linked server-side — it will not run automatically unless this tab stays open.`)
+        console.warn(`Pipeline "${pipeline.name}" saved locally but not linked server-side. It will not run automatically unless this tab stays open.`)
       }
     })
 
@@ -3877,7 +3877,7 @@ setTimeout(() => {
             </button>
           )}
           {learnedRules.length > 0 && <button onClick={() => setShowRulesPanel(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.25)', color:'#a78bfa' }}>🧠 {learnedRules.length} rules</button>}
-          {runIssues.length > 0 && runStatus!=='GREEN' && <button onClick={() => setShowApprovalModal(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(239,68,68,0.12)', border:'1px solid rgba(239,68,68,0.25)', color:'#f87171' }}>⚠️ {runIssues.length} changes — Review</button>}
+          {runIssues.length > 0 && runStatus!=='GREEN' && <button onClick={() => setShowApprovalModal(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(239,68,68,0.12)', border:'1px solid rgba(239,68,68,0.25)', color:'#f87171' }}>⚠️ {runIssues.length} changes. Review</button>}
           {transformations.length > 0 && (
             <button onClick={() => setShowSQLDrawer(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background:'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.25)', color:'#818cf8' }}>
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h8M4 18h8"/></svg>SQL
@@ -3926,18 +3926,18 @@ setTimeout(() => {
     type === 'REST API'       ? (activeSource?.type as string) === 'rest' :
     type === 'GA4'            ? activeSource?.type === 'ga4' : false
   const sourceTooltips: Record<string, string> = {
-    'CSV': 'CSV — Upload a comma-separated values file',
-    'Google Sheets': 'Google Sheets — Live-connected spreadsheet',
-    'MySQL': 'MySQL — Relational database server',
-    'PostgreSQL': 'PostgreSQL — Relational database server',
-    'BigQuery': 'BigQuery — Google Cloud data warehouse',
-    'MongoDB': 'MongoDB — NoSQL document database',
-    'AWS': 'AWS — RDS, S3, Redshift, or DynamoDB',
-    'GCS': 'Google Cloud Storage — File bucket storage',
-    'Cloud SQL': 'Cloud SQL — GCP managed PostgreSQL/MySQL',
-    'Databricks': 'Databricks — SQL Warehouse via token',
-    'REST API': 'REST API — Any HTTP/JSON endpoint',
-    'GA4': 'Google Analytics 4 — Web analytics reports',
+    'CSV': 'CSV. Upload a comma-separated values file',
+    'Google Sheets': 'Google Sheets. Live-connected spreadsheet',
+    'MySQL': 'MySQL. Relational database server',
+    'PostgreSQL': 'PostgreSQL. Relational database server',
+    'BigQuery': 'BigQuery. Google Cloud data warehouse',
+    'MongoDB': 'MongoDB. NoSQL document database',
+    'AWS': 'AWS. RDS, S3, Redshift, or DynamoDB',
+    'GCS': 'Google Cloud Storage. File bucket storage',
+    'Cloud SQL': 'Cloud SQL. GCP managed PostgreSQL/MySQL',
+    'Databricks': 'Databricks. SQL Warehouse via token',
+    'REST API': 'REST API. Any HTTP/JSON endpoint',
+    'GA4': 'Google Analytics 4. Web analytics reports',
   }
   return (
     <button key={type}
@@ -4082,16 +4082,16 @@ setTimeout(() => {
       type === 'BigQuery' ? !!bqDestination :
       type === 'MongoDB' ? !!mongoDestination : false
     const destTooltips: Record<string, string> = {
-      'CSV': 'CSV — Downloadable cleaned file',
-      'Google Sheets': 'Google Sheets — Write cleaned data back to a sheet',
-      'MySQL': 'MySQL — Relational database server',
-      'PostgreSQL': 'PostgreSQL — Relational database server',
-      'BigQuery': 'BigQuery — Google Cloud data warehouse',
-      'MongoDB': 'MongoDB — NoSQL document database',
-      'AWS': 'AWS — RDS, S3, Redshift, or DynamoDB',
-      'GCS': 'Google Cloud Storage — File bucket storage',
-      'Cloud SQL': 'Cloud SQL — GCP managed PostgreSQL/MySQL',
-      'Databricks': 'Databricks — SQL Warehouse via token',
+      'CSV': 'CSV. Downloadable cleaned file',
+      'Google Sheets': 'Google Sheets. Write cleaned data back to a sheet',
+      'MySQL': 'MySQL. Relational database server',
+      'PostgreSQL': 'PostgreSQL. Relational database server',
+      'BigQuery': 'BigQuery. Google Cloud data warehouse',
+      'MongoDB': 'MongoDB. NoSQL document database',
+      'AWS': 'AWS. RDS, S3, Redshift, or DynamoDB',
+      'GCS': 'Google Cloud Storage. File bucket storage',
+      'Cloud SQL': 'Cloud SQL. GCP managed PostgreSQL/MySQL',
+      'Databricks': 'Databricks. SQL Warehouse via token',
     }
     return (
       <button key={type}
@@ -5039,7 +5039,7 @@ setTimeout(() => {
                         )}
                         <button disabled={!can('pipeline.execute')} onClick={() => runPipeline(pipeline,'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.15)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
                         {pipeline.serverId && (
-                          <button disabled={!can('pipeline.execute')} onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side — works even if this tab is closed">☁ Run on Server</button>
+                          <button disabled={!can('pipeline.execute')} onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side. Works even if this tab is closed">☁ Run on Server</button>
                         )}
                         <button onClick={() => {
                           if (window.confirm(`Permanently delete pipeline "${pipeline.name}"? This cannot be undone.`)) {
@@ -5179,7 +5179,7 @@ setTimeout(() => {
             </div>
             <div style={{ background:'rgba(255,255,255,0.01)' }}>
               {isFirstRun?(
-                <div className="px-6 py-6"><p className="font-semibold text-white mb-1">No baseline yet — first upload</p><p className="text-xs" style={{ color:'rgba(255,255,255,0.4)' }}>Save a pipeline to set the baseline.</p></div>
+                <div className="px-6 py-6"><p className="font-semibold text-white mb-1">No baseline yet. First upload</p><p className="text-xs" style={{ color:'rgba(255,255,255,0.4)' }}>Save a pipeline to set the baseline.</p></div>
               ):runIssues.length===0?(
                 <div className="px-6 py-5 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:'rgba(34,197,94,0.1)', border:'1px solid rgba(34,197,94,0.2)' }}>✅</div>
@@ -5189,7 +5189,7 @@ setTimeout(() => {
                 <div className="p-5 space-y-3">
                   <div className="rounded-xl px-4 py-3" style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)' }}>
                     <p className="text-sm font-semibold text-white">{runIssues.length} change{runIssues.length!==1?'s':''} detected</p>
-                    <p className="text-xs mt-0.5" style={{ color:'rgba(255,255,255,0.4)' }}>{runStatus==='RED'?'Breaking — pipeline paused until reviewed.':'Minor — review recommended.'}</p>
+                    <p className="text-xs mt-0.5" style={{ color:'rgba(255,255,255,0.4)' }}>{runStatus==='RED'?'Breaking. Pipeline paused until reviewed.':'Minor. Review recommended.'}</p>
                   </div>
                   <button onClick={() => setShowApprovalModal(true)} className="w-full py-3 rounded-xl text-sm font-bold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)' }}>Review All Changes →</button>
                 </div>
@@ -5348,7 +5348,7 @@ setTimeout(() => {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">Require approval before running</p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Pipeline will be saved as pending — it won't execute (manually or on schedule) until approved</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Pipeline will be saved as pending. It won't execute (manually or on schedule) until approved</p>
                 </div>
               </div>
               <div className="rounded-xl p-3" style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)' }}>
@@ -5429,7 +5429,7 @@ setTimeout(() => {
                     </button>
                   </div>
                 </div>
-                <p className="text-xs mb-3" style={{ color:'rgba(255,255,255,0.3)' }}>Optional — pipeline won't run before this date. Leave empty to start immediately.</p>
+                <p className="text-xs mb-3" style={{ color:'rgba(255,255,255,0.3)' }}>Optional. Pipeline won't run before this date. Leave empty to start immediately.</p>
                 {saveShowCalendar&&<MiniCalendar value={saveStartDate} onChange={d => { setSaveStartDate(d); if (d) setSaveShowCalendar(false) }} />}
                 {saveStartDate&&!saveShowCalendar&&(<div className="flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)' }}><p className="text-xs" style={{ color:'#c4b5fd' }}>Starts on <strong>{fmtDateSave(saveStartDate)}</strong></p></div>)}
               </div>
@@ -5490,7 +5490,7 @@ setTimeout(() => {
             {(() => { const latestLog=getLatestLog(selectedPipelineForLogs); if (!latestLog||latestLog.status==='success') return null; return (
               <div className="px-6 py-3 flex items-center gap-3" style={{ background:'rgba(239,68,68,0.08)', borderBottom:'1px solid rgba(239,68,68,0.15)' }}>
                 <span className="text-sm">⚠️</span>
-                <div className="flex-1"><p className="text-xs font-bold" style={{ color:'#f87171' }}>Last run failed — {fmtRelative(latestLog.timestamp)}</p><p className="text-xs" style={{ color:'rgba(255,255,255,0.45)' }}>{latestLog.steps.find(s => s.status==='failed')?.message||'Unknown error'}{' · '}<button onClick={() => setExpandedLogId(latestLog.id)} className="underline" style={{ color:'#f87171' }}>See details</button></p></div>
+                <div className="flex-1"><p className="text-xs font-bold" style={{ color:'#f87171' }}>Last run failed. {fmtRelative(latestLog.timestamp)}</p><p className="text-xs" style={{ color:'rgba(255,255,255,0.45)' }}>{latestLog.steps.find(s => s.status==='failed')?.message||'Unknown error'}{' · '}<button onClick={() => setExpandedLogId(latestLog.id)} className="underline" style={{ color:'#f87171' }}>See details</button></p></div>
                 <button onClick={() => navigate('/audit-logs')} className="text-xs px-3 py-1.5 rounded-lg font-semibold flex-shrink-0" style={{ background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.3)', color:'#f87171' }}>View in Audit Log →</button>
               </div>
             )})()}
@@ -5677,7 +5677,7 @@ setTimeout(() => {
       {showApprovalModal&&(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:'rgba(0,0,0,0.8)' }} onClick={() => setShowApprovalModal(false)}>
           <div className="rounded-2xl w-full max-w-xl max-h-[85vh] overflow-auto" style={{ background:'#0d0a1a', border:'1px solid rgba(255,255,255,0.1)' }} onClick={e => e.stopPropagation()}>
-            <div className="p-5" style={{ borderBottom:'1px solid rgba(255,255,255,0.08)' }}><h3 className="font-bold text-white mb-1">Review Data Changes</h3><p className="text-xs" style={{ color:'rgba(255,255,255,0.45)' }}>Tick the changes you accept — the system will remember and auto-handle them next time.</p></div>
+            <div className="p-5" style={{ borderBottom:'1px solid rgba(255,255,255,0.08)' }}><h3 className="font-bold text-white mb-1">Review Data Changes</h3><p className="text-xs" style={{ color:'rgba(255,255,255,0.45)' }}>Tick the changes you accept. The system will remember and auto-handle them next time.</p></div>
             <div className="p-5 space-y-3">
               {runIssues.map((issue: any) => {
                 const sev=SEV_COLOR[issue.severity]||SEV_COLOR.YELLOW; const kind=KIND_LABEL[issue.kind]||{icon:'❓',plain:issue.description}; const isSelected=selectedIssueIds.has(issue.id)
@@ -5896,7 +5896,7 @@ setTimeout(() => {
               id: crypto.randomUUID(), time: new Date().toLocaleString(),
               action: 'add_transformation', entity_type: 'transformation',
               entity_id: customTransform.id,
-              details: `Added AI Custom Rule: "${label}" — ${instruction}`,
+              details: `Added AI Custom Rule: "${label}". ${instruction}`,
               user: 'local_user',
             })
             setShowAICustomModal(false)

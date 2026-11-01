@@ -847,7 +847,7 @@ const openGooglePicker = async () => {
             if (data && !data.error) {
               conn = { uri: data.credentials?.uri, database: data.config?.database }
             }
-          } catch { /* fall through — analysis will surface a clear error */ }
+          } catch { /* fall through. Analysis will surface a clear error */ }
         }
         if (conn) {
           localStorage.setItem('datapro_active_mongo_source', JSON.stringify({ ...conn, collection }))
@@ -1212,7 +1212,7 @@ const handleLockedSource = () => {
                               : (s.type as string) === 'ga4'
                               ? `Analyze (${s.name.split('/').pop() || 'report'})`
                               : 'Analyze'
-                          return getCachedAnalysis(s.name) ? `${label} — Last Run →` : `${label} →`
+                          return getCachedAnalysis(s.name) ? `${label}. Last Run →` : `${label} →`
                         })()}
                       </button>
                       <button hidden={!can('connection.erase')} onClick={() => setExpandedSourceId(prev => prev === s.id ? null : s.id)}
@@ -1299,7 +1299,7 @@ const handleLockedSource = () => {
                           />
                           <div>
                             <label className="text-xs font-semibold block mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                              Retention (days) — auto-erase data after this many days of inactivity
+                              Retention (days). Auto-erase data after this many days of inactivity
                             </label>
                             <div className="flex gap-2">
                               <input
@@ -1675,7 +1675,7 @@ const handleLockedSource = () => {
                     <div className="rounded-xl p-4" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(52,211,153,0.2)' }}>
                       <p className="text-xs font-bold text-white mb-1.5">🔒 Secure OAuth 2.0 via Google</p>
                       <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                        We use Google's standard sign-in screen. If you're already logged into Google in this browser, your account will be pre-populated — one click and you're in.
+                        We use Google's standard sign-in screen. If you're already logged into Google in this browser, your account will be pre-populated. One click and you're in.
                       </p>
                       <button className="mt-2 text-xs underline"
                         style={{ color: 'rgba(52,211,153,0.6)', background: 'none', border: 'none', cursor: 'pointer' }}
@@ -1932,7 +1932,7 @@ const handleLockedSource = () => {
               <div className="rounded-xl p-3" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔒 SSL/TLS · Connection pool · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  Credentials are saved in your browser only. Other users on this tool connect with their own MySQL — your database is never shared.
+                  Credentials are saved in your browser only. Other users on this tool connect with their own MySQL. Your database is never shared.
                 </p>
               </div>
 
@@ -2036,7 +2036,7 @@ const handleLockedSource = () => {
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>
-                      ✅ Health check passed — database is reachable
+                      ✅ Health check passed. Database is reachable
                     </p>
                   </div>
 
@@ -2359,7 +2359,7 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — database is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed. Database is reachable</p>
                   </div>
                   {postgresTablesLoading && (
                     <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
@@ -2592,7 +2592,7 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — BigQuery is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed. BigQuery is reachable</p>
                   </div>
 
                   {bqDatasets.length > 0 && (
@@ -2849,7 +2849,7 @@ if (tablesData.tables?.length > 0) {
               <div className="rounded-xl p-3" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
                 <p className="text-xs font-bold text-white mb-1">🔒 Connection URI · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  Get this from MongoDB Atlas → Install MongoDB Atlas → Connect → Drivers. Format: mongodb+srv://user:pass@cluster.mongodb.net/ — Credentials stay in your browser only.
+                  Get this from MongoDB Atlas → Install MongoDB Atlas → Connect → Drivers. Format: mongodb+srv://user:pass@cluster.mongodb.net/. Credentials stay in your browser only.
                 </p>
               </div>
 
@@ -2890,7 +2890,7 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — MongoDB is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed. MongoDB is reachable</p>
                   </div>
                   {mongoCollectionsLoading && (
                     <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading collections…</p>
@@ -3611,7 +3611,7 @@ if (tablesData.tables?.length > 0) {
               )}
               {costExplorerStatus === 'ok' && costExplorerData.length > 0 && (
                 <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                  <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ {costExplorerData.length} rows fetched — ready to add as source</p>
+                  <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ {costExplorerData.length} rows fetched. Ready to add as source</p>
                 </div>
               )}
               <div className="flex gap-3 pt-1">
@@ -4168,7 +4168,7 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed — Databricks is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed. Databricks is reachable</p>
                   </div>
                   {databricksTablesLoading && (
                     <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
@@ -4682,7 +4682,7 @@ if (tablesData.tables?.length > 0) {
                   1. GCP Console → IAM → Service Accounts → Create key (JSON)<br/>
                   2. In GA4: Admin → Property Access Management → Add user (service account email) with Viewer role<br/>
                   3. Find your Property ID in GA4: Admin → Property Settings (format: 123456789)<br/>
-                  Key stays in your browser only — never shared. Date ranges are selected during analysis.
+                  Key stays in your browser only. Never shared. Date ranges are selected during analysis.
                 </p>
               </div>
 

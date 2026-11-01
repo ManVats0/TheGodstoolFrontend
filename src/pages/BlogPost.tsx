@@ -12,7 +12,7 @@ export default function BlogPost() {
 }
 
 function NotFound() {
-  useSeo({ title: "Post not found — The God's Tool", description: 'This post does not exist.', path: '/blog' })
+  useSeo({ title: "Post not found | The God's Tool", description: 'This post does not exist.', path: '/blog' })
   return (
     <BlogShell>
       <div className="gb-wrap gb-empty" style={{ paddingTop: 96 }}>
@@ -34,7 +34,7 @@ function Article({ post }: { post: Post }) {
   const [copied, setCopied] = useState(false)
 
   useSeo({
-    title: `${post.title} — The God's Tool`, description: desc, path: `/blog/${post.slug}`, type: 'article',
+    title: `${post.title} | The God's Tool`, description: desc, path: `/blog/${post.slug}`, type: 'article',
     jsonLd: {
       '@context': 'https://schema.org', '@type': 'BlogPosting', headline: post.title, description: desc, datePublished: post.published,
       mainEntityOfPage: url, url, author: { '@type': 'Organization', name: "The God's Tool" },

@@ -8,7 +8,7 @@ const STEPS_MYSQL = [
   {
     n: 1,
     title: 'Install the dependencies',
-    body: 'Open a terminal on the machine that can reach your MySQL database. Run the command below. This installs the two libraries the agent needs — websockets for the secure tunnel and aiomysql to talk to MySQL.',
+    body: 'Open a terminal on the machine that can reach your MySQL database. Run the command below. This installs the two libraries the agent needs. Websockets for the secure tunnel and aiomysql to talk to MySQL.',
     code: 'pip install websockets aiomysql',
   },
   {
@@ -20,19 +20,19 @@ const STEPS_MYSQL = [
   {
     n: 3,
     title: 'Get an agent token',
-    body: 'The server needs to trust your agent. Generate a token by calling the admin endpoint once. Save the token — you will paste it into the agent script next.',
+    body: 'The server needs to trust your agent. Generate a token by calling the admin endpoint once. Save the token. You will paste it into the agent script next.',
     code: 'curl -X POST http://localhost:8000/api/agent/token \\\n  -H "Content-Type: application/json" \\\n  -d \'{"label": "my-laptop"}\'',
   },
   {
     n: 4,
     title: 'Run the agent',
-    body: 'Start the agent on the machine with database access. It will prompt you for the server URL, your token, and the database credentials. Nothing is sent to any third party — all traffic goes directly between your machine and your own backend server.',
+    body: 'Start the agent on the machine with database access. It will prompt you for the server URL, your token, and the database credentials. Nothing is sent to any third party. All traffic goes directly between your machine and your own backend server.',
     code: 'python ~/datapro/agent.py',
   },
   {
     n: 5,
     title: 'Fill in the prompts',
-    body: 'The agent asks you five things:\n\n  Server URL  — the URL of your running backend, e.g. https://your-app.up.railway.app\n  Token       — the token you got in step 3\n  DB type     — type "mysql"\n  Host        — your database hostname, e.g. db.internal.company.com\n  Port        — usually 3306\n  Username    — your MySQL username\n  Password    — your MySQL password (hidden while you type)\n  Database    — the database name\n  SSL         — y or n',
+    body: 'The agent asks you five things:\n\n  Server URL . The URL of your running backend, e.g. https://your-app.up.railway.app\n  Token      , the token you got in step 3\n  DB type    , type "mysql"\n  Host       . Your database hostname, e.g. db.internal.company.com\n  Port       , usually 3306\n  Username   , your MySQL username\n  Password   , your MySQL password (hidden while you type)\n  Database   , the database name\n  SSL        . Y or n',
     code: '',
   },
   {
@@ -78,13 +78,13 @@ const STEPS_MONGODB: typeof STEPS_MYSQL = [
   {
     n: 5,
     title: 'Fill in the prompts',
-    body: 'The agent asks you:\n\n  Server URL  — the URL of your running backend\n  Token       — the token from step 3\n  DB type     — type "mongodb"\n  Host        — your MongoDB hostname, e.g. mongo.internal.company.com\n  Port        — usually 27017\n  Username    — your MongoDB username\n  Password    — your MongoDB password (hidden while you type)\n  Database    — the database (auth source) name\n  SSL         — y or n',
+    body: 'The agent asks you:\n\n  Server URL , the URL of your running backend\n  Token      , the token from step 3\n  DB type    , type "mongodb"\n  Host       , your MongoDB hostname, e.g. mongo.internal.company.com\n  Port       , usually 27017\n  Username   , your MongoDB username\n  Password   , your MongoDB password (hidden while you type)\n  Database   , the database (auth source) name\n  SSL        . Y or n',
     code: '',
   },
   {
     n: 6,
     title: 'Add the source in the browser',
-    body: 'Go to Data Sources → Add New → MongoDB. Enter the same host and database name you used in the agent prompts. Click "Test Connection" — the backend routes it through the tunnel automatically.',
+    body: 'Go to Data Sources → Add New → MongoDB. Enter the same host and database name you used in the agent prompts. Click "Test Connection". The backend routes it through the tunnel automatically.',
     code: '',
   },
 ]
@@ -117,7 +117,7 @@ const STEPS_BIGQUERY: typeof STEPS_MYSQL = [
   {
     n: 5,
     title: 'Fill in the prompts',
-    body: 'The agent asks you:\n\n  Server URL            — the URL of your running backend\n  Token                 — the token from step 3\n  DB type               — type "bigquery"\n  GCP Project ID        — your Google Cloud project ID\n  Dataset name          — optional; leave blank to see all datasets\n  Service account JSON  — full path to your downloaded .json key file',
+    body: 'The agent asks you:\n\n  Server URL           , the URL of your running backend\n  Token                , the token from step 3\n  DB type              , type "bigquery"\n  GCP Project ID       , your Google Cloud project ID\n  Dataset name         , optional; leave blank to see all datasets\n  Service account JSON , full path to your downloaded .json key file',
     code: '',
   },
   {
@@ -156,7 +156,7 @@ const STEPS_DATABRICKS: typeof STEPS_MYSQL = [
   {
     n: 5,
     title: 'Fill in the prompts',
-    body: 'The agent asks you:\n\n  Server URL   — the URL of your running backend\n  Token        — the DataPro agent token from step 3\n  DB type      — type "databricks"\n  Workspace    — your Databricks workspace hostname, e.g. adb-123.azuredatabricks.net\n  HTTP Path    — found in SQL Warehouse → Connection Details, e.g. /sql/1.0/warehouses/abc123\n  Access Token — your Databricks Personal Access Token (hidden while you type)\n  Schema       — optional catalog/schema name, default is "default"',
+    body: 'The agent asks you:\n\n  Server URL  , the URL of your running backend\n  Token       , the DataPro agent token from step 3\n  DB type     , type "databricks"\n  Workspace   , your Databricks workspace hostname, e.g. adb-123.azuredatabricks.net\n  HTTP Path   . Found in SQL Warehouse → Connection Details, e.g. /sql/1.0/warehouses/abc123\n  Access Token, your Databricks Personal Access Token (hidden while you type)\n  Schema      , optional catalog/schema name, default is "default"',
     code: '',
   },
   {
@@ -195,7 +195,7 @@ const STEPS_REDSHIFT: typeof STEPS_MYSQL = [
   {
     n: 5,
     title: 'Fill in the prompts',
-    body: 'The agent asks you:\n\n  Server URL  — the URL of your running backend\n  Token       — the token from step 3\n  DB type     — type "redshift"\n  Host        — your Redshift cluster endpoint, e.g. cluster.abc123.us-east-1.redshift.amazonaws.com\n  Port        — usually 5439\n  Username    — your Redshift username, e.g. awsuser\n  Password    — your Redshift password (hidden while you type)\n  Database    — the database name\n  SSL         — y (Redshift requires SSL)',
+    body: 'The agent asks you:\n\n  Server URL , the URL of your running backend\n  Token      , the token from step 3\n  DB type    , type "redshift"\n  Host       , your Redshift cluster endpoint, e.g. cluster.abc123.us-east-1.redshift.amazonaws.com\n  Port       , usually 5439\n  Username   , your Redshift username, e.g. awsuser\n  Password   , your Redshift password (hidden while you type)\n  Database   , the database name\n  SSL        . Y (Redshift requires SSL)',
     code: '',
   },
   {
@@ -292,7 +292,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
           <div>
             <h1 className="text-2xl font-bold text-white">Secure Tunneling</h1>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              Connect private databases — no firewall changes needed
+              Connect private databases. No firewall changes needed
             </p>
           </div>
         </div>
@@ -324,7 +324,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
       >
         <h2 className="font-bold text-white text-base mb-2">What is tunneling and why do I need it?</h2>
         <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          Most company databases live inside a private network — behind a VPN, behind a corporate firewall, or on a server with no public IP. Your DataPro backend (the FastAPI server) cannot reach those databases directly.
+          Most company databases live inside a private network. Behind a VPN, behind a corporate firewall, or on a server with no public IP. Your DataPro backend (the FastAPI server) cannot reach those databases directly.
         </p>
         <p className="text-sm leading-relaxed mt-3" style={{ color: 'rgba(255,255,255,0.6)' }}>
           The agent is a small Python script you run on a machine that <em>can</em> reach the database. It opens a secure WebSocket connection to your backend and waits. When you run a pipeline or analysis in the browser, the backend sends the SQL query through that connection, the agent runs it locally on your database, and sends the results back. Your database never needs a public IP or an open firewall port.
@@ -466,7 +466,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
           {[
             {
               problem: '"Invalid token" when the agent connects',
-              fix: 'The token was not saved correctly. Run the curl command in step 3 again and paste the new token carefully — no extra spaces.',
+              fix: 'The token was not saved correctly. Run the curl command in step 3 again and paste the new token carefully. No extra spaces.',
             },
             {
               problem: 'Agent connects but queries time out',
@@ -478,7 +478,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
             },
             {
               problem: 'agent.py says "asyncpg not installed"',
-              fix: 'Run: pip install asyncpg  —  this is required for PostgreSQL only. MySQL uses aiomysql.',
+              fix: 'Run: pip install asyncpg .  this is required for PostgreSQL only. MySQL uses aiomysql.',
             },
             {
               problem: 'Connection works but I see wrong tables',
@@ -506,7 +506,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
         <div>
           <p className="text-sm font-semibold text-white mb-1">Security model</p>
           <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Your database credentials are entered interactively on the agent machine and never stored anywhere on the server. The WebSocket connection uses TLS (wss://) end-to-end. Tokens are random 32-byte secrets. The agent only executes SELECT queries — it cannot write to your database.
+            Your database credentials are entered interactively on the agent machine and never stored anywhere on the server. The WebSocket connection uses TLS (wss://) end-to-end. Tokens are random 32-byte secrets. The agent only executes SELECT queries. It cannot write to your database.
           </p>
         </div>
       </div>

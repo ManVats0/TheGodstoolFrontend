@@ -171,19 +171,19 @@ const DOCS: Record<string, {
       {
         heading: 'CSV upload',
         body: 'Drag any .csv file onto the drop zone on the Add New tab, or click to open the file browser. The file is parsed in the browser and held in memory. Once confirmed, the app navigates to Analysis and begins profiling automatically.',
-        tip: 'Files never leave your machine — they are processed by your local backend server only.',
+        tip: 'Files never leave your machine. They are processed by your local backend server only.',
         code: '// Accepted format\ncontent-type: text/csv\nencoding: UTF-8\nmax recommended size: 500 MB',
         codeLanguage: 'bash',
       },
       {
         heading: 'Google Sheets',
-        body: 'Click the Google Sheets tile on Add New. An OAuth 2.0 popup opens — sign in and grant read access (one-time per Google account). Your spreadsheets load from the Drive API. Select a spreadsheet, select a worksheet tab, and click Import. The sheet is downloaded as CSV and stored locally.',
+        body: 'Click the Google Sheets tile on Add New. An OAuth 2.0 popup opens. Sign in and grant read access (one-time per Google account). Your spreadsheets load from the Drive API. Select a spreadsheet, select a worksheet tab, and click Import. The sheet is downloaded as CSV and stored locally.',
         tip: 'If the OAuth popup is blocked, disable your browser\'s ad-blocker or popup blocker for localhost.',
         warning: 'Google Sheets connected as destinations are rate-limited to one write per 60 seconds by the backend to avoid Sheets API quota exhaustion.',
       },
       {
         heading: 'MySQL',
-        body: 'Fill in the connection form with your host, port (default 3306), username, password, and database name. Click Test Connection — the backend executes SELECT 1 as a health check. On success, the full table list loads. Select one or more tables and click Add Source.',
+        body: 'Fill in the connection form with your host, port (default 3306), username, password, and database name. Click Test Connection. The backend executes SELECT 1 as a health check. On success, the full table list loads. Select one or more tables and click Add Source.',
         params: [
           { name: 'host', type: 'string', required: true, description: 'Hostname or IP address of the MySQL server.' },
           { name: 'port', type: 'number', required: true, description: 'TCP port. Default: 3306.' },
@@ -202,7 +202,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'PostgreSQL',
-        body: 'Same connection flow as MySQL. Default port is 5432. The backend uses asyncpg for async queries. SSL toggle enables TLS — required for Supabase, AWS RDS, Neon, and other managed providers.',
+        body: 'Same connection flow as MySQL. Default port is 5432. The backend uses asyncpg for async queries. SSL toggle enables TLS, which is required for Supabase, AWS RDS, Neon, and other managed providers.',
         params: [
           { name: 'host', type: 'string', required: true, description: 'Hostname or IP of the PostgreSQL server.' },
           { name: 'port', type: 'number', required: true, description: 'TCP port. Default: 5432.' },
@@ -215,13 +215,13 @@ const DOCS: Record<string, {
       },
       {
         heading: 'BigQuery',
-        body: 'BigQuery is Google\'s managed data warehouse. To connect, you need a service account key — a JSON file that lets this app read your BigQuery data securely.\n\nStep 1: Open the Google Cloud Console → IAM & Admin → Service Accounts (console.cloud.google.com/iam-admin/serviceaccounts). Click "Create Service Account", give it any name.\n\nStep 2: On the next screen, grant it two roles: "BigQuery Data Viewer" and "BigQuery Job User". Click Done.\n\nStep 3: Click the service account you just created → Keys tab → Add Key → Create new key → JSON. A .json file downloads to your computer.\n\nStep 4: Come back here, click the BigQuery tile, paste the entire contents of that JSON file into the key field, enter your Project ID (visible in the top bar of the console), and click Test Connection. Your datasets and tables will load — select the ones you want and click Add Source.',
+        body: 'BigQuery is Google\'s managed data warehouse. To connect, you need a service account key, a JSON file that lets this app read your BigQuery data securely.\n\nStep 1: Open the Google Cloud Console → IAM & Admin → Service Accounts (console.cloud.google.com/iam-admin/serviceaccounts). Click "Create Service Account", give it any name.\n\nStep 2: On the next screen, grant it two roles: "BigQuery Data Viewer" and "BigQuery Job User". Click Done.\n\nStep 3: Click the service account you just created → Keys tab → Add Key → Create new key → JSON. A .json file downloads to your computer.\n\nStep 4: Come back here, click the BigQuery tile, paste the entire contents of that JSON file into the key field, enter your Project ID (visible in the top bar of the console), and click Test Connection. Your datasets and tables will load. Select the ones you want and click Add Source.',
         params: [
           { name: 'key_json', type: 'string (JSON)', required: true, description: 'Paste the full contents of the downloaded .json service account key file here.' },
-          { name: 'project', type: 'string', required: true, description: 'Your GCP Project ID — visible in the top bar of console.cloud.google.com. This is the ID (e.g. my-project-123), not the display name.' },
+          { name: 'project', type: 'string', required: true, description: 'Your GCP Project ID, visible in the top bar of console.cloud.google.com. This is the ID (e.g. my-project-123), not the display name.' },
           { name: 'dataset', type: 'string', required: true, description: 'The BigQuery dataset containing your tables. Loaded automatically after a successful connection.' },
         ],
-        tip: 'The service account only needs two roles: BigQuery Data Viewer + BigQuery Job User. You can create a dedicated service account just for this tool with read-only access — no write permissions needed.',
+        tip: 'The service account only needs two roles: BigQuery Data Viewer + BigQuery Job User. You can create a dedicated service account just for this tool with read-only access. No write permissions needed.',
         warning: 'BigQuery charges your GCP project for each query. This platform fetches up to 50,000 rows per table per run. Check your billing at console.cloud.google.com/billing before running large analyses.',
       },
       {
@@ -232,13 +232,13 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Cloud SQL',
-        body: 'Cloud SQL is Google\'s managed MySQL and PostgreSQL service. It connects the same way as a regular MySQL or PostgreSQL server — using a host, port, username, and password.\n\nStep 1: Open console.cloud.google.com/sql and open your Cloud SQL instance.\n\nStep 2: Go to Connections → Networking and enable a Public IP if you don\'t already have one. Add your current IP address to the Authorized Networks list.\n\nStep 3: Note the Public IP address shown on the instance overview page.\n\nStep 4: Click the Cloud SQL tile in Data Sources, enter the Public IP as the host, your database username and password, the database name, and click Test Connection.',
-        tip: 'If you do not want to expose a public IP, you can use the Secure Tunneling agent instead — run agent.py on a machine inside your GCP VPC that can reach the Cloud SQL private IP.',
+        body: 'Cloud SQL is Google\'s managed MySQL and PostgreSQL service. It connects the same way as a regular MySQL or PostgreSQL server, using a host, port, username, and password.\n\nStep 1: Open console.cloud.google.com/sql and open your Cloud SQL instance.\n\nStep 2: Go to Connections → Networking and enable a Public IP if you don\'t already have one. Add your current IP address to the Authorized Networks list.\n\nStep 3: Note the Public IP address shown on the instance overview page.\n\nStep 4: Click the Cloud SQL tile in Data Sources, enter the Public IP as the host, your database username and password, the database name, and click Test Connection.',
+        tip: 'If you do not want to expose a public IP, you can use the Secure Tunneling agent instead. Run agent.py on a machine inside your GCP VPC that can reach the Cloud SQL private IP.',
         warning: 'Always add only your specific IP to the Authorized Networks list, not 0.0.0.0/0 (all IPs). Leaving Cloud SQL open to all IPs is a security risk.',
       },
       {
         heading: 'MongoDB',
-        body: 'Paste your full connection URI and target database name. The backend connects via Motor (async MongoDB driver), runs a ping command as a health check, and lists all collections in the database. Select collections to connect. Documents are flattened — nested objects are serialized to JSON strings for tabular compatibility.',
+        body: 'Paste your full connection URI and target database name. The backend connects via Motor (async MongoDB driver), runs a ping command as a health check, and lists all collections in the database. Select collections to connect. Documents are flattened. Nested objects are serialized to JSON strings for tabular compatibility.',
         params: [
           { name: 'uri', type: 'string', required: true, description: 'Full MongoDB connection URI. Supports mongodb:// and mongodb+srv:// schemes.' },
           { name: 'database', type: 'string', required: true, description: 'Target database name.' },
@@ -248,8 +248,8 @@ const DOCS: Record<string, {
         note: 'Nested arrays and objects in documents are serialized as JSON strings in the CSV output. Deeply nested schemas may reduce analysis accuracy.',
       },
       {
-        heading: 'AWS — RDS, S3, Redshift, DynamoDB',
-        body: 'AWS sources connect using IAM access keys — a key ID and secret that identify a specific IAM user. This tool never stores these on any server; they stay in your browser only.\n\nStep 1: Open the AWS Console → IAM → Users (console.aws.amazon.com/iam/home#/users). Create a new user or select an existing one.\n\nStep 2: Attach the permissions your source needs:\n  • RDS MySQL / PostgreSQL: AmazonRDSReadOnlyAccess\n  • Amazon S3: AmazonS3ReadOnlyAccess\n  • Redshift: AmazonRedshiftReadOnlyAccess\n  • DynamoDB: AmazonDynamoDBReadOnlyAccess\n  • Cost Explorer: attach a custom policy with ce:GetCostAndUsage\n\nStep 3: Go to the user\'s Security credentials tab → Create access key. Copy the Access Key ID and Secret Access Key.\n\nStep 4: Click the AWS tile in Data Sources, select your service (RDS MySQL, RDS PostgreSQL, S3, Redshift, DynamoDB, or Cost Explorer), enter your Access Key ID and Secret, fill in the service-specific fields (host/port for RDS, bucket name for S3, table name for DynamoDB), and click Test Connection.',
+        heading: 'AWS. RDS, S3, Redshift, DynamoDB',
+        body: 'AWS sources connect using IAM access keys. A key ID and secret that identify a specific IAM user. This tool never stores these on any server; they stay in your browser only.\n\nStep 1: Open the AWS Console → IAM → Users (console.aws.amazon.com/iam/home#/users). Create a new user or select an existing one.\n\nStep 2: Attach the permissions your source needs:\n  • RDS MySQL / PostgreSQL: AmazonRDSReadOnlyAccess\n  • Amazon S3: AmazonS3ReadOnlyAccess\n  • Redshift: AmazonRedshiftReadOnlyAccess\n  • DynamoDB: AmazonDynamoDBReadOnlyAccess\n  • Cost Explorer: attach a custom policy with ce:GetCostAndUsage\n\nStep 3: Go to the user\'s Security credentials tab → Create access key. Copy the Access Key ID and Secret Access Key.\n\nStep 4: Click the AWS tile in Data Sources, select your service (RDS MySQL, RDS PostgreSQL, S3, Redshift, DynamoDB, or Cost Explorer), enter your Access Key ID and Secret, fill in the service-specific fields (host/port for RDS, bucket name for S3, table name for DynamoDB), and click Test Connection.',
         params: [
           { name: 'Access Key ID', type: 'string', required: true, description: 'From IAM → Users → Security credentials → Create access key.' },
           { name: 'Secret Access Key', type: 'string', required: true, description: 'Shown once when you create the access key. Copy it immediately.' },
@@ -264,7 +264,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'AWS Cost Explorer',
-        body: 'Cost Explorer pulls your AWS billing and usage data as a dataset you can analyze and clean.\n\nStep 1: Make sure Cost Explorer is enabled for your account — go to console.aws.amazon.com/cost-management/home and click "Enable Cost Explorer" if you see that option.\n\nStep 2: Create an IAM user with a policy that includes ce:GetCostAndUsage (or attach the AWS managed policy AWSBillingReadOnlyAccess).\n\nStep 3: Generate an access key for that user (IAM → Users → Security credentials → Create access key).\n\nStep 4: Click the Cost Explorer tile, enter your Access Key ID and Secret, choose a date range, granularity (Daily or Monthly), and grouping (by Service, Region, or Usage Type), then click Fetch Cost Data. The data loads as a CSV source ready for analysis.',
+        body: 'Cost Explorer pulls your AWS billing and usage data as a dataset you can analyze and clean.\n\nStep 1: Make sure Cost Explorer is enabled for your account. Go to console.aws.amazon.com/cost-management/home and click "Enable Cost Explorer" if you see that option.\n\nStep 2: Create an IAM user with a policy that includes ce:GetCostAndUsage (or attach the AWS managed policy AWSBillingReadOnlyAccess).\n\nStep 3: Generate an access key for that user (IAM → Users → Security credentials → Create access key).\n\nStep 4: Click the Cost Explorer tile, enter your Access Key ID and Secret, choose a date range, granularity (Daily or Monthly), and grouping (by Service, Region, or Usage Type), then click Fetch Cost Data. The data loads as a CSV source ready for analysis.',
         tip: 'Cost Explorer data is available from the date you enabled it. Historical data before that date is not available.',
         note: 'Cost Explorer API calls have a small cost ($0.01 per 1,000 requests). Each fetch in this tool counts as one request.',
       },
@@ -273,7 +273,7 @@ const DOCS: Record<string, {
       
       {
         heading: 'Databricks',
-        body: 'Databricks connects via a SQL Warehouse using a Personal Access Token (PAT). The platform calls your Databricks workspace REST API to list tables and fetch data as CSV for analysis and pipeline runs.\n\nStep 1: Workspace Host — the URL of your Databricks workspace, e.g. adb-1234567890123456.7.azuredatabricks.net (Azure) or dbc-xxxxx.cloud.databricks.com (AWS). Find it in the browser address bar when you are logged in.\n\nStep 2: HTTP Path — go to SQL Warehouses → click your warehouse → Connection Details tab → copy the HTTP Path (e.g. /sql/1.0/warehouses/xxxxxxxxxx).\n\nStep 3: Personal Access Token — go to your user icon → Settings → Developer → Access Tokens → Generate new token. Copy it immediately — it is shown only once.\n\nStep 4: Click the Databricks tile in Data Sources, fill in the workspace host, HTTP path, token, catalog, and schema, then click Test Connection. Select tables and click Add Source.',
+        body: 'Databricks connects via a SQL Warehouse using a Personal Access Token (PAT). The platform calls your Databricks workspace REST API to list tables and fetch data as CSV for analysis and pipeline runs.\n\nStep 1: Workspace Host. The URL of your Databricks workspace, e.g. adb-1234567890123456.7.azuredatabricks.net (Azure) or dbc-xxxxx.cloud.databricks.com (AWS). Find it in the browser address bar when you are logged in.\n\nStep 2: HTTP Path. Go to SQL Warehouses → click your warehouse → Connection Details tab → copy the HTTP Path (e.g. /sql/1.0/warehouses/xxxxxxxxxx).\n\nStep 3: Personal Access Token. Go to your user icon → Settings → Developer → Access Tokens → Generate new token. Copy it immediately. It is shown only once.\n\nStep 4: Click the Databricks tile in Data Sources, fill in the workspace host, HTTP path, token, catalog, and schema, then click Test Connection. Select tables and click Add Source.',
         params: [
           { name: 'host', type: 'string', required: true, description: 'Workspace hostname without https://, e.g. adb-1234.7.azuredatabricks.net' },
           { name: 'httpPath', type: 'string', required: true, description: 'HTTP path from SQL Warehouse Connection Details, e.g. /sql/1.0/warehouses/xxxxxxxxxx' },
@@ -282,7 +282,7 @@ const DOCS: Record<string, {
           { name: 'schema', type: 'string', required: false, description: 'Schema (database) name within the catalog. Default: default.' },
         ],
         tip: 'Set a long expiry (e.g. 90 days) on the PAT so pipelines do not break unexpectedly. Rotate and update the token in Data Sources before it expires.',
-        warning: 'The SQL Warehouse must be running (not terminated) when you test the connection and when pipelines execute. Databricks auto-terminates idle warehouses after a configurable timeout — start the warehouse manually before running a pipeline if it has been idle.',
+        warning: 'The SQL Warehouse must be running (not terminated) when you test the connection and when pipelines execute. Databricks auto-terminates idle warehouses after a configurable timeout. Start the warehouse manually before running a pipeline if it has been idle.',
         errors: [
           { code: '403 Forbidden', cause: 'PAT token is invalid, expired, or lacks permissions.', fix: 'Generate a new token in Databricks Settings → Developer → Access Tokens. Ensure it has CAN USE permission on the SQL Warehouse.' },
           { code: 'SQL Warehouse terminated', cause: 'The warehouse auto-terminated due to inactivity.', fix: 'Start the warehouse from the Databricks SQL Warehouses page before connecting or running pipelines.' },
@@ -303,7 +303,7 @@ const DOCS: Record<string, {
           { name: 'verify_ssl', type: 'boolean', required: false, description: 'Enable SSL certificate verification. Disable only for self-signed certificates on private networks.' },
         ],
         tip: 'For APIs that return paginated data, connect the base list endpoint (e.g. /api/v1/orders). The backend fetches the first page and uses it as the data sample for analysis.',
-        note: 'Source names are stored as rest:hostname/endpoint (e.g. rest:api.example.com/api/v1/users). Credentials stay in your browser localStorage only — never sent to any third-party server.',
+        note: 'Source names are stored as rest:hostname/endpoint (e.g. rest:api.example.com/api/v1/users). Credentials stay in your browser localStorage only. Never sent to any third-party server.',
         errors: [
           { code: 'Health check failed', cause: 'The test path returned a non-2xx status or the host is unreachable.', fix: 'Verify the base URL and test path. Confirm the API is publicly accessible or the backend can reach it. Try /api or / if /health does not exist.' },
           { code: 'SSL verification failed', cause: 'The API uses a self-signed or expired certificate.', fix: 'Toggle "Verify SSL" off in the connection form. Only do this for internal or development APIs.' },
@@ -312,7 +312,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Google Analytics 4 (GA4)',
-        body: 'Connect a GA4 property using a GCP service account. Unlike some analytics integrations, no date range is set during connection — you configure metrics and dimensions once, and the date range is selected freely during analysis, just like Looker Studio.\n\nStep 1: Open console.cloud.google.com/iam-admin/serviceaccounts. Create a service account and generate a JSON key (Keys tab → Add Key → JSON). Download the file.\n\nStep 2: In your GA4 property, go to Admin → Property Access Management → Add users. Enter the service account email address (found in the JSON file under client_email) and assign the Viewer role.\n\nStep 3: Find your GA4 Property ID: Admin → Property Settings → Property ID (a numeric ID like 123456789).\n\nStep 4: Click the Google Analytics 4 tile in Data Sources, paste the JSON key, enter the Property ID, set your desired metrics and dimensions, then click Test Connection. Click Add Source to save.',
+        body: 'Connect a GA4 property using a GCP service account. Unlike some analytics integrations, no date range is set during connection. You configure metrics and dimensions once, and the date range is selected freely during analysis, just like Looker Studio.\n\nStep 1: Open console.cloud.google.com/iam-admin/serviceaccounts. Create a service account and generate a JSON key (Keys tab → Add Key → JSON). Download the file.\n\nStep 2: In your GA4 property, go to Admin → Property Access Management → Add users. Enter the service account email address (found in the JSON file under client_email) and assign the Viewer role.\n\nStep 3: Find your GA4 Property ID: Admin → Property Settings → Property ID (a numeric ID like 123456789).\n\nStep 4: Click the Google Analytics 4 tile in Data Sources, paste the JSON key, enter the Property ID, set your desired metrics and dimensions, then click Test Connection. Click Add Source to save.',
         params: [
           { name: 'propertyId', type: 'string', required: true, description: 'Numeric GA4 Property ID from Admin → Property Settings. Format: 123456789.' },
           { name: 'keyJson', type: 'string (JSON)', required: true, description: 'Full contents of the GCP service account JSON key file.' },
@@ -320,7 +320,7 @@ const DOCS: Record<string, {
           { name: 'dimensions', type: 'string (comma-separated)', required: true, description: 'GA4 dimensions to fetch, e.g. date,sessionDefaultChannelGroup,country,deviceCategory.' },
         ],
         tip: 'Common metrics: sessions, activeUsers, newUsers, screenPageViews, bounceRate, averageSessionDuration, conversions. Common dimensions: date, country, city, deviceCategory, sessionDefaultChannelGroup, pagePath, browser.',
-        note: 'Date ranges are not set during connection. The connection stores a wide default window (365 days) internally; the actual date range you want to analyze is selected in the Analysis view after connection — exactly like Looker Studio GA4 connectors.',
+        note: 'Date ranges are not set during connection. The connection stores a wide default window (365 days) internally; the actual date range you want to analyze is selected in the Analysis view after connection. Exactly like Looker Studio GA4 connectors.',
         warning: 'The service account must be granted Viewer access inside the GA4 property itself (not just in GCP IAM). Without this step the health check will fail with a permission error even if the JSON key is valid.',
         errors: [
           { code: 'Permission denied', cause: 'The service account was not added to the GA4 property as a Viewer.', fix: 'In GA4: Admin → Property Access Management → Add users → enter the service account email → assign Viewer role.' },
@@ -330,17 +330,17 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Removing a source',
-        body: 'Click the ✕ button on any source card in the Connected Sources tab. The source is removed from the app state immediately. For MySQL, PostgreSQL, BigQuery, and MongoDB sources, the saved connection record is also deleted from localStorage — the connection will not attempt to reconnect on the next page load.',
+        body: 'Click the ✕ button on any source card in the Connected Sources tab. The source is removed from the app state immediately. For MySQL, PostgreSQL, BigQuery, and MongoDB sources, the saved connection record is also deleted from localStorage. The connection will not attempt to reconnect on the next page load.',
         warning: 'Removing a source does not delete any data from the underlying database. It only removes the connection configuration from the browser.',
       },
       {
         heading: 'Data governance: retention & erasure',
-        body: 'Every connected source (any source with a saved backend connection — MySQL, PostgreSQL, MongoDB, BigQuery, AWS, GCS, Cloud SQL, or Databricks) exposes a ⚙ governance panel. Click the ⚙ button on a source card to expand it. Plain CSV uploads do not have a backend connection and show an explanatory note instead of controls.',
+        body: 'Every connected source (any source with a saved backend connection. MySQL, PostgreSQL, MongoDB, BigQuery, AWS, GCS, Cloud SQL, or Databricks) exposes a ⚙ governance panel. Click the ⚙ button on a source card to expand it. Plain CSV uploads do not have a backend connection and show an explanatory note instead of controls.',
         params: [
           { name: 'Retention (days)', type: 'number | null', required: false, description: 'When set, the server automatically drops the entire table, collection, or file this connection points to once it has gone untouched for that many days. Leave empty to disable.' },
-          { name: 'Erase Now', type: 'action', required: false, description: 'Immediately and permanently deletes all data this connection points to — the entire table/collection/file, not row-level filtering. Used for DPDP/GDPR right-to-erasure requests.' },
+          { name: 'Erase Now', type: 'action', required: false, description: 'Immediately and permanently deletes all data this connection points to. The entire table/collection/file, not row-level filtering. Used for DPDP/GDPR right-to-erasure requests.' },
         ],
-        warning: 'Both retention auto-purge and manual erasure are irreversible whole-object deletions (DROP TABLE / collection.drop() / file delete) — not row-level filtering by data subject. There is no undo.',
+        warning: 'Both retention auto-purge and manual erasure are irreversible whole-object deletions (DROP TABLE / collection.drop() / file delete). Not row-level filtering by data subject. There is no undo.',
         note: 'Every retention change and erasure (automatic or manual) is recorded in Audit Logs under the connection.retention_updated, connection.retention_erased, and connection.erased actions, including which user or the scheduler triggered it.',
       },
       {
@@ -363,7 +363,7 @@ const DOCS: Record<string, {
     sections: [
       {
         heading: 'Overview',
-        body: 'The Data Catalog is the metadata and governance layer of the platform. Every source registered in Data Sources automatically appears here with a business description, classification tags, data owner attribution, and profiling status. The catalog is read-only — structural changes are made in Data Sources.',
+        body: 'The Data Catalog is the metadata and governance layer of the platform. Every source registered in Data Sources automatically appears here with a business description, classification tags, data owner attribution, and profiling status. The catalog is read-only. Structural changes are made in Data Sources.',
         note: 'The catalog updates in real time as sources are added or removed. No manual refresh is needed.',
       },
       {
@@ -374,15 +374,15 @@ const DOCS: Record<string, {
           { name: 'Business description', type: 'string', required: false, description: 'Auto-generated description derived from the source name and upstream system.' },
           { name: 'Tags', type: 'string[]', required: false, description: 'Governance classification tags. Default set: Sensitive, MyGov, Finance, Internal.', anchorTarget: 'governance-tags' },
           { name: 'Profiling status', type: 'enum', required: false, description: '"Profiled" (analysis has run) or "Needs Profiling" (no analysis result exists).', anchorTarget: 'governance-tags' },
-          { name: 'Row count', type: 'number', required: false, description: 'Populated after a successful Analysis run. Shows — until then.' },
-          { name: 'Column count', type: 'number', required: false, description: 'Populated after a successful Analysis run. Shows — until then.' },
+          { name: 'Row count', type: 'number', required: false, description: 'Populated after a successful Analysis run. Shows. Until then.' },
+          { name: 'Column count', type: 'number', required: false, description: 'Populated after a successful Analysis run. Shows. Until then.' },
           { name: 'Data Owner', type: 'string', required: false, description: 'Currently hardcoded to "Local User". Editable in a future release.' },
           { name: 'Last Updated', type: 'date', required: false, description: 'The date the source was added to the platform.' },
         ],
       },
       {
         heading: 'Search and filter',
-        body: 'The search bar performs a full-text match across four fields simultaneously: source name, business description, tags, and data owner. The Owner filter and Date filter add further constraints. All active filters combine with AND logic — a result must satisfy every active filter to appear.',
+        body: 'The search bar performs a full-text match across four fields simultaneously: source name, business description, tags, and data owner. The Owner filter and Date filter add further constraints. All active filters combine with AND logic. A result must satisfy every active filter to appear.',
         tip: 'Search is case-insensitive and supports partial matches. Searching "fin" will match sources tagged "Finance".',
       },
       {
@@ -410,12 +410,12 @@ const DOCS: Record<string, {
       },
       {
         heading: 'PII detection',
-        body: 'Every Analysis run scans column names and a sample of values for common PII patterns — PAN, Aadhaar, GSTIN, email addresses, and phone numbers — and flags any column that matches with reasonable confidence. Detected columns are automatically pre-checked as "Sensitive" in the Data Dictionary the next time you open it.',
+        body: 'Every Analysis run scans column names and a sample of values for common PII patterns, PAN, Aadhaar, GSTIN, email addresses, and phone numbers, and flags any column that matches with reasonable confidence. Detected columns are automatically pre-checked as "Sensitive" in the Data Dictionary the next time you open it.',
         params: [
           { name: 'Detection basis', type: 'name + value pattern', required: false, description: 'A column is flagged either because its name matches a known PII term (e.g. "email", "pan_number") or because a sample of its values matches a regex pattern for PAN/Aadhaar/GSTIN/email/phone with high confidence.' },
           { name: 'Manual override', type: 'toggle', required: false, description: 'Click the Sensitive pill in the Data Dictionary to flag or unflag a column by hand. A manual choice always takes precedence over the automatic detection and will not be silently re-flagged on the next analysis.' },
         ],
-        tip: 'Detection is best-effort and pattern-based — always review the Data Dictionary after connecting a new source rather than relying on auto-detection alone, especially for columns using non-standard names.',
+        tip: 'Detection is best-effort and pattern-based. Always review the Data Dictionary after connecting a new source rather than relying on auto-detection alone, especially for columns using non-standard names.',
         note: 'PII-flagged columns are automatically masked in the Analysis Preview and Columns tabs. See the Analysis documentation for how masking works.',
       },
       {
@@ -528,7 +528,7 @@ const DOCS: Record<string, {
           { name: 'Pending Approval badge', type: 'status indicator', required: false, description: 'Shown on the pipeline row in the Saved Pipelines list whenever a pipeline is not yet approved.' },
           { name: 'Approve / Require Approval toggle', type: 'button (pipeline row)', required: false, description: 'Flips the pipeline between "approved" and "pending_approval" at any time after saving.' },
         ],
-        warning: 'A pipeline with status "pending_approval" cannot be executed — neither manually via Run Now / Run on Server, nor automatically by the schedule — until it is approved. Attempting to run it returns an explicit "pending approval" error rather than failing silently.',
+        warning: 'A pipeline with status "pending_approval" cannot be executed, neither manually via Run Now / Run on Server, nor automatically by the schedule, until it is approved. Attempting to run it returns an explicit "pending approval" error rather than failing silently.',
         note: 'Every approval status change is recorded in Audit Logs under the pipeline.status_changed action, including who changed it and the before/after value.',
       },
       {
@@ -586,14 +586,14 @@ const DOCS: Record<string, {
         params: [
           { name: 'Preview tab', type: 'masked', required: false, description: 'PII column headers are shown with a 🔒 icon in red, and cell values are partially masked (e.g. jo••••@e.com) rather than shown in full.' },
           { name: 'Columns tab', type: 'masked', required: false, description: 'PII columns show a red "PII" pill next to the column name, and the sample value cell is masked the same way as the Preview tab.' },
-          { name: 'Fullscreen preview', type: 'masked', required: false, description: 'Opening the Preview tab in fullscreen applies the same masking to the exported row set — masking is not bypassed by the fullscreen view.' },
+          { name: 'Fullscreen preview', type: 'masked', required: false, description: 'Opening the Preview tab in fullscreen applies the same masking to the exported row set. Masking is not bypassed by the fullscreen view.' },
           { name: 'View Original', type: 'not masked', required: false, description: 'The "View Original" modal intentionally shows raw, unmodified source data as-is, since that is its stated purpose (verifying the untouched source).' },
         ],
-        note: 'Masking is display-only — it does not change what is written to cleaned output files or pipeline destinations. It only affects what is rendered on screen in Analysis.',
+        note: 'Masking is display-only. It does not change what is written to cleaned output files or pipeline destinations. It only affects what is rendered on screen in Analysis.',
       },
       {
         heading: 'Time series detection',
-        body: 'The backend scans for date columns. If one covers more than 70% of the rows, it is flagged as the time axis. Frequency is inferred from median row spacing: daily ≤1 day, weekly ≤7 days, monthly ≤31 days, quarterly ≤93 days. The chart uses Plotly.js — requires the Plotly CDN script in index.html.',
+        body: 'The backend scans for date columns. If one covers more than 70% of the rows, it is flagged as the time axis. Frequency is inferred from median row spacing: daily ≤1 day, weekly ≤7 days, monthly ≤31 days, quarterly ≤93 days. The chart uses Plotly.js. Requires the Plotly CDN script in index.html.',
         tip: 'Add <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script> to the <head> of your index.html to enable the Time Series chart.',
         code: '<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>',
       },
@@ -603,7 +603,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Advanced imputation',
-        body: 'Choose from None, Mean, Median, Mode, Forward Fill, Backward Fill, KNN, Constant 0, Unknown, Linear Interpolation, or Index Interpolation. Use instead of "Fill Missing" — not both simultaneously.',
+        body: 'Choose from None, Mean, Median, Mode, Forward Fill, Backward Fill, KNN, Constant 0, Unknown, Linear Interpolation, or Index Interpolation. Use instead of "Fill Missing". Not both simultaneously.',
       },
       {
         heading: 'AI Clean tab',

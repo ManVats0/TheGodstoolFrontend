@@ -793,7 +793,7 @@ if (aiData.success) {
   setOptions(prev => ({ ...prev, [opKey]: true }))
 }
 const assistantText = aiData.success
-  ? `${aiData.explanation}\n\n✅ Added as a new cleaning step below — click **Run Cleaning** to apply!`
+  ? `${aiData.explanation}\n\n✅ Added as a new cleaning step below. Click **Run Cleaning** to apply!`
   : '⚠️ ' + (aiData.error || 'AI unavailable')
         setMessages(prev => [...prev, { role: 'assistant', content: assistantText }])
       } catch (err) {
@@ -1029,7 +1029,7 @@ const assistantText = aiData.success
       const prevPct = (p.null / prevRows) * 100
       const currPct = (c.null / currRows) * 100
       const diff = currPct - prevPct
-      if (diff >= 10) { // only flag increases — a drop in nulls isn't a problem worth flagging
+      if (diff >= 10) { // only flag increases. A drop in nulls isn't a problem worth flagging
         found.push({
           severity: diff * 1.2,
           type: 'nulls',
@@ -1717,7 +1717,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         if (sizeGb > SIZE_LIMIT_GB) {
           alert(
             `This source is too large to auto-analyze right now (${sizeGb.toFixed(1)}GB, limit is ${SIZE_LIMIT_GB}GB).\n\n` +
-            `Skip analysis for now — you can still build your pipeline, and we'll show insights after your first run.`
+            `Skip analysis for now. You can still build your pipeline, and we'll show insights after your first run.`
           )
           setAnalyzing(false)
           return true
@@ -2218,7 +2218,7 @@ setAnalyzing(false)
           return
         }
       } else if (!sourceObj2 || sourceObj2.type === 'csv') {
-        alert('CSV file not found in memory. Please re-upload the CSV from Data Sources — the file needs to be re-attached after a page refresh or source switch.')
+        alert('CSV file not found in memory. Please re-upload the CSV from Data Sources. The file needs to be re-attached after a page refresh or source switch.')
         setAnalyzing(false)
         return
       } else {
@@ -2940,7 +2940,7 @@ const getPreviewFullscreenData = () => {
                     </svg>
                     Live SQL Translation
                   </h2>
-                  <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Portable CTE chain — runnable in PostgreSQL, BigQuery, Snowflake, and more.</p>
+                  <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Portable CTE chain. Runnable in PostgreSQL, BigQuery, Snowflake, and more.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
@@ -2976,7 +2976,7 @@ const getPreviewFullscreenData = () => {
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="font-bold text-white">Original Data — first 50 rows</h2>
+                  <h2 className="font-bold text-white">Original Data. First 50 rows</h2>
                   <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Untouched source.</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -3204,7 +3204,7 @@ const getPreviewFullscreenData = () => {
             >
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', marginTop: '1px' }}>•</span>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                Insights will show up here the next time your data changes — for example, if your database or Google Sheet gets updated and you re-analyze.
+                Insights will show up here the next time your data changes. For example, if your database or Google Sheet gets updated and you re-analyze.
               </p>
             </div>
           )}
@@ -3826,7 +3826,7 @@ const getPreviewFullscreenData = () => {
                   style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.15)' }}
                 >
                   <p className="text-xs" style={{ color: '#c4b5fd' }}>
-                    <span className="font-bold">Selected:</span> {selectedMethod?.label} — {selectedMethod?.desc}
+                    <span className="font-bold">Selected:</span> {selectedMethod?.label}. {selectedMethod?.desc}
                   </p>
                 </div>
               )}

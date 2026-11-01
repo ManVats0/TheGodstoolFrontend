@@ -27,7 +27,7 @@ export default function Blog() {
   }, [hash, posts, navigate])
 
   useSeo({
-    title: "Blog — The God's Tool",
+    title: "Blog | The God's Tool",
     description: 'Straight answers on cleaning and moving data: how it works, how to keep it safe, and how to get clean results fast.',
     path: '/blog',
     jsonLd: {

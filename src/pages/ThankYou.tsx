@@ -64,7 +64,7 @@ useEffect(() => {
         })
         sessionStorage.setItem('google_ads_conversion_fired', 'true')
       } else {
-        console.warn('gtag not found — Google Ads base tag may not be loaded on this page.')
+        console.warn('gtag not found. Google Ads base tag may not be loaded on this page.')
       }
     }
   }, [])
@@ -286,7 +286,7 @@ useEffect(() => {
           </div>
           <div style={{ padding: '14px 16px 16px' }}>
             <p style={{ fontFamily: 'Georgia, serif', fontSize: '0.82rem', lineHeight: 1.7, color: '#a0c4e8', margin: 0, fontStyle: 'italic' }}>
-              "I used this tool in the 1990s to identify vulnerable areas that needed rain. Now — due to the sins of people — I follow no rules. To rain or not to rain... is simply my choice. You have pleased me today."
+              "I used this tool in the 1990s to identify vulnerable areas that needed rain. Now, due to the sins of people, I follow no rules. To rain or not to rain... is simply my choice. You have pleased me today."
             </p>
             <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={() => setShowIndra(false)} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(99,179,237,0.3)', color: '#63b3ed', padding: '5px 16px', borderRadius: '4px', fontSize: '0.75rem', letterSpacing: '0.1em', cursor: 'pointer' }}>Understood</button>
