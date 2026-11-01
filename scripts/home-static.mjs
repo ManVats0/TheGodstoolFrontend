@@ -73,7 +73,7 @@ const body = `
 <h1>${esc(c.hero.h1)}</h1>
 <p>${esc(c.hero.sub)}</p>
 ${li(c.hero.sources.map(esc))}
-<p>${esc(c.hero.note)}</p>
+<p>${esc(c.hero.note)} <a href="${c.privacy.href}">The AI never reads your rows.</a></p>
 <section><h2>${esc(c.problem.h2)}</h2><p>${esc(c.problem.intro)}</p><ul>${c.problem.items.map(card).join('')}</ul><p>${esc(c.problem.fix)}</p></section>
 <section><h2>${esc(c.audience.h2)}</h2><ul>${c.audience.items.map(card).join('')}</ul></section>
 <section id="features"><h2>${esc(c.features.h2)}</h2><p>${esc(c.features.intro)}</p><ul>${c.features.items.map(card).join('')}</ul></section>
@@ -84,6 +84,7 @@ ${li(c.hero.sources.map(esc))}
 <p>${esc(c.pricing.freeLine)}</p><p><strong>${esc(c.pricing.creditsTitle)}</strong> ${esc(c.pricing.creditsBody)}</p><p>${esc(c.pricing.foot)}</p></section>
 <section id="estimate"><h2>${esc(c.estimate.h2)}</h2><p>${esc(c.estimate.body)} ${esc(c.estimate.note)}</p></section>
 <section id="quote"><h2>${esc(c.quote.h2)}</h2><p>${esc(c.quote.body)}</p>${li(c.quote.points.map(esc))}<p>${esc(c.quote.note)} Email <a href="mailto:${c.site.email}">${c.site.email}</a> or use the form on this page.</p></section>
+<section id="private-ai"><h2>${esc(c.privacy.h2)}</h2><p>${esc(c.privacy.body)}</p>${li(c.privacy.points.map(esc))}<p><a href="${c.privacy.href}">${esc(c.privacy.link)}</a></p></section>
 <section id="faq"><h2>${esc(c.faq.h2)}</h2>${c.faq.items.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>
 <section><h2>${esc(c.cta.h2)}</h2><p>${esc(c.cta.body)}</p></section>
 <footer><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/refund.html">Refunds</a> · <a href="/blog">Blog</a></footer>

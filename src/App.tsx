@@ -34,7 +34,7 @@ import TeamGate from './pages/TeamGate'
 import { API_BASE } from './config'
 import content from './home/content.json'
 import { EstimateSection } from './home/EstimateSection'
-import { ProblemSection, AudienceSection, FeaturesSection, StepsSection, QuoteSection, FaqSection, scrollToQuote } from './home/HomeSections'
+import { ProblemSection, AudienceSection, FeaturesSection, StepsSection, QuoteSection, FaqSection, PrivacySection, scrollToQuote } from './home/HomeSections'
 import { clearPermissionsCache, loadPermissions, installForbiddenHandler, refreshPermissions, usePermissions } from './usePermissions'
 
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
@@ -693,7 +693,7 @@ if (!entered) return (
             <li key={src} style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.74rem', color: 'rgba(167,139,250,0.85)', whiteSpace: 'nowrap' }}>{src}</li>
           ))}
         </ul>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note}</p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note} <a href={content.privacy.href} style={{ color: '#6ee7b7', textDecoration: 'underline' }}>The AI never reads your rows.</a></p>
         <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="cta-btn" onClick={() => handleEnter('register')}>{content.hero.primary}</button>
           <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={scrollToQuote}>{content.hero.secondary}</button>
@@ -968,6 +968,7 @@ if (!entered) return (
 
     <EstimateSection />
     <QuoteSection />
+    <PrivacySection />
     <FaqSection />
 
     {/* ── FINAL CTA ── */}

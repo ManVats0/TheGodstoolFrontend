@@ -42,7 +42,7 @@ export default function Blog() {
   const filtering = needle !== '' || tag !== 'All'
   const results = useMemo(() => posts.filter(p =>
     (tag === 'All' || p.tag === tag) &&
-    (!needle || [p.title, p.tag, excerptOf(p), p.body.map(b => ('text' in b ? b.text : b.items.join(' '))).join(' ')].some(t => plain(t).toLowerCase().includes(needle)))
+    (!needle || [p.title, p.tag, excerptOf(p), p.body.map(b => ('text' in b ? b.text : 'items' in b ? b.items.join(' ') : (b.caption || ''))).join(' ')].some(t => plain(t).toLowerCase().includes(needle)))
   ), [posts, tag, needle])
 
   const [featured, ...rest] = posts

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ComponentType, FormEvent } from 'react'
 import content from './content.json'
+import { DiagramJourney } from '../blog/diagrams'
 import './home.css'
 
 type IconType = ComponentType<{ name: string; size?: number; color?: string }>
@@ -207,6 +208,24 @@ export function FaqSection() {
             <p>{it.a}</p>
           </details>
         ))}
+      </div>
+    </section>
+  )
+}
+
+export function PrivacySection() {
+  const p = content.privacy
+  return (
+    <section id={p.id} className="hm-sec" aria-labelledby="hm-privacy">
+      <div className="hm-priv">
+        <div className="hm-priv-text">
+          <span className="hm-eyebrow">{p.eyebrow}</span>
+          <h2 id="hm-privacy">{p.h2}</h2>
+          <p>{p.body}</p>
+          <ul>{p.points.map(x => <li key={x}>{x}</li>)}</ul>
+          <a className="hm-priv-link" href={p.href}>{p.link} →</a>
+        </div>
+        <div className="hm-priv-fig"><DiagramJourney /></div>
       </div>
     </section>
   )
