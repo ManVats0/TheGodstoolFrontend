@@ -359,7 +359,7 @@ export default function Pricing() {
             Flexible Credit Top-Up
           </div>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', marginTop: '6px', lineHeight: 1.5, fontFamily: 'monospace' }}>
-            Add credits on your own terms — no subscription, no lock-in. Built for freelancers covering a single project, agencies managing multiple clients, and corporate teams needing ad-hoc budget without a procurement cycle.
+            Add credits on your own terms. No subscription, no lock-in. Built for freelancers covering a single project, agencies managing multiple clients, and corporate teams needing ad-hoc budget without a procurement cycle.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>

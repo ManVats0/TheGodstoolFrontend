@@ -34,7 +34,7 @@ export default function About() {
           <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: '1rem' }}>
             The God's Tool is a data intelligence and pipeline automation platform. It allows users to connect data sources
             (CSV files, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, and more), run automated data quality analysis,
-            build cleaning pipelines, and govern datasets through a unified catalog — all from a browser-based interface.
+            build cleaning pipelines, and govern datasets through a unified catalog. All from a browser-based interface.
           </p>
         </section>
 

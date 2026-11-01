@@ -118,7 +118,7 @@ const handleEmailOk = async () => {
   const recommendedSteps = [
     { done: !!emailInput, text: 'Enter your email above and click OK' },
     { done: Object.values(alertConditions).some(Boolean), text: 'Enable the alert conditions you care about' },
-    { done: false, text: 'Upload your CSV — alerts fire automatically' },
+    { done: false, text: 'Upload your CSV and alerts fire automatically' },
   ]
 
   return (
@@ -198,7 +198,7 @@ const handleEmailOk = async () => {
                 color: emailInput.trim() ? 'white' : 'rgba(255,255,255,0.2)',
                 cursor: emailInput.trim() ? 'pointer' : 'not-allowed'
               }}>
-              OK — Save Email
+              Save email
             </button>
           ) : (
             <div className="mt-2 rounded-xl px-3 py-2.5 flex items-start gap-2"
@@ -206,7 +206,7 @@ const handleEmailOk = async () => {
               <span style={{ marginTop: '2px' }}><NotifIcon name="check" size={13} color="#4ade80" /></span>
               <div>
                 <p className="text-xs font-semibold" style={{ color: '#4ade80' }}>
-                  Email saved — alerts will go to {emailInput}
+                  Email saved. Alerts will go to {emailInput}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
                   Check your inbox after the next analysis run.

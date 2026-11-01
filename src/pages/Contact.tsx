@@ -26,7 +26,7 @@ export default function Contact() {
     const planLabel = planParam ? (PLAN_LABELS[planParam] || planParam) : ''
     const prefillMessage =
       intent === 'sales' && planLabel
-        ? `Hi, I'm interested in the ${planLabel} plan${billingParam ? ` (${billingParam} billing)` : ''}. I'd love to get set up with something powerful for my data pipeline — please share the next steps.`
+        ? `Hi, I'm interested in the ${planLabel} plan${billingParam ? ` (${billingParam} billing)` : ''}. I'd love to get set up with something powerful for my data pipeline. Please share the next steps.`
         : ''
 
     setForm(prev => ({
@@ -45,7 +45,7 @@ export default function Contact() {
             setForm(prev => ({ ...prev, name: data.name }))
           }
         })
-        .catch(() => { /* silently ignore — form still usable blank */ })
+        .catch(() => { /* silently ignore. Form still usable blank */ })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
