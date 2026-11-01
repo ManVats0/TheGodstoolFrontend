@@ -6,6 +6,8 @@ import { runSQLPreviewWasm } from '../duckdbClient'
 import GuidedTour, { TourStep } from './FlowTutorial'
 import { usePermissions, forbiddenMessage } from '../usePermissions'
 import { checkAiAllowance } from '../credits'
+import { profileFromRows } from '../privateProfile'
+import { useAiShare, AiShareSwitch } from '../aiShare'
 import toolLogo from '../../the_gods_tool_logo_3d.png'
 
 const EMPTY_STATE_TOUR: TourStep[] = [
@@ -1564,13 +1566,12 @@ function AICustomRuleModal({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const schemaContext = colInfo.slice(0, 15).map((c: any) =>
-    `${c.column} (${c.dtype}, ${c.null} nulls, sample: "${c.sample}")`
-  ).join('\n')
-
-  const sampleContext = sampleData.slice(0, 2).map((row: any, i: number) =>
-    `Row ${i + 1}: ${JSON.stringify(row)}`
-  ).join('\n')
+  // Only the structure of the data goes to the AI (column names, types, value shapes), never real rows.
+  const aiShare = useAiShare()
+  const schemaContext = aiShare.shared
+    ? colInfo.slice(0, 15).map((c: any) => `${c.column} (${c.dtype}, ${c.null} nulls, sample: "${c.sample}")`).join('\n')
+        + '\n' + sampleData.slice(0, 2).map((row: any, i: number) => `Row ${i + 1}: ${JSON.stringify(row)}`).join('\n')
+    : profileFromRows(sampleData.slice(0, 20), colInfo.slice(0, 15))
 
   const sendMessage = async () => {
     const trimmed = input.trim()
@@ -1584,7 +1585,6 @@ function AICustomRuleModal({
       const systemPrompt = `You are a data cleaning assistant inside a pipeline builder tool.
 Dataset: ${activeSourceName}
 Schema:\n${schemaContext}
-Sample:\n${sampleContext}
 
 The user wants to add a data cleaning RULE as a pipeline step.
 Your job:
@@ -1607,7 +1607,7 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           instructions: trimmed,
-          csv_preview: sampleContext + '\n\nSchema:\n' + schemaContext,
+          csv_preview: schemaContext,
           system_override: systemPrompt,
         }),
       })
@@ -1747,8 +1747,9 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
             Send
           </button>
         </div>
+        <AiShareSwitch {...aiShare} />
         <p className="px-5 pb-4 text-center flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
-          AI by Claude (Anthropic). Your instruction, column names and a few sample rows are sent to write the rule.{' '}
+          AI by Claude (Anthropic). {aiShare.shared ? 'Your instruction, column names and a few sample rows are sent.' : 'Only your instruction, column names and the structure of your data are sent, never your actual rows.'}{' '}
           <a href="/privacy.html" target="_blank" rel="noreferrer" style={{ color: '#a78bfa', textDecoration: 'underline' }}>Privacy policy</a>
         </p>
       </div>
