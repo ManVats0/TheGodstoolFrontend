@@ -80,7 +80,7 @@ function StatusDot({ s, title }: { s: Status; title?: string }) {
   return <span title={title} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: 99, background: `${c}22`, color: c, fontWeight: 800, fontSize: 12 }}>{t}</span>
 }
 
-const cellInput: CSSProperties = { width: '100%', background: 'transparent', border: '1px solid transparent', color: 'white', font: 'inherit', padding: '4px 6px', borderRadius: 6, outline: 'none' }
+const cellInput: CSSProperties = { width: '100%', boxSizing: 'border-box', background: 'transparent', border: '1px solid transparent', color: 'white', font: 'inherit', padding: '4px 6px', borderRadius: 6, outline: 'none' }
 
 export default function PdfStatements() {
   const navigate = useNavigate()

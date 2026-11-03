@@ -46,6 +46,18 @@
       "destination": "/the_gods_tool_logo_3d.png"
     },
     {
+      "source": "/bank-statement-pdf-to-excel",
+      "destination": "/bank-statement-pdf-to-excel.html"
+    },
+    {
+      "source": "/bank-statement-pdf-to-excel.html",
+      "destination": "/bank-statement-pdf-to-excel.html"
+    },
+    {
+      "source": "/pdf-to-table-example.webp",
+      "destination": "/pdf-to-table-example.webp"
+    },
+    {
       "source": "/**",
       "destination": "/index.html"
     }
