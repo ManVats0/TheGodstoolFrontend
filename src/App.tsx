@@ -198,6 +198,7 @@ const [showTrialWelcome, setShowTrialWelcome] = useState(false)
 const [regFeeling, setRegFeeling] = useState('')
 const forceLogoutRef = useRef<HTMLButtonElement>(null)
 const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
+const [planTick, setPlanTick] = useState(0)   // bumped whenever the plan is re-read from the server
 
 useEffect(() => {
   if (userPlan !== 'trial') { setTrialDaysLeft(null); return }
@@ -205,7 +206,7 @@ useEffect(() => {
   if (!expiresStr) { setTrialDaysLeft(null); return }
   const msLeft = new Date(expiresStr).getTime() - Date.now()
   setTrialDaysLeft(Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24))))
-}, [userPlan])
+}, [userPlan, planTick])
 
 useEffect(() => {
   if (showForceLogout && forceLogoutRef.current) {
@@ -233,6 +234,21 @@ useEffect(() => {
     if (Date.now() - lastLoginAt < 15000) return   // just signed in: permissions and sources were fetched a moment ago
     refreshPermissions()
     useStore.getState().loadSourcesFromBackend()
+    // Keep the plan and trial days in step with the server, so the top banner matches the dashboard.
+    const tk = localStorage.getItem('datapro_token')
+    if (tk) {
+      fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${tk}` } })
+        .then(r => r.json())
+        .then(p => {
+          if (!p || !p.plan) return
+          localStorage.setItem('datapro_plan', p.plan)
+          if (p.planExpiresAt) localStorage.setItem('datapro_plan_expires', p.planExpiresAt)
+          else localStorage.removeItem('datapro_plan_expires')
+          setUserPlan(p.plan)
+          setPlanTick(n => n + 1)
+        })
+        .catch(() => { /* keep what we have */ })
+    }
   }
   sync()
   const t = setInterval(sync, 45000)
