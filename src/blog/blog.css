@@ -70,7 +70,7 @@ a.gb-card:hover { transform: translateY(-3px); border-color: rgba(167,139,250,0.
 .gb-prose p { margin: 0 0 1.35em; }
 .gb-prose h2 { font-size: 1.55rem; line-height: 1.25; letter-spacing: -0.02em; font-weight: 800; color: #fff; margin: 2.1em 0 .7em; scroll-margin-top: 90px; }
 .gb-prose a { color: #c4b5fd; text-decoration: underline; text-underline-offset: 3px; }
-.gb-prose code { font-family: ui-monospace, Menlo, monospace; font-size: .92em; background: rgba(255,255,255,0.09); padding: 2px 6px; border-radius: 6px; }
+.gb-prose code { font-family: ui-monospace, Menlo, monospace; font-size: .92em; background: rgba(255,255,255,0.09); padding: 2px 6px; border-radius: 6px; overflow-wrap: anywhere; }
 .gb-prose ul { margin: 0 0 1.35em; padding-left: 1.3em; }
 .gb-prose li { margin: .4em 0; }
 .gb-prose blockquote { margin: 1.8em 0; padding: 4px 0 4px 20px; border-left: 3px solid #8b5cf6; font-size: 1.2rem; line-height: 1.6; color: #fff; font-weight: 500; }
