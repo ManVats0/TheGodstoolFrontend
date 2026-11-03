@@ -355,6 +355,40 @@ const DOCS: Record<string, {
       },
     ],
   },
+  '/pdf': {
+    title: 'PDF to table',
+    icon: 'database',
+    color: '#34d399',
+    badge: 'Paid plans',
+    sections: [
+      {
+        heading: 'What it does',
+        body: 'Turns a bank statement PDF into a table and tells you which rows to trust. Every row is checked against the balances printed on the statement itself: the previous balance plus this row\'s amount has to equal this row\'s balance. Rows that do not add up are marked, with a guess at why (debit and credit swapped, two digits swapped, a row lost at a page break, a duplicate).',
+        tip: 'Use the PDF you download from your bank, not a scan or a photo. Scans have no text to read, so they are refused instead of guessed.',
+      },
+      {
+        heading: 'How to use it',
+        body: 'Open PDF to table, drop the file in, and wait a few seconds. Rows marked with a tick are proven. Rows marked with an exclamation point need a look: click one and the PDF page opens next to the table with that row outlined. If a number is wrong, fix it in the table and the check runs again straight away. When you are happy, download a CSV or use it in the app, where it becomes a data source you can clean like any other file.',
+      },
+      {
+        heading: 'What the labels mean',
+        body: 'Proven means the balance chain holds for that row. To check means something does not add up, or the two readings of the PDF disagree. Not checkable means the statement gives nothing to check that row against, for example the very first row when no opening balance is printed. A statement with no running balance at all cannot be proven and is labelled that way.',
+        note: 'Proven does not mean perfect. A number that is wrong in a way that still adds up, for example a debit and a credit that were both misread so the balance still works out, would pass. That is why the PDF stays next to the table.',
+      },
+      {
+        heading: 'Dates',
+        body: 'A date like 03/04/2024 can be 3 April or 4 March. The tool works it out from the other dates in the file. If they do not settle it, you are asked to pick day/month or month/day and it runs again. It never guesses silently.',
+      },
+      {
+        heading: 'Privacy',
+        body: 'The PDF is read on our server without any AI service, and it is not stored. Only the table you choose to save is kept, as a normal CSV source in your workspace.',
+      },
+      {
+        heading: 'Limits',
+        body: 'PDF files up to 15 MB and the first 60 pages. Statements need a header row with a date column, a balance column and a debit and credit or amount column. Scanned statements are not supported yet. Credit card statements that print no running balance are not supported yet.',
+      },
+    ],
+  },
   '/catalog': {
     title: 'Data Catalog',
     icon: 'folder',
