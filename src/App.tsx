@@ -45,6 +45,7 @@ const pageLoaders = {
   docs: () => import('./pages/Documentation'),
   tunneling: () => import('./pages/Tunneling'),
   team: () => import('./pages/TeamGate'),
+  pdf: () => import('./pages/PdfStatements'),
 }
 const Dashboard = lazy(pageLoaders.dashboard)
 const DataSources = lazy(pageLoaders.sources)
@@ -55,6 +56,7 @@ const AuditLogs = lazy(pageLoaders.audit)
 const Documentation = lazy(pageLoaders.docs)
 const Tunneling = lazy(pageLoaders.tunneling)
 const TeamGate = lazy(pageLoaders.team)
+const PdfStatements = lazy(pageLoaders.pdf)
 let preloaded = false
 function preloadAppPages() {
   if (preloaded) return
@@ -1324,6 +1326,7 @@ if (!entered) return (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/sources" element={<DataSources />} />
           <Route path="/catalog" element={<DataCatalog />} />
+          <Route path="/pdf" element={<PdfStatements />} />
           <Route path="/flow" element={<Flow />} />
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/audit" element={<AuditLogs />} />
