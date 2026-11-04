@@ -650,10 +650,10 @@ import { usePermissions } from '../usePermissions'
                                   style={col.pii
                                     ? { background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }
                                     : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.35)', border: '1px dashed rgba(255,255,255,0.15)' }}>
-                                  {col.pii ? '⚠ PII' : '+ mark'}
+                                  {col.pii ? 'PII' : '+ mark'}
                                 </button>
                               ) : (
-                                col.pii ? <span style={{ color: '#f87171' }}>⚠ PII</span> : null
+                                col.pii ? <span style={{ color: '#f87171' }}>PII</span> : null
                               )}
                             </td>
                           </tr>

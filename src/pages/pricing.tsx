@@ -20,7 +20,7 @@ const PLANS = [
     price: '₹12,470',
     period: '/year',
     ai: true,
-    aiLabel: '⚡ 500 AI transforms/day',
+    aiLabel: '500 AI transforms/day',
     features: ['Everything in Solo', '500 AI transforms/day', 'Email support'],
     color: '#22d3ee',
     bg: 'rgba(34,211,238,0.08)',
@@ -33,7 +33,7 @@ const PLANS = [
     price: '₹1,579',
     period: '/month',
     ai: true,
-    aiLabel: '⚡ 5,000 AI transforms/day',
+    aiLabel: '5,000 AI transforms/day',
     features: ['Everything in Starter', '5,000 AI transforms/day', 'Priority support'],
     color: '#a78bfa',
     bg: 'rgba(124,58,237,0.12)',
@@ -46,7 +46,7 @@ const PLANS = [
     price: '₹15,790',
     period: '/year',
     ai: true,
-    aiLabel: '⚡ 10,000 AI transforms/day',
+    aiLabel: '10,000 AI transforms/day',
     features: ['Everything in Pro', '10,000 AI transforms/day', 'Priority support'],
     color: '#34d399',
     bg: 'rgba(52,211,153,0.08)',
@@ -114,7 +114,7 @@ export default function Pricing() {
 
       <div style={{ textAlign: 'center', marginBottom: '48px' }}>
         <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          Unlock The God's Tool
+          Choose a plan
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
           Choose a plan to access AI-powered data cleaning
@@ -123,7 +123,7 @@ export default function Pricing() {
 
       {error && (
         <div style={{ marginBottom: '24px', background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: '10px', padding: '12px 20px', color: '#fca5a5', fontSize: '0.875rem', fontFamily: 'monospace' }}>
-          ⚠ {error}
+          {error}
         </div>
       )}
 

@@ -1,0 +1,34 @@
+# The God's Tool
+
+> A web app that cleans messy data. Upload a CSV, link a Google Sheet or connect a database, review the problems it finds, and fix them by describing what you want in plain English. Cleaning steps can be saved, edited as SQL and run again on a schedule.
+
+It is made for freelancers, analysts, small teams and companies who regularly receive messy spreadsheets and exports, and for data teams that need to keep database tables clean on a schedule.
+
+## When it fits
+- Cleaning a messy CSV export: duplicates, blanks, broken dates, inconsistent names, numbers stored as text.
+- Fixing a Google Sheet without writing formulas or scripts.
+- Cleaning a MySQL, PostgreSQL, BigQuery or MongoDB table, including databases behind a firewall, with reviewable SQL.
+- Turning a bank statement PDF into a table that is checked row by row against the statement's own running balances, with doubtful rows flagged next to the PDF (paid plans and trial).
+- Repeating the same cleanup every week or month, with an alert when a column changes shape.
+
+## When it does not fit
+- It is software you operate yourself, not a done-for-you cleaning service.
+- It does not read scanned or photographed statements, or statements that print no running balance, and it does not import into accounting software.
+- It is not a data warehouse, BI dashboard or ETL platform for moving large volumes of data.
+
+## Key facts
+- Free plan: up to 3 sources, CSV files up to 5 MB, 5,000 rows per run, 1 pipeline. New accounts get a 14-day trial with everything unlocked, no card needed.
+- Paid plans (USD per month): Lite $19, Starter $39, Pro $79, Team $199.
+- Credits: pay as you go with no subscription. One credit pays for one AI action, about $0.03 each, minimum top-up $2.
+- Quotes: bulk credits, team plans, database or API sources and invoicing are quoted by email. Request one at https://thegodstool.com/#quote or write to contact@thegodstool.com. Quotes cover access to the tool, not a done-for-you cleaning service.
+- Sources: CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS (RDS, S3, DynamoDB, Redshift), Google Cloud Storage, Cloud SQL, Databricks, REST APIs, Google Analytics 4.
+- Security: data is encrypted in transit and is not sold. AI features run in private mode: Claude (Anthropic) receives the instruction, column names and a structural summary, never actual rows. See https://thegodstool.com/privacy.html
+
+## Pages
+- [Home](https://thegodstool.com/): what it does, who it is for, pricing, quote form and FAQ
+- [FAQ](https://thegodstool.com/faq.html): common questions
+- [Bank statement PDF to Excel](https://thegodstool.com/bank-statement-pdf-to-excel.html): how the row-by-row balance check works, what it cannot do
+- [Pricing](https://thegodstool.com/pricing): plans and credits
+- [Blog](https://thegodstool.com/blog): guides on cleaning data and keeping it safe
+- [Contact](https://thegodstool.com/contact)
+- [Privacy](https://thegodstool.com/privacy.html), [Terms](https://thegodstool.com/terms.html), [Refunds](https://thegodstool.com/refund.html)

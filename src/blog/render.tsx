@@ -30,7 +30,7 @@ export function Body({ blocks }: { blocks: PostBlock[] }) {
           case 'h': return <h2 key={i} id={headingId(b.text)}>{rich(b.text)}</h2>
           case 'ul': return <ul key={i}>{b.items.map((it, j) => <li key={j}>{rich(it)}</li>)}</ul>
           case 'quote': return <blockquote key={i}>{rich(b.text)}</blockquote>
-          case 'tip': return <div key={i} className="gb-tip">💡 {rich(b.text)}</div>
+          case 'tip': return <div key={i} className="gb-tip">{rich(b.text)}</div>
           case 'diagram': {
             const D = DIAGRAMS[b.id]
             return D ? <figure key={i} className="gb-fig"><D />{b.caption && <figcaption>{rich(b.caption)}</figcaption>}</figure> : null

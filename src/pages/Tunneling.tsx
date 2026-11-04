@@ -379,7 +379,6 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
           className="mt-4 flex items-center gap-3 text-sm rounded-xl px-4 py-3"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}
         >
-          <span style={{ fontSize: '20px' }}>💻</span>
           <span>Your computer (runs the agent)</span>
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
             <path d="M1 6h18M13 1l5 5-5 5"/>
@@ -388,11 +387,11 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
             <path d="M1 6h18M13 1l5 5-5 5"/>
           </svg>
-          <span>🖥️ The God's Tool server</span>
+          <span>The God's Tool server</span>
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
             <path d="M1 6h18M13 1l5 5-5 5"/>
           </svg>
-          <span>🌐 Browser</span>
+          <span>Browser</span>
         </div>
       </div>
 
@@ -565,7 +564,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
         className="mt-6 rounded-2xl p-5 flex items-start gap-3"
         style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)' }}
       >
-        <span style={{ fontSize: '18px' }}></span>
+        
         <div>
           <p className="text-sm font-semibold text-white mb-1">Security model</p>
           <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>

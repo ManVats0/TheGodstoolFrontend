@@ -114,7 +114,6 @@ export default function Dashboard() {
     if (sum.isTrial && sum.daysLeft !== null)
       return (
         <div style={{ ...card, borderColor: 'rgba(124,58,237,0.45)', background: 'rgba(124,58,237,0.10)', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '1.4rem' }}>🎁</span>
           <div style={{ flex: 1, minWidth: 220 }}>
             <div style={{ color: 'white', fontWeight: 700 }}>Your free trial: {sum.daysLeft} day{sum.daysLeft === 1 ? '' : 's'} left</div>
             <div style={{ color: muted, fontSize: '0.85rem' }}>Everything is unlocked right now. Keep it all after the trial by choosing a plan.</div>
@@ -152,7 +151,7 @@ export default function Dashboard() {
       <div className="p-8 max-w-5xl mx-auto" style={{ display: 'grid', gap: 20 }}>
         <TrialBanner />
         <div style={{ ...card, padding: 32, background: 'linear-gradient(135deg,rgba(124,58,237,0.18),rgba(255,255,255,0.02))', borderColor: 'rgba(124,58,237,0.35)' }}>
-          <div style={{ color: '#c4b5fd', fontWeight: 700, fontSize: '0.85rem', marginBottom: 8 }}>Welcome{first ? `, ${first}` : ''} 👋</div>
+          <div style={{ color: '#c4b5fd', fontWeight: 700, fontSize: '0.85rem', marginBottom: 8 }}>Welcome{first ? `, ${first}` : ''}</div>
           <h1 style={{ color: 'white', fontSize: 'clamp(1.6rem,4vw,2.4rem)', fontWeight: 800, lineHeight: 1.15, margin: 0 }}>
             Turn a messy spreadsheet into clean data, in minutes.
           </h1>
@@ -382,7 +381,7 @@ export default function Dashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', color: muted, fontSize: '0.8rem', margin: '10px 0 4px' }}><span>Saved pipelines</span><span>{ent.usage.pipelines} / {ent.limits.maxPipelines}</span></div>
             <Bar value={ent.usage.pipelines} max={ent.limits.maxPipelines} />
             <div style={{ color: muted, fontSize: '0.82rem', margin: '12px 0' }}>Cleans the first {ent.limits.maxCleanRows.toLocaleString('en-IN')} rows per file. Upgrade for databases, every row, schedules and teammates.</div>
-            <Btn to="/pricing">Unlock everything</Btn>
+            <Btn to="/pricing">See plans</Btn>
           </div>
         )}
       </div>

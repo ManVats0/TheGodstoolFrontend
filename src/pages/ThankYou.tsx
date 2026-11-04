@@ -175,13 +175,13 @@ useEffect(() => {
           {receipt
             ? (receipt.kind === 'credits'
                 ? `You added ${Number(receipt.credits).toLocaleString('en-IN')} AI credits. Your balance is now ${Number(receipt.balanceAfter ?? 0).toLocaleString('en-IN')}.`
-                : `Your ${receipt.description} is active. Welcome to The God's Tool!`)
+                : `Your ${receipt.description} is active. Thanks for choosing The God's Tool.`)
             : paymentParam
               ? 'Your payment went through. We are preparing your receipt...'
               : (
           isCreditsPurchase
-            ? "Your credits have been added to The God's Tool!"
-            : "Your subscription is now active. Welcome to The God's Tool! 🎉"
+            ? "Your credits have been added."
+            : "Your subscription is now active. Thanks for choosing The God's Tool."
             )}
         </p>
 
@@ -280,7 +280,7 @@ useEffect(() => {
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, #0a0820 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(66,153,225,0.18) 0%, transparent 70%)', animation: 'indraLightning 2.5s ease-in-out infinite' }} />
             <div style={{ position: 'absolute', bottom: '8px', left: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '1.1rem' }}></span>
+              
               <span style={{ fontFamily: 'Georgia, serif', color: '#63b3ed', fontSize: '0.65rem', opacity: 0.7, letterSpacing: '0.1em' }}>GOD OF RAIN</span>
             </div>
           </div>

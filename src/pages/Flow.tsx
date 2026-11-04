@@ -13,7 +13,7 @@ import toolLogo from '../../the_gods_tool_logo_3d.png'
 const EMPTY_STATE_TOUR: TourStep[] = [
   {
     target: '[data-tour="tour-goto-sources"]',
-    title: 'Welcome to Pipeline Builder 👋',
+    title: 'Welcome to Pipeline Builder',
     body: 'Every pipeline starts with a data source. Click here to upload a CSV or connect a database, spreadsheet, or API. Then come back to build your cleaning pipeline.',
     placement: 'top',
   },
@@ -21,7 +21,7 @@ const EMPTY_STATE_TOUR: TourStep[] = [
 
 const MAIN_TOUR: TourStep[] = [
   {
-    title: 'Welcome to Pipeline Builder! 👋',
+    title: 'Welcome to Pipeline Builder!',
     body: "You've got a data source connected. Let's take a 60-second tour so you know exactly how to turn it into clean, automated output.",
   },
   {
@@ -49,21 +49,21 @@ const MAIN_TOUR: TourStep[] = [
     placement: 'top',
   },
   {
-    title: "You're all set! 🎉",
+    title: "You're all set!",
     body: 'Build your pipeline, save it, and DataPipe will keep your data clean automatically. On whatever schedule you choose.',
   },
 ]
 
 const TRANSFORMATIONS = [
-  { id: 'remove_duplicates', label: 'Remove Duplicates', icon: '🗑️', desc: 'Drop identical rows',   color: '#ef4444' },
-  { id: 'fill_missing',      label: 'Fill Missing',      icon: '🔧', desc: 'Median / mode fill',    color: '#f97316' },
-  { id: 'standardize_text',  label: 'Standardize Text',  icon: '✏️', desc: 'Lowercase + trim',      color: '#8b5cf6' },
-  { id: 'cap_outliers',      label: 'Cap Outliers',      icon: '📊', desc: 'Modified Z-Score',      color: '#eab308' },
-  { id: 'remove_empty_rows', label: 'Remove Empty Rows', icon: '🧹', desc: 'Drop all-null rows',    color: '#06b6d4' },
-  { id: 'fix_dates',         label: 'Fix Dates',         icon: '📅', desc: 'Standardize formats',   color: '#22c55e' },
-    { id: 'ai_clean',          label: 'Clean with AI',     icon: '✨', desc: 'Smart AI-powered clean', color: '#a855f7' },
-  { id: 'ai_custom',         label: 'AI Custom Rule',    icon: '🤖', desc: 'Natural language rule',  color: '#ec4899' },
-  { id: 'use_sql',           label: 'Write SQL',         icon: '🧮', desc: 'Full query control',     color: '#0ea5e9' },
+  { id: 'remove_duplicates', label: 'Remove Duplicates', icon: '', desc: 'Drop identical rows',   color: '#ef4444' },
+  { id: 'fill_missing',      label: 'Fill Missing',      icon: '', desc: 'Median / mode fill',    color: '#f97316' },
+  { id: 'standardize_text',  label: 'Standardize Text',  icon: '✏', desc: 'Lowercase + trim',      color: '#8b5cf6' },
+  { id: 'cap_outliers',      label: 'Cap Outliers',      icon: '', desc: 'Modified Z-Score',      color: '#eab308' },
+  { id: 'remove_empty_rows', label: 'Remove Empty Rows', icon: '', desc: 'Drop all-null rows',    color: '#06b6d4' },
+  { id: 'fix_dates',         label: 'Fix Dates',         icon: '', desc: 'Standardize formats',   color: '#22c55e' },
+    { id: 'ai_clean',          label: 'Clean with AI',     icon: '', desc: 'Smart AI-powered clean', color: '#a855f7' },
+  { id: 'ai_custom',         label: 'AI Custom Rule',    icon: '', desc: 'Natural language rule',  color: '#ec4899' },
+  { id: 'use_sql',           label: 'Write SQL',         icon: '', desc: 'Full query control',     color: '#0ea5e9' },
 ]
 
 
@@ -220,9 +220,9 @@ const SEV_COLOR: Record<string, { bg: string; text: string; border: string; dot:
 }
 
 const KIND_LABEL: Record<string, { icon: string; plain: string }> = {
-  added:       { icon: '➕', plain: 'New column appeared in your data that wasn\'t there before' },
-  removed:     { icon: '➖', plain: 'A column that was previously there is now missing' },
-  type_change: { icon: '🔄', plain: 'A column\'s data type changed (e.g. text → number)' },
+  added:       { icon: '', plain: 'New column appeared in your data that wasn\'t there before' },
+  removed:     { icon: '', plain: 'A column that was previously there is now missing' },
+  type_change: { icon: '', plain: 'A column\'s data type changed (e.g. text → number)' },
 }
 
 const MIN_SCHEDULE_MS = 30_000 // matches the backend scheduler's poll interval. Nothing faster can actually run more often anyway
@@ -1031,7 +1031,7 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
           <button onClick={onClose} style={{ color:'rgba(255,255,255,0.35)', fontSize:'18px' }}>✕</button>
         </div>
         <div className="flex gap-1 p-4 pb-0">
-          {([{id:'frequency',label:'⏱ Frequency'},{id:'daily-at',label:'🕘 Run at time'}] as const).map(tab => (
+          {([{id:'frequency',label:'Frequency'},{id:'daily-at',label:'Run at time'}] as const).map(tab => (
             <button key={tab.id} onClick={() => setScheduleTab(tab.id)} className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
               style={{ background:scheduleTab===tab.id?'rgba(124,58,237,0.25)':'rgba(255,255,255,0.04)', border:`1px solid ${scheduleTab===tab.id?'rgba(124,58,237,0.5)':'rgba(255,255,255,0.08)'}`, color:scheduleTab===tab.id?'#c4b5fd':'rgba(255,255,255,0.45)' }}>
               {tab.label}
@@ -1091,12 +1091,12 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
             <div className="grid grid-cols-2 gap-4">
               {scheduleTab==='frequency' && isAbsolute && (
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>⏰ Time of Day</label>
+                  <label className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>Time of Day</label>
                   <input type="time" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)} className="w-full text-sm text-white rounded-xl px-4 py-3 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)', colorScheme:'dark' }} />
                 </div>
               )}
               <div className={scheduleTab==='frequency' && isAbsolute ? '' : 'col-span-2'}>
-                <label className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>🌍 Timezone</label>
+                <label className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>Timezone</label>
                 <select value={timezone} onChange={e => setTimezone(e.target.value)} className="w-full text-sm text-white rounded-xl px-4 py-3 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }}>
                   {TIMEZONES.map(tz => <option key={tz} value={tz} style={{ background:'#0d0a1a' }}>{tz}</option>)}
                 </select>
@@ -1105,7 +1105,7 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
           )}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold uppercase tracking-widest" style={{ color:'rgba(255,255,255,0.4)' }}>📅 Start Date</label>
+              <label className="text-xs font-bold uppercase tracking-widest" style={{ color:'rgba(255,255,255,0.4)' }}>Start Date</label>
               <div className="flex items-center gap-2">
                 {startDate && <button onClick={() => setStartDate('')} className="text-xs px-2 py-0.5 rounded-md" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Clear</button>}
                 <button onClick={() => setShowCalendar(v => !v)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl font-semibold transition-all"
@@ -1125,12 +1125,12 @@ function ScheduleModal({ pipeline, onClose, onSave }: {
           </div>
           {scheduleTab==='frequency' && scheduleValue==='live' && (
   <div className="rounded-xl px-4 py-3" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)' }}>
-    <p className="text-xs font-bold" style={{ color:'#f87171' }}>⚡ Live mode polls every 5 seconds. Use only for actively updating sources. It makes a backend call every 5s.</p>
+    <p className="text-xs font-bold" style={{ color:'#f87171' }}>Live mode polls every 5 seconds. Use only for actively updating sources. It makes a backend call every 5s.</p>
   </div>
 )}
           {scheduleTab==='frequency' && scheduleValue!=='none' && scheduleValue!=='custom' && (
             <div className="rounded-xl px-4 py-3" style={{ background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)' }}>
-              <p className="text-xs" style={{ color:'#c4b5fd' }}>⚡ Auto-runs every <strong>{SCHEDULE_PRESETS.find(p => p.value===scheduleValue)?.label}</strong>{isAbsolute && <> at <strong>{scheduleTime}</strong></>}{showTimezone && timezone!=='UTC' && <> in <strong>{timezone}</strong></>}{startDate && <> · starting <strong>{fmtDate(startDate)}</strong></>}</p>
+              <p className="text-xs" style={{ color:'#c4b5fd' }}>Auto-runs every <strong>{SCHEDULE_PRESETS.find(p => p.value===scheduleValue)?.label}</strong>{isAbsolute && <> at <strong>{scheduleTime}</strong></>}{showTimezone && timezone!=='UTC' && <> in <strong>{timezone}</strong></>}{startDate && <> · starting <strong>{fmtDate(startDate)}</strong></>}</p>
             </div>
           )}
         </div>
@@ -1309,7 +1309,7 @@ const popup = window.open(url, 'google-auth', 'width=500,height=600')
           {step === 'auth' && (
             <>
               <div className="rounded-xl p-4" style={{ background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1.5">🔒 Secure OAuth via Google</p>
+                <p className="text-xs font-bold text-white mb-1.5">Secure OAuth via Google</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
                   We use Google's standard sign-in screen. If you're already logged into Google in your browser, your accounts will be pre-populated for one-click selection. No URL copy-pasting needed.
                 </p>
@@ -1623,13 +1623,13 @@ If the instruction is unclear, ask ONE clarifying question instead, without the 
         setPendingLabel(label)
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: `✅ **${label}**\n\n${confirm}\n\nClick **"Add to Pipeline"** to add this as a step, or describe a different rule.`,
+          content: `**${label}**\n\n${confirm}\n\nClick **"Add to Pipeline"** to add this as a step, or describe a different rule.`,
         }])
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: text }])
       }
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Could not reach AI. Check your connection.' }])
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Could not reach AI. Check your connection.' }])
     } finally {
       setLoading(false)
     }
@@ -1786,7 +1786,7 @@ function SQLEditorModal({ activeSourceName, colInfo, onConfirm, onClose }: {
       <div className="rounded-2xl w-full max-w-2xl flex flex-col" style={{ background:'#0d0a1a', border:'1px solid rgba(14,165,233,0.3)', maxHeight:'85vh' }} onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
           <div>
-            <h3 className="font-bold text-white text-sm">🗄️ Write SQL</h3>
+            <h3 className="font-bold text-white text-sm">Write SQL</h3>
             <p className="text-xs" style={{ color:'rgba(255,255,255,0.4)' }}>Table name: <code style={{ color:'#38bdf8' }}>source</code> · {activeSourceName}</p>
           </div>
           <button onClick={onClose} style={{ color:'rgba(255,255,255,0.35)', fontSize:'18px' }}>✕</button>
@@ -2018,7 +2018,7 @@ export default function Flow() {
       setDestinationEdited(false)
     }
   }
-  const [showOriginalModal, setShowOriginalModal] = useState(false)  // ✅ correct placement
+  const [showOriginalModal, setShowOriginalModal] = useState(false)  // correct placement
 
   const activeSource     = sources.find(s => s.name === selectedSourceId) || sources[0]
   const tableName        = activeSource?.name.replace('.csv','').replace(/[^a-zA-Z0-9_]/g,'_') || 'your_table'
@@ -3193,19 +3193,19 @@ if (actualRowsIn > 0 || data?.download_url) {
           })
           const updateData = await updateRes.json()
           if (updateData.success) {
-            console.log(`✅ Google Sheet "${activeGsheets.sheetName}" updated: ${updateData.rows_written} rows`)
+            console.log(`Google Sheet "${activeGsheets.sheetName}" updated: ${updateData.rows_written} rows`)
             // Show a brief toast-style alert so user knows it worked
-            alert(`✅ Google Sheet "${activeGsheets.sheetName}" updated with ${updateData.rows_written} rows!`)
+            alert(`Google Sheet "${activeGsheets.sheetName}" updated with ${updateData.rows_written} rows!`)
           } else if (updateData.skipped) {
             console.warn('[GSheets] Rate limited:', updateData.reason)
           } else {
             console.error('[GSheets] Update failed:', updateData.error)
-            alert(`⚠️ Sheet update failed: ${updateData.error}`)
+            alert(`Sheet update failed: ${updateData.error}`)
           }
         }
       } catch (e) {
         console.error('Google Sheets update failed:', e)
-        alert(`⚠️ Could not update Google Sheet. Check console for details.`)
+        alert(`Could not update Google Sheet. Check console for details.`)
       }
     }
     // ── Write back to MySQL if destination is MySQL ──────────────────────────────
@@ -3242,11 +3242,11 @@ console.log('[Pipeline] Writing to MySQL table (overwrite in-place):', destTable
       })
           const writeData = await writeRes.json()
 if (writeData.success) {
-  console.log(`✅ MySQL table "${writeData.table}" updated: ${writeData.rows_written} rows`)
+  console.log(`MySQL table "${writeData.table}" updated: ${writeData.rows_written} rows`)
   // setLastRunResult already handles the success toast — no alert needed
 } else {
             console.error('[MySQL write-back] failed:', writeData.error)
-            alert(`⚠️ MySQL write failed: ${writeData.error}`)
+            alert(`MySQL write failed: ${writeData.error}`)
           }
         }
       } catch (e) {
@@ -3286,10 +3286,10 @@ if (writeData.success) {
           })
           const writeData3 = await writeRes3.json()
           if (writeData3.success) {
-            console.log(`✅ PostgreSQL table "${writeData3.table}" updated: ${writeData3.rows_written} rows`)
+            console.log(`PostgreSQL table "${writeData3.table}" updated: ${writeData3.rows_written} rows`)
           } else {
             console.error('[PostgreSQL write-back] failed:', writeData3.error)
-            alert(`⚠️ PostgreSQL write failed: ${writeData3.error}`)
+            alert(`PostgreSQL write failed: ${writeData3.error}`)
           }
         }
       } catch (e) {
@@ -3326,10 +3326,10 @@ if (writeData.success) {
           })
           const writeData4 = await writeRes4.json()
           if (writeData4.success) {
-            console.log(`✅ BigQuery table "${writeData4.table}" updated: ${writeData4.rows_written} rows`)
+            console.log(`BigQuery table "${writeData4.table}" updated: ${writeData4.rows_written} rows`)
           } else {
             console.error('[BigQuery write-back] failed:', writeData4.error)
-            alert(`⚠️ BigQuery write failed: ${writeData4.error}`)
+            alert(`BigQuery write failed: ${writeData4.error}`)
           }
         }
       } catch (e) {
@@ -3364,10 +3364,10 @@ if (writeData.success) {
           })
           const writeData6 = await writeRes6.json()
           if (writeData6.success) {
-            console.log(`✅ AWS ${awsDestConn.service} write: ${destItem6}. ${writeData6.rows_written} rows`)
+            console.log(`AWS ${awsDestConn.service} write: ${destItem6}. ${writeData6.rows_written} rows`)
           } else {
             console.error('[AWS write-back] failed:', writeData6.error)
-            alert(`⚠️ AWS write failed: ${writeData6.error}`)
+            alert(`AWS write failed: ${writeData6.error}`)
           }
         }
       } catch (e) {
@@ -3402,10 +3402,10 @@ if (writeData.success) {
           })
           const writeData5 = await writeRes5.json()
           if (writeData5.success) {
-            console.log(`✅ MongoDB collection "${writeData5.collection}" updated: ${writeData5.rows_written} docs`)
+            console.log(`MongoDB collection "${writeData5.collection}" updated: ${writeData5.rows_written} docs`)
           } else {
             console.error('[MongoDB write-back] failed:', writeData5.error)
-            alert(`⚠️ MongoDB write failed: ${writeData5.error}`)
+            alert(`MongoDB write failed: ${writeData5.error}`)
           }
         }
       } catch (e) {
@@ -3442,10 +3442,10 @@ if (writeData.success) {
           })
           const writeData7 = await writeRes7.json()
           if (writeData7.success) {
-            console.log(`✅ GCS file "${writeData7.file}" updated: ${writeData7.rows_written} rows`)
+            console.log(`GCS file "${writeData7.file}" updated: ${writeData7.rows_written} rows`)
           } else {
             console.error('[GCS write-back] failed:', writeData7.error)
-            alert(`⚠️ GCS write failed: ${writeData7.error}`)
+            alert(`GCS write failed: ${writeData7.error}`)
           }
         }
       } catch (e) {
@@ -3486,10 +3486,10 @@ if (writeData.success) {
           })
           const writeData8 = await writeRes8.json()
           if (writeData8.success) {
-            console.log(`✅ Cloud SQL table "${writeData8.table}" updated: ${writeData8.rows_written} rows`)
+            console.log(`Cloud SQL table "${writeData8.table}" updated: ${writeData8.rows_written} rows`)
           } else {
             console.error('[Cloud SQL write-back] failed:', writeData8.error)
-            alert(`⚠️ Cloud SQL write failed: ${writeData8.error}`)
+            alert(`Cloud SQL write failed: ${writeData8.error}`)
           }
         }
       } catch (e) {
@@ -3528,10 +3528,10 @@ if (writeData.success) {
           })
           const writeData9 = await writeRes9.json()
           if (writeData9.success) {
-            console.log(`✅ Databricks table "${writeData9.table}" updated: ${writeData9.rows_written} rows`)
+            console.log(`Databricks table "${writeData9.table}" updated: ${writeData9.rows_written} rows`)
           } else {
             console.error('[Databricks write-back] failed:', writeData9.error)
-            alert(`⚠️ Databricks write failed: ${writeData9.error}`)
+            alert(`Databricks write failed: ${writeData9.error}`)
           }
         }
       } catch (e) {
@@ -3797,7 +3797,7 @@ setTimeout(() => {
     const customTransform = {
       id: `sql_custom_${Date.now()}`,
       label: 'SQL Query',
-      icon: '🗄️',
+      icon: '',
       desc: editableSQL.length > 60 ? editableSQL.slice(0, 57) + '...' : editableSQL,
       sql: editableSQL,
       color: '#0ea5e9',
@@ -3828,7 +3828,6 @@ setTimeout(() => {
       <div className="p-8 max-w-5xl mx-auto">
         <GuidedTour key={`empty-${tourKey}`} steps={EMPTY_STATE_TOUR} storageKey="datapipe_tour_empty_seen" />
         <div className="text-center py-24 rounded-2xl" style={{ background:'rgba(255,255,255,0.02)', border:'1px dashed rgba(255,255,255,0.08)' }}>
-          <div className="text-5xl mb-4">🔗</div>
           <p className="text-white font-bold text-lg mb-2">No data source connected</p>
           <p className="text-sm mb-6" style={{ color:'rgba(255,255,255,0.35)' }}>Add a source first to build your pipeline</p>
           <button data-tour="tour-goto-sources" onClick={() => navigate('/sources')} className="px-6 py-3 rounded-xl text-sm font-bold text-white" style={{ background:'linear-gradient(135deg, #7c3aed, #2563eb)' }}>Go to Data Sources →</button>
@@ -3866,7 +3865,7 @@ setTimeout(() => {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={replayTour} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.5)' }} title="Replay the guided tour">
-            🧭 Tour
+            Tour
           </button>
           <button onClick={() => setShowDriftPanel(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:statusColors.bg, border:`1px solid ${statusColors.border}`, color:statusColors.text }}>
             <span className="w-2 h-2 rounded-full animate-pulse" style={{ background:statusColors.dot }} />Schema: {statusColors.label}{driftScore>0&&<span className="opacity-70">· {driftScore}% drift</span>}
@@ -3876,8 +3875,8 @@ setTimeout(() => {
               <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Pipeline Runs
             </button>
           )}
-          {learnedRules.length > 0 && <button onClick={() => setShowRulesPanel(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.25)', color:'#a78bfa' }}>🧠 {learnedRules.length} rules</button>}
-          {runIssues.length > 0 && runStatus!=='GREEN' && <button onClick={() => setShowApprovalModal(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(239,68,68,0.12)', border:'1px solid rgba(239,68,68,0.25)', color:'#f87171' }}>⚠️ {runIssues.length} changes. Review</button>}
+          {learnedRules.length > 0 && <button onClick={() => setShowRulesPanel(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.25)', color:'#a78bfa' }}>{learnedRules.length} rules</button>}
+          {runIssues.length > 0 && runStatus!=='GREEN' && <button onClick={() => setShowApprovalModal(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold" style={{ background:'rgba(239,68,68,0.12)', border:'1px solid rgba(239,68,68,0.25)', color:'#f87171' }}>{runIssues.length} changes. Review</button>}
           {transformations.length > 0 && (
             <button onClick={() => setShowSQLDrawer(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background:'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.25)', color:'#818cf8' }}>
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h8M4 18h8"/></svg>SQL
@@ -3901,7 +3900,7 @@ setTimeout(() => {
 
             {/* SOURCE — native <select> */}
             <div data-tour="tour-source-select">
-              <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>📥 Source Dataset</label>
+              <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>Source Dataset</label>
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 mb-2">
 {(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL', 'Databricks', 'REST API', 'GA4'] as const).map(type => {
   const activeSourceIsGSheets = activeSource?.type === 'sheets'
@@ -4031,11 +4030,11 @@ setTimeout(() => {
           CSQL
         </span>
       ) : type === 'Databricks' ? (
-        <span className="flex items-center justify-center gap-1">🧱 DBX</span>
+        <span className="flex items-center justify-center gap-1">DBX</span>
       ) : type === 'REST API' ? (
-        <span className="flex items-center justify-center gap-1">🌐 REST</span>
+        <span className="flex items-center justify-center gap-1">REST</span>
       ) : type === 'GA4' ? (
-        <span className="flex items-center justify-center gap-1">📈 GA4</span>
+        <span className="flex items-center justify-center gap-1">GA4</span>
       ) : type}
     </button>
   )
@@ -4051,7 +4050,7 @@ setTimeout(() => {
                   {sources.map(s => (
                     <option key={s.name} value={s.name} style={{ background:'#0d0a1a' }} title={s.name}>
                       {s.type === 'mysql'
-                        ? `🗄️ ${s.name.split('.')[0]}.${s.name.split('.')[1]?.split('@')[0] || '?'} @ ${s.name.split('@')[1] || ''}`
+                        ? `${s.name.split('.')[0]}.${s.name.split('.')[1]?.split('@')[0] || '?'} @ ${s.name.split('@')[1] || ''}`
                         : s.name}
                     </option>
                   ))}
@@ -4067,7 +4066,7 @@ setTimeout(() => {
 
             {/* DESTINATION — combobox with clear button + GSheets + write mode */}
             <div data-tour="tour-destination">
-              <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>📤 Destination / Output Name</label>
+              <label className="text-xs font-semibold block mb-2" style={{ color:'rgba(255,255,255,0.5)' }}>Destination / Output Name</label>
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 mb-2">
   {(['CSV', 'Google Sheets', 'MySQL', 'PostgreSQL', 'BigQuery', 'MongoDB', 'AWS', 'GCS', 'Cloud SQL', 'Databricks'] as const).map(type => {
     const isActive =
@@ -4237,7 +4236,7 @@ setTimeout(() => {
             CSQL
           </span>
         ) : type === 'Databricks' ? (
-          <span className="flex items-center justify-center gap-1">🧱 DBX</span>
+          <span className="flex items-center justify-center gap-1">DBX</span>
         ) : type}
       </button>
     )
@@ -4257,7 +4256,7 @@ setTimeout(() => {
             <path d="M12 2L22 19H2L12 2Z" fill="#ea580c" fillOpacity="0.7" stroke="#ea580c" strokeWidth="1.5" strokeLinejoin="round"/>
           </svg>
           <span className="text-xs font-bold text-white break-all">
-            🔷 {bqDestination.project}.{bqDestination.dataset}.{bqDestination.table || bqDestination.tables?.[0] || '?'}
+            {bqDestination.project}.{bqDestination.dataset}.{bqDestination.table || bqDestination.tables?.[0] || '?'}
           </span>
         </div>
         <button onClick={() => { setBqDest(null); localStorage.removeItem('datapro_bigquery_dest') }} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
@@ -4316,7 +4315,7 @@ setTimeout(() => {
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <svg width="13" height="13" fill="none" stroke="#fbbf24" strokeWidth="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                         <span className="text-xs font-bold text-white break-all">
-  🗄️ {mysqlDestination.database}.{mysqlDestination.table || mysqlDestination.tables?.[0] || '?'} @ {mysqlDestination.host}
+  {mysqlDestination.database}.{mysqlDestination.table || mysqlDestination.tables?.[0] || '?'} @ {mysqlDestination.host}
 </span>
                       </div>
                       <button onClick={() => setMysqlDest(null)} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
@@ -4380,7 +4379,7 @@ setTimeout(() => {
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <svg width="13" height="13" fill="none" stroke="#818cf8" strokeWidth="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                         <span className="text-xs font-bold text-white break-all">
-                          🐘 {pgDestination.database}.{pgDestination.table || pgDestination.tables?.[0] || '?'} @ {pgDestination.host}
+                          {pgDestination.database}.{pgDestination.table || pgDestination.tables?.[0] || '?'} @ {pgDestination.host}
                         </span>
                       </div>
                       <button onClick={() => { setPgDest(null) }} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
@@ -4440,7 +4439,7 @@ setTimeout(() => {
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <svg width="13" height="13" fill="none" stroke="#4ade80" strokeWidth="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                         <span className="text-xs font-bold text-white break-all">
-                          🍃 {mongoDestination.database}.{mongoDestination.collection || mongoDestination.collections?.[0] || '?'}
+                          {mongoDestination.database}.{mongoDestination.collection || mongoDestination.collections?.[0] || '?'}
                         </span>
                       </div>
                       <button onClick={() => { setMongoDest(null); localStorage.removeItem('datapro_mongo_dest') }} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
@@ -4495,7 +4494,7 @@ setTimeout(() => {
                         <path d="M6.5 20C4.01 20 2 17.99 2 15.5C2 13.01 4.01 11 6.5 11C6.5 8.24 8.74 6 11.5 6C13.85 6 15.82 7.57 16.4 9.74C16.6 9.72 16.8 9.7 17 9.7C19.21 9.7 21 11.49 21 13.7C21 15.91 19.21 17.7 17 17.7H16.5" stroke="#FF9900" strokeWidth="1.5" strokeLinecap="round"/>
                       </svg>
                       <span className="text-xs font-bold text-white break-all">
-                        ☁️ {awsDestinationState.service?.toUpperCase()} · {awsDestinationState.service === 's3' ? awsDestinationState.bucket : awsDestinationState.database || awsDestinationState.tableName} · {awsDestinationState.region}
+                        {awsDestinationState.service?.toUpperCase()} · {awsDestinationState.service === 's3' ? awsDestinationState.bucket : awsDestinationState.database || awsDestinationState.tableName} · {awsDestinationState.region}
                       </span>
                     </div>
                     <button onClick={() => setAwsDest(null)} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
@@ -4517,7 +4516,7 @@ setTimeout(() => {
                           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#4285F4" strokeWidth="1.5" strokeLinejoin="round"/>
                         </svg>
                         <span className="text-xs font-bold text-white break-all">
-                          ☁️ gcs://{gcsDestination.bucket}/{gcsDestination.file || gcsDestination.files?.[0] || '?'}
+                          gcs://{gcsDestination.bucket}/{gcsDestination.file || gcsDestination.files?.[0] || '?'}
                         </span>
                       </div>
                       <button onClick={() => setGcsDest(null)} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
@@ -4575,7 +4574,7 @@ setTimeout(() => {
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <svg width="13" height="13" fill="none" stroke="#34A853" strokeWidth="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                         <span className="text-xs font-bold text-white break-all">
-                          🔷 {cloudsqlDestination.database}.{cloudsqlDestination.table || cloudsqlDestination.tables?.[0] || '?'} @ cloudsql.{cloudsqlDestination.project}
+                          {cloudsqlDestination.database}.{cloudsqlDestination.table || cloudsqlDestination.tables?.[0] || '?'} @ cloudsql.{cloudsqlDestination.project}
                         </span>
                       </div>
                       <button onClick={() => setCsqlDest(null)} className="text-xs px-2 py-0.5 rounded-md flex-shrink-0 ml-2" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Disconnect</button>
@@ -4633,7 +4632,6 @@ setTimeout(() => {
                   <div className="mb-2 space-y-2">
                     <div className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background:'rgba(255,70,0,0.08)', border:'1px solid rgba(255,70,0,0.25)' }}>
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span style={{ fontSize:'13px' }}>🧱</span>
                         <span className="text-xs font-bold text-white break-all">
                           {databricksDestination.catalog}.{databricksDestination.schema}.{databricksDestination.table || databricksDestination.tables?.[0] || '?'} @ {databricksDestination.host}
                         </span>
@@ -4696,7 +4694,7 @@ setTimeout(() => {
                       color: destinationMode === mode ? '#c4b5fd' : 'rgba(255,255,255,0.45)',
                       cursor: 'pointer',
                     }}>
-                    {mode === 'replace' ? '♻️ Replace existing' : '➕ Append to existing'}
+                    {mode === 'replace' ? 'Replace existing' : 'Append to existing'}
                   </button>
                 ))}
               </div>
@@ -4734,8 +4732,8 @@ setTimeout(() => {
               {/* Auto-overwrite note */}
               <p className="text-xs mt-2" style={{ color:'rgba(255,255,255,0.25)' }}>
                 {destinationMode === 'replace'
-                  ? '♻️ Each run overwrites the destination with the latest cleaned data'
-                  : '➕ Each run appends new cleaned rows to the existing destination'}
+                  ? 'Each run overwrites the destination with the latest cleaned data'
+                  : 'Each run appends new cleaned rows to the existing destination'}
               </p>
             </div>
           </div>
@@ -4750,7 +4748,7 @@ setTimeout(() => {
                     {existingPipeline.runCount} runs · last: {existingPipeline.lastRun ? fmtRelative(existingPipeline.lastRun) : 'never'}
                     {existingPipeline.scheduleLabel && (
                       <span style={{ color:'#a78bfa' }}>
-                        {' '}· ⏱ {existingPipeline.scheduleLabel}
+                        {' '}· {existingPipeline.scheduleLabel}
                         {existingPipeline.scheduleTimezone && ` (${existingPipeline.scheduleTimezone})`}
                         {existingPipeline.scheduleStartDate && ` · from ${existingPipeline.scheduleStartDate}`}
                       </span>
@@ -4760,7 +4758,7 @@ setTimeout(() => {
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => { setSelectedPipelineForLogs(existingPipeline); setShowLogsPanel(true) }} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.25)', color:'#818cf8' }}>View Runs</button>
-                <button onClick={() => setShowScheduleModal(existingPipeline)} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.25)', color:'#a78bfa' }}>⏱ Schedule</button>
+                <button onClick={() => setShowScheduleModal(existingPipeline)} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.25)', color:'#a78bfa' }}>Schedule</button>
                 <button disabled={!can('pipeline.execute')} onClick={() => runPipeline(existingPipeline, 'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.2)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
               </div>
             </div>
@@ -4849,7 +4847,7 @@ setTimeout(() => {
               </div>
               <p className="font-bold text-white text-sm break-all">{destination || '—'}</p>
               <p className="text-xs mt-1" style={{ color:'rgba(255,255,255,0.35)' }}>
-                {gsheetsConnected ? '📊 Google Sheets' : 'Cleaned output'} · {destinationMode === 'replace' ? '♻️ Replace' : '➕ Append'}
+                {gsheetsConnected ? 'Google Sheets' : 'Cleaned output'} · {destinationMode === 'replace' ? 'Replace' : 'Append'}
               </p>
               {existingPipeline && (() => {
                 const latestLog = getLatestLog(existingPipeline)
@@ -4954,10 +4952,10 @@ setTimeout(() => {
                           <div className="flex items-center gap-2 flex-wrap mb-1">
                             <p className="font-bold text-white text-sm">{pipeline.name}</p>
                             {pipeline.status === 'rejected' && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(239,68,68,0.15)', color:'#f87171' }}>✕ Rejected</span>}
-                            {pipeline.status === 'pending_approval' && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(234,179,8,0.15)', color:'#fbbf24' }}>⏳ Pending Approval</span>}
-                            {isRunningNow && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(34,197,94,0.12)', color:'#4ade80' }}>⏱ {pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
-                            {!isRunningNow&&pipeline.scheduleLabel&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(234,179,8,0.1)', color:'#fbbf24' }}>⏸ {pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
-                            {pipeline.scheduleStartDate&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(99,102,241,0.1)', color:'#818cf8' }}>📅 from {pipeline.scheduleStartDate}</span>}
+                            {pipeline.status === 'pending_approval' && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(234,179,8,0.15)', color:'#fbbf24' }}>Pending Approval</span>}
+                            {isRunningNow && <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:'rgba(34,197,94,0.12)', color:'#4ade80' }}>{pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
+                            {!isRunningNow&&pipeline.scheduleLabel&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(234,179,8,0.1)', color:'#fbbf24' }}>{pipeline.scheduleLabel}{pipeline.scheduleTimezone&&pipeline.scheduleTimezone!=='UTC'&&<span style={{ opacity:0.7 }}> · {pipeline.scheduleTimezone}</span>}</span>}
+                            {pipeline.scheduleStartDate&&<span className="text-xs px-2 py-0.5 rounded-full" style={{ background:'rgba(99,102,241,0.1)', color:'#818cf8' }}>from {pipeline.scheduleStartDate}</span>}
                             {latestLog&&<StatusBadge status={latestLog.status} />}
                           </div>
                           <p className="text-xs mb-2" style={{ color:'rgba(255,255,255,0.4)' }}><span style={{ color:'#a78bfa' }}>{pipeline.sourceName}</span><span style={{ color:'rgba(255,255,255,0.25)' }}> → </span><span style={{ color:'#34d399' }}>{pipeline.destinationName}</span></p>
@@ -4989,14 +4987,14 @@ setTimeout(() => {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
                         {isRunningNow?(
-                          <button onClick={() => { stopSchedule(pipeline.id); persistPipelines(savedPipelines.map(p => p.id===pipeline.id?{...p,isActive:false}:p)) }} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(234,179,8,0.1)', border:'1px solid rgba(234,179,8,0.25)', color:'#fbbf24' }}>⏸ Pause</button>
+                          <button onClick={() => { stopSchedule(pipeline.id); persistPipelines(savedPipelines.map(p => p.id===pipeline.id?{...p,isActive:false}:p)) }} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(234,179,8,0.1)', border:'1px solid rgba(234,179,8,0.25)', color:'#fbbf24' }}>Pause</button>
                         ):pipeline.scheduleMs?(
                           <button onClick={() => { startSchedule(pipeline); persistPipelines(savedPipelines.map(p => p.id===pipeline.id?{...p,isActive:true}:p)) }} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(34,197,94,0.08)', border:'1px solid rgba(34,197,94,0.2)', color:'#4ade80' }}>▶ Resume</button>
                         ):null}
-                        <button onClick={() => setShowScheduleModal(pipeline)} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(124,58,237,0.1)', border:'1px solid rgba(124,58,237,0.2)', color:'#a78bfa' }}>⏱ Schedule</button>
+                        <button onClick={() => setShowScheduleModal(pipeline)} className="text-xs px-3 py-1.5 rounded-lg font-semibold" style={{ background:'rgba(124,58,237,0.1)', border:'1px solid rgba(124,58,237,0.2)', color:'#a78bfa' }}>Schedule</button>
                         <button onClick={() => { setSelectedPipelineForLogs(pipeline); setShowLogsPanel(true) }} className="text-xs px-3 py-1.5 rounded-lg font-semibold"
                           style={{ background:latestLog?.status==='failed'?'rgba(239,68,68,0.12)':'rgba(99,102,241,0.1)', border:`1px solid ${latestLog?.status==='failed'?'rgba(239,68,68,0.25)':'rgba(99,102,241,0.2)'}`, color:latestLog?.status==='failed'?'#f87171':'#818cf8' }}>
-                          {latestLog?.status==='failed'?'⚠ View Error':'Runs & Logs'}
+                          {latestLog?.status==='failed'?'View Error':'Runs & Logs'}
                         </button>
                         {pipeline.serverId && (
                           <button
@@ -5039,7 +5037,7 @@ setTimeout(() => {
                         )}
                         <button disabled={!can('pipeline.execute')} onClick={() => runPipeline(pipeline,'manual')} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(124,58,237,0.15)', border:'1px solid rgba(124,58,237,0.3)' }}>▶ Run Now</button>
                         {pipeline.serverId && (
-                          <button disabled={!can('pipeline.execute')} onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side. Works even if this tab is closed">☁ Run on Server</button>
+                          <button disabled={!can('pipeline.execute')} onClick={() => executePipelineOnServer(pipeline.serverId!)} className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white" style={{ background:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)' }} title="Runs server-side. Works even if this tab is closed">Run on Server</button>
                         )}
                         <button onClick={() => {
                           if (window.confirm(`Permanently delete pipeline "${pipeline.name}"? This cannot be undone.`)) {
@@ -5047,7 +5045,7 @@ setTimeout(() => {
                             persistPipelines(savedPipelines.filter(p => p.id!==pipeline.id))
                             addAuditLog({ id:crypto.randomUUID(), time:new Date().toLocaleString(), action:'delete_pipeline', entity_type:'pipeline', entity_id:pipeline.id, details:`Deleted pipeline "${pipeline.name}"`, user:'local_user' })
                           }
-                        }} className="text-xs px-2 py-1.5 rounded-lg" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.15)', color:'#f87171' }} title="Permanently delete pipeline" hidden={!can('pipeline.delete')}>🗑</button>
+                        }} className="text-xs px-2 py-1.5 rounded-lg" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.15)', color:'#f87171' }} title="Permanently delete pipeline" hidden={!can('pipeline.delete')}></button>
                       </div>
                     </div>
                   </div>
@@ -5119,13 +5117,12 @@ setTimeout(() => {
         <div className="rounded-2xl px-6 py-4 flex items-center justify-between gap-4 flex-wrap"
           style={{ background:'rgba(192, 194, 193, 0.08)', border:'1px solid rgba(34,197,94,0.25)' }}>
           <div className="flex items-center gap-3">
-            <span className="text-xl">✅</span>
             <div>
               <p className="font-bold text-white text-sm">"{lastRunResult.pipelineName}" ran successfully</p>
               <p className="text-xs mt-0.5" style={{ color:'rgba(255,255,255,0.5)' }}>
                 {lastRunResult.rowsIn.toLocaleString()} rows in → {lastRunResult.rowsOut.toLocaleString()} rows out
                 {lastRunResult.rowsAffected > 0 && <span style={{ color:'#f87171' }}> · −{lastRunResult.rowsAffected.toLocaleString()} removed</span>}
-                {' · '}{lastRunResult.mode === 'append' ? '➕ Appended' : '♻️ Replaced'}
+                {' · '}{lastRunResult.mode === 'append' ? 'Appended' : 'Replaced'}
               </p>
             </div>
           </div>
@@ -5182,7 +5179,6 @@ setTimeout(() => {
                 <div className="px-6 py-6"><p className="font-semibold text-white mb-1">No baseline yet. First upload</p><p className="text-xs" style={{ color:'rgba(255,255,255,0.4)' }}>Save a pipeline to set the baseline.</p></div>
               ):runIssues.length===0?(
                 <div className="px-6 py-5 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:'rgba(34,197,94,0.1)', border:'1px solid rgba(34,197,94,0.2)' }}>✅</div>
                   <div><p className="font-semibold text-white">Structure unchanged from baseline</p><p className="text-xs mt-0.5" style={{ color:'rgba(255,255,255,0.4)' }}>Safe to run. {baseline?.runCount>0&&`${baseline.runCount} successful run${baseline.runCount!==1?'s':''}.`}</p></div>
                 </div>
               ):(
@@ -5356,9 +5352,9 @@ setTimeout(() => {
                 <div className="flex flex-wrap gap-1.5">{transformations.map(t => (<span key={t.id} className="text-xs px-2 py-1 rounded-lg flex items-center gap-1" style={{ background:'rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.6)' }}>{t.icon} {t.label}</span>))}</div>
               </div>
               <div>
-                <label className="text-xs font-bold uppercase tracking-widest block mb-3" style={{ color:'rgba(255,255,255,0.4)' }}>⏱ Execution Schedule</label>
+                <label className="text-xs font-bold uppercase tracking-widest block mb-3" style={{ color:'rgba(255,255,255,0.4)' }}>Execution Schedule</label>
                 <div className="flex gap-1 mb-4">
-                  {([{id:'frequency',label:'⏱ Frequency'},{id:'daily-at',label:'🕘 Run at time'}] as const).map(tab => (
+                  {([{id:'frequency',label:'Frequency'},{id:'daily-at',label:'Run at time'}] as const).map(tab => (
                     <button key={tab.id} onClick={() => setSaveScheduleTab(tab.id)} className="flex-1 py-2 rounded-xl text-xs font-bold transition-all"
                       style={{ background:saveScheduleTab===tab.id?'rgba(124,58,237,0.25)':'rgba(255,255,255,0.04)', border:`1px solid ${saveScheduleTab===tab.id?'rgba(124,58,237,0.5)':'rgba(255,255,255,0.08)'}`, color:saveScheduleTab===tab.id?'#c4b5fd':'rgba(255,255,255,0.45)' }}>
                       {tab.label}
@@ -5408,9 +5404,9 @@ setTimeout(() => {
               </div>
               {showSaveTimezone&&(
                 <div className="grid grid-cols-2 gap-4">
-                  {saveScheduleTab==='frequency'&&isSaveAbsolute&&(<div><label className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>⏰ Time of Day</label><input type="time" value={saveScheduleTime} onChange={e => setSaveScheduleTime(e.target.value)} className="w-full text-sm text-white rounded-xl px-4 py-3 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)', colorScheme:'dark' }} /></div>)}
+                  {saveScheduleTab==='frequency'&&isSaveAbsolute&&(<div><label className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>Time of Day</label><input type="time" value={saveScheduleTime} onChange={e => setSaveScheduleTime(e.target.value)} className="w-full text-sm text-white rounded-xl px-4 py-3 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)', colorScheme:'dark' }} /></div>)}
                   <div className={saveScheduleTab==='frequency'&&isSaveAbsolute?'':'col-span-2'}>
-                    <label className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>🌍 Timezone</label>
+                    <label className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color:'rgba(255,255,255,0.4)' }}>Timezone</label>
                     <select value={saveTimezone} onChange={e => setSaveTimezone(e.target.value)} className="w-full text-sm text-white rounded-xl px-4 py-3 outline-none" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(124,58,237,0.3)' }}>
                       {TIMEZONES.map(tz => <option key={tz} value={tz} style={{ background:'#0d0a1a' }}>{tz}</option>)}
                     </select>
@@ -5419,7 +5415,7 @@ setTimeout(() => {
               )}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold uppercase tracking-widest" style={{ color:'rgba(255,255,255,0.4)' }}>📅 Start Date</label>
+                  <label className="text-xs font-bold uppercase tracking-widest" style={{ color:'rgba(255,255,255,0.4)' }}>Start Date</label>
                   <div className="flex items-center gap-2">
                     {saveStartDate&&<button onClick={() => setSaveStartDate('')} className="text-xs px-2 py-0.5 rounded-md" style={{ color:'#f87171', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)' }}>Clear</button>}
                     <button onClick={() => setSaveShowCalendar(v => !v)} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl font-semibold transition-all"
@@ -5435,7 +5431,7 @@ setTimeout(() => {
               </div>
               {saveScheduleTab==='frequency'&&saveScheduleValue!=='none'&&saveScheduleValue!=='custom'&&(
                 <div className="rounded-xl px-4 py-2.5" style={{ background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)' }}>
-                  <p className="text-xs" style={{ color:'#c4b5fd' }}>⚡ Auto-runs every <strong>{SCHEDULE_PRESETS.find(p => p.value===saveScheduleValue)?.label}</strong>{isSaveAbsolute&&<> at <strong>{saveScheduleTime}</strong></>}{showSaveTimezone&&saveTimezone!=='UTC'&&<> in <strong>{saveTimezone}</strong></>}{saveStartDate&&<> · starting <strong>{fmtDateSave(saveStartDate)}</strong></>}</p>
+                  <p className="text-xs" style={{ color:'#c4b5fd' }}>Auto-runs every <strong>{SCHEDULE_PRESETS.find(p => p.value===saveScheduleValue)?.label}</strong>{isSaveAbsolute&&<> at <strong>{saveScheduleTime}</strong></>}{showSaveTimezone&&saveTimezone!=='UTC'&&<> in <strong>{saveTimezone}</strong></>}{saveStartDate&&<> · starting <strong>{fmtDateSave(saveStartDate)}</strong></>}</p>
                 </div>
               )}
             </div>
@@ -5489,7 +5485,6 @@ setTimeout(() => {
             </div>
             {(() => { const latestLog=getLatestLog(selectedPipelineForLogs); if (!latestLog||latestLog.status==='success') return null; return (
               <div className="px-6 py-3 flex items-center gap-3" style={{ background:'rgba(239,68,68,0.08)', borderBottom:'1px solid rgba(239,68,68,0.15)' }}>
-                <span className="text-sm">⚠️</span>
                 <div className="flex-1"><p className="text-xs font-bold" style={{ color:'#f87171' }}>Last run failed. {fmtRelative(latestLog.timestamp)}</p><p className="text-xs" style={{ color:'rgba(255,255,255,0.45)' }}>{latestLog.steps.find(s => s.status==='failed')?.message||'Unknown error'}{' · '}<button onClick={() => setExpandedLogId(latestLog.id)} className="underline" style={{ color:'#f87171' }}>See details</button></p></div>
                 <button onClick={() => navigate('/audit-logs')} className="text-xs px-3 py-1.5 rounded-lg font-semibold flex-shrink-0" style={{ background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.3)', color:'#f87171' }}>View in Audit Log →</button>
               </div>
@@ -5517,7 +5512,7 @@ setTimeout(() => {
                                 <StatusBadge status={log.status} />
                                 <div className="min-w-0">
                                   <p className="text-xs font-bold text-white">{new Date(log.timestamp).toLocaleString()}</p>
-                                  <p className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>{fmtRelative(log.timestamp)} · {log.triggeredBy==='schedule'?`⏱ ${log.schedule}`:log.triggeredBy==='manual'?'🖱 Manual':'🔌 API'}</p>
+                                  <p className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>{fmtRelative(log.timestamp)} · {log.triggeredBy==='schedule'?`${log.schedule}`:log.triggeredBy==='manual'?'Manual':'API'}</p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-3 flex-shrink-0">
@@ -5532,7 +5527,7 @@ setTimeout(() => {
                                 <div className="flex h-2 rounded-full overflow-hidden gap-0.5 mb-3">{log.steps.map((step,si) => (<div key={si} className="flex-1 rounded-full" style={{ background:step.status==='success'?'#22c55e':step.status==='failed'?'#ef4444':'rgba(255,255,255,0.1)' }} />))}</div>
                                 {log.steps.map((step,si) => (
                                   <div key={si} className="flex items-center justify-between py-2 px-3 rounded-lg" style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.05)' }}>
-                                    <div className="flex items-center gap-2"><span className="text-xs">{step.status==='success'?'✅':step.status==='failed'?'❌':'⏭'}</span><span className="text-xs font-medium text-white">{step.name}</span>{step.message&&<span className="text-xs" style={{ color:'#f87171' }}>{step.message}</span>}</div>
+                                    <div className="flex items-center gap-2"><span className="text-xs">{step.status==='success'?'':step.status==='failed'?'':''}</span><span className="text-xs font-medium text-white">{step.name}</span>{step.message&&<span className="text-xs" style={{ color:'#f87171' }}>{step.message}</span>}</div>
                                     <span className="text-xs font-mono" style={{ color:'rgba(255,255,255,0.3)' }}>{fmtDur(step.duration)}</span>
                                   </div>
                                 ))}
@@ -5633,7 +5628,7 @@ setTimeout(() => {
                 <p className="text-xs" style={{ color:'rgba(255,255,255,0.5)' }}>{runStatus==='GREEN'?'No changes. Pipeline can run automatically.':runStatus==='YELLOW'?'Minor changes. Worth reviewing.':'Breaking changes. Pipeline paused until reviewed.'}</p>
               </div>
               {runIssues.length===0?(
-                <div className="text-center py-10"><p className="text-4xl mb-3">✅</p><p className="text-sm font-semibold text-white">No changes detected</p></div>
+                <div className="text-center py-10"><p className="text-sm font-semibold text-white">No changes detected</p></div>
               ):(
                 <>
                   {runIssues.map((issue: any) => {
@@ -5654,12 +5649,12 @@ setTimeout(() => {
           <div className="absolute inset-0" style={{ background:'rgba(0,0,0,0.6)' }} />
           <div className="relative flex flex-col shadow-2xl" style={{ width:'480px', height:'100%', background:'#0a0714', borderLeft:'1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-              <div><h2 className="font-bold text-white">🧠 Learned Rules</h2><p className="text-xs mt-1" style={{ color:'rgba(255,255,255,0.4)' }}>Auto-applied on future uploads</p></div>
+              <div><h2 className="font-bold text-white">Learned Rules</h2><p className="text-xs mt-1" style={{ color:'rgba(255,255,255,0.4)' }}>Auto-applied on future uploads</p></div>
               <button onClick={() => setShowRulesPanel(false)} style={{ color:'rgba(255,255,255,0.35)', fontSize:'18px' }}>✕</button>
             </div>
             <div className="flex-1 overflow-auto p-5 space-y-3">
               {learnedRules.length===0?(
-                <div className="text-center py-12"><p className="text-4xl mb-3">🧠</p><p className="text-sm font-semibold text-white mb-2">Nothing learned yet</p><p className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>Approve schema fixes to save them as rules.</p></div>
+                <div className="text-center py-12"><p className="text-sm font-semibold text-white mb-2">Nothing learned yet</p><p className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>Approve schema fixes to save them as rules.</p></div>
               ):learnedRules.map((rule: any) => (
                 <div key={rule.id} className="rounded-xl p-4" style={{ background:'rgba(124,58,237,0.06)', border:'1px solid rgba(124,58,237,0.18)' }}>
                   <div className="flex items-start justify-between gap-2">
@@ -5781,7 +5776,6 @@ setTimeout(() => {
             <div className="p-5 space-y-2">
               {sources.filter(s => s.type === 'sheets').length === 0 ? (
                 <div className="text-center py-10">
-                  <p className="text-3xl mb-3">📊</p>
                   <p className="text-sm font-semibold text-white mb-2">No Google Sheets connected yet</p>
                   <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>Go to Data Sources and connect a Google Sheet first.</p>
                   <button onClick={() => { setShowGSheetsPicker(false); window.location.href = '/sources' }}
@@ -5884,7 +5878,7 @@ setTimeout(() => {
             const customTransform = {
               id: `ai_custom_${Date.now()}`,
               label: label,
-              icon: '🤖',
+              icon: '',
               desc: instruction.length > 60 ? instruction.slice(0, 57) + '...' : instruction,
               instruction: instruction,
               color: '#ec4899',
@@ -5914,7 +5908,7 @@ setTimeout(() => {
             const customTransform = {
               id: `sql_custom_${Date.now()}`,
               label: 'SQL Query',
-              icon: '🗄️',
+              icon: '',
               desc: sql.length > 60 ? sql.slice(0, 57) + '...' : sql,
               sql,
               color: '#0ea5e9',

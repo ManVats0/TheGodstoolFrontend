@@ -26,7 +26,7 @@ export default function Contact() {
     const planLabel = planParam ? (PLAN_LABELS[planParam] || planParam) : ''
     const prefillMessage =
       intent === 'sales' && planLabel
-        ? `Hi, I'm interested in the ${planLabel} plan${billingParam ? ` (${billingParam} billing)` : ''}. I'd love to get set up with something powerful for my data pipeline. Please share the next steps.`
+        ? `Hi, I'm interested in the ${planLabel} plan${billingParam ? ` (${billingParam} billing)` : ''}. I'd like to get set up. Please share the next steps.`
         : ''
 
     setForm(prev => ({
@@ -160,7 +160,7 @@ export default function Contact() {
 
             {status === 'error' && (
               <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>
-                ⚠ {errorMsg}
+                {errorMsg}
               </div>
             )}
 

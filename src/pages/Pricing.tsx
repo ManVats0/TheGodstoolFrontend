@@ -256,7 +256,7 @@ export default function Pricing() {
 
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
         <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          Unlock The God's Tool
+          Choose a plan
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
           Transparent pricing for freelancers, growing teams, and enterprises
@@ -280,7 +280,7 @@ export default function Pricing() {
 
       {error && (
         <div style={{ marginBottom: '24px', background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: '10px', padding: '12px 20px', color: '#fca5a5', fontSize: '0.875rem', fontFamily: 'monospace' }}>
-          ⚠ {error}
+          {error}
         </div>
       )}
 
@@ -312,11 +312,11 @@ export default function Pricing() {
             </div>
 
             <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#34d399', fontFamily: 'monospace' }}>
-              ⚡ {plan.aiPerDay} AI transforms/day
+              {plan.aiPerDay} AI transforms/day
             </div>
 
             <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#a5b4fc', fontFamily: 'monospace' }}>
-              👤 {plan.userLimit} concurrent login{plan.userLimit > 1 ? 's' : ''}
+              {plan.userLimit} concurrent login{plan.userLimit > 1 ? 's' : ''}
             </div>
 
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
@@ -393,7 +393,7 @@ export default function Pricing() {
           <br />USD shown is an estimate; the exact rate is applied at checkout.
         </p>
         {customError && (
-          <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>⚠ {customError}</div>
+          <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>{customError}</div>
         )}
         <button
           onClick={handleCustomPayment}

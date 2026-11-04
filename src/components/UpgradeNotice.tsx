@@ -46,7 +46,7 @@ export default function UpgradeNotice() {
           style={{ position: 'fixed', inset: 0, zIndex: 100000, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={e => e.stopPropagation()}
             style={{ maxWidth: 420, width: '100%', background: '#0f0b1f', border: '1px solid rgba(124,58,237,0.4)', borderRadius: 16, padding: 24, color: 'white', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-            <div style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: 8 }}>Unlock this with a paid plan</div>
+            <div style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: 8 }}>This needs a paid plan</div>
             <div style={{ fontSize: '0.9rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.7)', marginBottom: 20 }}>{upgrade.message}</div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setUpgrade(null)}

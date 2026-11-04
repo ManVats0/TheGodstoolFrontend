@@ -124,7 +124,7 @@ export function DiagramSteps() {
           </g>
         )
       })}
-      <T x={240} y={622} size={13} fill={C.soft}>Only step 3 involves the AI, and it never sees your rows.</T>
+      <T x={240} y={622} size={13} fill={C.soft}>Only step 3 involves the AI, and in private mode it never sees your rows.</T>
     </Frame>
   )
 }

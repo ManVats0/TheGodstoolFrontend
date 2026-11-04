@@ -14,7 +14,6 @@ export default function About() {
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <div style={{ fontSize: '3rem', marginBottom: 16 }}>♔</div>
           <h1 style={{
             fontSize: '2.8rem', fontWeight: 900, letterSpacing: '0.06em',
             background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)',
@@ -63,15 +62,14 @@ export default function About() {
           <h2 style={{ fontSize: '1.2rem', color: '#c4b5fd', letterSpacing: '0.1em', marginBottom: 20 }}>Core Features</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             {[
-              ['🔌', 'Data Sources', 'Connect 12+ source types including databases, cloud warehouses, and APIs'],
-              ['📊', 'Data Analysis', 'Automated profiling: missing values, outliers, schema drift, time series'],
-              ['⚙️', 'Pipeline Flow', 'Chain cleaning transformations with scheduling and full run logs'],
-              ['🗂️', 'Data Catalog', 'Governance layer with tagging, data dictionary, and profiling status'],
-              ['🔐', 'Secure Tunneling', 'Connect private network databases without opening firewall ports'],
-              ['📜', 'Audit Logs', 'Full history of every action taken on the platform'],
-            ].map(([icon, title, desc]) => (
+              ['Data Sources', 'Connect 12+ source types including databases, cloud warehouses, and APIs'],
+              ['Data Analysis', 'Automated profiling: missing values, outliers, schema drift, time series'],
+              ['Pipeline Flow', 'Chain cleaning transformations with scheduling and full run logs'],
+              ['Data Catalog', 'Governance layer with tagging, data dictionary, and profiling status'],
+              ['Secure Tunneling', 'Connect private network databases without opening firewall ports'],
+              ['Audit Logs', 'Full history of every action taken on the platform'],
+            ].map(([title, desc]) => (
               <div key={title as string} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '20px 18px' }}>
-                <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>{icon}</div>
                 <div style={{ fontWeight: 700, color: '#e9d5ff', marginBottom: 6, fontSize: '0.95rem' }}>{title}</div>
                 <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', lineHeight: 1.6 }}>{desc}</div>
               </div>
