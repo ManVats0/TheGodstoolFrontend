@@ -1351,7 +1351,7 @@ if (!entered) return (
               Your 14-day free trial has started
             </div>
             <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '24px' }}>
-              Every data source and AI feature is unlocked for the next 14 days. No credit card needed. Connect a real database and see how it feels before you decide on a plan.
+              Every data source and AI feature is included for the next 14 days. No credit card needed. Connect a real database and see how it feels before you decide on a plan.
             </p>
             <button onClick={() => setShowTrialWelcome(false)} className="cta-btn" style={{ width: '100%' }}>
               Let's go →
