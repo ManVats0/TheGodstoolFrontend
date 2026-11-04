@@ -72,7 +72,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Free plan and trial',
-        body: 'New accounts get 14 days with everything unlocked and no card. After that the account moves to the Free plan, which keeps working with these limits: up to 3 sources, CSV files up to 5 MB, 5,000 rows per run and 1 pipeline. Nothing is deleted when the trial ends. If a limit stops you, the app tells you which one and what to change.',
+        body: 'New accounts get 14 days with every feature included and no card. After that the account moves to the Free plan, which keeps working with these limits: up to 3 sources, CSV files up to 5 MB, 5,000 rows per run and 1 pipeline. Nothing is deleted when the trial ends. If a limit stops you, the app tells you which one and what to change.',
         warning: 'The limits are enforced on the server, so they apply however you reach the app.',
       },
       {
@@ -117,7 +117,7 @@ const DOCS: Record<string, {
     sections: [
       {
         heading: 'Plans or credits',
-        body: 'You can pay two ways. Monthly plans (Lite $19, Starter $39, Pro $79, Team $199) unlock every source and give a daily AI allowance. Credits are pay as you go, with no subscription. They suit people who clean data a few days a month, such as freelancers.',
+        body: 'You can pay two ways. Monthly plans (Lite $19, Starter $39, Pro $79, Team $199) include every source and give a daily AI allowance. Credits are pay as you go, with no subscription. They suit people who clean data a few days a month, such as freelancers.',
       },
       {
         heading: 'How credits work',
