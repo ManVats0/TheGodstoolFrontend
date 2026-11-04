@@ -833,7 +833,7 @@ if (!entered) return (
           </div>
         </div>
         {sideFormError && (
-          <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '6px 10px', color: '#fca5a5', fontSize: '0.68rem', fontFamily: 'monospace' }}>⚠ {sideFormError}</div>
+          <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '6px 10px', color: '#fca5a5', fontSize: '0.68rem', fontFamily: 'monospace' }}>{sideFormError}</div>
         )}
         <button type="submit" className="auth-btn-primary" style={{ padding: '9px', fontSize: '0.85rem' }}>CONTINUE →</button>
         <p style={{ fontFamily: 'monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>14-day free trial · No credit card required · Takes 30 seconds</p>
@@ -1166,12 +1166,12 @@ if (!entered) return (
           )}
 
           {loginError && (
-            <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>⚠ {loginError}</div>
+            <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>{loginError}</div>
           )}
           {showForceLogout && (
             <>
               <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
-                👆 Click below again to confirm and log in here
+                Click below again to confirm and log in here
               </div>
               <button
                 ref={forceLogoutRef}
@@ -1194,7 +1194,7 @@ if (!entered) return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: 'rgba(30,64,175,0.08)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '8px', padding: '16px' }}>
               <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontFamily: 'monospace' }}>Enter your email to receive a reset link:</div>
               <input type="email" placeholder="you@example.com" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} className="auth-input" />
-              {forgotError && <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>⚠ {forgotError}</div>}
+              {forgotError && <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>{forgotError}</div>}
               {forgotMsg && <div style={{ color: '#86efac', fontSize: '0.78rem', fontFamily: 'monospace' }}>✓ {forgotMsg}</div>}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={handleForgotPassword} className="auth-btn-primary" style={{ flex: 1, padding: '10px' }}>Send Reset Link</button>
@@ -1225,7 +1225,7 @@ if (!entered) return (
       <div style={{ textAlign: 'center', maxWidth: '480px' }}>
         <img src={logo} alt="logo" style={{ height: '64px', width: '64px', marginBottom: '16px' }} />
         <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>Welcome to The God's Tool</div>
-        <div style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginBottom: '32px' }}>Get started for free or unlock the full platform</div>
+        <div style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginBottom: '32px' }}>Start free, upgrade when you need more</div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
           {/* Free tier */}
@@ -1347,7 +1347,6 @@ if (!entered) return (
           onClick={() => setShowTrialWelcome(false)}>
           <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎉</div>
             <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
               Your 14-day free trial has started
             </div>

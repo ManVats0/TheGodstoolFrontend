@@ -9,7 +9,7 @@
 
   const DATASOURCES_TOUR: TourStep[] = [
   {
-    title: 'Welcome to Data Sources 👋',
+    title: 'Welcome to Data Sources',
     body: 'This is where every project starts. Connect a CSV, Google Sheet, database, or API here and DataPipe will pull it in for cleaning and analysis.',
   },
   {
@@ -346,9 +346,9 @@ const [savedDatabricksConns, setSavedDatabricksConns] = useState<any[]>(() => {
         })
         const result = await res.json()
         if (result.success) alert(` Erased: ${result.detail || 'done'}`)
-        else alert(`❌ Erasure failed: ${result.detail || 'unknown error'}`)
+        else alert(`Erasure failed: ${result.detail || 'unknown error'}`)
       } catch (e) {
-        alert(`❌ Could not reach backend: ${e}`)
+        alert(`Could not reach backend: ${e}`)
       } finally {
         setErasingId(null)
       }
@@ -1022,7 +1022,7 @@ const handleLockedSource = () => {
             {credits !== null && credits > 0 && (
               <span className="ml-2 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"
                 style={{ background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }}>
-                🪙 {credits.toLocaleString()} credits
+                {credits.toLocaleString()} credits
               </span>
             )}
           </div>
@@ -1051,7 +1051,6 @@ const handleLockedSource = () => {
                 <polygon points="55,40 65,40 60,48" fill="#1a1040" stroke="#a78bfa" strokeWidth="1.5" strokeLinejoin="round"/>
                 <text x="60" y="14" textAnchor="middle" fill="#a78bfa" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">I HAIL TO THE</text>
                 <text x="60" y="26" textAnchor="middle" fill="#c4b5fd" fontSize="8" fontWeight="bold" fontFamily="sans-serif">GOD OF DATA</text>
-                <text x="60" y="37" textAnchor="middle" fill="#7c3aed" fontSize="7" fontFamily="sans-serif">⚔️ 🛡️ ⚔️</text>
               </g>
 
               {/* Cape */}
@@ -1673,7 +1672,7 @@ const handleLockedSource = () => {
                 {gsheetsStep === 'auth' && (
                   <>
                     <div className="rounded-xl p-4" style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(52,211,153,0.2)' }}>
-                      <p className="text-xs font-bold text-white mb-1.5">🔒 Secure OAuth 2.0 via Google</p>
+                      <p className="text-xs font-bold text-white mb-1.5">Secure OAuth 2.0 via Google</p>
                       <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
                         We use Google's standard sign-in screen. If you're already logged into Google in this browser, your account will be pre-populated. One click and you're in.
                       </p>
@@ -1794,7 +1793,7 @@ const handleLockedSource = () => {
 <button onClick={openGooglePicker}
                         className="w-full mb-3 py-2.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2"
                         style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.4)', cursor: 'pointer' }}>
-                        📁 Choose a Spreadsheet from Drive
+                        Choose a Spreadsheet from Drive
                       </button>
 
                       <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -1930,7 +1929,7 @@ const handleLockedSource = () => {
 
               {/* Info banner */}
               <div className="rounded-xl p-3" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔒 SSL/TLS · Connection pool · Health check</p>
+                <p className="text-xs font-bold text-white mb-1">SSL/TLS · Connection pool · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Credentials are saved in your browser only. Other users on this tool connect with their own MySQL. Your database is never shared.
                 </p>
@@ -2036,12 +2035,12 @@ const handleLockedSource = () => {
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
                     <p className="text-xs font-bold" style={{ color: '#4ade80' }}>
-                      ✅ Health check passed. Database is reachable
+                      Health check passed. Database is reachable
                     </p>
                   </div>
 
                   {mysqlTablesLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>
                   )}
 
                   {!mysqlTablesLoading && mysqlTables.length > 0 && (
@@ -2157,7 +2156,7 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch {
                       setMysqlStatus('error')
-                      setMysqlError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
+                      setMysqlError('Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!mysql.host || !mysql.user || !mysql.database || mysqlStatus === 'testing'}
@@ -2168,7 +2167,7 @@ if (tablesData.tables?.length > 0) {
                     color: '#fbbf24',
                     cursor: (!mysql.host || !mysql.user || !mysql.database || mysqlStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
-                  {mysqlStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {mysqlStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
 
                 <button
@@ -2280,7 +2279,7 @@ if (tablesData.tables?.length > 0) {
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔒 SSL/TLS · Connection pool · Health check</p>
+                <p className="text-xs font-bold text-white mb-1">SSL/TLS · Connection pool · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Credentials are saved in your browser only. Your database is never shared with other users.
                 </p>
@@ -2359,10 +2358,10 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed. Database is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed. Database is reachable</p>
                   </div>
                   {postgresTablesLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>
                   )}
                   {!postgresTablesLoading && postgresTables.length > 0 && (
                     <div>
@@ -2442,13 +2441,13 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch {
                       setPostgresStatus('error')
-                      setPostgresError('❌ Could not reach backend.\n   → Make sure the server is running.')
+                      setPostgresError('Could not reach backend.\n   → Make sure the server is running.')
                     }
                   }}
                   disabled={!postgres.host || !postgres.user || !postgres.database || postgresStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.35)', color: '#818cf8', cursor: (!postgres.host || !postgres.user || !postgres.database || postgresStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
-                  {postgresStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {postgresStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
                 <button
                   onClick={async () => {
@@ -2549,7 +2548,7 @@ if (tablesData.tables?.length > 0) {
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(234,88,12,0.06)', border: '1px solid rgba(234,88,12,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔑 Service Account JSON Key</p>
+                <p className="text-xs font-bold text-white mb-1">Service Account JSON Key</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   In Google Cloud Console → IAM → Service Accounts → create key (JSON). The service account needs BigQuery Data Viewer + BigQuery Job User roles. Key is saved in your browser only.
                 </p>
@@ -2592,7 +2591,7 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed. BigQuery is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed. BigQuery is reachable</p>
                   </div>
 
                   {bqDatasets.length > 0 && (
@@ -2637,7 +2636,7 @@ if (tablesData.tables?.length > 0) {
                   )}
 
                   {bqTablesLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>
                   )}
 
                   {!bqTablesLoading && bqTables.length > 0 && (
@@ -2740,7 +2739,7 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch {
                       setBqStatus('error')
-                      setBqError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
+                      setBqError('Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!bqProject || !bqKeyJson || bqStatus === 'testing'}
@@ -2751,7 +2750,7 @@ if (tablesData.tables?.length > 0) {
                     color: '#fb923c',
                     cursor: (!bqProject || !bqKeyJson || bqStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
-                  {bqStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {bqStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
 
                 <button
@@ -2847,7 +2846,7 @@ if (tablesData.tables?.length > 0) {
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔒 Connection URI · Health check</p>
+                <p className="text-xs font-bold text-white mb-1">Connection URI · Health check</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Get this from MongoDB Atlas → Install MongoDB Atlas → Connect → Drivers. Format: mongodb+srv://user:pass@cluster.mongodb.net/. Credentials stay in your browser only.
                 </p>
@@ -2890,10 +2889,10 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed. MongoDB is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed. MongoDB is reachable</p>
                   </div>
                   {mongoCollectionsLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading collections…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading collections…</p>
                   )}
                   {!mongoCollectionsLoading && mongoCollections.length > 0 && (
                     <div>
@@ -2980,13 +2979,13 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch {
                       setMongoStatus('error')
-                      setMongoError('❌ Could not reach backend.\n   → Make sure the server is running.')
+                      setMongoError('Could not reach backend.\n   → Make sure the server is running.')
                     }
                   }}
                   disabled={!mongo.uri || !mongo.database || mongoStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.35)', color: '#4ade80', cursor: (!mongo.uri || !mongo.database || mongoStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
-                  {mongoStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {mongoStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
 
                 <button
@@ -3093,7 +3092,7 @@ if (tablesData.tables?.length > 0) {
             <div className="p-5 space-y-4">
               {/* IAM info banner */}
               <div className="rounded-xl p-3" style={{ background: 'rgba(255,153,0,0.06)', border: '1px solid rgba(255,153,0,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔑 IAM Access Key Required</p>
+                <p className="text-xs font-bold text-white mb-1">IAM Access Key Required</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   In AWS Console → IAM → Users → your user → Security credentials → Create access key.
                   The IAM user needs: <strong style={{ color: '#FF9900' }}>AmazonRDSReadOnlyAccess</strong> (for RDS/Redshift),
@@ -3260,7 +3259,7 @@ if (tablesData.tables?.length > 0) {
               {awsService === 'cost-explorer' && (
                 <>
                   <div className="rounded-xl p-3" style={{ background: 'rgba(255,153,0,0.06)', border: '1px solid rgba(255,153,0,0.2)' }}>
-                    <p className="text-xs font-bold text-white mb-1">💰 AWS Cost Explorer</p>
+                    <p className="text-xs font-bold text-white mb-1">AWS Cost Explorer</p>
                     <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                       Pulls your AWS billing data into a CSV for analysis. Your IAM user needs the
                       <strong style={{ color: '#FF9900' }}> AWSBillingReadOnlyAccess</strong> or
@@ -3343,9 +3342,9 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ AWS connection healthy</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>AWS connection healthy</p>
                   </div>
-                  {awsTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables / objects…</p>}
+                  {awsTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables / objects…</p>}
                   {!awsTablesLoading && awsTables.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -3434,13 +3433,13 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch {
                       setAwsStatus('error')
-                      setAwsError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
+                      setAwsError('Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={awsStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(255,153,0,0.15)', border: '1px solid rgba(255,153,0,0.35)', color: '#FF9900', cursor: awsStatus === 'testing' ? 'not-allowed' : 'pointer' }}>
-                  {awsStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {awsStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
 
                 <button
@@ -3520,7 +3519,6 @@ if (tablesData.tables?.length > 0) {
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
                   style={{ background: 'rgba(255,153,0,0.12)', border: '1px solid rgba(255,153,0,0.3)' }}>
-                  <span style={{ fontSize: '18px' }}>💰</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">AWS Cost Explorer</h3>
@@ -3532,7 +3530,7 @@ if (tablesData.tables?.length > 0) {
             </div>
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(255,153,0,0.06)', border: '1px solid rgba(255,153,0,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔑 IAM permissions required</p>
+                <p className="text-xs font-bold text-white mb-1">IAM permissions required</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Your IAM user needs <strong style={{ color: '#FF9900' }}>ce:GetCostAndUsage</strong> permission. In AWS Console → IAM → attach a policy with that action on resource <code style={{ color: '#FF9900' }}>*</code>. Keys are saved in your browser only.
                 </p>
@@ -3611,7 +3609,7 @@ if (tablesData.tables?.length > 0) {
               )}
               {costExplorerStatus === 'ok' && costExplorerData.length > 0 && (
                 <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                  <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ {costExplorerData.length} rows fetched. Ready to add as source</p>
+                  <p className="text-xs font-bold" style={{ color: '#4ade80' }}>{costExplorerData.length} rows fetched. Ready to add as source</p>
                 </div>
               )}
               <div className="flex gap-3 pt-1">
@@ -3636,13 +3634,13 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch (e) {
                       setCostExplorerStatus('error')
-                      setCostExplorerError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
+                      setCostExplorerError('Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!costExplorer.accessKeyId || !costExplorer.secretAccessKey || !costExplorer.startDate || !costExplorer.endDate || costExplorerStatus === 'fetching'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(255,153,0,0.15)', border: '1px solid rgba(255,153,0,0.35)', color: '#FF9900', cursor: 'pointer' }}>
-                  {costExplorerStatus === 'fetching' ? '⏳ Fetching…' : '📊 Fetch Cost Data'}
+                  {costExplorerStatus === 'fetching' ? 'Fetching…' : 'Fetch Cost Data'}
                 </button>
                 <button
                   onClick={() => {
@@ -3697,7 +3695,6 @@ if (tablesData.tables?.length > 0) {
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
                   style={{ background: 'rgba(66,133,244,0.12)', border: '1px solid rgba(66,133,244,0.3)' }}>
-                  <span style={{ fontSize: '18px' }}>🪣</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">Connect Cloud Storage</h3>
@@ -3709,7 +3706,7 @@ if (tablesData.tables?.length > 0) {
             </div>
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(66,133,244,0.06)', border: '1px solid rgba(66,133,244,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔑 Service Account JSON Key</p>
+                <p className="text-xs font-bold text-white mb-1">Service Account JSON Key</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   GCP Console → IAM → Service Accounts → Create key (JSON). The account needs <strong style={{ color: '#4285F4' }}>Storage Object Viewer</strong> role. Key stays in your browser only.
                 </p>
@@ -3756,9 +3753,9 @@ if (tablesData.tables?.length > 0) {
               {gcsStatus === 'ok' && !gcsError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ GCS bucket reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>GCS bucket reachable</p>
                   </div>
-                  {gcsFilesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading CSV files…</p>}
+                  {gcsFilesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading CSV files…</p>}
                   {!gcsFilesLoading && gcsFiles.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -3818,12 +3815,12 @@ if (tablesData.tables?.length > 0) {
                           if (filesData.files?.length > 0) { setGcsFiles(filesData.files); setGcsSelectedFiles(new Set(filesData.files)) }
                         } catch { setGcsFiles([]) } finally { setGcsFilesLoading(false) }
                       } else { setGcsStatus('error'); setGcsError(data.message || 'Unknown error') }
-                    } catch { setGcsStatus('error'); setGcsError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.') }
+                    } catch { setGcsStatus('error'); setGcsError('Could not reach backend.\n   → Make sure the server is running on port 8000.') }
                   }}
                   disabled={!gcs.project || !gcs.bucket || !gcs.keyJson || gcsStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.35)', color: '#4285F4', cursor: 'pointer' }}>
-                  {gcsStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {gcsStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
                 <button
                   onClick={async () => {
@@ -3870,7 +3867,6 @@ if (tablesData.tables?.length > 0) {
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
                   style={{ background: 'rgba(52,168,83,0.12)', border: '1px solid rgba(52,168,83,0.3)' }}>
-                  <span style={{ fontSize: '18px' }}>☁️</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">Connect Cloud SQL</h3>
@@ -3882,7 +3878,7 @@ if (tablesData.tables?.length > 0) {
             </div>
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(52,168,83,0.06)', border: '1px solid rgba(52,168,83,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔌 Cloud SQL Connection</p>
+                <p className="text-xs font-bold text-white mb-1">Cloud SQL Connection</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Use the public IP of your Cloud SQL instance (enable it in GCP Console → Cloud SQL → Connections → Public IP). Add your IP to Authorized Networks. Credentials stay in browser only.
                 </p>
@@ -3956,9 +3952,9 @@ if (tablesData.tables?.length > 0) {
               {cloudSQLStatus === 'ok' && !cloudSQLError && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Cloud SQL reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Cloud SQL reachable</p>
                   </div>
-                  {cloudSQLTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>}
+                  {cloudSQLTablesLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>}
                   {!cloudSQLTablesLoading && cloudSQLTables.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -4018,12 +4014,12 @@ if (tablesData.tables?.length > 0) {
                           if (tData.tables?.length > 0) { setCloudSQLTables(tData.tables); setCloudSQLSelectedTables(new Set(tData.tables)) }
                         } catch { setCloudSQLTables([]) } finally { setCloudSQLTablesLoading(false) }
                       } else { setCloudSQLStatus('error'); setCloudSQLError(data.message || 'Unknown error') }
-                    } catch { setCloudSQLStatus('error'); setCloudSQLError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.') }
+                    } catch { setCloudSQLStatus('error'); setCloudSQLError('Could not reach backend.\n   → Make sure the server is running on port 8000.') }
                   }}
                   disabled={!cloudSQL.instanceConnectionName || !cloudSQL.user || !cloudSQL.database || cloudSQLStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(52,168,83,0.15)', border: '1px solid rgba(52,168,83,0.35)', color: '#34A853', cursor: 'pointer' }}>
-                  {cloudSQLStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {cloudSQLStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
                 <button
                   onClick={async () => {
@@ -4088,7 +4084,7 @@ if (tablesData.tables?.length > 0) {
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(255,70,0,0.06)', border: '1px solid rgba(255,70,0,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔑 Personal Access Token (PAT)</p>
+                <p className="text-xs font-bold text-white mb-1">Personal Access Token (PAT)</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   In Databricks → User Settings → Access Tokens → Generate token. Host is your workspace URL e.g. <strong style={{ color: '#FF4600' }}>adb-xxxx.azuredatabricks.net</strong>. HTTP path is in SQL Warehouses → your warehouse → Connection details. Token stays in your browser only.
                 </p>
@@ -4168,10 +4164,10 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ Health check passed. Databricks is reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>Health check passed. Databricks is reachable</p>
                   </div>
                   {databricksTablesLoading && (
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Loading tables…</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading tables…</p>
                   )}
                   {!databricksTablesLoading && databricksTables.length > 0 && (
                     <div>
@@ -4276,7 +4272,7 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch {
                       setDatabricksStatus('error')
-                      setDatabricksError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
+                      setDatabricksError('Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!databricks.host || !databricks.httpPath || !databricks.token || databricksStatus === 'testing'}
@@ -4287,7 +4283,7 @@ if (tablesData.tables?.length > 0) {
                     color: '#FF4600',
                     cursor: (!databricks.host || !databricks.httpPath || !databricks.token || databricksStatus === 'testing') ? 'not-allowed' : 'pointer',
                   }}>
-                  {databricksStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {databricksStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
 
                 <button
@@ -4378,7 +4374,7 @@ if (tablesData.tables?.length > 0) {
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(20,184,166,0.06)', border: '1px solid rgba(20,184,166,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🌐 REST API Connection</p>
+                <p className="text-xs font-bold text-white mb-1">REST API Connection</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Connect any REST API endpoint. Supports Bearer token, API key, or no auth. Credentials stay in your browser only.
                 </p>
@@ -4469,7 +4465,7 @@ if (tablesData.tables?.length > 0) {
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3"
                     style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ REST API reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>REST API reachable</p>
                   </div>
                   {restEndpointResults.length > 0 && (
                     <div>
@@ -4583,13 +4579,13 @@ if (tablesData.tables?.length > 0) {
                       }
                     } catch {
                       setRestStatus('error')
-                      setRestError('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
+                      setRestError('Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!restApi.base_url || restStatus === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(20,184,166,0.15)', border: '1px solid rgba(20,184,166,0.35)', color: '#14b8a6', cursor: (!restApi.base_url || restStatus === 'testing') ? 'not-allowed' : 'pointer' }}>
-                  {restStatus === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {restStatus === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
 
                 <button
@@ -4664,7 +4660,6 @@ if (tablesData.tables?.length > 0) {
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
                   style={{ background: 'rgba(251,146,60,0.12)', border: '1px solid rgba(251,146,60,0.3)' }}>
-                  <span style={{ fontSize: '18px' }}>📈</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-sm">Connect Google Analytics 4</h3>
@@ -4677,7 +4672,7 @@ if (tablesData.tables?.length > 0) {
 
             <div className="p-5 space-y-4">
               <div className="rounded-xl p-3" style={{ background: 'rgba(251,146,60,0.06)', border: '1px solid rgba(251,146,60,0.2)' }}>
-                <p className="text-xs font-bold text-white mb-1">🔑 Setup Instructions</p>
+                <p className="text-xs font-bold text-white mb-1">Setup Instructions</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   1. GCP Console → IAM → Service Accounts → Create key (JSON)<br/>
                   2. In GA4: Admin → Property Access Management → Add user (service account email) with Viewer role<br/>
@@ -4735,9 +4730,9 @@ if (tablesData.tables?.length > 0) {
               {ga4Status === 'ok' && !ga4Error && (
                 <div className="space-y-3">
                   <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
-                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>✅ GA4 property reachable</p>
+                    <p className="text-xs font-bold" style={{ color: '#4ade80' }}>GA4 property reachable</p>
                   </div>
-                  {ga4ReportsLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>⏳ Building report list…</p>}
+                  {ga4ReportsLoading && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Building report list…</p>}
                   {!ga4ReportsLoading && ga4Reports.length > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -4800,13 +4795,13 @@ if (tablesData.tables?.length > 0) {
                         setGa4Status('error'); setGa4Error(data.message || 'Unknown error')
                       }
                     } catch {
-                      setGa4Status('error'); setGa4Error('❌ Could not reach backend.\n   → Make sure the server is running on port 8000.')
+                      setGa4Status('error'); setGa4Error('Could not reach backend.\n   → Make sure the server is running on port 8000.')
                     }
                   }}
                   disabled={!ga4.propertyId || !ga4.keyJson || ga4Status === 'testing'}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
                   style={{ background: 'rgba(251,146,60,0.15)', border: '1px solid rgba(251,146,60,0.35)', color: '#fb923c', cursor: 'pointer' }}>
-                  {ga4Status === 'testing' ? '⏳ Testing…' : '🔍 Test Connection'}
+                  {ga4Status === 'testing' ? 'Testing…' : 'Test Connection'}
                 </button>
 
                 <button

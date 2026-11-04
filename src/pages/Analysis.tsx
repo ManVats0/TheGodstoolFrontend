@@ -145,7 +145,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
 
     const handleSave = async () => {
       const confirmed = window.confirm(
-        `⚠️ This will replace your existing data in the original source:\n\n"${activeSourceName}"\n\nwith the cleaned version. This cannot be undone.\n\nAre you sure?`
+        `This will replace your existing data in the original source:\n\n"${activeSourceName}"\n\nwith the cleaned version. This cannot be undone.\n\nAre you sure?`
       )
       if (!confirmed) return
 
@@ -155,7 +155,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
       try {
         // Download the cleaned CSV blob from backend
         const csvRes = await fetch(`${API_BASE}${result.download_url}`)
-        if (!csvRes.ok) { setSaveMsg('❌ Could not download cleaned file.'); setSaving(false); return }
+        if (!csvRes.ok) { setSaveMsg('Could not download cleaned file.'); setSaving(false); return }
         const blob = await csvRes.blob()
         const formData = new FormData()
         formData.append('file', new File([blob], 'cleaned.csv', { type: 'text/csv' }))
@@ -184,7 +184,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
             c.database === database &&
             (c.host === host || (c.host === 'localhost' && host === '127.0.0.1') || (c.host === '127.0.0.1' && host === 'localhost'))
           )
-          if (!conn) { setSaveMsg('❌ MySQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          if (!conn) { setSaveMsg('MySQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
           formData.append('mysql_host', conn.host)
           formData.append('mysql_port', conn.port)
           formData.append('mysql_user', conn.user)
@@ -206,7 +206,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
             c.database === database &&
             (c.host === host || (c.host === 'localhost' && host === '127.0.0.1') || (c.host === '127.0.0.1' && host === 'localhost'))
           )
-          if (!conn) { setSaveMsg('❌ PostgreSQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          if (!conn) { setSaveMsg('PostgreSQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
           formData.append('mysql_host', conn.host)
           formData.append('mysql_port', conn.port)
           formData.append('mysql_user', conn.user)
@@ -223,7 +223,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
           const table = parts[2] || ''
           const savedBQ = JSON.parse(localStorage.getItem('datapro_bigquery_connections') || '[]')
           const conn = savedBQ.find((c: any) => c.project === project && c.dataset === dataset)
-          if (!conn) { setSaveMsg('❌ BigQuery connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          if (!conn) { setSaveMsg('BigQuery connection not found. Please reconnect in Sources.'); setSaving(false); return }
           formData.append('bq_key_json', conn.key_json)
           formData.append('bq_project', project)
           formData.append('bq_dataset', dataset)
@@ -238,7 +238,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
           const collection = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
           const savedMongo = JSON.parse(localStorage.getItem('datapro_mongo_connections') || '[]')
           const conn = savedMongo.find((c: any) => c.database === database)
-          if (!conn) { setSaveMsg('❌ MongoDB connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          if (!conn) { setSaveMsg('MongoDB connection not found. Please reconnect in Sources.'); setSaving(false); return }
           formData.append('mongo_uri', conn.uri)
           formData.append('mongo_database', conn.database)
           formData.append('mongo_collection', collection)
@@ -256,7 +256,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
             const database = dotIdx >= 0 ? beforeAt.slice(0, dotIdx) : beforeAt
             return c.host === host && c.database === database
           })
-          if (!conn) { setSaveMsg('❌ AWS connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          if (!conn) { setSaveMsg('AWS connection not found. Please reconnect in Sources.'); setSaving(false); return }
           formData.append('aws_service', conn.service)
           formData.append('aws_region', conn.region)
           formData.append('aws_access_key_id', conn.accessKeyId)
@@ -285,7 +285,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
           const table = dotIdx >= 0 ? beforeAt.slice(dotIdx + 1) : ''
           const projectPart = atIdx >= 0 ? activeSourceName.slice(atIdx + 1).replace('cloudsql.', '') : ''
           const conn = savedCSQL.find((c: any) => c.database === database && c.project === projectPart)
-          if (!conn) { setSaveMsg('❌ Cloud SQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
+          if (!conn) { setSaveMsg('Cloud SQL connection not found. Please reconnect in Sources.'); setSaving(false); return }
           formData.append('mysql_host', conn.instanceConnectionName)
           formData.append('mysql_port', conn.port)
           formData.append('mysql_user', conn.user)
@@ -299,12 +299,12 @@ import { checkAiAllowance, refreshCredits } from '../credits'
         const res = await fetch(`${API_BASE}/api/write-to-source`, { method: 'POST', headers: analysisAuthHeaders(), body: formData })
         const data = await res.json()
         if (data.success) {
-          setSaveMsg(`✅ Saved successfully! ${data.rows_written ? `${data.rows_written} rows written.` : ''}`)
+          setSaveMsg(`Saved successfully! ${data.rows_written ? `${data.rows_written} rows written.` : ''}`)
         } else {
-          setSaveMsg(`❌ Failed: ${data.error || 'Unknown error'}`)
+          setSaveMsg(`Failed: ${data.error || 'Unknown error'}`)
         }
       } catch {
-        setSaveMsg('❌ Could not reach backend.')
+        setSaveMsg('Could not reach backend.')
       } finally {
         setSaving(false)
       }
@@ -318,10 +318,10 @@ import { checkAiAllowance, refreshCredits } from '../credits'
           className="py-3 px-8 rounded-xl font-bold text-white disabled:opacity-50"
           style={{ background: 'linear-gradient(135deg, #0ea5e9, #0369a1)' }}
         >
-          {saving ? '⏳ Saving...' : label}
+          {saving ? 'Saving...' : label}
         </button>
         {saveMsg && (
-          <p className="text-xs font-semibold text-center" style={{ color: saveMsg.startsWith('✅') ? '#4ade80' : '#f87171' }}>
+          <p className="text-xs font-semibold text-center" style={{ color: saveMsg.startsWith('Saved') ? '#4ade80' : '#f87171' }}>
             {saveMsg}
           </p>
         )}
@@ -565,7 +565,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
                       onMouseLeave={e => { if (selectedSource !== s.name) e.currentTarget.style.background = 'transparent' }}
                     >
                       <span className="text-base">
-                        {s.type === 'catalog' ? '🗂️' : s.type === 'sheets' ? '📊' : s.type === 'ga4' ? '📈' : s.type === 'databricks' ? '🧱' : s.type === 'rest' ? '🌐' : '📄'}
+                        {s.type === 'catalog' ? '' : s.type === 'sheets' ? '' : s.type === 'ga4' ? '' : s.type === 'databricks' ? '' : s.type === 'rest' ? '' : ''}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-white truncate">{s.name}</p>
@@ -584,7 +584,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
 
             <div>
               <label className="text-xs font-semibold block mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                📤 Destination / Output Name
+                Destination / Output Name
               </label>
               <div
                 className="relative w-full rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer"
@@ -611,7 +611,6 @@ import { checkAiAllowance, refreshCredits } from '../credits'
                       className="flex items-center gap-3 px-4 py-3 cursor-pointer"
                       style={{ background: 'rgba(52,211,153,0.15)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
                     >
-                      <span className="text-base">✨</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-white truncate">{selectedDest}</p>
                         <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Generated Output</p>
@@ -633,7 +632,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
                       onMouseEnter={e => { if (selectedDest !== s.name) e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
                       onMouseLeave={e => { if (selectedDest !== s.name) e.currentTarget.style.background = 'transparent' }}
                     >
-                      <span className="text-base">{s.type === 'catalog' ? '🗂️' : '📄'}</span>
+                      <span className="text-base">{s.type === 'catalog' ? '' : ''}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-white truncate">{s.name}</p>
                         <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{s.type.toUpperCase()}</p>
@@ -666,7 +665,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
                     className="text-xs mt-2 px-2 py-1 rounded-lg inline-block"
                     style={{ background: 'rgba(234,179,8,0.1)', color: '#fbbf24', border: '1px solid rgba(234,179,8,0.2)' }}
                   >
-                    ⚡ Will re-run analysis with new source
+                    Will re-run analysis with new source
                   </p>
                 )}
               </div>
@@ -750,7 +749,7 @@ import { checkAiAllowance, refreshCredits } from '../credits'
         // Check plan and AI usage gate
         const token = localStorage.getItem('datapro_token')
         if (!token) {
-          setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ You are not logged in. Please log in and subscribe to use AI features.' }])
+          setMessages(prev => [...prev, { role: 'assistant', content: 'You are not logged in. Please log in and subscribe to use AI features.' }])
           setLoading(false)
           return
         }
@@ -793,13 +792,13 @@ if (aiData.success) {
   setOptions(prev => ({ ...prev, [opKey]: true }))
 }
 const assistantText = aiData.success
-  ? `${aiData.explanation}\n\n✅ Added as a new cleaning step below. Click **Run Cleaning** to apply!`
-  : '⚠️ ' + (aiData.error || 'AI unavailable')
+  ? `${aiData.explanation}\n\nAdded as a new cleaning step below. Click **Run Cleaning** to apply!`
+  : '' + (aiData.error || 'AI unavailable')
         setMessages(prev => [...prev, { role: 'assistant', content: assistantText }])
       } catch (err) {
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: '⚠️ Could not reach the AI. Make sure you are connected and the API is available.',
+          content: 'Could not reach the AI. Make sure you are connected and the API is available.',
         }])
       } finally {
         setLoading(false)
@@ -1770,7 +1769,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
             formData.append('connection_id', sourceObj2.connectionId)
             formData.append('mysql_table', table)
           } else {
-            console.error('❌ No MySQL connection found for', { database, host })
+            console.error('No MySQL connection found for', { database, host })
             alert(`MySQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
             return
           }
@@ -1812,7 +1811,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
             formData.append('connection_id', sourceObj2.connectionId)
             formData.append('mysql_table', table)
           } else {
-            console.error('❌ No PostgreSQL connection found for', { database, host })
+            console.error('No PostgreSQL connection found for', { database, host })
             alert(`PostgreSQL connection not found for ${database}@${host}. Please reconnect in Sources.`)
             return
           }
@@ -1847,7 +1846,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
             formData.append('connection_id', sourceObj2.connectionId)
             formData.append('mysql_table', collection)
           } else {
-            console.error('❌ No MongoDB connection found for', { database })
+            console.error('No MongoDB connection found for', { database })
             alert(`MongoDB connection not found for ${database}. Please reconnect in Sources.`)
             setAnalyzing(false)
             return
@@ -1967,7 +1966,7 @@ const [customCleanOps, setCustomCleanOps] = useState<{key: string, label: string
         const bqConn = savedBQ.find((c: any) => c.project === project && c.dataset === dataset)
         console.log('BigQuery debug:', { activeSourceName, project, dataset, table, bqConn })
         if (!bqConn) {
-          console.error('❌ No BigQuery connection found for', { project, dataset })
+          console.error('No BigQuery connection found for', { project, dataset })
           alert(`BigQuery connection not found for ${project}.${dataset}. Please reconnect in Sources.`)
           return
         }
@@ -2648,7 +2647,6 @@ setAnalyzing(false)
             className="text-center py-24 rounded-2xl"
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}
           >
-            <div className="text-5xl mb-4">📊</div>
             <p className="text-white font-bold text-lg mb-2">No file selected</p>
             <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.35)' }}>Go to Data Sources and upload a CSV to begin</p>
             <button
@@ -2706,7 +2704,6 @@ setAnalyzing(false)
             className="rounded-3xl p-10 text-center"
             style={{ background: 'rgba(34,197,94,0.05)', border: '2px solid rgba(34,197,94,0.2)' }}
           >
-            <div className="text-5xl mb-4">✅</div>
             <h2 className="text-3xl font-bold text-white mb-2">Perfectly Cleaned!</h2>
             <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.4)' }}>Original file preserved. Nothing was overwritten.</p>
             <div className="grid grid-cols-3 gap-4 max-w-xs mx-auto mb-6">
@@ -2884,7 +2881,7 @@ setAnalyzing(false)
       { id: 'describe', label: 'Statistics' },
       { id: 'problems', label: 'Problems', badge: totalProblems },
       ...(ts.detected && ts.chart_data ? [{ id: 'timeseries', label: 'Time Series' }] : []),
-      { id: 'aichat',   label: '✨ AI Clean' },
+      { id: 'aichat',   label: 'AI Clean' },
     ]
 
     // Build row/col arrays for fullscreen from current tab
@@ -3057,7 +3054,7 @@ const getPreviewFullscreenData = () => {
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all group"
                   style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#a78bfa' }}
                 >
-                  <span>📥 {activeSourceName}</span>
+                  <span>{activeSourceName}</span>
                   <svg
                     width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
                     className="opacity-60 group-hover:opacity-100"
@@ -3073,7 +3070,7 @@ const getPreviewFullscreenData = () => {
                       className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium"
                       style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: '#34d399' }}
                     >
-                      📤 {activeDestinationName}
+                      {activeDestinationName}
                     </span>
                   </>
                 )}
@@ -3118,7 +3115,7 @@ const getPreviewFullscreenData = () => {
               style={{ background: 'rgba(124,58,237,0.25)', border: '1px solid rgba(124,58,237,0.35)' }}
               title={staleness.isStale ? `Last analyzed ${staleness.hoursOld} hours ago` : 'Re-analyze fresh data'}
             >
-              {staleness.isStale ? '🔄 Re-analyze' : 'Re-analyze'}
+              {staleness.isStale ? 'Re-analyze' : 'Re-analyze'}
             </button>
           </div>
         </div>
@@ -3130,7 +3127,6 @@ const getPreviewFullscreenData = () => {
             style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}
           >
             <div className="flex items-center gap-3">
-              <span style={{ fontSize: '18px' }}>⏰</span>
               <div>
                 <p style={{ color: '#fbbf24', fontWeight: 'bold', fontSize: '14px', margin: 0 }}>
                   Analysis is {staleness.hoursOld} hours old
@@ -3523,7 +3519,6 @@ const getPreviewFullscreenData = () => {
               <div>
                 {problems.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="text-4xl mb-3">✨</div>
                     <p className="font-bold text-white mb-1">No problems found!</p>
                     <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Your data is clean.</p>
                   </div>
@@ -3724,7 +3719,7 @@ const getPreviewFullscreenData = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {[...CLEANING_OPTIONS, ...customCleanOps.map(op => ({
                 key: op.key,
-                label: `✨ ${op.label}`,
+                label: `${op.label}`,
                 desc: 'AI-generated cleaning step',
                 issueKey: ''
               }))].map(({ key, label, desc, issueKey }) => {

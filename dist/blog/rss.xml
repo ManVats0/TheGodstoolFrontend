@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>The God's Tool Blog</title>
+    <link>https://thegodstool.com/blog</link>
+    <description>Straight answers on cleaning and moving data.</description>
+    <language>en</language>
+    <item>
+      <title>Why PDF to Excel gets bank statements wrong, and how to check yours</title>
+      <link>https://thegodstool.com/blog/pdf-to-excel-wrong-numbers-bank-statements</link>
+      <guid isPermaLink="true">https://thegodstool.com/blog/pdf-to-excel-wrong-numbers-bank-statements</guid>
+      <pubDate>Tue, 03 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Data quality</category>
+      <description>A bad PDF conversion looks like a clean spreadsheet. Here is what goes wrong, why &quot;98% accurate&quot; is not good enough for money, and a balance check you can run in Excel in a minute.</description>
+    </item>
+    <item>
+      <title>How AI cleaning works without ever seeing your data</title>
+      <link>https://thegodstool.com/blog/how-ai-cleaning-keeps-your-data-private</link>
+      <guid isPermaLink="true">https://thegodstool.com/blog/how-ai-cleaning-keeps-your-data-private</guid>
+      <pubDate>Sun, 01 Nov 2026 00:00:00 GMT</pubDate>
+      <category>Privacy</category>
+      <description>You type &quot;remove duplicate customers&quot; and your file gets cleaned. Here's what happens in between, with pictures, and why the AI never reads a single row.</description>
+    </item>
+    <item>
+      <title>Is my data actually safe on this platform?</title>
+      <link>https://thegodstool.com/blog/is-my-data-safe</link>
+      <guid isPermaLink="true">https://thegodstool.com/blog/is-my-data-safe</guid>
+      <pubDate>Sat, 01 Aug 2026 00:00:00 GMT</pubDate>
+      <category>Security</category>
+      <description>If you're about to connect a real database, the question is simple: what happens to my data once I do? Short answer: your database stays where it is, rows pass through…</description>
+    </item>
+  </channel>
+</rss>

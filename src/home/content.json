@@ -119,7 +119,7 @@
       },
       {
         "icon": "shield",
-        "title": "The AI never sees your rows",
+        "title": "Private AI mode by default",
         "body": "Plain English cleaning works from the shape of your data, such as column types and value patterns. Your actual rows and cell values stay on our side and are never sent to the AI."
       }
     ]
@@ -264,7 +264,7 @@
       },
       {
         "q": "Can I use it for client work?",
-        "a": "Yes, plenty of freelancers do. The files are processed under your account, so check that your agreement with the client allows sharing their data with a tool like this."
+        "a": "Yes, many freelancers do. The files are processed under your account, so check that your agreement with the client allows sharing their data with a tool like this."
       },
       {
         "q": "Is my data safe?",
@@ -305,7 +305,7 @@
   "privacy": {
     "id": "private-ai",
     "eyebrow": "Private by default",
-    "h2": "The AI helps you clean. It never reads your rows.",
+    "h2": "The AI helps you clean. In private mode it never reads your rows.",
     "body": "When you ask for a fix in plain English, the AI gets your sentence and a short description of each column, such as \"a column of emails\" or \"dates written like 03/04/1990\". It writes the cleaning steps. We run them on your full file, on our side. By default, none of your rows or cell values are sent to the AI.",
     "points": [
       "Your full file goes to our servers, never to the AI",

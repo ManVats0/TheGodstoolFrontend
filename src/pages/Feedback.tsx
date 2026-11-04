@@ -109,7 +109,7 @@ export default function Feedback() {
 
           {status === 'error' && (
             <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 12px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>
-              ⚠ {errorMsg}
+              {errorMsg}
             </div>
           )}
 

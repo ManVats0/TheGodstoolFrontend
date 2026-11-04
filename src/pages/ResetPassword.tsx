@@ -38,7 +38,7 @@ export default function ResetPassword() {
           style={{ width: '100%', padding: '13px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '6px', color: '#e2e8f0', fontSize: '0.95rem', fontFamily: 'Georgia,serif', boxSizing: 'border-box', outline: 'none' }} />
         <input type="password" placeholder="Confirm new password" value={confirm} onChange={e => setConfirm(e.target.value)}
           style={{ width: '100%', padding: '13px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '6px', color: '#e2e8f0', fontSize: '0.95rem', fontFamily: 'Georgia,serif', boxSizing: 'border-box', outline: 'none' }} />
-        {error && <div style={{ color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>⚠ {error}</div>}
+        {error && <div style={{ color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>{error}</div>}
         {msg && <div style={{ color: '#86efac', fontSize: '0.82rem', fontFamily: 'monospace' }}>✓ {msg}</div>}
         <button onClick={handleReset}
           style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', border: 'none', borderRadius: '6px', color: 'white', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Georgia,serif' }}>

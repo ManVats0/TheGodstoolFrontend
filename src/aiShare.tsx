@@ -51,7 +51,7 @@ export function AiShareSwitch({ shared, allowed, canChange, error, change }: Ret
         <input type="checkbox" checked={priv} disabled={!editable} onChange={e => change(!e.target.checked)} style={{ marginTop: 2 }} />
         <span>
           <b style={{ color: priv ? '#86efac' : 'rgba(255,255,255,0.75)' }}>
-            {priv ? 'Private mode is on (recommended): the AI never sees your rows.' : 'Private mode is off: a few sample rows are shared with the AI.'}
+            {priv ? 'Private mode is on (recommended): the AI sees your instruction and column names, not your rows.' : 'Private mode is off: a few sample rows are shared with the AI.'}
           </b>
           {' '}
           {!allowed ? 'Sample sharing is not available on this service.'

@@ -618,7 +618,7 @@ const DOCS: Record<string, {
         heading: 'PII masking in previews',
         body: 'Any column flagged as PII (see Data Catalog → PII detection) is automatically masked wherever raw row data is displayed in Analysis, so sensitive values are not casually visible on screen.',
         params: [
-          { name: 'Preview tab', type: 'masked', required: false, description: 'PII column headers are shown with a 🔒 icon in red, and cell values are partially masked (e.g. jo••••@e.com) rather than shown in full.' },
+          { name: 'Preview tab', type: 'masked', required: false, description: 'PII column headers are shown in red, and cell values are partially masked (e.g. jo••••@e.com) rather than shown in full.' },
           { name: 'Columns tab', type: 'masked', required: false, description: 'PII columns show a red "PII" pill next to the column name, and the sample value cell is masked the same way as the Preview tab.' },
           { name: 'Fullscreen preview', type: 'masked', required: false, description: 'Opening the Preview tab in fullscreen applies the same masking to the exported row set. Masking is not bypassed by the fullscreen view.' },
           { name: 'View Original', type: 'not masked', required: false, description: 'The "View Original" modal intentionally shows raw, unmodified source data as-is, since that is its stated purpose (verifying the untouched source).' },

@@ -6,7 +6,7 @@ export default function Privacy() {
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', marginBottom: '40px' }}>Last updated: June 2026</p>
                 <p>Welcome to The God's Tool. Protecting your data isn't an afterthought here. It's built into how the platform works, from encrypted credential storage to retention controls you manage yourself. This Privacy Policy explains exactly how we collect, use, and protect your information.</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '24px 0', padding: '16px 20px', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: '12px' }}>
-          {['🔒 Encrypted database credentials', '🗑️ Self-service data erasure', '🚫 Never sold to third parties', '📄 Google-verified data handling'].map(item => (
+          {['Encrypted database credentials', 'Self-service data erasure', 'Never sold to third parties', 'Google-verified data handling'].map(item => (
             <span key={item} style={{ fontSize: '0.8rem', color: '#c4b5fd', fontFamily: 'monospace' }}>{item}</span>
           ))}
         </div>

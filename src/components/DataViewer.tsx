@@ -5,17 +5,17 @@ interface DataViewerProps {
 }
 
 const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
-  // 🔥 SAFE DATA ACCESS
+  // SAFE DATA ACCESS
   const sampleData = data.sample_data || data.top_500_rows || [];
   const hasData = sampleData.length > 0;
   const firstRow = sampleData[0] || {};
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* 🎯 TOP 500 TABLE */}
+      {/* TOP 500 TABLE */}
       <div className="bg-white/10 backdrop-blur-xl p-8 rounded-3xl border border-white/20 max-h-[70vh] overflow-auto">
         <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-          📊 Top 500 Rows Preview
+          Top 500 Rows Preview
           <span className="px-3 py-1 bg-emerald-500/20 text-emerald-200 rounded-full text-sm font-bold">
             {data.dataset_info?.rows?.toLocaleString()} total rows
           </span>
@@ -46,7 +46,7 @@ const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
               </tbody>
             </table>
             <div className="text-center mt-6 p-4 bg-white/10 rounded-2xl">
-              <p className="text-white/70 text-sm mb-2">👆 Hover to explore first 20 of 500 rows</p>
+              <p className="text-white/70 text-sm mb-2">Hover to explore first 20 of 500 rows</p>
               {data.download_url && (
                 <a href={data.download_url} className="text-blue-300 hover:text-blue-200 underline text-sm">
                   Download full Top 500 CSV →
@@ -55,11 +55,11 @@ const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
             </div>
           </div>
         ) : (
-          <p className="text-white/60 text-center py-12">Upload CSV to see data preview ✨</p>
+          <p className="text-white/60 text-center py-12">Upload CSV to see data preview</p>
         )}
       </div>
 
-      {/* 📈 STATS DASHBOARD */}
+      {/* STATS DASHBOARD */}
       <div className="space-y-6">
         {/* Quality Score */}
         <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 text-center shadow-2xl hover:shadow-3xl transition-all duration-300">
@@ -72,7 +72,7 @@ const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
 
         {/* Key Metrics */}
         <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-2xl hover:shadow-3xl transition-all duration-300">
-          <h3 className="text-xl font-bold text-white mb-6">📊 Dataset Summary</h3>
+          <h3 className="text-xl font-bold text-white mb-6">Dataset Summary</h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="p-4 bg-white/10 rounded-xl">
               <span className="text-white/60 block">Total Rows</span>
@@ -108,7 +108,7 @@ const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
             className="block w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-4 px-8 rounded-3xl text-center shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 text-lg"
             download
           >
-            💾 Download Top 500 Preview CSV
+            Download Top 500 Preview CSV
           </a>
         )}
       </div>
