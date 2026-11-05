@@ -337,6 +337,20 @@ useEffect(() => {
       })
   }, [location.pathname])
 
+  useEffect(() => {
+    if (location.pathname === '/' && new URLSearchParams(location.search).get('signin')) {
+      setShowLogin(true); setIsRegisterMode(true); setLoginError('')
+    }
+  }, [location.pathname, location.search])
+
+  useEffect(() => {
+    if (!entered) return
+    try {
+      const to = localStorage.getItem('gt_after_login')
+      if (to && to.startsWith('/')) { localStorage.removeItem('gt_after_login'); navigate(to) }
+    } catch { /* ignore */ }
+  }, [entered])
+
   const [heroClipIndex, setHeroClipIndex] = useState(0)
   const heroClips = [heroClipA, heroClipB]
   const [sideEmail, setSideEmail] = useState('')
