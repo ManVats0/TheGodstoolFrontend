@@ -60,6 +60,38 @@
     {
       "source": "/**",
       "destination": "/index.html"
+    },
+    {
+      "source": "/fix-mixed-date-formats-csv",
+      "destination": "/fix-mixed-date-formats-csv.html"
+    },
+    {
+      "source": "/fix-mixed-date-formats-csv.html",
+      "destination": "/fix-mixed-date-formats-csv.html"
+    },
+    {
+      "source": "/remove-duplicate-customers-csv",
+      "destination": "/remove-duplicate-customers-csv.html"
+    },
+    {
+      "source": "/remove-duplicate-customers-csv.html",
+      "destination": "/remove-duplicate-customers-csv.html"
+    },
+    {
+      "source": "/fix-numbers-stored-as-text-csv",
+      "destination": "/fix-numbers-stored-as-text-csv.html"
+    },
+    {
+      "source": "/fix-numbers-stored-as-text-csv.html",
+      "destination": "/fix-numbers-stored-as-text-csv.html"
+    },
+    {
+      "source": "/csv-data-cleaning-checklist",
+      "destination": "/csv-data-cleaning-checklist.html"
+    },
+    {
+      "source": "/csv-data-cleaning-checklist.html",
+      "destination": "/csv-data-cleaning-checklist.html"
     }
   ]
 }

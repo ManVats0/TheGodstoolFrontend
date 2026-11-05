@@ -7,6 +7,7 @@ type Cycle = 'monthly' | 'yearly'
 const PLANS = [
   {
     key: 'lite',
+    usdMonthly: 19,
     name: 'Lite',
     monthlyPrice: '₹774',
     yearlyPrice: '₹8,256',
@@ -19,6 +20,7 @@ const PLANS = [
   },
   {
     key: 'starter',
+    usdMonthly: 39,
     name: 'Starter',
     monthlyPrice: '₹1,634',
     yearlyPrice: '₹17,114',
@@ -32,6 +34,7 @@ const PLANS = [
   },
   {
     key: 'pro',
+    usdMonthly: 79,
     name: 'Pro',
     monthlyPrice: '₹3,354',
     yearlyPrice: '₹36,034',
@@ -45,6 +48,7 @@ const PLANS = [
   },
   {
     key: 'team',
+    usdMonthly: 199,
     name: 'Team',
     monthlyPrice: '₹6,794',
     yearlyPrice: '₹72,154',
@@ -57,6 +61,7 @@ const PLANS = [
   },
   {
     key: 'enterprise',
+    usdMonthly: null as number | null,
     name: 'Enterprise',
     monthlyPrice: '₹42,914',
     yearlyPrice: '₹4,11,940',
@@ -76,8 +81,35 @@ const CONTACT_SALES_ONLY: Record<string, Cycle[]> = {
   team: ['yearly'],
 }
 
-function requiresContactSales(planKey: string, cycle: Cycle) {
+type Cur = 'INR' | 'USD'
+
+// India sees rupees, everyone else sees dollars. The browser's time zone and language decide, nothing is sent
+// anywhere, and the visitor can always switch with the buttons on the page.
+function detectCurrency(): Cur {
+  try { const saved = localStorage.getItem('gt_currency'); if (saved === 'INR' || saved === 'USD') return saved } catch { /* no storage */ }
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+    if (tz === 'Asia/Calcutta' || tz === 'Asia/Kolkata') return 'INR'
+  } catch { /* ignore */ }
+  try {
+    const lang = (navigator.language || '').toLowerCase()
+    if (lang === 'en-in' || lang.startsWith('hi')) return 'INR'
+  } catch { /* ignore */ }
+  return 'USD'
+}
+
+// Yearly and enterprise dollar prices are not published, so those go to a quote instead of showing a made-up number.
+function requiresContactSales(planKey: string, cycle: Cycle, cur: Cur = 'INR') {
+  if (cur === 'USD' && (cycle === 'yearly' || planKey === 'enterprise')) return true
   return CONTACT_SALES_ONLY[planKey]?.includes(cycle) ?? false
+}
+
+const isSignedIn = () => { try { return !!localStorage.getItem('datapro_token') } catch { return false } }
+
+// Signed-out visitors go to sign-up and come back here afterwards, instead of being dropped on the homepage.
+function sendToSignUp(navigate: (to: string) => void) {
+  try { localStorage.setItem('gt_after_login', '/pricing') } catch { /* ignore */ }
+  navigate('/?signin=1')
 }
 
 export default function Pricing() {
@@ -85,9 +117,12 @@ export default function Pricing() {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [cycle, setCycle] = useState<Cycle>('monthly')
+  const [cur, setCur] = useState<Cur>(detectCurrency)
+  const pickCurrency = (c: Cur) => { setCur(c); try { localStorage.setItem('gt_currency', c) } catch { /* ignore */ } }
+  const signedIn = isSignedIn()
   const [customAmount, setCustomAmount] = useState('')
   const [customAmountUSD, setCustomAmountUSD] = useState('')
-  const [customCurrency, setCustomCurrency] = useState<'INR' | 'USD'>('INR')
+  const [customCurrency, setCustomCurrency] = useState<'INR' | 'USD'>(cur)
   const [customLoading, setCustomLoading] = useState(false)
   const [customError, setCustomError] = useState('')
   const { rates } = useCredits()
@@ -123,21 +158,21 @@ export default function Pricing() {
     // Razorpay checkout is skipped for plan/cycle combos above the current
     // transaction cap. The Razorpay code below is untouched and still runs
     // normally for every other plan — this only intercepts the capped ones.
-    if (requiresContactSales(planKey, cycle)) {
+    if (requiresContactSales(planKey, cycle, cur)) {
       navigate(`/contact?intent=sales&plan=${planKey}&billing=${cycle}`)
       return
     }
     // ────────────────────────────────────────────────────────────────────
 
-    setLoading(planKey)
     const token = localStorage.getItem('datapro_token')
-    if (!token) { navigate('/'); return }
+    if (!token) { sendToSignUp(navigate); return }
+    setLoading(planKey)
 
     try {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planKey, billingCycle: cycle })
+        body: JSON.stringify({ planKey, billingCycle: cycle, currency: cur })
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to create subscription'); setLoading(null); return }
@@ -199,9 +234,9 @@ export default function Pricing() {
     const lim = rates[customCurrency]
     if (amountNum < lim.min) { setCustomError(`The minimum top-up is ${customSym}${lim.min.toLocaleString('en-IN')}.`); return }
     if (amountNum > lim.max) { setCustomError(`The maximum single top-up is ${customSym}${lim.max.toLocaleString('en-IN')}. For more, contact us.`); return }
-    setCustomLoading(true)
     const token = localStorage.getItem('datapro_token')
-    if (!token) { navigate('/'); return }
+    if (!token) { sendToSignUp(navigate); return }
+    setCustomLoading(true)
 
     try {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/create-custom-order`, {
@@ -259,8 +294,24 @@ export default function Pricing() {
           Choose a plan
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
-          Transparent pricing for freelancers, growing teams, and enterprises
-        </p>
+          Start with the free plan or the 14-day trial. Pay only when you need more.</p>
+      </div>
+
+      <ul style={{ listStyle: 'none', margin: '0 0 24px', padding: 0, display: 'flex', flexWrap: 'wrap', gap: '8px 20px', justifyContent: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', fontFamily: 'monospace', maxWidth: '760px', textAlign: 'center' }}>
+        <li>14-day trial with every feature, no card needed</li>
+        <li>Free plan stays after the trial</li>
+        <li>14-day money-back guarantee on paid plans</li>
+        <li>Cancel any time</li>
+      </ul>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace', fontSize: '0.75rem' }}>
+        Prices in
+        {(['INR', 'USD'] as Cur[]).map(c => (
+          <button key={c} onClick={() => pickCurrency(c)} aria-pressed={cur === c}
+            style={{ padding: '4px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.75rem', background: cur === c ? 'rgba(124,58,237,0.5)' : 'transparent', color: cur === c ? 'white' : 'rgba(255,255,255,0.5)' }}>
+            {c === 'INR' ? '₹ INR' : '$ USD'}
+          </button>
+        ))}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '4px' }}>
@@ -306,17 +357,21 @@ export default function Pricing() {
             <div>
               <div style={{ color: plan.color, fontWeight: 700, fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{plan.name}</div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '1.8rem', fontFamily: 'Georgia, serif', lineHeight: 1.1, marginTop: '6px' }}>
-                {cycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
-                <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{cycle === 'monthly' ? '/month' : '/year'}</span>
+                {cur === 'INR'
+                  ? (cycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice)
+                  : (requiresContactSales(plan.key, cycle, cur) ? 'Custom quote' : `$${plan.usdMonthly}`)}
+                {!(cur === 'USD' && requiresContactSales(plan.key, cycle, cur)) && (
+                  <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{cycle === 'monthly' ? '/month' : '/year'}</span>
+                )}
               </div>
             </div>
 
             <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#34d399', fontFamily: 'monospace' }}>
-              {plan.aiPerDay} AI transforms/day
+              {plan.aiPerDay} AI actions a day
             </div>
 
             <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#a5b4fc', fontFamily: 'monospace' }}>
-              {plan.userLimit} concurrent login{plan.userLimit > 1 ? 's' : ''}
+              {plan.userLimit} {plan.userLimit > 1 ? 'people' : 'person'} signed in at once
             </div>
 
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
@@ -347,7 +402,7 @@ export default function Pricing() {
                 transition: 'opacity 0.2s'
               }}
             >
-              {loading === plan.key ? 'Opening...' : (requiresContactSales(plan.key, cycle) ? 'Contact Sales' : 'Subscribe')}
+              {loading === plan.key ? 'Opening...' : (requiresContactSales(plan.key, cycle, cur) ? 'Ask for a quote' : (signedIn ? 'Subscribe' : 'Sign up to subscribe'))}
             </button>
           </div>
         ))}
@@ -420,11 +475,27 @@ export default function Pricing() {
         </p>
       </div>
 
+      <div style={{ maxWidth: '760px', width: '100%', marginTop: '40px', fontFamily: 'monospace' }}>
+        <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem', marginBottom: '8px', fontFamily: 'Georgia, serif' }}>Before you pay</div>
+        {[
+          ['Do I have to pay to try it?', 'No. New accounts get 14 days with every feature and no card. After that the free plan stays: 3 sources, CSV files up to 5 MB, 5,000 rows per run and 1 pipeline.'],
+          ['What is an AI action?', 'One credit pays for one AI action, such as asking the AI to write a cleaning step. Plain actions that do not use AI do not use credits. Plans include a daily number of AI actions, and credits cover anything beyond that.'],
+          ['Can I get my money back?', 'Yes. Paid plans have a 14-day money-back guarantee, and you can cancel any time.'],
+          ['Is my data safe?', 'In the default private mode the AI gets your instruction and column names, not your rows. Read the details in the privacy policy before you connect real data. A test on a throwaway file is a good first step.'],
+          ['Why is there a quote button instead of a price?', 'Some options, such as yearly billing in dollars or the Enterprise plan, are priced by hand. Send a request and we will reply by email.'],
+        ].map(([q, a]) => (
+          <details key={q} style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '12px 0' }}>
+            <summary style={{ cursor: 'pointer', color: 'white', fontWeight: 600, fontSize: '0.85rem' }}>{q}</summary>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', lineHeight: 1.6, margin: '8px 0 0' }}>{a}</p>
+          </details>
+        ))}
+      </div>
+
       <button
         onClick={() => navigate('/')}
         style={{ marginTop: '32px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'monospace' }}
       >
-        ← Back to app
+        {signedIn ? '← Back to app' : '← Back to home'}
       </button>
     </div>
   )

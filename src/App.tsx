@@ -337,6 +337,20 @@ useEffect(() => {
       })
   }, [location.pathname])
 
+  useEffect(() => {
+    if (location.pathname === '/' && new URLSearchParams(location.search).get('signin')) {
+      setShowLogin(true); setIsRegisterMode(true); setLoginError('')
+    }
+  }, [location.pathname, location.search])
+
+  useEffect(() => {
+    if (!entered) return
+    try {
+      const to = localStorage.getItem('gt_after_login')
+      if (to && to.startsWith('/')) { localStorage.removeItem('gt_after_login'); navigate(to) }
+    } catch { /* ignore */ }
+  }, [entered])
+
   const [heroClipIndex, setHeroClipIndex] = useState(0)
   const heroClips = [heroClipA, heroClipB]
   const [sideEmail, setSideEmail] = useState('')
@@ -1104,6 +1118,13 @@ if (!entered) return (
 <a href="/blog" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Blog</a>
 <a href="#quote" onClick={e => { e.preventDefault(); scrollToQuote() }} style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Get a quote</a>
       </div>
+      <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
+        <a href="/csv-data-cleaning-checklist.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>CSV cleaning checklist</a>
+        <a href="/fix-mixed-date-formats-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Fix mixed dates</a>
+        <a href="/remove-duplicate-customers-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Remove duplicate customers</a>
+        <a href="/fix-numbers-stored-as-text-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Numbers stored as text</a>
+        <a href="/bank-statement-pdf-to-excel.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Bank statement PDF to Excel</a>
+      </div>
       <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2026 The God's Tool · Made for anyone who gets handed messy data</div>
     </footer>
 
@@ -1351,7 +1372,7 @@ if (!entered) return (
               Your 14-day free trial has started
             </div>
             <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '24px' }}>
-              Every data source and AI feature is unlocked for the next 14 days. No credit card needed. Connect a real database and see how it feels before you decide on a plan.
+              Every data source and AI feature is included for the next 14 days. No credit card needed. Connect a real database and see how it feels before you decide on a plan.
             </p>
             <button onClick={() => setShowTrialWelcome(false)} className="cta-btn" style={{ width: '100%' }}>
               Let's go →

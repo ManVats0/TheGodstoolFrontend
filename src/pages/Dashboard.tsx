@@ -116,7 +116,7 @@ export default function Dashboard() {
         <div style={{ ...card, borderColor: 'rgba(124,58,237,0.45)', background: 'rgba(124,58,237,0.10)', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 220 }}>
             <div style={{ color: 'white', fontWeight: 700 }}>Your free trial: {sum.daysLeft} day{sum.daysLeft === 1 ? '' : 's'} left</div>
-            <div style={{ color: muted, fontSize: '0.85rem' }}>Everything is unlocked right now. Keep it all after the trial by choosing a plan.</div>
+            <div style={{ color: muted, fontSize: '0.85rem' }}>Every feature is included during your trial. Keep it all after the trial by choosing a plan.</div>
           </div>
           <Btn to="/pricing">See plans</Btn>
         </div>
