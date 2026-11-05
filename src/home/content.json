@@ -13,7 +13,7 @@
     "eyebrow": "For freelancers, analysts and small data teams",
     "h1": "Clean messy data in minutes, not hours.",
     "sub": "Drop in a CSV or link a Google Sheet. The God's Tool spots the duplicates, blanks, broken dates and inconsistent names, then fixes them when you say what you want in plain English. No formulas, no scripts.",
-    "note": "14-day trial with everything unlocked. The free plan stays after that. No card needed.",
+    "note": "14-day trial with every feature included. The free plan stays after that. No card needed.",
     "primary": "Clean a file free",
     "secondary": "Get a quote",
     "sources": [
@@ -55,7 +55,7 @@
     "items": [
       {
         "title": "Freelancers and consultants",
-        "body": "Take on more cleanup work without the late nights. Stay on the free plan, or buy credits only for the days you need the AI. No monthly commitment.",
+        "body": "Spend less of the week on cleanup. Stay on the free plan, or buy credits only for the days you need the AI. No monthly commitment.",
         "cta": "Start free",
         "action": "register"
       },
@@ -120,7 +120,7 @@
       {
         "icon": "shield",
         "title": "Private AI mode by default",
-        "body": "Plain English cleaning works from the shape of your data, such as column types and value patterns. Your actual rows and cell values stay on our side and are never sent to the AI."
+        "body": "Plain English cleaning works from the shape of your data, such as column types and value patterns. By default your rows and cell values stay on our side and are not sent to the AI. An admin can choose to share a few sample rows."
       }
     ]
   },
@@ -154,7 +154,7 @@
   },
   "pricing": {
     "h2": "Start free. Pay when you need more.",
-    "sub": "The free plan covers small CSV and Google Sheets jobs. Paid plans unlock every source and more AI each day.",
+    "sub": "The free plan covers small CSV and Google Sheets jobs. Paid plans add every source and more AI each day.",
     "freeLine": "Free plan: 3 sources, CSV files up to 5 MB, 5,000 rows per run, 1 pipeline.",
     "creditsTitle": "No subscription? Buy credits.",
     "creditsBody": "One credit pays for one AI action. It's about $0.03 a credit (Rs 2 in India), and you can top up from $2. Handy if you clean data a few days a month.",
@@ -252,7 +252,7 @@
       },
       {
         "q": "Can I clean a CSV or Google Sheet for free?",
-        "a": "Yes. The free plan handles CSV files up to 5 MB and 5,000 rows per run, with up to 3 sources and 1 pipeline. New accounts also get 14 days with everything unlocked."
+        "a": "Yes. The free plan handles CSV files up to 5 MB and 5,000 rows per run, with up to 3 sources and 1 pipeline. New accounts also get 14 days with every feature included."
       },
       {
         "q": "Do I need to know SQL or code?",
@@ -290,7 +290,7 @@
   },
   "cta": {
     "h2": "Try it on the file that's annoying you right now.",
-    "body": "Free for 14 days with everything on. No card.",
+    "body": "Free for 14 days with every feature. No card needed.",
     "button": "Clean a file free"
   },
   "estimate": {
@@ -308,8 +308,8 @@
     "h2": "The AI helps you clean. In private mode it never reads your rows.",
     "body": "When you ask for a fix in plain English, the AI gets your sentence and a short description of each column, such as \"a column of emails\" or \"dates written like 03/04/1990\". It writes the cleaning steps. We run them on your full file, on our side. By default, none of your rows or cell values are sent to the AI.",
     "points": [
-      "Your full file goes to our servers, never to the AI",
-      "The AI only sees column names and the shape of each column",
+      "Your full file is processed on our servers, not sent to the AI",
+      "In private mode the AI sees column names and the shape of each column",
       "Every AI-written step is checked before it runs",
       "Admins can choose to share sample rows. It is off until they do"
     ],
