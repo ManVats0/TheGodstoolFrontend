@@ -42,10 +42,10 @@ const { can, role } = usePermissions()
   const allNavItems: { path: string; icon: string; label: string; show?: boolean }[] = [
     { path: '/dashboard', icon: 'home', label: 'Dashboard' },
     { path: '/sources', icon: 'plug', label: 'Sources' },
-    { path: '/pdf', icon: 'table', label: 'PDF to table' },
     { path: '/catalog', icon: 'folder', label: 'Catalog' },
     { path: '/flow', icon: 'flow', label: 'Pipeline Flow' },
     { path: '/analysis', icon: 'chart', label: 'Analysis' },
+    { path: '/pdf', icon: 'table', label: 'PDF to table' },
     { path: '/audit', icon: 'file', label: 'Audit Logs', show: can('audit.view') },
     { path: '/team', icon: 'team', label: 'Team' },
     { path: '/docs', icon: 'book', label: 'Cosmic Documentation' },
