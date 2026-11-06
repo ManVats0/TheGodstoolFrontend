@@ -26,7 +26,7 @@ const PLANS = [
     yearlyPrice: '₹17,114',
     aiPerDay: 35,
     userLimit: 1,
-    features: ['Everything in Lite', '35 AI transforms/day', 'Email support'],
+    features: ['Everything in Lite', 'Email support'],
     color: '#22d3ee',
     bg: 'rgba(34,211,238,0.08)',
     border: 'rgba(34,211,238,0.25)',
@@ -40,7 +40,7 @@ const PLANS = [
     yearlyPrice: '₹36,034',
     aiPerDay: 110,
     userLimit: 5,
-    features: ['Everything in Starter', '110 AI transforms/day', '5 concurrent logins', 'Priority support'],
+    features: ['Everything in Starter', 'Priority support'],
     color: '#a78bfa',
     bg: 'rgba(124,58,237,0.12)',
     border: 'rgba(124,58,237,0.4)',
@@ -54,7 +54,7 @@ const PLANS = [
     yearlyPrice: '₹72,154',
     aiPerDay: 150,
     userLimit: 15,
-    features: ['Everything in Pro', '150 AI transforms/day', '15 concurrent logins', 'Priority support'],
+    features: ['Everything in Pro', 'Priority support'],
     color: '#34d399',
     bg: 'rgba(52,211,153,0.08)',
     border: 'rgba(52,211,153,0.25)',
@@ -67,7 +67,7 @@ const PLANS = [
     yearlyPrice: '₹4,11,940',
     aiPerDay: 500,
     userLimit: 100,
-    features: ['Everything in Team', '500 AI transforms/day', '100 concurrent logins', 'Dedicated support'],
+    features: ['Everything in Team', 'Dedicated support'],
     color: '#fbbf24',
     bg: 'rgba(251,191,36,0.08)',
     border: 'rgba(251,191,36,0.25)',
@@ -335,6 +335,19 @@ export default function Pricing() {
         </div>
       )}
 
+      <div style={{ maxWidth: '1200px', width: '100%', marginBottom: '24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px 20px', padding: '16px 22px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(124,58,237,0.22), rgba(34,211,238,0.12))', border: '1px solid rgba(167,139,250,0.45)' }}>
+        <div style={{ flex: '1 1 320px' }}>
+          <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem', fontFamily: 'Georgia, serif' }}>Don't want a monthly plan? Buy credits instead.</div>
+          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem', marginTop: '4px', fontFamily: 'monospace', lineHeight: 1.5 }}>
+            Add any amount from {cur === 'USD' ? '$' : '₹'}{rates[cur].min.toLocaleString('en-IN')}. One credit pays for one AI action ({cur === 'USD' ? '$' : '₹'}{rates[cur].perCredit} each). No subscription.
+          </div>
+        </div>
+        <button onClick={() => document.getElementById('credits')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+          style={{ padding: '11px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', whiteSpace: 'nowrap' }}>
+          Add custom credits
+        </button>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', maxWidth: '1200px', width: '100%' }}>
         {PLANS.map(plan => (
           <div key={plan.key} style={{
@@ -408,10 +421,11 @@ export default function Pricing() {
         ))}
       </div>
 
-      <div id="credits" style={{ marginTop: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px', padding: '24px 28px', maxWidth: '420px', width: '100%', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div id="credits" style={{ marginTop: '40px', background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(167,139,250,0.5)', boxShadow: '0 0 40px rgba(124,58,237,0.18)', borderRadius: '16px', padding: '28px 30px', maxWidth: '520px', width: '100%', display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <div>
-          <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
-            Flexible Credit Top-Up
+          <div style={{ display: 'inline-block', background: '#22d3ee', color: '#0a0a1a', fontSize: '0.68rem', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', marginBottom: '10px', fontFamily: 'monospace' }}>No subscription</div>
+          <div style={{ color: 'white', fontWeight: 800, fontSize: '1.3rem', fontFamily: 'Georgia, serif' }}>
+            Custom credits: pay only for what you use
           </div>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', marginTop: '6px', lineHeight: 1.5, fontFamily: 'monospace' }}>
             Add credits on your own terms. No subscription, no lock-in. Built for freelancers covering a single project, agencies managing multiple clients, and corporate teams needing ad-hoc budget without a procurement cycle.
