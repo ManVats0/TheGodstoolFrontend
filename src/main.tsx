@@ -5,8 +5,9 @@ import './authFetch'
 import App from './App'
 import UpgradeNotice from './components/UpgradeNotice'
 import './index.css'
+import { hostRedirect } from './hosts'
 
-createRoot(document.getElementById('root')!).render(
+if (!hostRedirect()) createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <App /> 

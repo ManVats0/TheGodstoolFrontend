@@ -14,6 +14,7 @@ import Billing from './pages/Billing'
 import Terms from './pages/Terms'
 // import Faq from './pages/Faq'
 import { useState, useEffect, useRef } from 'react'
+import { onSite, onApp, signInUrl } from './hosts'
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import NotificationPanel from './components/NotificationPanel'
@@ -338,10 +339,25 @@ useEffect(() => {
   }, [location.pathname])
 
   useEffect(() => {
-    if (location.pathname === '/' && new URLSearchParams(location.search).get('signin')) {
-      setShowLogin(true); setIsRegisterMode(true); setLoginError('')
+    if (location.pathname !== '/') return
+    const q = new URLSearchParams(location.search)
+    if (q.get('signin')) {
+      const after = q.get('after')
+      if (after && after.startsWith('/') && !after.startsWith('//')) { try { localStorage.setItem('gt_after_login', after) } catch { /* ignore */ } }
+      setShowLogin(true); setIsRegisterMode(q.get('mode') !== 'login'); setLoginError('')
+    } else if (onApp() && !entered) {
+      // Someone opening the app address while signed out goes straight to the sign-in form.
+      setShowLogin(true); setIsRegisterMode(false); setLoginError('')
     }
   }, [location.pathname, location.search])
+
+  // On the public site the sign-in form lives on the app address, so the session is created where it will be used.
+  useEffect(() => {
+    if (showLogin && onSite()) {
+      setShowLogin(false)
+      window.location.assign(signInUrl({ register: isRegisterMode }))
+    }
+  }, [showLogin])
 
   useEffect(() => {
     if (!entered) return
@@ -493,6 +509,7 @@ useEffect(() => {
   }
 
  const handleGoogleLogin = () => {
+   if (onSite()) { window.location.assign(signInUrl()); return }
     setIsGoogleLoading(true)
     setSignStage('google')
     if (!(window as any).google?.accounts?.id) {   // Google's script has not loaded yet: use the redirect sign-in right away

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCredits } from '../credits'
+import { onSite, signInUrl } from '../hosts'
 
 type Cycle = 'monthly' | 'yearly'
 
@@ -108,6 +109,7 @@ const isSignedIn = () => { try { return !!localStorage.getItem('datapro_token') 
 
 // Signed-out visitors go to sign-up and come back here afterwards, instead of being dropped on the homepage.
 function sendToSignUp(navigate: (to: string) => void) {
+  if (onSite()) { window.location.assign(signInUrl({ after: '/pricing' })); return }
   try { localStorage.setItem('gt_after_login', '/pricing') } catch { /* ignore */ }
   navigate('/?signin=1')
 }
