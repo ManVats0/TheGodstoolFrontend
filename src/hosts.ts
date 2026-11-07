@@ -11,16 +11,12 @@ export const onApp = () => window.location.hostname === APP_HOST
 // Pages that only make sense once you are signed in. Old links to them on the public site are forwarded.
 const APP_PATHS = ['/dashboard', '/sources', '/catalog', '/pdf', '/flow', '/analysis', '/audit', '/team', '/billing', '/docs', '/tunneling', '/auth/callback', '/thank-you']
 
-const loggedInHere = () => { try { return !!localStorage.getItem('datapro_logged_in') } catch { return false } }
-
 // Runs once before the page is drawn. Returns true when it is sending the visitor somewhere else.
 export function hostRedirect(): boolean {
   const { pathname, search, hash } = window.location
   if (onSite()) {
     const isAppPath = APP_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
-    // Someone who was signed in on the public site before the move goes to the app. They sign in there once.
-    const returningUser = pathname === '/' && loggedInHere()
-    if (isAppPath || returningUser) {
+    if (isAppPath) {
       window.location.replace(APP_ORIGIN + pathname + search + hash)
       return true
     }
