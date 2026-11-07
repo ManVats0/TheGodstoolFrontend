@@ -343,6 +343,7 @@ useEffect(() => {
     const q = new URLSearchParams(location.search)
     if (q.get('signin')) {
       const after = q.get('after')
+      if (entered) { navigate(after && after.startsWith('/') && !after.startsWith('//') ? after : '/dashboard', { replace: true }); return }
       if (after && after.startsWith('/') && !after.startsWith('//')) { try { localStorage.setItem('gt_after_login', after) } catch { /* ignore */ } }
       setShowLogin(true); setIsRegisterMode(q.get('mode') !== 'login'); setLoginError('')
     } else if (onApp() && !entered) {
@@ -627,7 +628,8 @@ if (location.pathname === '/auth/callback') return (
   </div>
 )
 
-if (!entered) return (
+// The public site always shows the public pages, even if an old session is still stored on this address.
+if (!entered || onSite()) return (
   <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: "'Inter', -apple-system, sans-serif", overflowX: 'hidden' }}>
     {(signStage === 'verify' || signStage === 'workspace' || signStage === 'redirect' || location.pathname === '/auth/callback') && (
       <SigningInOverlay stage={location.pathname === '/auth/callback' ? 'workspace' : signStage as 'verify' | 'workspace' | 'redirect'} />
