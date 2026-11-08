@@ -35,6 +35,16 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
           window.dispatchEvent(new CustomEvent('datapro:upgrade-required', { detail: { message: d.error, feature: d.feature } }))
         }
       }).catch(() => { /* not JSON */ })
+    } else if (res.status === 401) {
+      // The server says this login was ended (signed out elsewhere, or pushed out by the login limit).
+      res.clone().json().then(d => {
+        if (d && d.code === 'session_ended') {
+          try {
+            ['datapro_token', 'datapro_logged_in', 'datapro_plan', 'datapro_plan_expires'].forEach(k => localStorage.removeItem(k))
+          } catch { /* ignore */ }
+          window.location.assign('/?signin=1&mode=login&ended=1')
+        }
+      }).catch(() => { /* not JSON */ })
     } else if (res.ok && (url.includes('/api/clean-data') || url.includes('/api/sql-clean'))) {
       res.clone().json().then(d => {
         if (d && d.row_limit && d.row_limit.truncated) {
