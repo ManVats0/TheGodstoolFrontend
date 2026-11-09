@@ -64,14 +64,62 @@ function recheck(rows: Row[], edited: Set<number>): Row[] {
   })
 }
 
+// ── readable details ──────────────────────────────────────────────────────────────────────────────────────────
+// Banks print the payment as one long code. This works out a type, the other party and a reference number from it.
+// It is a best guess from the text only: the exact bank text always stays in the Description column and in the CSV.
+const KINDS: [RegExp, string][] = [
+  [/\bUPI\b/i, 'UPI'], [/\bIMPS\b/i, 'IMPS'], [/\bNEFT\b/i, 'NEFT'], [/\bRTGS\b/i, 'RTGS'],
+  [/\b(ATM|NFS|CASH\s*WDL|CASH\s*WITHDRAWAL)\b/i, 'ATM'], [/\bPOS\b/i, 'Card'],
+  [/\b(ECS|NACH|MANDATE)\b/i, 'Auto-debit'],
+  [/\b(CHGS|CHARGES?|CHRG|GST|SMS\s*ALERT|CONSUMER|HIGH\s*MARK|MORTGAGE)\b/i, 'Charges'],
+  [/\bINT(EREST)?\b\.?\s*(PD|PAID|CR|CREDIT)\b/i, 'Interest'],
+  [/\b(CHQ\s*:?\s*[1-9]\d*|CHEQUE|CLG|CLEARING)\b/i, 'Cheque'],
+]
+const NOT_A_NAME = new Set(['DR', 'CR', 'UPI', 'IMPS', 'NEFT', 'RTGS', 'MB', 'CHQ', 'CHEQUE', 'NFS', 'ATM', 'POS', 'PAYMENT', 'PAYMENTS', 'FROM', 'TO', 'BY', 'TRANSFER', 'TRF', 'REF', 'NA', 'NIL', 'INB', 'BANK', 'PAY', 'DEBIT', 'CREDIT'])
+function tidy(description: string, ref: string): { type: string; party: string; ref: string } {
+  const text = `${description || ''} ${ref || ''}`.replace(/\s+/g, ' ').trim()
+  const kindText = text.replace(/\bchq\s*:?\s*0\b/ig, ' ')
+  const type = KINDS.find(([re]) => re.test(kindText))?.[1] || (/\bMB\b/i.test(kindText) ? 'Mobile banking' : '')
+  const refNo = (text.match(/\d{9,}/) || [''])[0]
+  let party = ''
+  for (const raw of text.split(/[\/|]|\s-\s|-(?=[A-Za-z]{2,}\b)/)) {
+    const tok = raw.replace(/^(chq|ref|upi|imps|neft)\s*:?\s*\d*\s*/i, '').trim()
+    if (tok.length < 3 || /\d{3,}/.test(tok) || /^[A-F0-9]{10,}$/i.test(tok)) continue
+    if (!/^[A-Za-z][A-Za-z .&']+$/.test(tok) || NOT_A_NAME.has(tok.toUpperCase())) continue
+    if (KINDS.some(([re]) => re.test(tok))) continue
+    party = tok.slice(0, 28); break
+  }
+  return { type, party, ref: refNo }
+}
+const looksLike = (d: { type: string; party: string }) => [d.type, d.party].filter(Boolean).join(' · ')
+
+// ── totals at the top ───────────────────────────────────────────────────────────────────────────────────────────
+function totalsOf(rows: Row[]) {
+  const amt = rows.map(r => { const d = cents(r.debit), c = cents(r.credit); return d == null && c == null ? null : (c || 0) - (d || 0) })
+  const bal = rows.map(r => cents(r.balance))
+  const fits = (p: number, c: number) => bal[p] != null && bal[c] != null && amt[c] != null && bal[p]! + amt[c]! === bal[c]
+  const idx = rows.map((_, i) => i)
+  const score = (o: number[]) => { let ok = 0; for (let k = 1; k < o.length; k++) if (fits(o[k - 1], o[k])) ok++; return ok }
+  const o = score([...idx].reverse()) > score(idx) ? [...idx].reverse() : idx
+  if (!o.length) return null
+  const first = o[0], last = o[o.length - 1]
+  const opening = bal[first] != null && amt[first] != null ? bal[first]! - amt[first]! : null
+  const closing = bal[last]
+  let inn = 0, out = 0
+  for (const a of amt) { if (a == null) continue; if (a > 0) inn += a; else out -= a }
+  const ties = opening != null && closing != null && opening + inn - out === closing
+  return { opening, closing, inn, out, ties }
+}
+const money = (c: number | null) => c == null ? '–' : (c / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
 function toCsv(rows: Row[]): string {
   const q = (v: string | null) => {
     const s = v ?? ''
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
-  const head = ['Date', 'Description', 'Ref', 'Debit', 'Credit', 'Balance', 'Check']
+  const head = ['Date', 'Description', 'Ref', 'Debit', 'Credit', 'Balance', 'Check', 'Type', 'Party', 'Reference no']
   const label = (s: Status) => s === 'verified' ? 'verified' : s === 'flagged' ? 'needs review' : 'not checked'
-  return [head.join(','), ...rows.map(r => [r.date, r.description, r.ref, r.debit, r.credit, r.balance, label(r.status)].map(q).join(','))].join('\n')
+  return [head.join(','), ...rows.map(r => { const d = tidy(r.description, r.ref); return [r.date, r.description, r.ref, r.debit, r.credit, r.balance, label(r.status), d.type, d.party, d.ref].map(q).join(',') })].join('\n')
 }
 
 function StatusDot({ s, title }: { s: Status; title?: string }) {
@@ -136,6 +184,7 @@ export default function PdfStatements() {
     return { v, f, u: rows.length - v - f }
   }, [rows])
 
+  const totals = useMemo(() => totalsOf(rows), [rows])
   const selRow = rows.find(r => r.id === sel) || null
   const pageNo = selRow?.page ?? 1
   const page = res?.pages.find(p => p.page === pageNo) || null
@@ -224,7 +273,7 @@ export default function PdfStatements() {
             </div>
             {res.summary.fileFlags.length > 0 && (
               <ul style={{ margin: '12px 0 0', paddingLeft: 18, color: '#fde68a', fontSize: '0.88rem', lineHeight: 1.55 }}>
-                {res.summary.fileFlags.map(f => <li key={f.code}>{f.message}</li>)}
+                {res.summary.fileFlags.map(f => <li key={f.code} style={f.severity === 'info' ? { color: muted } : undefined}>{f.message}</li>)}
               </ul>
             )}
             {hasEdits && res.summary.fileFlags.length > 0 && (
@@ -243,6 +292,27 @@ export default function PdfStatements() {
             {res.truncated && <div style={{ color: '#fde68a', fontSize: '0.85rem', marginTop: 8 }}>Only the first 60 pages were read.</div>}
           </div>
 
+          {totals && (
+            <div style={{ ...card, marginTop: 14, padding: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 10 }}>
+                {([['Opening balance', totals.opening], ['Money in', totals.inn], ['Money out', totals.out], ['Closing balance', totals.closing]] as [string, number | null][]).map(([k, v]) => (
+                  <div key={k}>
+                    <div style={{ color: muted, fontSize: '0.78rem' }}>{k}</div>
+                    <div style={{ fontWeight: 800, fontSize: '1.05rem', fontVariantNumeric: 'tabular-nums' }}>{money(v)}</div>
+                  </div>
+                ))}
+              </div>
+              {totals.opening != null && totals.closing != null && (
+                <div style={{ marginTop: 10, fontSize: '0.85rem', lineHeight: 1.5, color: totals.ties ? GREEN : AMBER }}>
+                  {totals.ties
+                    ? 'Opening balance, plus money in, minus money out, equals the closing balance.'
+                    : 'Opening balance, plus money in, minus money out, does not equal the closing balance. Look at the marked rows.'}
+                </div>
+              )}
+              <div style={{ color: muted, fontSize: '0.78rem', marginTop: 4 }}>{rows.length} transactions. Worked out from the rows below, so they change if you edit a number.</div>
+            </div>
+          )}
+
           <div style={{ display: 'flex', gap: 14, alignItems: 'center', margin: '16px 0 8px', flexWrap: 'wrap', fontSize: '0.88rem' }}>
             <label style={{ display: 'flex', gap: 6, alignItems: 'center', cursor: 'pointer', color: muted }}>
               <input type="checkbox" checked={onlyCheck} onChange={e => setOnlyCheck(e.target.checked)} /> Show only rows to check ({summary.f + summary.u})
@@ -253,12 +323,12 @@ export default function PdfStatements() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,520px),1fr))', gap: 14, alignItems: 'start' }}>
             <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
               <div style={{ maxHeight: '72vh', overflow: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', minWidth: 600, tableLayout: 'fixed' }}>
-                  <colgroup><col style={{ width: 34 }} /><col style={{ width: 96 }} /><col /><col style={{ width: 96 }} /><col style={{ width: 96 }} /><col style={{ width: 108 }} /></colgroup>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', minWidth: 760, tableLayout: 'fixed' }}>
+                  <colgroup><col style={{ width: 34 }} /><col style={{ width: 96 }} /><col style={{ width: 150 }} /><col /><col style={{ width: 96 }} /><col style={{ width: 96 }} /><col style={{ width: 108 }} /></colgroup>
                   <thead>
                     <tr style={{ position: 'sticky', top: 0, background: '#15102a', zIndex: 1, textAlign: 'left', color: muted }}>
-                      {['', 'Date', 'Description', 'Debit', 'Credit', 'Balance'].map((h, i) => (
-                        <th key={i} style={{ padding: '10px 8px', fontWeight: 600, textAlign: i >= 3 ? 'right' : 'left' }}>{h}</th>
+                      {['', 'Date', 'Looks like', 'Description', 'Debit', 'Credit', 'Balance'].map((h, i) => (
+                        <th key={i} title={h === 'Looks like' ? 'A best guess worked out from the description. The Description column is the bank’s exact text.' : undefined} style={{ padding: '10px 8px', fontWeight: 600, textAlign: i >= 4 ? 'right' : 'left' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -270,6 +340,7 @@ export default function PdfStatements() {
                         <tr key={r.id} onClick={() => setSel(r.id)} style={{ background: bg, cursor: 'pointer', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                           <td style={{ padding: '4px 8px' }}><StatusDot s={r.status} title={r.status} /></td>
                           <td><input style={cellInput} value={r.date} onChange={e => edit(r.id, 'date', e.target.value)} /></td>
+                          <td style={{ padding: '4px 8px', color: '#ddd6fe', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={tidy(r.description, r.ref).ref ? `Reference ${tidy(r.description, r.ref).ref}` : undefined}>{looksLike(tidy(r.description, r.ref)) || '–'}</td>
                           <td><input style={cellInput} value={r.description} title={r.description} onChange={e => edit(r.id, 'description', e.target.value)} /></td>
                           {(['debit', 'credit', 'balance'] as const).map(k => (
                             <td key={k}>
@@ -279,7 +350,7 @@ export default function PdfStatements() {
                         </tr>
                       )
                     })}
-                    {visible.length === 0 && <tr><td colSpan={6} style={{ padding: 24, textAlign: 'center', color: muted }}>Every row is proven.</td></tr>}
+                    {visible.length === 0 && <tr><td colSpan={7} style={{ padding: 24, textAlign: 'center', color: muted }}>Every row is proven.</td></tr>}
                   </tbody>
                 </table>
               </div>
