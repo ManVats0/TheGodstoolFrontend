@@ -356,19 +356,19 @@ const DOCS: Record<string, {
     ],
   },
   '/pdf': {
-    title: 'PDF to table',
+    title: 'PDF to data',
     icon: 'database',
     color: '#34d399',
     badge: 'Paid plans',
     sections: [
       {
         heading: 'What it does',
-        body: 'Turns a bank statement PDF into a table and tells you which rows to trust. Every row is checked against the balances printed on the statement itself: the previous balance plus this row\'s amount has to equal this row\'s balance. Rows that do not add up are marked, with a guess at why (debit and credit swapped, two digits swapped, a row lost at a page break, a duplicate).',
+        body: 'Any PDF table: drop in a PDF made by a program and the tables in it come back as plain rows and columns, with repeated headers joined across pages. Clean it with one-click steps (trim spaces, remove empty rows and columns, join wrapped lines, remove duplicates, turn text into numbers, make dates YYYY-MM-DD), each one telling you what it changed, then download a CSV or keep cleaning in the app. Scans and photos have no text to read and are refused. Check the result against the PDF, because table reading is a best effort.\n\nBank statement tab: turns a bank statement PDF into a table and tells you which rows to trust. Every row is checked against the balances printed on the statement itself: the previous balance plus this row\'s amount has to equal this row\'s balance. Rows that do not add up are marked, with a guess at why (debit and credit swapped, two digits swapped, a row lost at a page break, a duplicate).',
         tip: 'Use the PDF you download from your bank, not a scan or a photo. Scans have no text to read, so they are refused instead of guessed.',
       },
       {
         heading: 'How to use it',
-        body: 'Open PDF to table, drop the file in, and wait a few seconds. Rows marked with a tick are proven. Rows marked with an exclamation point need a look: click one and the PDF page opens next to the table with that row outlined. If a number is wrong, fix it in the table and the check runs again straight away. When you are happy, download a CSV or use it in the app, where it becomes a data source you can clean like any other file.',
+        body: 'On the Bank statement tab, drop the file in, and wait a few seconds. Rows marked with a tick are proven. Rows marked with an exclamation point need a look: click one and the PDF page opens next to the table with that row outlined. If a number is wrong, fix it in the table and the check runs again straight away. When you are happy, download a CSV or use it in the app, where it becomes a data source you can clean like any other file.',
       },
       {
         heading: 'What the labels mean',

@@ -45,7 +45,7 @@ const { can, role } = usePermissions()
     { path: '/catalog', icon: 'folder', label: 'Catalog' },
     { path: '/flow', icon: 'flow', label: 'Pipeline Flow' },
     { path: '/analysis', icon: 'chart', label: 'Analysis' },
-    { path: '/pdf', icon: 'table', label: 'PDF to table' },
+    { path: '/pdf', icon: 'table', label: 'PDF to data' },
     { path: '/audit', icon: 'file', label: 'Audit Logs', show: can('audit.view') },
     { path: '/team', icon: 'team', label: 'Team' },
     { path: '/docs', icon: 'book', label: 'Cosmic Documentation' },

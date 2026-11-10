@@ -92,6 +92,14 @@
     {
       "source": "/csv-data-cleaning-checklist.html",
       "destination": "/csv-data-cleaning-checklist.html"
+    },
+    {
+      "source": "/pdf-table-to-excel-csv",
+      "destination": "/pdf-table-to-excel-csv.html"
+    },
+    {
+      "source": "/pdf-table-to-excel-csv.html",
+      "destination": "/pdf-table-to-excel-csv.html"
     }
   ]
 }
