@@ -46,7 +46,7 @@ const pageLoaders = {
   docs: () => import('./pages/Documentation'),
   tunneling: () => import('./pages/Tunneling'),
   team: () => import('./pages/TeamGate'),
-  pdf: () => import('./pages/PdfStatements'),
+  pdf: () => import('./pages/PdfToData'),
 }
 const Dashboard = lazy(pageLoaders.dashboard)
 const DataSources = lazy(pageLoaders.sources)
@@ -57,7 +57,7 @@ const AuditLogs = lazy(pageLoaders.audit)
 const Documentation = lazy(pageLoaders.docs)
 const Tunneling = lazy(pageLoaders.tunneling)
 const TeamGate = lazy(pageLoaders.team)
-const PdfStatements = lazy(pageLoaders.pdf)
+const PdfStatements = lazy(pageLoaders.pdf)  // the PDF to data page
 let preloaded = false
 function preloadAppPages() {
   if (preloaded) return
@@ -1139,6 +1139,7 @@ if (!entered || onSite()) return (
       </div>
       <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
         <a href="/csv-data-cleaning-checklist.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>CSV cleaning checklist</a>
+        <a href="/pdf-table-to-excel-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>PDF table to Excel</a>
         <a href="/fix-mixed-date-formats-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Fix mixed dates</a>
         <a href="/remove-duplicate-customers-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Remove duplicate customers</a>
         <a href="/fix-numbers-stored-as-text-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Numbers stored as text</a>

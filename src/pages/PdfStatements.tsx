@@ -82,7 +82,7 @@ function StatusDot({ s, title }: { s: Status; title?: string }) {
 
 const cellInput: CSSProperties = { width: '100%', boxSizing: 'border-box', background: 'transparent', border: '1px solid transparent', color: 'white', font: 'inherit', padding: '4px 6px', borderRadius: 6, outline: 'none' }
 
-export default function PdfStatements() {
+export default function PdfStatements({ embedded = false }: { embedded?: boolean } = {}) {
   const navigate = useNavigate()
   const fileRef = useRef<HTMLInputElement>(null)
   const hiRef = useRef<HTMLDivElement>(null)
@@ -168,8 +168,8 @@ export default function PdfStatements() {
   const tone = !res ? muted : allClear ? GREEN : summary.f > 0 || res.summary.fileFlags.some(f => f.severity === 'review') ? AMBER : '#93c5fd'
 
   return (
-    <div style={{ padding: '28px 24px 60px', maxWidth: 1400, margin: '0 auto', fontFamily: 'Inter, sans-serif', color: 'white' }}>
-      <h1 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>PDF to table</h1>
+    <div style={embedded ? { fontFamily: 'Inter, sans-serif', color: 'white' } : { padding: '28px 24px 60px', maxWidth: 1400, margin: '0 auto', fontFamily: 'Inter, sans-serif', color: 'white' }}>
+      {!embedded && <h1 style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>PDF to table</h1>}
       <p style={{ color: muted, margin: '6px 0 20px', maxWidth: 760, lineHeight: 1.55 }}>
         Drop a bank statement PDF. Every row is checked against the balances printed on the statement itself, and the few rows
         that do not add up are marked so you can look at them next to the PDF. Nothing is changed quietly.

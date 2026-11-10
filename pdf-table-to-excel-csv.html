@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PDF Table to Excel or CSV, Cleaned and Ready to Use</title>
+<meta name="description" content="Why copying a table out of a PDF breaks, how a PDF table becomes clean rows and columns, and what to fix before you trust it. Text PDFs only, no scans." />
+<link rel="canonical" href="https://thegodstool.com/pdf-table-to-excel-csv.html" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="PDF Table to Excel or CSV, Cleaned and Ready to Use" />
+<meta property="og:description" content="Why copying a table out of a PDF breaks, how a PDF table becomes clean rows and columns, and what to fix before you trust it. Text PDFs only, no scans." />
+<meta property="og:url" content="https://thegodstool.com/pdf-table-to-excel-csv.html" />
+<meta property="og:image" content="https://thegodstool.com/og-image.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #05030f; color: #e2e8f0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.7; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 90px; }
+  nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 44px; font-size: 0.92rem; }
+  nav a { color: #c4b5fd; text-decoration: none; font-weight: 600; }
+  nav .brand { color: #fff; font-weight: 800; }
+  .tag { font-family: monospace; font-size: 0.72rem; color: #a78bfa; letter-spacing: 0.1em; text-transform: uppercase; }
+  h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); line-height: 1.15; margin: 8px 0 16px; color: #fff; font-weight: 800; }
+  h2 { font-size: 1.45rem; margin: 52px 0 10px; color: #fff; font-weight: 800; }
+  h3 { font-size: 1.05rem; margin: 22px 0 4px; color: #fff; }
+  p, li { color: rgba(255,255,255,0.74); font-size: 1.02rem; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 6px 0; }
+  a { color: #a78bfa; }
+  .lead { font-size: 1.15rem; color: rgba(255,255,255,0.82); max-width: 720px; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; margin: 26px 0 6px; }
+  .btn { display: inline-block; padding: 12px 22px; border-radius: 12px; font-weight: 700; text-decoration: none; }
+  .btn.main { background: linear-gradient(135deg, #7c3aed, #a78bfa); color: #fff; }
+  .btn.alt { border: 1px solid rgba(255,255,255,0.2); color: #fff; }
+  .small { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+  figure { margin: 34px 0 0; }
+  figure img { width: 100%; height: auto; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); display: block; }
+  figcaption { font-size: 0.85rem; color: rgba(255,255,255,0.55); margin-top: 8px; }
+  .box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 4px 20px 14px; margin-top: 14px; }
+  .warn { border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.06); }
+  details { border-top: 1px solid rgba(255,255,255,0.1); padding: 14px 0; }
+  details:last-of-type { border-bottom: 1px solid rgba(255,255,255,0.1); }
+  summary { cursor: pointer; font-weight: 700; color: #fff; }
+  details p { margin: 10px 0 0; }
+  footer { margin-top: 60px; font-size: 0.85rem; color: rgba(255,255,255,0.45); }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.93rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.78); vertical-align: top; }
+  th { color: #fff; font-weight: 700; }
+  code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88rem; }
+  code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+  pre { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; overflow-x: auto; color: #e2e8f0; }
+  .tblwrap { overflow-x: auto; }
+  .note { font-size: 0.9rem; color: rgba(255,255,255,0.55); }
+</style>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@graph": [{"@type": "Article", "@id": "https://thegodstool.com/pdf-table-to-excel-csv.html", "url": "https://thegodstool.com/pdf-table-to-excel-csv.html", "headline": "PDF table to Excel or CSV: get rows you can actually use", "description": "Why copying a table out of a PDF breaks, how a PDF table becomes clean rows and columns, and what to fix before you trust it. Text PDFs only, no scans.", "inLanguage": "en", "dateModified": "2026-11-04", "datePublished": "2026-11-04", "author": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}, "publisher": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://thegodstool.com/"}, {"@type": "ListItem", "position": 2, "name": "PDF table to Excel or CSV", "item": "https://thegodstool.com/pdf-table-to-excel-csv.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I convert a PDF table to Excel?", "acceptedAnswer": {"@type": "Answer", "text": "Read the table as rows and columns instead of copying it, join the pages, clean the text and numbers, then save it as CSV, which Excel opens. In The God's Tool, open PDF to data, drop in the PDF and download the CSV."}}, {"@type": "Question", "name": "Why does my PDF table paste as one column?", "acceptedAnswer": {"@type": "Answer", "text": "A PDF stores text at positions on the page, not as cells. Your spreadsheet has to guess where the columns are, and without cell lines it often guesses wrong."}}, {"@type": "Question", "name": "Can it read a scanned PDF?", "acceptedAnswer": {"@type": "Answer", "text": "No. A scan is a picture with no text in it, so there is nothing to read. Use the original PDF from the program that created it."}}, {"@type": "Question", "name": "What happens to a table that runs over several pages?", "acceptedAnswer": {"@type": "Answer", "text": "Pages that continue the same table with the same header are joined, and the repeated header rows are removed, so you get one table."}}, {"@type": "Question", "name": "Is the PDF stored or sent to an AI?", "acceptedAnswer": {"@type": "Answer", "text": "No. The PDF is read on our server from its own text without AI and is not stored."}}, {"@type": "Question", "name": "Will it get every table right?", "acceptedAnswer": {"@type": "Answer", "text": "No. Ruled tables read most reliably. Merged cells and irregular layouts can come out wrong, so check the result against the PDF."}}]}]}
+</script>
+</head>
+<body>
+<div class="wrap">
+<nav><a class="brand" href="/">The God's Tool</a><span><a href="/pricing">Pricing</a> &nbsp; <a href="/blog">Blog</a></span></nav>
+
+<div class="tag">PDF data guide</div>
+<h1>PDF table to Excel or CSV: get rows you can actually use</h1>
+<p class="lead">Select the table in a PDF, paste it into Excel, and you usually get one long column of text or a grid with the columns in the wrong places. The fix is to read the table as rows and columns, join the pages, and clean the result before you use it. This page explains how that works and where it stops working.</p>
+<div class="small">Updated 4 November 2026. Examples on this page were run for real; the data in them is made up.</div>
+
+
+<h2>Why copy and paste breaks</h2>
+<p>A PDF is a picture of a page with text placed at exact positions. It has no idea what a row or a column is. When you copy from it, your spreadsheet has to guess, and it guesses badly in four predictable ways:</p>
+<ul>
+<li><strong>Columns collapse.</strong> The text of a whole row lands in one cell, or a two-word name such as <code>Acme Inc</code> is split across two columns.</li>
+<li><strong>Long cells wrap into extra rows.</strong> A description that runs onto a second line becomes its own row with only one cell filled.</li>
+<li><strong>Headers repeat on every page.</strong> A report of 300 rows over six pages brings six copies of the header into the middle of your data.</li>
+<li><strong>Numbers arrive as text.</strong> <code>1,234.50</code> and <code>(500.00)</code> look like numbers but will not add up. See <a href="/fix-numbers-stored-as-text-csv.html">numbers stored as text</a>.</li>
+</ul>
+
+<h2>How a PDF table becomes rows and columns</h2>
+<p>There are two kinds of table in a PDF, and they are found in different ways.</p>
+<table>
+<tr><th>Kind</th><th>What it looks like</th><th>How it is read</th></tr>
+<tr><td>Ruled</td><td>Lines or borders around the cells</td><td>The drawn lines mark the cell edges. This is the most reliable case.</td></tr>
+<tr><td>Borderless</td><td>Columns that only line up by spacing</td><td>The reader looks for empty vertical strips that run down the page and treats them as column breaks.</td></tr>
+</table>
+<p>After that, tables that continue on the next page with the same header are joined, so a six-page report comes back as one table with one header row. We tested this on a generated 80-row invoice list across three pages: it came back as 81 rows (header plus 80) in four columns, with no repeated headers.</p>
+
+<h2>What to fix afterwards</h2>
+<p>Reading the table is the first half. The second half is cleaning it, in this order:</p>
+<ol>
+<li><strong>Trim spaces.</strong> Extra or non-breaking spaces make identical values look different.</li>
+<li><strong>Remove empty rows and columns.</strong> Page breaks and spacing often leave blank ones behind.</li>
+<li><strong>Join wrapped lines.</strong> A row with nothing in the first column but text elsewhere is usually the second line of the row above it.</li>
+<li><strong>Turn text into numbers.</strong> Remove thousands commas and currency signs, and treat <code>(500.00)</code> as <code>-500.00</code>. Leave phone numbers and codes alone, because a leading zero is part of the value.</li>
+<li><strong>Make dates one format.</strong> Write <code>YYYY-MM-DD</code>. A date such as <code>03/04/2026</code> can mean 3 April or 4 March, and only you know which. See <a href="/fix-mixed-date-formats-csv.html">mixed date formats</a>.</li>
+<li><strong>Remove duplicates last.</strong> Only after the text is comparable. See <a href="/remove-duplicate-customers-csv.html">duplicate customers</a>.</li>
+</ol>
+
+<h2>How The God's Tool does it</h2>
+<p>Open <strong>PDF to data</strong>, drop in the PDF, and the tables it finds are shown as a plain grid. If there is more than one, you pick which. The cleaning steps above are one-click buttons, and each one tells you what it changed, for example "Removed 3 empty rows and 0 empty columns". You can undo all of it with Start over, edit any cell by hand, then download a CSV that opens in Excel or Google Sheets, or send it into the app to keep cleaning with plain English instructions.</p>
+<p>The PDF is read on our server from its own text, without AI, and it is not stored. Only the cleaning that you ask for in the app's AI features uses AI, in private mode, where the AI gets your instruction and column names, not your rows.</p>
+
+<div class="box warn">
+<h3>What it cannot do</h3>
+<p>It cannot read a scanned page or a photo, because there is no text in the file to read. Use the original PDF from the program that made it. Tables with merged cells, tables split into several blocks, and text that only looks like a table can come out wrong, so check the result against the PDF before you rely on it. Reading is a best effort, not a proof. The limits are 15 MB, 60 pages and 12 tables per file, and PDF to data is on the trial and the paid plans.</p>
+<p>Bank statements are a special case. They print a running balance, so each row can be proven against the one before it. That has its own reader. See <a href="/bank-statement-pdf-to-excel.html">bank statement PDF to Excel, every row checked</a>.</p>
+</div>
+
+
+<h2>Try it on your own file</h2>
+<p>Drop in a PDF that has a table, look at what comes back, clean it with the buttons, and download the CSV. If the table comes out wrong, you will see that straight away next to your original.</p>
+<div class="cta">
+  <a class="btn main" href="/">Start the 14-day trial</a>
+  <a class="btn alt" href="/pricing">See plans</a>
+</div>
+<div class="small">No card needed for the trial. After it, the free plan stays: CSV files up to 5 MB and 5,000 rows per run.</div>
+
+<h2>Questions people ask</h2>
+<details><summary>How do I convert a PDF table to Excel?</summary><p>Read the table as rows and columns instead of copying it, join the pages, clean the text and numbers, then save it as CSV, which Excel opens. In The God's Tool, open PDF to data, drop in the PDF and download the CSV.</p></details>
+<details><summary>Why does my PDF table paste as one column?</summary><p>A PDF stores text at positions on the page, not as cells. Your spreadsheet has to guess where the columns are, and without cell lines it often guesses wrong.</p></details>
+<details><summary>Can it read a scanned PDF?</summary><p>No. A scan is a picture with no text in it, so there is nothing to read. Use the original PDF from the program that created it.</p></details>
+<details><summary>What happens to a table that runs over several pages?</summary><p>Pages that continue the same table with the same header are joined, and the repeated header rows are removed, so you get one table.</p></details>
+<details><summary>Is the PDF stored or sent to an AI?</summary><p>No. The PDF is read on our server from its own text without AI and is not stored.</p></details>
+<details><summary>Will it get every table right?</summary><p>No. Ruled tables read most reliably. Merged cells and irregular layouts can come out wrong, so check the result against the PDF.</p></details>
+
+<h2>Keep reading</h2>
+<ul>
+<li><a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a>: a row-by-row balance check</li>
+<li><a href="/fix-numbers-stored-as-text-csv.html">Numbers stored as text</a>: brackets, dashes and decimal commas</li>
+<li><a href="/fix-mixed-date-formats-csv.html">Fix mixed date formats</a>: is 03/04 March or April?</li>
+<li><a href="/csv-data-cleaning-checklist.html">CSV data cleaning checklist</a>: ten checks, in order</li>
+</ul>
+
+<footer>The God's Tool &middot; <a href="/">Home</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></footer>
+</div>
+</body>
+</html>

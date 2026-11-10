@@ -87,7 +87,7 @@ ${li(c.hero.sources.map(esc))}
 <section id="private-ai"><h2>${esc(c.privacy.h2)}</h2><p>${esc(c.privacy.body)}</p>${li(c.privacy.points.map(esc))}<p><a href="${c.privacy.href}">${esc(c.privacy.link)}</a></p></section>
 <section id="faq"><h2>${esc(c.faq.h2)}</h2>${c.faq.items.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>
 <section><h2>${esc(c.cta.h2)}</h2><p>${esc(c.cta.body)}</p></section>
-<footer><p>Guides: <a href="/csv-data-cleaning-checklist.html">CSV cleaning checklist</a> · <a href="/fix-mixed-date-formats-csv.html">Fix mixed dates</a> · <a href="/remove-duplicate-customers-csv.html">Remove duplicate customers</a> · <a href="/fix-numbers-stored-as-text-csv.html">Numbers stored as text</a> · <a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a></p><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/refund.html">Refunds</a> · <a href="/blog">Blog</a></footer>
+<footer><p>Guides: <a href="/csv-data-cleaning-checklist.html">CSV cleaning checklist</a> · <a href="/pdf-table-to-excel-csv.html">PDF table to Excel</a> · <a href="/fix-mixed-date-formats-csv.html">Fix mixed dates</a> · <a href="/remove-duplicate-customers-csv.html">Remove duplicate customers</a> · <a href="/fix-numbers-stored-as-text-csv.html">Numbers stored as text</a> · <a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a></p><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/refund.html">Refunds</a> · <a href="/blog">Blog</a></footer>
 </main>`
 
 if (!/<div id="root"><\/div>/.test(html)) throw new Error('root div not found in dist/index.html')

@@ -12,12 +12,13 @@
   "hero": {
     "eyebrow": "For freelancers, analysts and small data teams",
     "h1": "Clean messy data in minutes, not hours.",
-    "sub": "Drop in a CSV or link a Google Sheet. The God's Tool spots the duplicates, blanks, broken dates and inconsistent names, then fixes them when you say what you want in plain English. No formulas, no scripts.",
+    "sub": "Drop in a CSV, link a Google Sheet, or upload a PDF with a table in it. The God's Tool spots the duplicates, blanks, broken dates and inconsistent names, then fixes them when you say what you want in plain English. No formulas, no scripts.",
     "note": "14-day trial with every feature included. The free plan stays after that. No card needed.",
     "primary": "Clean a file free",
     "secondary": "Get a quote",
     "sources": [
       "CSV",
+      "PDF tables",
       "Google Sheets",
       "MySQL",
       "PostgreSQL",
@@ -91,6 +92,11 @@
         "icon": "link",
         "title": "Works with what you already use",
         "body": "CSV files, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS, Databricks, Google Analytics 4 and more."
+      },
+      {
+        "icon": "book",
+        "title": "PDF tables, cleaned",
+        "body": "Upload a PDF that has a table in it and get plain rows and columns back, with repeated headers joined across pages. Clean it with one click (spaces, empty rows, numbers, dates, duplicates) and download a CSV. It reads text PDFs, not scans. Bank statements get their own reader that checks every row against the printed balances."
       },
       {
         "icon": "refresh",
@@ -253,6 +259,10 @@
       {
         "q": "Can I clean a CSV or Google Sheet for free?",
         "a": "Yes. The free plan handles CSV files up to 5 MB and 5,000 rows per run, with up to 3 sources and 1 pipeline. New accounts also get 14 days with every feature included."
+      },
+      {
+        "q": "Can it clean data from a PDF?",
+        "a": "Yes, if the PDF was made by a program and has a table in it. Upload it, check the table that comes back, tidy it with the one-click steps and download a CSV, or keep cleaning in the app. It cannot read scans or photos, and tables with merged cells can come out wrong, so check the result against the PDF. It is available on the trial and the paid plans."
       },
       {
         "q": "Do I need to know SQL or code?",

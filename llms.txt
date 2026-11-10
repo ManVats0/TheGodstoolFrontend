@@ -8,6 +8,7 @@ It is made for freelancers, analysts, small teams and companies who regularly re
 - Cleaning a messy CSV export: duplicates, blanks, broken dates, inconsistent names, numbers stored as text.
 - Fixing a Google Sheet without writing formulas or scripts.
 - Cleaning a MySQL, PostgreSQL, BigQuery or MongoDB table, including databases behind a firewall, with reviewable SQL.
+- Turning any text-based PDF with a table in it into plain rows and columns, cleaning it with one-click steps (trim spaces, remove empty rows, join wrapped lines, numbers, dates, duplicates) and downloading a CSV. Not for scans or photos. Trial and paid plans.
 - Turning a bank statement PDF into a table that is checked row by row against the statement's own running balances, with doubtful rows flagged next to the PDF (paid plans and trial).
 - Repeating the same cleanup every week or month, with an alert when a column changes shape.
 
@@ -32,6 +33,7 @@ It is made for freelancers, analysts, small teams and companies who regularly re
 - [Remove duplicate customers in a CSV](https://thegodstool.com/remove-duplicate-customers-csv.html): merging customers spelled differently, with a review step and a check for record versus transaction rows
 - [Fix numbers stored as text in a CSV](https://thegodstool.com/fix-numbers-stored-as-text-csv.html): N/A, dashes, brackets and decimal commas in amount columns, and whether a blank means zero
 - [CSV data cleaning checklist](https://thegodstool.com/csv-data-cleaning-checklist.html): ten checks in order, ending with a reconciliation against the original
+- [PDF table to Excel or CSV](https://thegodstool.com/pdf-table-to-excel-csv.html): why copying from a PDF breaks, how tables are read, what to clean afterwards, and what it cannot do
 - [Pricing](https://thegodstool.com/pricing): plans and credits
 - [Blog](https://thegodstool.com/blog): guides on cleaning data and keeping it safe
 - [Contact](https://thegodstool.com/contact)
