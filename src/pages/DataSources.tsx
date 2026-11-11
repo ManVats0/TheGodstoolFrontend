@@ -10,7 +10,7 @@
   const DATASOURCES_TOUR: TourStep[] = [
   {
     title: 'Welcome to Data Sources',
-    body: 'This is where every project starts. Connect a CSV, Google Sheet, database, or API here and DataPipe will pull it in for cleaning and analysis.',
+    body: 'This is where every project starts. Connect a CSV, Google Sheet, database, or API here and The God’s Tool will pull it in for cleaning and analysis.',
   },
   {
     target: '[data-tour="tour-datasources-tabs"]',
@@ -46,6 +46,10 @@
     )
   }
 
+  // A file that was just saved from PDF to data: point at the button that comes next.
+  function isNewSource(s: { name: string }): boolean {
+    try { return sessionStorage.getItem('gt_new_source') === s.name } catch { return false }
+  }
   function getCachedAnalysis(sourceName: string): any | null {
     try {
       const raw = localStorage.getItem(`analysis_cache_${sourceName}`)
@@ -1179,6 +1183,9 @@ const handleLockedSource = () => {
                       <div>
                         <p className="font-semibold text-white text-sm">{s.name}</p>
                         <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Added {s.addedAt}</p>
+                        {isNewSource(s) && !(getCachedAnalysis(s.name) || backendAnalysisBadges[sourceKeyOf(s)]) && (
+                          <span className="gt-hint" role="note" style={{ marginTop: 6 }}>Next step: click Analyse / Clean to find and fix problems</span>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -1187,31 +1194,31 @@ const handleLockedSource = () => {
                       {!s.connectionId && badge('Only on this device', '#64748b')}
                       {(getCachedAnalysis(s.name) || backendAnalysisBadges[sourceKeyOf(s)]) && badge('Last Run', '#34d399')}
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#22c55e' }} />
-                      <button onClick={() => loadSource(s)}
-                        className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white"
-                        style={{ background: 'rgba(124,58,237,0.25)', border: '1px solid rgba(124,58,237,0.3)' }}
+                      <button onClick={() => { if (isNewSource(s)) { try { sessionStorage.removeItem('gt_new_source') } catch { /* ignore */ } } loadSource(s) }}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-semibold text-white ${(getCachedAnalysis(s.name) || backendAnalysisBadges[sourceKeyOf(s)]) ? '' : 'gt-glow'}`}
+                        style={{ background: (getCachedAnalysis(s.name) || backendAnalysisBadges[sourceKeyOf(s)]) ? 'rgba(124,58,237,0.25)' : 'linear-gradient(135deg,#7c3aed,#8b5cf6)', border: '1px solid rgba(167,139,250,0.45)' }}
                         title={s.name}>
                         {(() => {
                           const label = s.type === 'mysql' || s.type === 'postgres'
-                              ? `Analyze (${s.name.split('.')[1]?.split('@')[0] || '?'})`
+                              ? `Analyse / Clean (${s.name.split('.')[1]?.split('@')[0] || '?'})`
                               : s.type === 'bigquery'
-                              ? `Analyze (${s.name.split('.')[2] || '?'})`
+                              ? `Analyse / Clean (${s.name.split('.')[2] || '?'})`
                               : s.type === 'mongodb'
-                              ? `Analyze (${s.name.split('.')[1]?.split('@')[0] || '?'})`
+                              ? `Analyse / Clean (${s.name.split('.')[1]?.split('@')[0] || '?'})`
                               : s.type === 'aws'
-                              ? `Analyze (${s.name.split('/').pop()?.split('@')[0] || '?'})`
+                              ? `Analyse / Clean (${s.name.split('/').pop()?.split('@')[0] || '?'})`
                               : (s.type as string) === 'gcs'
-                              ? `Analyze (${s.name.split('/').pop() || '?'})`
+                              ? `Analyse / Clean (${s.name.split('/').pop() || '?'})`
                               : (s.type as string) === 'cloudsql'
-                              ? `Analyze (${s.name.split('.')[1]?.split('@')[0] || '?'})`
+                              ? `Analyse / Clean (${s.name.split('.')[1]?.split('@')[0] || '?'})`
                               : (s.type as string) === 'databricks'
-                              ? `Analyze (${s.name.split('.')[2]?.split('@')[0] || '?'})`
+                              ? `Analyse / Clean (${s.name.split('.')[2]?.split('@')[0] || '?'})`
                               : (s.type as string) === 'rest'
-                              ? `Analyze (${s.name.replace('rest:', '').split('/').filter(Boolean).pop() || 'endpoint'})`
+                              ? `Analyse / Clean (${s.name.replace('rest:', '').split('/').filter(Boolean).pop() || 'endpoint'})`
                               : (s.type as string) === 'ga4'
-                              ? `Analyze (${s.name.split('/').pop() || 'report'})`
-                              : 'Analyze'
-                          return getCachedAnalysis(s.name) ? `${label}. Last Run →` : `${label} →`
+                              ? `Analyse / Clean (${s.name.split('/').pop() || 'report'})`
+                              : 'Analyse / Clean'
+                          return getCachedAnalysis(s.name) ? `${label} · last run →` : `${label} →`
                         })()}
                       </button>
                       <button hidden={!can('connection.erase')} onClick={() => setExpandedSourceId(prev => prev === s.id ? null : s.id)}

@@ -159,6 +159,7 @@ export default function PdfStatements({ embedded = false }: { embedded?: boolean
       const r = await fetch(`${API_BASE}/api/connections/upload-csv`, { method: 'POST', credentials: 'include', body: fd })
       const j = await r.json().catch(() => ({} as any))
       if (!r.ok) { setError(j?.error || `Could not save (${r.status}).`); return }
+      try { sessionStorage.setItem('gt_new_source', `${stem}.csv`) } catch { /* ignore */ }
       navigate('/sources')
     } catch { setError('Could not reach the server.') } finally { setSaving(false) }
   }

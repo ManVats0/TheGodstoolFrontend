@@ -88,3 +88,17 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
+
+/* Gentle attention effects. Slow, soft, and switched off for people who prefer less motion. */
+@keyframes gt-soft-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.0), 0 0 10px 0 rgba(124, 58, 237, 0.25); }
+  50%      { box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.16), 0 0 18px 2px rgba(124, 58, 237, 0.45); }
+}
+@keyframes gt-soft-dot {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50%      { transform: scale(1.35); opacity: 0.55; }
+}
+.gt-glow { animation: gt-soft-glow 2.6s ease-in-out infinite; }
+.gt-soft-dot { display: inline-block; width: 7px; height: 7px; border-radius: 999px; background: #fbbf24; animation: gt-soft-dot 2.2s ease-in-out infinite; }
+.gt-hint { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 600; color: #ddd6fe; background: rgba(124,58,237,0.16); border: 1px solid rgba(167,139,250,0.35); border-radius: 999px; padding: 3px 10px; }
+@media (prefers-reduced-motion: reduce) { .gt-glow, .gt-soft-dot { animation: none; } }

@@ -2295,7 +2295,7 @@ setAnalyzing(false)
         })
 
         analysisSourceRef.current = activeSourceName
-        setAnalysisTab('preview')
+        setAnalysisTab((data.total_problems > 0 || (data.problems?.length ?? 0) > 0) ? 'problems' : 'preview')
         setFilterIssue('All')
         setFilterCol('All')
         if (data.notifications?.length) {
@@ -2876,10 +2876,10 @@ setAnalyzing(false)
     const selectedMethod = IMPUTATION_METHODS.find(m => m.value === imputationMethod)
 
     const tabs = [
+      { id: 'problems', label: 'Problems', badge: totalProblems },
       { id: 'preview',  label: 'Preview' },
       { id: 'info',     label: 'Columns' },
       { id: 'describe', label: 'Statistics' },
-      { id: 'problems', label: 'Problems', badge: totalProblems },
       ...(ts.detected && ts.chart_data ? [{ id: 'timeseries', label: 'Time Series' }] : []),
       { id: 'aichat',   label: 'AI Clean' },
     ]
@@ -3047,7 +3047,7 @@ const getPreviewFullscreenData = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Analysis</h1>
+              <h1 className="text-2xl font-bold text-white">Analyse / Clean</h1>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 <button
                   onClick={() => setShowEditSource(true)}
@@ -3113,9 +3113,9 @@ const getPreviewFullscreenData = () => {
               onClick={() => runAnalysis()}
               className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ background: 'rgba(124,58,237,0.25)', border: '1px solid rgba(124,58,237,0.35)' }}
-              title={staleness.isStale ? `Last analyzed ${staleness.hoursOld} hours ago` : 'Re-analyze fresh data'}
+              title={staleness.isStale ? `Last analyzed ${staleness.hoursOld} hours ago` : 'Re-analyse fresh data'}
             >
-              {staleness.isStale ? 'Re-analyze' : 'Re-analyze'}
+              {staleness.isStale ? 'Re-analyse' : 'Re-analyse'}
             </button>
           </div>
         </div>
@@ -3159,6 +3159,21 @@ const getPreviewFullscreenData = () => {
           <StatCard label="Memory" value={`${(info.memory_mb || 0).toFixed(1)} MB`} />
           <StatCard label="Problems Found" value={totalProblems.toLocaleString()} color={totalProblems > 0 ? '#f87171' : '#4ade80'} />
         </div>
+
+        {/* A calm pointer to the list of problems, which sits just under the overview */}
+        {totalProblems > 0 && (
+          <button
+            onClick={() => { setAnalysisTab('problems'); document.getElementById('gt-problems-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
+            className="gt-glow w-full text-left rounded-2xl px-5 py-3 flex items-center justify-between gap-3"
+            style={{ background: 'rgba(124,58,237,0.10)', border: '1px solid rgba(167,139,250,0.35)', color: 'white' }}
+          >
+            <span className="text-sm">
+              <span className="font-semibold">{totalProblems.toLocaleString()} {totalProblems === 1 ? 'problem was' : 'problems were'} found.</span>
+              <span style={{ color: 'rgba(255,255,255,0.65)' }}> See what needs fixing and how to fix it.</span>
+            </span>
+            <span className="text-sm font-semibold whitespace-nowrap" style={{ color: '#c4b5fd' }}>Show problems ↓</span>
+          </button>
+        )}
 
         {/* Insights — what changed since last sync (always visible, even before there's history) */}
         <div
@@ -3283,6 +3298,7 @@ const getPreviewFullscreenData = () => {
 
         {/* Main tabs */}
         <div
+          id="gt-problems-anchor"
           className="rounded-3xl overflow-hidden"
           style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
         >
@@ -3302,6 +3318,9 @@ const getPreviewFullscreenData = () => {
                 }}
               >
                 {t.label}
+                {t.id === 'problems' && totalProblems > 0 && analysisTab !== 'problems' && (
+                  <span className="gt-soft-dot" aria-hidden="true" title="Start here: see what needs fixing" />
+                )}
                 {(t as any).badge > 0 && (
                   <span
                     className="px-1.5 py-0.5 rounded-full text-xs font-bold"
@@ -3524,6 +3543,16 @@ const getPreviewFullscreenData = () => {
                   </div>
                 ) : (
                   <div>
+                    <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.22)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.6 }}>
+                      <p className="font-semibold text-white mb-1">What this list is</p>
+                      <p>Every row below is one thing that looks wrong in your data, such as a blank, a duplicate, an odd value or a mixed format. Nothing has been changed yet.</p>
+                      <p className="mt-1.5">
+                        <span className="font-semibold text-white">How to fix them: </span>
+                        tick the fixes in the <span className="font-semibold text-white">Clean Data</span> box further down (the ones for your problems are already ticked),
+                        or open <button onClick={() => setAnalysisTab('aichat')} className="underline font-semibold" style={{ color: '#c4b5fd' }}>AI Clean</button> and
+                        describe a fix in plain English, for example "make every date YYYY-MM-DD".
+                      </p>
+                    </div>
                     {totalProblems > problems.length && (
                       <div
                         className="rounded-xl px-4 py-2.5 mb-4 text-sm flex items-center justify-between gap-3"
