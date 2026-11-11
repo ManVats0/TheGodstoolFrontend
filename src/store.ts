@@ -415,7 +415,7 @@ export const useStore = create<AppState>((set, get) => ({
     activeFile: null,
     activeSourceName: name,
     analysis: a,
-    analysisTab: 'preview',
+    analysisTab: (a && (a.total_problems > 0 || (a.problems?.length ?? 0) > 0)) ? 'problems' : 'preview',
   }),
 
   activeDestinationName: '',

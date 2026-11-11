@@ -10,9 +10,9 @@
     "updated": "2026-11-01"
   },
   "hero": {
-    "eyebrow": "For freelancers, analysts and small data teams",
+    "eyebrow": "For freelancers, analysts, teams and companies",
     "h1": "Clean messy data in minutes, not hours.",
-    "sub": "Drop in a CSV, link a Google Sheet, or upload a PDF with a table in it. The God's Tool spots the duplicates, blanks, broken dates and inconsistent names, then fixes them when you say what you want in plain English. No formulas, no scripts.",
+    "sub": "Drop in a CSV, link a Google Sheet, upload a PDF with a table, or connect a database. The God's Tool finds the duplicates, blanks, broken dates and inconsistent names, then fixes them when you say what you want in plain English. Save your fixes as a pipeline: the same steps, ready to run again on new data in one click.",
     "note": "14-day trial with every feature included. The free plan stays after that. No card needed.",
     "primary": "Clean a file free",
     "secondary": "Get a quote",
@@ -55,20 +55,20 @@
     "h2": "Built for people who get handed bad data.",
     "items": [
       {
-        "title": "Freelancers and consultants",
+        "title": "Freelancers and analysts",
         "body": "Spend less of the week on cleanup. Stay on the free plan, or buy credits only for the days you need the AI. No monthly commitment.",
         "cta": "Start free",
         "action": "register"
       },
       {
-        "title": "Small teams and agencies",
-        "body": "Share one set of cleaning steps so every analyst's output looks the same. Roles, approvals and an audit trail are already there.",
+        "title": "Teams in finance, operations and marketing",
+        "body": "Share one set of cleaning steps so every report looks the same, whoever prepared it. Roles, approvals and an audit trail are already there.",
         "cta": "Ask for a team quote",
         "action": "quote"
       },
       {
         "title": "Companies with databases",
-        "body": "Connect MySQL, PostgreSQL, BigQuery, MongoDB and more. Schedule runs, get alerts when data drifts, and keep sensitive sources behind approvals.",
+        "body": "Connect MySQL, PostgreSQL, BigQuery, MongoDB and more, clean the data once, and save the steps as a pipeline. Run it again when the data changes, or put it on a schedule. Sensitive sources can sit behind approvals.",
         "cta": "Get a quote",
         "action": "quote"
       }
@@ -101,7 +101,7 @@
       {
         "icon": "refresh",
         "title": "Steps you can reuse",
-        "body": "Save a cleanup once and run it on every new file. Put it on a schedule if you'd rather not think about it."
+        "body": "Save a cleanup once and it becomes a pipeline: the same steps, ready to run on every new file or on a schedule, so nobody repeats the work."
       },
       {
         "icon": "database",
@@ -136,7 +136,7 @@
       {
         "icon": "link",
         "title": "Add your data",
-        "body": "Upload a CSV, paste a Google Sheet link, or connect a database."
+        "body": "Upload a CSV or a PDF table, paste a Google Sheet link, or connect a database."
       },
       {
         "icon": "zap",
@@ -146,7 +146,7 @@
       {
         "icon": "refresh",
         "title": "Download or repeat",
-        "body": "Grab the clean file, send it to a destination, or save the steps to run again later."
+        "body": "Grab the clean file, send it to a destination, or save the steps as a pipeline to run again on the next file."
       }
     ]
   },

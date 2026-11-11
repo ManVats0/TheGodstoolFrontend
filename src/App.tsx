@@ -817,7 +817,7 @@ if (!entered || onSite()) return (
             <li key={src} style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.74rem', color: 'rgba(167,139,250,0.85)', whiteSpace: 'nowrap' }}>{src}</li>
           ))}
         </ul>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note} <a href={content.privacy.href} style={{ color: '#6ee7b7', textDecoration: 'underline' }}>The AI never reads your rows.</a></p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note} <a href={content.privacy.href} style={{ color: '#6ee7b7', textDecoration: 'underline' }}>By default the AI never reads your rows.</a></p>
         <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="cta-btn" onClick={() => handleEnter('register')}>{content.hero.primary}</button>
           <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={scrollToQuote}>{content.hero.secondary}</button>
