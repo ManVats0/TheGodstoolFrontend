@@ -34,7 +34,7 @@ It is made for freelancers, analysts, small teams and companies who regularly re
 - [Fix numbers stored as text in a CSV](https://thegodstool.com/fix-numbers-stored-as-text-csv.html): N/A, dashes, brackets and decimal commas in amount columns, and whether a blank means zero
 - [CSV data cleaning checklist](https://thegodstool.com/csv-data-cleaning-checklist.html): ten checks in order, ending with a reconciliation against the original
 - [PDF table to Excel or CSV](https://thegodstool.com/pdf-table-to-excel-csv.html): why copying from a PDF breaks, how tables are read, what to clean afterwards, and what it cannot do
-- [About](https://thegodstool.com/about.html): who builds it (Aman Sharma, a data analyst in India), why, how it was tested, and what it is not
+- [About](https://thegodstool.com/about.html): who builds it (Aman Sharma, who has worked as a data analyst at a well-known Indian company), why, how it was tested, and what it is not
 - [Pricing](https://thegodstool.com/pricing): plans and credits
 - [Blog](https://thegodstool.com/blog): guides on cleaning data and keeping it safe
 - [Contact](https://thegodstool.com/contact)

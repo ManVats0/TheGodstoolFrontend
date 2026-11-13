@@ -783,6 +783,7 @@ if (!entered || onSite()) return (
         <span className="nav-link" onClick={scrollToQuote}>Get a quote</span>
         <a href="/contact" className="nav-link" style={{ textDecoration: 'none' }}>Contact</a>
 <a href="/blog" className="nav-link" style={{ textDecoration: 'none' }}>Blog</a>
+<a href="/about.html" className="nav-link" style={{ textDecoration: 'none' }}>About</a>
         <button onClick={() => handleEnter('login')} style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', padding: '8px 20px', borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.2)' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
