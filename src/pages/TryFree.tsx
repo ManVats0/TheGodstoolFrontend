@@ -62,6 +62,7 @@ export default function TryFree() {
   const [res, setRes] = useState<Ok | null>(null)
   const [name, setName] = useState('')
   const [drag, setDrag] = useState(false)
+  const [segment, setSegment] = useState('')
 
   const run = async (f: File) => {
     if (!/\.(pdf|csv|tsv|txt)$/i.test(f.name) && f.type !== 'application/pdf') { setError('The free try reads PDF and CSV files.'); return }
@@ -79,13 +80,19 @@ export default function TryFree() {
   }
 
   const cleaned = res ? cleanAll(res.rows) : null
-  const signUp = () => { track('try_signup_click', { problems: res?.problems.total ?? 0 }); window.location.assign(signInUrl({ register: true, after: '/pdf' })) }
+  const pickSegment = (s: string) => { setSegment(s); track('try_segment', { segment: s }) }
+  const signUp = () => { track('try_signup_click', { problems: res?.problems.total ?? 0, segment: segment || 'unanswered' }); window.location.assign(signInUrl({ register: true, after: '/pdf' })) }
 
   return (
     <div style={{ minHeight: '100vh', background: '#07050f', color: 'white', fontFamily: 'Inter, sans-serif', padding: '28px 20px 70px' }}>
       <div style={{ maxWidth: 980, margin: '0 auto' }}>
         <a href="/" style={{ color: '#c4b5fd', textDecoration: 'none', fontWeight: 700 }}>The God&rsquo;s Tool</a>
-        <h1 style={{ fontSize: 'clamp(1.6rem,4vw,2.3rem)', fontWeight: 800, margin: '18px 0 8px' }}>Try it free on one file</h1>
+        <div style={{ marginTop: 18 }}>
+          <span style={{ display: 'inline-block', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.4)', color: '#6ee7b7', borderRadius: 999, padding: '4px 14px', fontSize: '0.8rem', fontWeight: 700 }}>
+            No sign-up. No login. No card.
+          </span>
+        </div>
+        <h1 style={{ fontSize: 'clamp(1.6rem,4vw,2.3rem)', fontWeight: 800, margin: '12px 0 8px' }}>Try it free on one file</h1>
         <p style={{ color: muted, lineHeight: 1.6, maxWidth: 680, margin: '0 0 20px' }}>
           Drop a PDF with a table in it, or a CSV. You do not need an account. We show you what we found wrong and the first 20 rows cleaned.
         </p>
@@ -137,6 +144,17 @@ export default function TryFree() {
             <div style={{ color: muted, fontSize: '0.82rem', marginTop: 8, lineHeight: 1.5 }}>
               {cleaned.notes.length ? `On these rows: ${cleaned.notes.join(' ')}` : 'Nothing on these rows needed changing.'}
               {' '}Dates were read day first. The clean is only applied to the rows shown here.
+            </div>
+
+            <div style={{ ...card, marginTop: 18 }}>
+              <div style={{ fontWeight: 700, fontSize: '0.92rem' }}>What is this file for? <span style={{ color: muted, fontWeight: 400 }}>(optional, helps us make the tool better for you)</span></div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+                {['Finance or accounting', 'Sales or marketing', 'Operations', 'Research or study', 'Something else'].map(s => (
+                  <button key={s} onClick={() => pickSegment(s)} aria-pressed={segment === s}
+                    style={{ background: segment === s ? 'rgba(124,58,237,0.35)' : 'rgba(255,255,255,0.06)', border: `1px solid ${segment === s ? '#a78bfa' : 'rgba(255,255,255,0.18)'}`, color: 'white', borderRadius: 999, padding: '6px 14px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 600 }}>{s}</button>
+                ))}
+              </div>
+              <div style={{ color: muted, fontSize: '0.78rem', marginTop: 8 }}>Your answer is counted anonymously. We do not ask who you are, and the file is not stored.</div>
             </div>
 
             <div style={{ ...card, marginTop: 18, borderColor: 'rgba(167,139,250,0.45)', background: 'rgba(124,58,237,0.1)' }}>
