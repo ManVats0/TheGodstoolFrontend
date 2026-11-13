@@ -1140,6 +1140,7 @@ if (!entered || onSite()) return (
       <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
         <a href="/csv-data-cleaning-checklist.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>CSV cleaning checklist</a>
         <a href="/pdf-table-to-excel-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>PDF table to Excel</a>
+        <a href="/about.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>About</a>
         <a href="/fix-mixed-date-formats-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Fix mixed dates</a>
         <a href="/remove-duplicate-customers-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Remove duplicate customers</a>
         <a href="/fix-numbers-stored-as-text-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Numbers stored as text</a>
