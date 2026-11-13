@@ -81,7 +81,7 @@ export default function About() {
         <section style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 32, display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="/privacy" style={{ color: '#7c6fff', fontSize: '0.9rem', textDecoration: 'none' }}>Privacy Policy</a>
           <a href="/terms" style={{ color: '#7c6fff', fontSize: '0.9rem', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="mailto:vatsaman888@gmail.com" style={{ color: '#7c6fff', fontSize: '0.9rem', textDecoration: 'none' }}>Contact</a>
+          <a href="mailto:contact@thegodstool.com" style={{ color: '#7c6fff', fontSize: '0.9rem', textDecoration: 'none' }}>Contact</a>
         </section>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.15)', fontSize: '0.78rem', marginTop: 32, fontFamily: 'monospace' }}>

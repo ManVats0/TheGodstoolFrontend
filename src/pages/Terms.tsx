@@ -14,7 +14,7 @@ export default function Terms() {
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>4. Termination</h2>
         <p>We may suspend accounts that violate these terms. You may cancel anytime.</p>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>5. Contact</h2>
-        <p>Email us at <a href="mailto:vatsaman888@gmail.com" style={{ color: '#a78bfa' }}>vatsaman888@gmail.com</a></p>
+        <p>Email us at <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>contact@thegodstool.com</a></p>
         <a href="/" style={{ display: 'inline-block', marginTop: '40px', color: '#a78bfa' }}>← Back to The God's Tool</a>
       </div>
     </div>
