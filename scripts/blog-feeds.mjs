@@ -2,7 +2,7 @@
 // so search engines and feed readers learn about new posts without anyone editing those files by hand.
 import fs from 'fs'
 
-const SITE = 'https://thegodstool.com'
+const SITE = 'https://www.thegodstool.com'
 
 // Read the post list straight from src/blog/posts.ts (no extra tools needed): it is a plain JavaScript array.
 const src = fs.readFileSync('src/blog/posts.ts', 'utf8')

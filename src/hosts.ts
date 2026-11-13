@@ -3,7 +3,7 @@
 export const APP_HOST = 'app.thegodstool.com'
 export const SITE_HOSTS = ['thegodstool.com', 'www.thegodstool.com']
 export const APP_ORIGIN = `https://${APP_HOST}`
-export const SITE_ORIGIN = 'https://thegodstool.com'
+export const SITE_ORIGIN = 'https://www.thegodstool.com'
 
 export const onSite = () => SITE_HOSTS.includes(window.location.hostname)
 export const onApp = () => window.location.hostname === APP_HOST
