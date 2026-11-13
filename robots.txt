@@ -37,4 +37,4 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-Sitemap: https://thegodstool.com/sitemap.xml
+Sitemap: https://www.thegodstool.com/sitemap.xml

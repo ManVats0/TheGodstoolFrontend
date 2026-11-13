@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { API_BASE } from '../config'
 import './blog.css'
 
-export const SITE = 'https://thegodstool.com'
+export const SITE = 'https://www.thegodstool.com'
 
 function setMeta(attr: 'name' | 'property', key: string, content: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`)

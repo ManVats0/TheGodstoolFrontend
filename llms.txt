@@ -21,21 +21,21 @@ It is made for freelancers, analysts, small teams and companies who regularly re
 - Free plan: up to 3 sources, CSV files up to 5 MB, 5,000 rows per run, 1 pipeline. New accounts get a 14-day trial with every feature included, no card needed.
 - Paid plans (USD per month): Lite $19, Starter $39, Pro $79, Team $199.
 - Credits: pay as you go with no subscription. One credit pays for one AI action, about $0.03 each, minimum top-up $2.
-- Quotes: bulk credits, team plans, database or API sources and invoicing are quoted by email. Request one at https://thegodstool.com/#quote or write to contact@thegodstool.com. Quotes cover access to the tool, not a done-for-you cleaning service.
+- Quotes: bulk credits, team plans, database or API sources and invoicing are quoted by email. Request one at https://www.thegodstool.com/#quote or write to contact@thegodstool.com. Quotes cover access to the tool, not a done-for-you cleaning service.
 - Sources: CSV, Google Sheets, MySQL, PostgreSQL, BigQuery, MongoDB, AWS (RDS, S3, DynamoDB, Redshift), Google Cloud Storage, Cloud SQL, Databricks, REST APIs, Google Analytics 4.
-- Security: data is encrypted in transit and is not sold. AI features run in private mode: Claude (Anthropic) receives the instruction, column names and a structural summary, never actual rows. See https://thegodstool.com/privacy.html
+- Security: data is encrypted in transit and is not sold. AI features run in private mode: Claude (Anthropic) receives the instruction, column names and a structural summary, never actual rows. See https://www.thegodstool.com/privacy.html
 
 ## Pages
-- [Home](https://thegodstool.com/): what it does, who it is for, pricing, quote form and FAQ
-- [FAQ](https://thegodstool.com/faq.html): common questions
-- [Bank statement PDF to Excel](https://thegodstool.com/bank-statement-pdf-to-excel.html): how the row-by-row balance check works, what it cannot do
-- [Fix mixed and ambiguous dates in a CSV](https://thegodstool.com/fix-mixed-date-formats-csv.html): how to find a CSV's day and month order, convert to YYYY-MM-DD, and what to do when the file can't tell you
-- [Remove duplicate customers in a CSV](https://thegodstool.com/remove-duplicate-customers-csv.html): merging customers spelled differently, with a review step and a check for record versus transaction rows
-- [Fix numbers stored as text in a CSV](https://thegodstool.com/fix-numbers-stored-as-text-csv.html): N/A, dashes, brackets and decimal commas in amount columns, and whether a blank means zero
-- [CSV data cleaning checklist](https://thegodstool.com/csv-data-cleaning-checklist.html): ten checks in order, ending with a reconciliation against the original
-- [PDF table to Excel or CSV](https://thegodstool.com/pdf-table-to-excel-csv.html): why copying from a PDF breaks, how tables are read, what to clean afterwards, and what it cannot do
-- [About](https://thegodstool.com/about.html): who builds it (Aman Sharma, who has worked as a data analyst at a well-known Indian company), why, how it was tested, and what it is not
-- [Pricing](https://thegodstool.com/pricing): plans and credits
-- [Blog](https://thegodstool.com/blog): guides on cleaning data and keeping it safe
-- [Contact](https://thegodstool.com/contact)
-- [Privacy](https://thegodstool.com/privacy.html), [Terms](https://thegodstool.com/terms.html), [Refunds](https://thegodstool.com/refund.html)
+- [Home](https://www.thegodstool.com/): what it does, who it is for, pricing, quote form and FAQ
+- [FAQ](https://www.thegodstool.com/faq.html): common questions
+- [Bank statement PDF to Excel](https://www.thegodstool.com/bank-statement-pdf-to-excel.html): how the row-by-row balance check works, what it cannot do
+- [Fix mixed and ambiguous dates in a CSV](https://www.thegodstool.com/fix-mixed-date-formats-csv.html): how to find a CSV's day and month order, convert to YYYY-MM-DD, and what to do when the file can't tell you
+- [Remove duplicate customers in a CSV](https://www.thegodstool.com/remove-duplicate-customers-csv.html): merging customers spelled differently, with a review step and a check for record versus transaction rows
+- [Fix numbers stored as text in a CSV](https://www.thegodstool.com/fix-numbers-stored-as-text-csv.html): N/A, dashes, brackets and decimal commas in amount columns, and whether a blank means zero
+- [CSV data cleaning checklist](https://www.thegodstool.com/csv-data-cleaning-checklist.html): ten checks in order, ending with a reconciliation against the original
+- [PDF table to Excel or CSV](https://www.thegodstool.com/pdf-table-to-excel-csv.html): why copying from a PDF breaks, how tables are read, what to clean afterwards, and what it cannot do
+- [About](https://www.thegodstool.com/about.html): who builds it (Aman Sharma, who has worked as a data analyst at a well-known Indian company), why, how it was tested, and what it is not
+- [Pricing](https://www.thegodstool.com/pricing): plans and credits
+- [Blog](https://www.thegodstool.com/blog): guides on cleaning data and keeping it safe
+- [Contact](https://www.thegodstool.com/contact)
+- [Privacy](https://www.thegodstool.com/privacy.html), [Terms](https://www.thegodstool.com/terms.html), [Refunds](https://www.thegodstool.com/refund.html)
