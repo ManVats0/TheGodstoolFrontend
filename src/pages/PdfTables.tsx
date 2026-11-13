@@ -16,25 +16,25 @@ const grad = 'linear-gradient(135deg,#7c3aed,#a78bfa)'
 const GREEN = '#34d399'
 const btn: CSSProperties = { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.16)', color: 'white', borderRadius: 10, padding: '8px 14px', fontWeight: 600, cursor: 'pointer', fontSize: '0.86rem' }
 
-type Grid = string[][]
+export type Grid = string[][]
 type Result = { grid: Grid; note: string }
 
 // ── cleanups: each takes the table (first row = header) and says what it did ────────────────────────────────────
 const isEmptyRow = (r: string[]) => r.every(c => c.trim() === '')
 
-const trim = (g: Grid): Result => {
+export const trim = (g: Grid): Result => {
   let n = 0
   const out = g.map(r => r.map(c => { const t = c.replace(/\s+/g, ' ').trim(); if (t !== c) n++; return t }))
   return { grid: out, note: n ? `Trimmed extra spaces in ${n} cells.` : 'No extra spaces found.' }
 }
-const dropEmpty = (g: Grid): Result => {
+export const dropEmpty = (g: Grid): Result => {
   const rows = g.filter((r, i) => i === 0 || !isEmptyRow(r))
   const keep = (g[0] || []).map((_, j) => rows.some((r, i) => i === 0 ? true : (r[j] ?? '').trim() !== ''))
   const out = rows.map(r => r.filter((_, j) => keep[j]))
   const dr = g.length - rows.length, dc = keep.filter(k => !k).length
   return { grid: out, note: dr || dc ? `Removed ${dr} empty row(s) and ${dc} empty column(s).` : 'No empty rows or columns found.' }
 }
-const dedupe = (g: Grid): Result => {
+export const dedupe = (g: Grid): Result => {
   const seen = new Set<string>(); const out: Grid = []
   g.forEach((r, i) => { const k = JSON.stringify(r.map(c => c.trim().toLowerCase())); if (i === 0 || !seen.has(k)) { seen.add(k); out.push(r) } })
   const n = g.length - out.length
@@ -55,7 +55,7 @@ const toNumber = (s: string): string | null => {
   else return null
   return (neg ? '-' : '') + t
 }
-const numbers = (g: Grid): Result => {
+export const numbers = (g: Grid): Result => {
   let n = 0
   const out = g.map((r, i) => i === 0 ? r : r.map(c => { const v = toNumber(c); if (v != null && v !== c) { n++; return v } return c }))
   return { grid: out, note: n ? `Turned ${n} cells into plain numbers (removed thousands commas and currency signs; (5) became -5). Phone numbers and codes are left alone.` : 'No text numbers needed changing.' }
@@ -77,12 +77,12 @@ const toDate = (s: string, dayFirst: boolean): { v: string | null; ambiguous: bo
   if (m) { const mi = MONTHS.indexOf(m[2].slice(0, 3).toLowerCase()); if (mi >= 0) return { v: iso(+m[3], mi + 1, +m[1]), ambiguous: false } }
   return { v: null, ambiguous: false }
 }
-const dates = (g: Grid, dayFirst: boolean): Result & { ambiguous: number } => {
+export const dates = (g: Grid, dayFirst: boolean): Result & { ambiguous: number } => {
   let n = 0, amb = 0
   const out = g.map((r, i) => i === 0 ? r : r.map(c => { const d = toDate(c, dayFirst); if (d.v && d.v !== c) { n++; if (d.ambiguous) amb++; return d.v } return c }))
   return { grid: out, ambiguous: amb, note: n ? `Rewrote ${n} dates as YYYY-MM-DD${amb ? ` (${amb} could be read either way and were read as ${dayFirst ? 'day first' : 'month first'})` : ''}.` : 'No dates needed changing.' }
 }
-const joinWrapped = (g: Grid): Result => {
+export const joinWrapped = (g: Grid): Result => {
   // a row whose first column is empty but has text elsewhere is usually the wrapped second line of the row above
   const out: Grid = []; let n = 0
   g.forEach((r, i) => {

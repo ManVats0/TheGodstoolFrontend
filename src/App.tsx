@@ -22,6 +22,7 @@ import { useStore } from './store'
 import { lazy, Suspense } from 'react'
 import Contact from './pages/Contact'
 import Blog from './pages/Blog'
+import TryFree from './pages/TryFree'
 import BlogPost from './pages/BlogPost'
 import Feedback from './pages/Feedback'
 import { API_BASE } from './config'
@@ -289,6 +290,7 @@ useEffect(() => {
     '/pricing': "Pricing | The God's Tool",
     '/contact': "Contact | The God's Tool",
     '/blog': "Blog | The God's Tool",
+    '/try': "Try it free on one file | The God's Tool",
     '/terms': "Terms of Service | The God's Tool",
     '/feedback': "Feedback | The God's Tool",
   }
@@ -619,6 +621,7 @@ if (location.pathname === '/terms') return <Routes><Route path="/terms" element=
 // if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
 if (location.pathname === '/blog' || location.pathname.startsWith('/blog/')) return <Routes><Route path="/blog" element={<Blog />} /><Route path="/blog/:slug" element={<BlogPost />} /></Routes>
+if (location.pathname === '/try') return <Routes><Route path="/try" element={<TryFree />} /></Routes>
 if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
 if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
 
@@ -823,6 +826,7 @@ if (!entered || onSite()) return (
           <button className="cta-btn" onClick={() => handleEnter('register')}>{content.hero.primary}</button>
           <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={scrollToQuote}>{content.hero.secondary}</button>
         </div>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', marginTop: '14px' }}><a href="/try" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>Or try it on one file now, no sign-up</a></p>
       </div>
 
       {/* ── SIDE SIGNUP FORM ── */}
