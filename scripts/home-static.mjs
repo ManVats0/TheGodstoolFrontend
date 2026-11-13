@@ -68,7 +68,7 @@ const li = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`
 const card = (it) => `<li><h3>${esc(it.title)}</h3><p>${esc(it.body)}</p></li>`
 const body = `
 <main id="seo-static">
-<nav aria-label="Main"><a href="/">${esc(c.site.name)}</a> · <a href="#features">Features</a> · <a href="#pricing">Pricing</a> · <a href="#quote">Get a quote</a> · <a href="/blog">Blog</a> · <a href="/about.html">About</a> · <a href="/faq.html">FAQ</a> · <a href="/contact">Contact</a></nav>
+<nav aria-label="Main"><a href="/">${esc(c.site.name)}</a> · <a href="#features">Features</a> · <a href="#pricing">Pricing</a> · <a href="#quote">Get a quote</a> · <a href="/try">Try it free</a> · <a href="/blog">Blog</a> · <a href="/about.html">About</a> · <a href="/faq.html">FAQ</a> · <a href="/contact">Contact</a></nav>
 <p>${esc(c.hero.eyebrow)}</p>
 <h1>${esc(c.hero.h1)}</h1>
 <p>${esc(c.hero.sub)}</p>
