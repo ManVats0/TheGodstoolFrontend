@@ -784,7 +784,8 @@ if (!entered || onSite()) return (
         <span className="nav-link" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>How It Works</span>
         <span className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</span>
         <span className="nav-link" onClick={scrollToQuote}>Get a quote</span>
-        <a href="/contact" className="nav-link" style={{ textDecoration: 'none' }}>Contact</a>
+        <a href="/try" className="nav-link" style={{ textDecoration: 'none', color: '#c4b5fd', fontWeight: 700 }}>Try free</a>
+<a href="/contact" className="nav-link" style={{ textDecoration: 'none' }}>Contact</a>
 <a href="/blog" className="nav-link" style={{ textDecoration: 'none' }}>Blog</a>
 <a href="/about.html" className="nav-link" style={{ textDecoration: 'none' }}>About</a>
         <button onClick={() => handleEnter('login')} style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', padding: '8px 20px', borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}
