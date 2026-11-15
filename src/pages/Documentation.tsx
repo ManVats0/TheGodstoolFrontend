@@ -77,7 +77,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Where to go next',
-        body: 'Data Sources explains every connector. Data Catalog is where you label what your columns mean. Flow is the cleaning and pipeline builder. Analysis profiles a source and lists what is wrong. Billing and Credits explains paying for AI actions, and Teams and Roles covers working with other people.',
+        body: 'Data Sources explains every connector. Data Catalog is where you label what your columns mean. Flow is the cleaning and pipeline builder. Analyse / Clean profiles a source and lists the problems it finds, then lets you fix them. Billing and Credits explains paying for AI actions, and Teams and Roles covers working with other people.',
       },
     ],
   },
@@ -170,8 +170,8 @@ const DOCS: Record<string, {
       },
       {
         heading: 'CSV upload',
-        body: 'Drag any .csv file onto the drop zone on the Add New tab, or click to open the file browser. The file is parsed in the browser and held in memory. Once confirmed, the app navigates to Analysis and begins profiling automatically.',
-        tip: 'Files never leave your machine. They are processed by your local backend server only.',
+        body: 'Drag any .csv file onto the drop zone on the Add New tab, or click to open the file browser. The file is parsed in the browser and held in memory. Once confirmed, the app navigates to Analyse / Clean and begins profiling automatically.',
+        tip: 'Use the Analyse / Clean button on a source to see what is wrong and fix it. A source you just added from a PDF is highlighted so you can find it.',
         code: '// Accepted format\ncontent-type: text/csv\nencoding: UTF-8\nmax recommended size: 500 MB',
         codeLanguage: 'bash',
       },
@@ -594,13 +594,13 @@ const DOCS: Record<string, {
     ],
   },
   '/analysis': {
-    title: 'Analysis',
+    title: 'Analyse / Clean',
     icon: 'chart',
     color: '#8b5cf6',
     sections: [
       {
         heading: 'Overview',
-        body: 'Analysis is the data profiling engine. It detects missing values, duplicates, outliers, schema drift, time series patterns, and class imbalances. The profiling runs automatically whenever you switch the active source.',
+        body: 'Analyse / Clean is where you find out what is wrong with a source and fix it. It is also the data profiling engine. It detects missing values, duplicates, outliers, schema drift, time series patterns, and class imbalances. The profiling runs automatically whenever you switch the active source. Use Re-analyse to run it again after changes.',
       },
       {
         heading: 'Quality score',
@@ -608,7 +608,7 @@ const DOCS: Record<string, {
       },
       {
         heading: 'Tabs',
-        body: 'Preview: first 100 sample rows. Columns: per-column null count, unique count, dtype, and a sample value. Statistics: pandas describe() output for all numeric columns. Problems: filterable list of every missing value, duplicate row, and outlier with row number and primary key. Time Series: appears only when a date column is detected. AI Clean: chat interface to generate Python/SQL cleaning code.',
+        body: 'Problems opens first: a filterable list of every problem found, and a banner tells you how many. Preview: first 100 sample rows. Columns: per-column null count, unique count, dtype, and a sample value. Statistics: pandas describe() output for all numeric columns. Time Series: appears only when a date column is detected. AI Clean: chat interface to generate Python/SQL cleaning code.',
       },
       {
         heading: 'Problems tab',

@@ -26,6 +26,7 @@ export default function Privacy() {
 <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>6. Data Retention and Deletion</h2>
         <p>We retain your account data (name, email, subscription status) for as long as your account is active.</p>
         <p style={{ marginTop: '12px' }}>Google user data (Sheets content accessed during a session) is not stored beyond the active session and is automatically discarded once your operation is complete.</p>
+        <p style={{ marginTop: '12px' }}>Free try (no sign-up): if you use the free try page, your file is read in memory to show the problems and the first 20 rows cleaned, and is not saved. To enforce the hourly limit we keep a short-lived count of tries against your IP address in memory. We record that a try happened, the file type and the result type in our analytics, never the file's contents. The free try does not use AI.</p>
         <p style={{ marginTop: '12px' }}>To request deletion of your account and all associated data, email us at <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>contact@thegodstool.com</a>. We will process deletion requests within 30 days.</p>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>7. Security Measures</h2>
         <p>Account passwords are hashed with bcrypt and never stored in plain text. Database and connector credentials you provide (MySQL, MongoDB, cloud service accounts, etc.) are encrypted at rest before being saved, and decrypted only when a pipeline you configured needs to run.</p>
