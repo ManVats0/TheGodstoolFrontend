@@ -81,6 +81,15 @@ export default function TryFree() {
   }
 
   const cleaned = res ? cleanAll(res.rows) : null
+  const useSample = async () => {
+    track('try_sample_click')
+    setError('')
+    try {
+      const r = await fetch('/sample-orders.pdf')
+      if (!r.ok) throw new Error('missing')
+      run(new File([await r.blob()], 'sample-orders.pdf', { type: 'application/pdf' }))
+    } catch { setError('Could not load the sample file. Please try your own file, or reload the page.') }
+  }
   const pickSegment = (s: string) => { setSegment(s); track('try_segment', { segment: s }) }
   const signUp = () => { track('try_signup_click', { problems: res?.problems.total ?? 0, segment: segment || 'unanswered' }); window.location.assign(signInUrl({ register: true, after: '/pdf' })) }
 
@@ -110,6 +119,15 @@ export default function TryFree() {
             </div>
           )}
         </div>
+
+        {!res && !busy && (
+          <p style={{ color: muted, fontSize: '0.9rem', margin: '12px 0 0', textAlign: 'center' }}>
+            No file handy?{' '}
+            <button onClick={useSample} style={{ background: 'none', border: 'none', color: '#c4b5fd', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', font: 'inherit', padding: 0 }}>Try it on a sample PDF</button>
+            {' '}(made-up orders with a few problems in it), or{' '}
+            <a href="/sample-orders.pdf" download onClick={() => track('try_sample_download')} style={{ color: '#c4b5fd' }}>download the sample</a>.
+          </p>
+        )}
 
         {error && <div style={{ ...card, marginTop: 14, borderColor: 'rgba(248,113,113,0.45)', background: 'rgba(248,113,113,0.08)', color: '#fecaca', lineHeight: 1.5 }}>{error}</div>}
 
