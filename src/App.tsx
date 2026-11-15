@@ -23,6 +23,7 @@ import { lazy, Suspense } from 'react'
 import Contact from './pages/Contact'
 import Blog from './pages/Blog'
 import TryFree from './pages/TryFree'
+import tryContent from './home/try-content.json'
 import BlogPost from './pages/BlogPost'
 import Feedback from './pages/Feedback'
 import { API_BASE } from './config'
@@ -290,7 +291,8 @@ useEffect(() => {
     '/pricing': "Pricing | The God's Tool",
     '/contact': "Contact | The God's Tool",
     '/blog': "Blog | The God's Tool",
-    '/try': "Try it free on one file | The God's Tool",
+    '/try': tryContent.title,
+    '/try.html': tryContent.title,
     '/terms': "Terms of Service | The God's Tool",
     '/feedback': "Feedback | The God's Tool",
   }
@@ -621,7 +623,7 @@ if (location.pathname === '/terms') return <Routes><Route path="/terms" element=
 // if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
 if (location.pathname === '/blog' || location.pathname.startsWith('/blog/')) return <Routes><Route path="/blog" element={<Blog />} /><Route path="/blog/:slug" element={<BlogPost />} /></Routes>
-if (location.pathname === '/try') return <Routes><Route path="/try" element={<TryFree />} /></Routes>
+if (location.pathname === '/try' || location.pathname === '/try.html') return <Routes><Route path={location.pathname} element={<TryFree />} /></Routes>
 if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
 if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
 
@@ -784,7 +786,7 @@ if (!entered || onSite()) return (
         <span className="nav-link" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>How It Works</span>
         <span className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</span>
         <span className="nav-link" onClick={scrollToQuote}>Get a quote</span>
-        <a href="/try" className="nav-link" style={{ textDecoration: 'none', color: '#c4b5fd', fontWeight: 700 }}>Try free</a>
+        <a href="/try.html" className="nav-link" style={{ textDecoration: 'none', color: '#c4b5fd', fontWeight: 700 }}>Try free</a>
 <a href="/contact" className="nav-link" style={{ textDecoration: 'none' }}>Contact</a>
 <a href="/blog" className="nav-link" style={{ textDecoration: 'none' }}>Blog</a>
 <a href="/about.html" className="nav-link" style={{ textDecoration: 'none' }}>About</a>
@@ -827,7 +829,7 @@ if (!entered || onSite()) return (
           <button className="cta-btn" onClick={() => handleEnter('register')}>{content.hero.primary}</button>
           <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={scrollToQuote}>{content.hero.secondary}</button>
         </div>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', marginTop: '14px' }}><a href="/try" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>Or try it on one file now, no sign-up</a></p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', marginTop: '14px' }}><a href="/try.html" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>Or try it on one file now, no sign-up</a></p>
       </div>
 
       {/* ── SIDE SIGNUP FORM ── */}

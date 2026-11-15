@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { API_BASE } from '../config'
 import { signInUrl } from '../hosts'
+import tryContent from '../home/try-content.json'
 import { trim, dropEmpty, dedupe, numbers, dates } from './PdfTables'
 import type { Grid } from './PdfTables'
 
@@ -89,13 +90,11 @@ export default function TryFree() {
         <a href="/" style={{ color: '#c4b5fd', textDecoration: 'none', fontWeight: 700 }}>The God&rsquo;s Tool</a>
         <div style={{ marginTop: 18 }}>
           <span style={{ display: 'inline-block', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.4)', color: '#6ee7b7', borderRadius: 999, padding: '4px 14px', fontSize: '0.8rem', fontWeight: 700 }}>
-            No sign-up. No login. No card.
+            {tryContent.badge}
           </span>
         </div>
-        <h1 style={{ fontSize: 'clamp(1.6rem,4vw,2.3rem)', fontWeight: 800, margin: '12px 0 8px' }}>Try it free on one file</h1>
-        <p style={{ color: muted, lineHeight: 1.6, maxWidth: 680, margin: '0 0 20px' }}>
-          Drop a PDF with a table in it, or a CSV. You do not need an account. We show you what we found wrong and the first 20 rows cleaned.
-        </p>
+        <h1 style={{ fontSize: 'clamp(1.6rem,4vw,2.3rem)', fontWeight: 800, margin: '12px 0 8px' }}>{tryContent.h1}</h1>
+        <p style={{ color: muted, lineHeight: 1.6, maxWidth: 720, margin: '0 0 20px' }}>{tryContent.answer}</p>
 
         <div
           onDragOver={e => { e.preventDefault(); setDrag(true) }} onDragLeave={() => setDrag(false)}
@@ -171,13 +170,38 @@ export default function TryFree() {
           </>
         )}
 
-        <div style={{ ...card, marginTop: 22 }}>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>What the free try cannot do</div>
-          <div style={{ color: muted, fontSize: '0.86rem', lineHeight: 1.65 }}>
-            It shows only the first 20 rows and the first table of a PDF, and it cannot read scanned pages or photos. Table reading is a best effort, so check it against your file.
-            The counts above are simple checks, not a full analysis. The file is read on our server and is not stored. The clean on this page runs in your browser.
-          </div>
-        </div>
+        <section style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 12px' }}>{tryContent.how.h2}</h2>
+          <ol style={{ margin: 0, paddingLeft: 20, color: muted, lineHeight: 1.65, fontSize: '0.92rem' }}>
+            {tryContent.how.items.map(i => (
+              <li key={i.title} style={{ marginBottom: 8 }}><strong style={{ color: 'white' }}>{i.title}.</strong> {i.body}</li>
+            ))}
+          </ol>
+        </section>
+
+        <section style={{ ...card, marginTop: 24 }}>
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 800, margin: '0 0 6px' }}>{tryContent.limits.h2}</h2>
+          <p style={{ color: muted, fontSize: '0.88rem', lineHeight: 1.65, margin: 0 }}>{tryContent.limits.body}</p>
+        </section>
+
+        <section style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 12px' }}>{tryContent.faq.h2}</h2>
+          {tryContent.faq.items.map(f => (
+            <details key={f.q} style={{ ...card, padding: '12px 16px', marginBottom: 8 }}>
+              <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: '0.93rem' }}>{f.q}</summary>
+              <p style={{ color: muted, fontSize: '0.88rem', lineHeight: 1.65, margin: '8px 0 0' }}>{f.a}</p>
+            </details>
+          ))}
+        </section>
+
+        <section style={{ marginTop: 24 }}>
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 800, margin: '0 0 8px' }}>Keep reading</h2>
+          <ul style={{ margin: 0, paddingLeft: 20, color: muted, lineHeight: 1.8, fontSize: '0.9rem' }}>
+            {tryContent.related.map(r => (
+              <li key={r.href}><a href={r.href} style={{ color: '#c4b5fd' }}>{r.title}</a>: {r.desc}</li>
+            ))}
+          </ul>
+        </section>
       </div>
     </div>
   )
