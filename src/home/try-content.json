@@ -9,10 +9,22 @@
   "how": {
     "h2": "How the free try works",
     "items": [
-      { "title": "Drop one file", "body": "Choose a PDF with a table in it, or a CSV, up to 5 MB. For a PDF the first 10 pages are read." },
-      { "title": "See what we found", "body": "You get the size of the table and a count of problems: blank cells, duplicate rows, empty rows, extra spaces, numbers stored as text and dates in mixed formats." },
-      { "title": "Compare the first 20 rows", "body": "The first 20 rows are shown before and after a one-click clean: spaces trimmed, empty and duplicate rows removed, numbers made plain, dates written as YYYY-MM-DD." },
-      { "title": "Clean the whole file if you want", "body": "The free try stops at 20 rows. To clean every row and download it, create an account. The 14-day trial has every feature and needs no card." }
+      {
+        "title": "Drop one file",
+        "body": "Choose a PDF with a table in it, or a CSV, up to 5 MB. For a PDF the first 10 pages are read."
+      },
+      {
+        "title": "See what we found",
+        "body": "You get the size of the table and a count of problems: blank cells, duplicate rows, empty rows, extra spaces, numbers stored as text and dates in mixed formats."
+      },
+      {
+        "title": "Compare the first 20 rows",
+        "body": "The first 20 rows are shown before and after a one-click clean: spaces trimmed, empty and duplicate rows removed, numbers made plain, dates written as YYYY-MM-DD."
+      },
+      {
+        "title": "Clean the whole file if you want",
+        "body": "The free try stops at 20 rows. To clean every row and download it, create an account. The 14-day trial has every feature and needs no card."
+      }
     ]
   },
   "limits": {
@@ -22,19 +34,95 @@
   "faq": {
     "h2": "Questions people ask",
     "items": [
-      { "q": "Can I convert a PDF table to CSV for free without signing up?", "a": "You can try it without signing up. Drop a text-based PDF up to 5 MB and you will see the table, what is wrong with it, and the first 20 rows cleaned. To clean every row and download the result you create an account, and the 14-day trial includes PDF to data with no card." },
-      { "q": "Is my file stored or sent to an AI?", "a": "No. The file is read on our server from its own text without AI and is not stored. The cleaning you see in the preview runs in your browser." },
-      { "q": "Why does it say my PDF has no table?", "a": "A PDF made from a scan or a photo has no text to read, and a PDF of ordinary paragraphs has no rows and columns. Use the original PDF from the program that made it, with the data laid out in a table." },
-      { "q": "How many files can I try?", "a": "Up to 5 tries an hour, with files up to 5 MB. For a PDF the first 10 pages are read, and the first table in them is shown." },
-      { "q": "What problems does it look for?", "a": "Blank cells, duplicate rows, empty rows, extra spaces, numbers stored as text such as 1,234.50 or (500.00), and dates written in more than one format in the same column." },
-      { "q": "Does it work on bank statements?", "a": "It reads them as an ordinary table. The full app has a separate bank statement reader that checks every row against the statement's own balances, and that is not part of the free try." },
-      { "q": "How is this different from copying a table out of a PDF?", "a": "Copying often collapses the columns, splits wrapped lines into extra rows and brings numbers across as text. This reads the table as rows and columns first, then shows what to fix. See the guide on PDF table to Excel or CSV for the details." }
+      {
+        "q": "Can I convert a PDF table to CSV for free without signing up?",
+        "a": "You can try it without signing up. Drop a text-based PDF up to 5 MB and you will see the table, what is wrong with it, and the first 20 rows cleaned. To clean every row and download the result you create an account, and the 14-day trial includes PDF to data with no card."
+      },
+      {
+        "q": "Is my file stored or sent to an AI?",
+        "a": "No. The file is read on our server from its own text without AI and is not stored. The cleaning you see in the preview runs in your browser."
+      },
+      {
+        "q": "Why does it say my PDF has no table?",
+        "a": "A PDF made from a scan or a photo has no text to read, and a PDF of ordinary paragraphs has no rows and columns. Use the original PDF from the program that made it, with the data laid out in a table."
+      },
+      {
+        "q": "How many files can I try?",
+        "a": "Up to 5 tries an hour, with files up to 5 MB. For a PDF the first 10 pages are read, and the first table in them is shown."
+      },
+      {
+        "q": "What problems does it look for?",
+        "a": "Blank cells, duplicate rows, empty rows, extra spaces, numbers stored as text such as 1,234.50 or (500.00), and dates written in more than one format in the same column."
+      },
+      {
+        "q": "Does it work on bank statements?",
+        "a": "It reads them as an ordinary table. The full app has a separate bank statement reader that checks every row against the statement's own balances, and that is not part of the free try."
+      },
+      {
+        "q": "How is this different from copying a table out of a PDF?",
+        "a": "Copying often collapses the columns, splits wrapped lines into extra rows and brings numbers across as text. This reads the table as rows and columns first, then shows what to fix. See the guide on PDF table to Excel or CSV for the details."
+      }
     ]
   },
   "related": [
-    { "href": "/pdf-table-to-excel-csv.html", "title": "PDF table to Excel or CSV", "desc": "why copying from a PDF breaks and how tables are read" },
-    { "href": "/csv-data-cleaning-checklist.html", "title": "CSV data cleaning checklist", "desc": "ten checks, in order" },
-    { "href": "/fix-numbers-stored-as-text-csv.html", "title": "Numbers stored as text", "desc": "brackets, dashes and decimal commas" },
-    { "href": "/fix-mixed-date-formats-csv.html", "title": "Mixed date formats", "desc": "is 03/04 March or April?" }
-  ]
+    {
+      "href": "/pdf-table-to-excel-csv.html",
+      "title": "PDF table to Excel or CSV",
+      "desc": "why copying from a PDF breaks and how tables are read"
+    },
+    {
+      "href": "/csv-data-cleaning-checklist.html",
+      "title": "CSV data cleaning checklist",
+      "desc": "ten checks, in order"
+    },
+    {
+      "href": "/fix-numbers-stored-as-text-csv.html",
+      "title": "Numbers stored as text",
+      "desc": "brackets, dashes and decimal commas"
+    },
+    {
+      "href": "/fix-mixed-date-formats-csv.html",
+      "title": "Mixed date formats",
+      "desc": "is 03/04 March or April?"
+    }
+  ],
+  "account": {
+    "h2": "What you can do with an account",
+    "intro": "The free try shows you the problems. An account lets you fix them across the whole file, and keep the fix.",
+    "tiers": [
+      {
+        "name": "Free plan",
+        "tag": "Stays free",
+        "items": [
+          "CSV files and Google Sheets, up to 3 sources, CSV files up to 5 MB, 5,000 rows cleaned per run",
+          "See every problem found in a file and fix them with one-click steps",
+          "Download the cleaned file, or write it back to a Google Sheet",
+          "1 saved pipeline that you run by hand (no schedule, no database sources)"
+        ]
+      },
+      {
+        "name": "14-day trial",
+        "tag": "No card needed",
+        "items": [
+          "Every feature unlocked, including PDF to data and the bank statement check",
+          "Connect Google Sheets and databases such as MySQL, PostgreSQL and BigQuery",
+          "Save your steps as a pipeline, edit them as SQL, and run them again or on a schedule while the app is open",
+          "When the trial ends you drop to the free plan and nothing is deleted"
+        ]
+      },
+      {
+        "name": "Paid plans",
+        "tag": "From $19 a month",
+        "items": [
+          "Lite $19, Starter $39, Pro $79 and Team $199 a month",
+          "Every data source and the full pipeline builder on every paid plan",
+          "More AI actions a day on higher plans (35 on Starter, 110 on Pro, 150 on Team)",
+          "Or skip the subscription and buy credits: about $0.03 for one AI action, from a $2 top-up"
+        ]
+      }
+    ],
+    "note": "AI actions use Claude and, by default, never send your rows, only the instruction and a summary of each column. Paid plans have a 14-day money-back guarantee.",
+    "cta": "Start the 14-day trial",
+    "ctaNote": "No card needed. The free plan stays after the trial."
+  }
 }

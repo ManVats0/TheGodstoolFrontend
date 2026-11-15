@@ -197,6 +197,25 @@ export default function TryFree() {
           </ol>
         </section>
 
+        <section style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 6px' }}>{tryContent.account.h2}</h2>
+          <p style={{ color: muted, lineHeight: 1.6, margin: '0 0 14px', maxWidth: 720 }}>{tryContent.account.intro}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(250px,1fr))', gap: 12 }}>
+            {tryContent.account.tiers.map(t => (
+              <div key={t.name} style={card}>
+                <div style={{ fontWeight: 800 }}>{t.name}</div>
+                <div style={{ color: '#c4b5fd', fontSize: '0.8rem', margin: '2px 0 10px' }}>{t.tag}</div>
+                <ul style={{ margin: 0, paddingLeft: 18, color: muted, fontSize: '0.86rem', lineHeight: 1.6 }}>
+                  {t.items.map(i => <li key={i} style={{ marginBottom: 4 }}>{i}</li>)}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <p style={{ color: muted, fontSize: '0.82rem', lineHeight: 1.6, margin: '12px 0' }}>{tryContent.account.note}</p>
+          <button onClick={signUp} style={{ background: grad, border: 'none', color: 'white', borderRadius: 12, padding: '12px 22px', fontWeight: 700, cursor: 'pointer' }}>{tryContent.account.cta}</button>
+          <span style={{ color: muted, fontSize: '0.82rem', marginLeft: 12 }}>{tryContent.account.ctaNote}</span>
+        </section>
+
         <section style={{ ...card, marginTop: 24 }}>
           <h2 style={{ fontSize: '1.05rem', fontWeight: 800, margin: '0 0 6px' }}>{tryContent.limits.h2}</h2>
           <p style={{ color: muted, fontSize: '0.88rem', lineHeight: 1.65, margin: 0 }}>{tryContent.limits.body}</p>
