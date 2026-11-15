@@ -1,0 +1,40 @@
+{
+  "path": "/try.html",
+  "title": "Free PDF Table to CSV and CSV Cleaner, No Sign-up",
+  "description": "Drop a PDF table or a CSV and see what is wrong plus the first 20 rows cleaned. No sign-up, not stored, up to 5 MB. Text PDFs only, not scans.",
+  "ogTitle": "Free PDF table to CSV and CSV cleaner, no sign-up",
+  "h1": "Free PDF table to CSV and CSV cleaner, no sign-up",
+  "answer": "You can drop a PDF that has a table in it, or a CSV, on this page and see the table, a count of what is wrong with it, and the first 20 rows cleaned. You do not need an account, and the file is not stored. It reads text PDFs up to 5 MB, not scans or photos.",
+  "badge": "No sign-up. No login. No card.",
+  "how": {
+    "h2": "How the free try works",
+    "items": [
+      { "title": "Drop one file", "body": "Choose a PDF with a table in it, or a CSV, up to 5 MB. For a PDF the first 10 pages are read." },
+      { "title": "See what we found", "body": "You get the size of the table and a count of problems: blank cells, duplicate rows, empty rows, extra spaces, numbers stored as text and dates in mixed formats." },
+      { "title": "Compare the first 20 rows", "body": "The first 20 rows are shown before and after a one-click clean: spaces trimmed, empty and duplicate rows removed, numbers made plain, dates written as YYYY-MM-DD." },
+      { "title": "Clean the whole file if you want", "body": "The free try stops at 20 rows. To clean every row and download it, create an account. The 14-day trial has every feature and needs no card." }
+    ]
+  },
+  "limits": {
+    "h2": "What the free try cannot do",
+    "body": "It shows only the first 20 rows and the first table of a PDF. It cannot read scanned pages or photos, because there is no text in them to read. Table reading is a best effort, and merged cells or unusual layouts can come out wrong, so check the result against your file. The counts are simple checks, not a full analysis. Dates are read day first in the preview. The file is read on our server without AI and is not stored. The clean on this page runs in your browser."
+  },
+  "faq": {
+    "h2": "Questions people ask",
+    "items": [
+      { "q": "Can I convert a PDF table to CSV for free without signing up?", "a": "You can try it without signing up. Drop a text-based PDF up to 5 MB and you will see the table, what is wrong with it, and the first 20 rows cleaned. To clean every row and download the result you create an account, and the 14-day trial includes PDF to data with no card." },
+      { "q": "Is my file stored or sent to an AI?", "a": "No. The file is read on our server from its own text without AI and is not stored. The cleaning you see in the preview runs in your browser." },
+      { "q": "Why does it say my PDF has no table?", "a": "A PDF made from a scan or a photo has no text to read, and a PDF of ordinary paragraphs has no rows and columns. Use the original PDF from the program that made it, with the data laid out in a table." },
+      { "q": "How many files can I try?", "a": "Up to 5 tries an hour, with files up to 5 MB. For a PDF the first 10 pages are read, and the first table in them is shown." },
+      { "q": "What problems does it look for?", "a": "Blank cells, duplicate rows, empty rows, extra spaces, numbers stored as text such as 1,234.50 or (500.00), and dates written in more than one format in the same column." },
+      { "q": "Does it work on bank statements?", "a": "It reads them as an ordinary table. The full app has a separate bank statement reader that checks every row against the statement's own balances, and that is not part of the free try." },
+      { "q": "How is this different from copying a table out of a PDF?", "a": "Copying often collapses the columns, splits wrapped lines into extra rows and brings numbers across as text. This reads the table as rows and columns first, then shows what to fix. See the guide on PDF table to Excel or CSV for the details." }
+    ]
+  },
+  "related": [
+    { "href": "/pdf-table-to-excel-csv.html", "title": "PDF table to Excel or CSV", "desc": "why copying from a PDF breaks and how tables are read" },
+    { "href": "/csv-data-cleaning-checklist.html", "title": "CSV data cleaning checklist", "desc": "ten checks, in order" },
+    { "href": "/fix-numbers-stored-as-text-csv.html", "title": "Numbers stored as text", "desc": "brackets, dashes and decimal commas" },
+    { "href": "/fix-mixed-date-formats-csv.html", "title": "Mixed date formats", "desc": "is 03/04 March or April?" }
+  ]
+}

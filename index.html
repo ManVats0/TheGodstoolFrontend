@@ -44,7 +44,7 @@
   <body>
     <script>
       // Homepage-only tags are for "/" alone. Other routes get their own from the app.
-      if (location.pathname !== '/') {
+      if (location.pathname !== '/' && location.pathname !== '/try' && location.pathname !== '/try.html') {
         document.documentElement.className = 'app-route';
         document.querySelectorAll('script[type="application/ld+json"], link[rel="canonical"]').forEach(function (n) { n.remove(); });
       }
