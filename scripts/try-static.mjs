@@ -60,6 +60,7 @@ const body = `
 <h1>${esc(t.h1)}</h1>
 <p>${esc(t.answer)}</p>
 <section><h2>${esc(t.how.h2)}</h2><ol>${t.how.items.map((i) => `<li><h3>${esc(i.title)}</h3><p>${esc(i.body)}</p></li>`).join('')}</ol></section>
+<section><h2>${esc(t.account.h2)}</h2><p>${esc(t.account.intro)}</p>${t.account.tiers.map((x) => `<h3>${esc(x.name)} (${esc(x.tag)})</h3><ul>${x.items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`).join('')}<p>${esc(t.account.note)}</p><p><a href="/">${esc(t.account.cta)}</a>. ${esc(t.account.ctaNote)}</p></section>
 <section><h2>${esc(t.limits.h2)}</h2><p>${esc(t.limits.body)}</p></section>
 <section><h2>${esc(t.faq.h2)}</h2>${t.faq.items.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>
 <section><h2>Keep reading</h2><ul>${t.related.map((r) => `<li><a href="${r.href}">${esc(r.title)}</a>: ${esc(r.desc)}</li>`).join('')}</ul></section>
