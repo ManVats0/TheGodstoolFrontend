@@ -207,10 +207,11 @@ export default function Pricing() {
   }
   setLoading(null)
 },
-        modal: { ondismiss: () => setLoading(null) },
+        modal: { ondismiss: () => { track('checkout_closed', { plan: planKey }); setLoading(null) } },
         prefill: { email: localStorage.getItem('datapro_email') || '' },
         theme: { color: '#7c3aed' }
       })
+      rzp.on('payment.failed', (resp: any) => { track('payment_failed', { plan: planKey, reason: String(resp?.error?.reason || resp?.error?.code || 'unknown') }) })
       rzp.open()
     } catch (err) {
       setError('Cannot connect to server.')
@@ -255,6 +256,7 @@ export default function Pricing() {
       if (!res.ok) { setCustomError(data.error || 'Failed to create payment'); setCustomLoading(false); return }
 
       const { orderId, key } = data
+      track('begin_checkout', { plan: 'credits', currency: customCurrency, value: amountNum })
 
       const rzp = new (window as any).Razorpay({
         key,
@@ -278,11 +280,12 @@ export default function Pricing() {
           }
           setCustomLoading(false)
         },
-        modal: { ondismiss: () => setCustomLoading(false) },
+        modal: { ondismiss: () => { track('checkout_closed', { plan: 'credits' }); setCustomLoading(false) } },
         prefill: { email: localStorage.getItem('datapro_email') || '' },
         theme: { color: '#7c3aed' }
       })
       rzp.on('payment.failed', (resp: any) => {
+        track('payment_failed', { plan: 'credits', reason: String(resp?.error?.reason || resp?.error?.code || 'unknown') })
         setCustomError(`Payment failed: ${resp?.error?.description || 'please try again'}. If money was deducted, your bank refunds it automatically, usually within 5 to 7 days.`)
         setCustomLoading(false)
       })
