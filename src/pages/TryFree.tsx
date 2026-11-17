@@ -154,6 +154,12 @@ export default function TryFree() {
               )}
             </div>
 
+            {res.totalRows > res.shown && (
+              <div style={{ ...card, marginTop: 16, padding: '12px 16px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, borderColor: 'rgba(167,139,250,0.4)' }}>
+                <span style={{ flex: '1 1 260px', fontSize: '0.9rem' }}>Showing {res.shown.toLocaleString()} of {res.totalRows.toLocaleString()} rows. Create an account to clean all of them.</span>
+                <button onClick={signUp} style={{ background: grad, border: 'none', color: 'white', borderRadius: 10, padding: '9px 16px', fontWeight: 700, cursor: 'pointer', fontSize: '0.86rem' }}>Start the 14-day trial</button>
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,420px),1fr))', gap: 14, marginTop: 14 }}>
               <Table rows={res.rows} label={`Before (first ${res.shown} rows)`} />
               <Table rows={cleaned.grid} label="After a one-click clean (same rows)" />
@@ -183,7 +189,7 @@ export default function TryFree() {
                 Start the 14-day trial
               </button>
               <span style={{ color: muted, fontSize: '0.8rem', marginLeft: 12 }}>No card needed. The free plan stays after the trial.</span>
-              <div style={{ marginTop: 10, fontSize: '0.82rem' }}><a href="/pricing" style={{ color: '#c4b5fd' }}>See plans and credits</a></div>
+              <div style={{ marginTop: 12 }}><a href="/pricing" onClick={() => track('try_pricing_click')} style={{ display: 'inline-block', border: '1px solid rgba(167,139,250,0.6)', color: '#e9d5ff', borderRadius: 12, padding: '10px 18px', fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none' }}>See plans and credits</a></div>
             </div>
           </>
         )}
