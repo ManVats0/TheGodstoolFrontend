@@ -1,3 +1,5 @@
+// Page shown after a payment. Sends the purchase conversion once per payment, then sends the person to the app.
+
 import { track } from '../analytics'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -18,7 +20,7 @@ export default function ThankYou() {
   const purchaseType = searchParams.get('type')
   const isCreditsPurchase = purchaseType === 'credits'
 
-useEffect(() => {
+  useEffect(() => {
     // Verify user is logged in. A plan is only required for the subscription
     // flow — a pure credits top-up never sets 'datapro_plan' (see Pricing.tsx
     // handleCustomPayment), so the credits flow isn't gated on having a plan.
@@ -41,12 +43,12 @@ useEffect(() => {
     if (!conversionAlreadyFired) {
       const paidAmount = localStorage.getItem('datapro_amount') // CONFIRM: is this the correct key?
       if (window.trackdesk && paidAmount) {
-        window.trackdesk("thegodstool", "conversion", {
-          conversionType: "sale",
-          amount: { value: paidAmount }
+        window.trackdesk('thegodstool', 'conversion', {
+          conversionType: 'sale',
+          amount: { value: paidAmount },
         })
-        window.trackdesk("thegodstool", "conversion", {
-          conversionType: "lead"
+        window.trackdesk('thegodstool', 'conversion', {
+          conversionType: 'lead',
         })
         sessionStorage.setItem('trackdesk_conversion_fired', 'true')
       }
@@ -57,10 +59,18 @@ useEffect(() => {
       const done = sessionStorage.getItem('gt_purchase_tracked')
       if (paymentParam && done !== paymentParam) {
         const c = isCreditsPurchase ? {} : JSON.parse(sessionStorage.getItem('gt_checkout') || '{}')
-        track('purchase', { transaction_id: paymentParam, plan: isCreditsPurchase ? 'credits' : (c.plan || localStorage.getItem('datapro_plan') || 'unknown'), billing_cycle: c.cycle, currency: isCreditsPurchase ? (searchParams.get('currency') || undefined) : c.currency, value: isCreditsPurchase ? (Number(searchParams.get('amount')) || undefined) : c.value })
+        track('purchase', {
+          transaction_id: paymentParam,
+          plan: isCreditsPurchase ? 'credits' : c.plan || localStorage.getItem('datapro_plan') || 'unknown',
+          billing_cycle: c.cycle,
+          currency: isCreditsPurchase ? searchParams.get('currency') || undefined : c.currency,
+          value: isCreditsPurchase ? Number(searchParams.get('amount')) || undefined : c.value,
+        })
         sessionStorage.setItem('gt_purchase_tracked', paymentParam)
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
 
     // Fire Google Ads "Subscribe" conversion — guarded to fire only once per payment
     // NOTE: requires the base Google tag (gtag.js) script to already be loaded
@@ -80,7 +90,6 @@ useEffect(() => {
     }
   }, [])
 
-  
   useEffect(() => {
     if (!paymentParam) return
     let cancelled = false
@@ -88,13 +97,25 @@ useEffect(() => {
       const token = localStorage.getItem('datapro_token') || ''
       for (let i = 0; i < 10 && !cancelled; i++) {
         try {
-          const r = await fetch(`${AUTH_URL}/api/payments/by-razorpay/${encodeURIComponent(paymentParam)}`, { headers: { Authorization: `Bearer ${token}` } })
-          if (r.ok) { if (!cancelled) { setReceipt(await r.json()); refreshCredits() } return }
-        } catch { /* retry */ }
+          const r = await fetch(`${AUTH_URL}/api/payments/by-razorpay/${encodeURIComponent(paymentParam)}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (r.ok) {
+            if (!cancelled) {
+              setReceipt(await r.json())
+              refreshCredits()
+            }
+            return
+          }
+        } catch {
+          /* retry */
+        }
         await new Promise(res => setTimeout(res, 1000))
       }
     })()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [paymentParam])
 
   const handleContinue = () => {
@@ -111,15 +132,17 @@ useEffect(() => {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#07050f',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px',
-      flexDirection: 'column'
-    }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#07050f',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        flexDirection: 'column',
+      }}
+    >
       <style>{`
         @keyframes checkmark {
           0% { transform: scale(0) rotate(-45deg); opacity: 0; }
@@ -162,66 +185,135 @@ useEffect(() => {
       </div>
 
       <div className="content" style={{ textAlign: 'center', maxWidth: '600px' }}>
-        <h1 style={{
-          fontSize: '2.8rem',
-          fontWeight: 900,
-          color: 'white',
-          fontFamily: 'Georgia, serif',
-          margin: '0 0 16px',
-          background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
-        }}>
+        <h1
+          style={{
+            fontSize: '2.8rem',
+            fontWeight: 900,
+            color: 'white',
+            fontFamily: 'Georgia, serif',
+            margin: '0 0 16px',
+            background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
           {isCreditsPurchase ? 'Credits Added!' : 'Payment Successful!'}
         </h1>
 
-        <p style={{
-          fontSize: '1.1rem',
-          color: 'rgba(255,255,255,0.6)',
-          fontFamily: 'Georgia, serif',
-          lineHeight: 1.8,
-          margin: '0 0 24px'
-        }}>
+        <p
+          style={{
+            fontSize: '1.1rem',
+            color: 'rgba(255,255,255,0.6)',
+            fontFamily: 'Georgia, serif',
+            lineHeight: 1.8,
+            margin: '0 0 24px',
+          }}
+        >
           {receipt
-            ? (receipt.kind === 'credits'
-                ? `You added ${Number(receipt.credits).toLocaleString('en-IN')} AI credits. Your balance is now ${Number(receipt.balanceAfter ?? 0).toLocaleString('en-IN')}.`
-                : `Your ${receipt.description} is active. Thanks for choosing The God's Tool.`)
+            ? receipt.kind === 'credits'
+              ? `You added ${Number(receipt.credits).toLocaleString('en-IN')} AI credits. Your balance is now ${Number(receipt.balanceAfter ?? 0).toLocaleString('en-IN')}.`
+              : `Your ${receipt.description} is active. Thanks for choosing The God's Tool.`
             : paymentParam
               ? 'Your payment went through. We are preparing your receipt...'
-              : (
-          isCreditsPurchase
-            ? "Your credits have been added."
-            : "Your subscription is now active. Thanks for choosing The God's Tool."
-            )}
+              : isCreditsPurchase
+                ? 'Your credits have been added.'
+                : "Your subscription is now active. Thanks for choosing The God's Tool."}
         </p>
 
-        <div style={{
-          background: 'rgba(52,211,153,0.08)',
-          border: '1px solid rgba(52,211,153,0.2)',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '32px',
-          textAlign: 'left'
-        }}>
-          <div style={{ color: '#34d399', fontSize: '0.9rem', fontFamily: 'monospace', marginBottom: '12px', fontWeight: 700 }}>
+        <div
+          style={{
+            background: 'rgba(52,211,153,0.08)',
+            border: '1px solid rgba(52,211,153,0.2)',
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '32px',
+            textAlign: 'left',
+          }}
+        >
+          <div
+            style={{
+              color: '#34d399',
+              fontSize: '0.9rem',
+              fontFamily: 'monospace',
+              marginBottom: '12px',
+              fontWeight: 700,
+            }}
+          >
             {isCreditsPurchase ? '✓ Credits Added' : '✓ Subscription Active'}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', fontFamily: 'monospace', lineHeight: 1.7 }}>
-            {receipt && receipt.kind === 'credits' ? `1 credit = 1 AI action. Your ${Number(receipt.balanceAfter ?? 0).toLocaleString('en-IN')} credits never expire, and they work with or without a plan.` : (isCreditsPurchase
-              ? 'Your credit balance has been topped up. Credits never expire and work with or without a plan.'
-              : 'You now have full access to all data sources, AI cleaning, and pipeline automation. Start by connecting your first data source.')}
+          <div
+            style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', fontFamily: 'monospace', lineHeight: 1.7 }}
+          >
+            {receipt && receipt.kind === 'credits'
+              ? `1 credit = 1 AI action. Your ${Number(receipt.balanceAfter ?? 0).toLocaleString('en-IN')} credits never expire, and they work with or without a plan.`
+              : isCreditsPurchase
+                ? 'Your credit balance has been topped up. Credits never expire and work with or without a plan.'
+                : 'You now have full access to all data sources, AI cleaning, and pipeline automation. Start by connecting your first data source.'}
           </div>
         </div>
 
         {receipt && (
-          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '20px', marginBottom: '24px', textAlign: 'left', fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' }}>
+          <div
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '24px',
+              textAlign: 'left',
+              fontFamily: 'monospace',
+              fontSize: '0.85rem',
+              color: 'rgba(255,255,255,0.7)',
+            }}
+          >
             <div style={{ color: '#a78bfa', fontWeight: 700, marginBottom: '10px' }}>Receipt {receipt.receiptNo}</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>Item</span><span>{receipt.description}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>Amount paid</span><span>{(receipt.currency === 'USD' ? '$' : '\u20B9') + Number(receipt.amount).toLocaleString(receipt.currency === 'USD' ? 'en-US' : 'en-IN', { minimumFractionDigits: 2 })}</span></div>
-            {receipt.kind === 'credits' && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>Credits added</span><span>+{Number(receipt.credits).toLocaleString('en-IN')}</span></div>}
-            {receipt.kind === 'subscription' && receipt.periodEnd && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span>Access paid until</span><span>{new Date(receipt.periodEnd).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>}
-            <button onClick={() => navigate(`/billing/${receipt.id}`)} style={{ marginTop: '12px', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#c4b5fd', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontFamily: 'monospace' }}>View / print receipt</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
+              <span>Item</span>
+              <span>{receipt.description}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
+              <span>Amount paid</span>
+              <span>
+                {(receipt.currency === 'USD' ? '$' : '\u20B9') +
+                  Number(receipt.amount).toLocaleString(receipt.currency === 'USD' ? 'en-US' : 'en-IN', {
+                    minimumFractionDigits: 2,
+                  })}
+              </span>
+            </div>
+            {receipt.kind === 'credits' && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
+                <span>Credits added</span>
+                <span>+{Number(receipt.credits).toLocaleString('en-IN')}</span>
+              </div>
+            )}
+            {receipt.kind === 'subscription' && receipt.periodEnd && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
+                <span>Access paid until</span>
+                <span>
+                  {new Date(receipt.periodEnd).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
+            )}
+            <button
+              onClick={() => navigate(`/billing/${receipt.id}`)}
+              style={{
+                marginTop: '12px',
+                background: 'transparent',
+                border: '1px solid rgba(167,139,250,0.4)',
+                color: '#c4b5fd',
+                borderRadius: '8px',
+                padding: '8px 14px',
+                cursor: 'pointer',
+                fontFamily: 'monospace',
+              }}
+            >
+              View / print receipt
+            </button>
           </div>
         )}
 
@@ -241,16 +333,22 @@ useEffect(() => {
               fontFamily: 'Georgia, serif',
               letterSpacing: '0.05em',
               transition: 'all 0.3s',
-              boxShadow: '0 0 40px rgba(124,58,237,0.3)'
+              boxShadow: '0 0 40px rgba(124,58,237,0.3)',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(124,58,237,0.5)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(124,58,237,0.3)' }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'scale(1.02)'
+              e.currentTarget.style.boxShadow = '0 0 60px rgba(124,58,237,0.5)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = '0 0 40px rgba(124,58,237,0.3)'
+            }}
           >
             Go to Dashboard →
           </button>
 
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => (window.location.href = '/')}
             style={{
               width: '100%',
               padding: '16px',
@@ -263,44 +361,141 @@ useEffect(() => {
               cursor: 'pointer',
               fontFamily: 'Georgia, serif',
               letterSpacing: '0.05em',
-              transition: 'all 0.3s'
+              transition: 'all 0.3s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.6)'; e.currentTarget.style.background = 'rgba(167,139,250,0.1)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(167,139,250,0.3)'; e.currentTarget.style.background = 'transparent' }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = 'rgba(167,139,250,0.6)'
+              e.currentTarget.style.background = 'rgba(167,139,250,0.1)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = 'rgba(167,139,250,0.3)'
+              e.currentTarget.style.background = 'transparent'
+            }}
           >
             Return to Home
           </button>
         </div>
 
-        <p style={{
-          fontSize: '0.85rem',
-          color: 'rgba(255,255,255,0.35)',
-          fontFamily: 'monospace',
-          marginTop: '24px',
-          lineHeight: 1.6
-        }}>
-          {receipt?.emailed ? `We emailed your receipt to ${receipt.customerEmail}.` : receipt ? 'Your receipt is saved under Billing in the sidebar.' : paymentParam ? '' : `A confirmation email has been sent to ${localStorage.getItem('datapro_email')}`}
+        <p
+          style={{
+            fontSize: '0.85rem',
+            color: 'rgba(255,255,255,0.35)',
+            fontFamily: 'monospace',
+            marginTop: '24px',
+            lineHeight: 1.6,
+          }}
+        >
+          {receipt?.emailed
+            ? `We emailed your receipt to ${receipt.customerEmail}.`
+            : receipt
+              ? 'Your receipt is saved under Billing in the sidebar.'
+              : paymentParam
+                ? ''
+                : `A confirmation email has been sent to ${localStorage.getItem('datapro_email')}`}
         </p>
       </div>
 
       {/* ── INDRA POPUP ── */}
       {showIndra && (
-        <div style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 999, width: '320px', background: 'linear-gradient(145deg, #0a0820 0%, #110d2e 60%, #0d1a3a 100%)', border: '1px solid rgba(99,179,237,0.25)', borderRadius: '12px', boxShadow: '0 0 40px rgba(66,153,225,0.15), 0 8px 32px rgba(0,0,0,0.6)', overflow: 'hidden', animation: 'indraSlide 0.5s cubic-bezier(0.16,1,0.3,1)' }}>
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '32px',
+            right: '32px',
+            zIndex: 999,
+            width: '320px',
+            background: 'linear-gradient(145deg, #0a0820 0%, #110d2e 60%, #0d1a3a 100%)',
+            border: '1px solid rgba(99,179,237,0.25)',
+            borderRadius: '12px',
+            boxShadow: '0 0 40px rgba(66,153,225,0.15), 0 8px 32px rgba(0,0,0,0.6)',
+            overflow: 'hidden',
+            animation: 'indraSlide 0.5s cubic-bezier(0.16,1,0.3,1)',
+          }}
+        >
           <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
-            <img src="https://i.postimg.cc/DfcCXhSJ/Indra.png" alt="Indra" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', filter: 'brightness(0.75) saturate(1.4) contrast(1.1)' }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, #0a0820 100%)' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(66,153,225,0.18) 0%, transparent 70%)', animation: 'indraLightning 2.5s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', bottom: '8px', left: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              
-              <span style={{ fontFamily: 'Georgia, serif', color: '#63b3ed', fontSize: '0.65rem', opacity: 0.7, letterSpacing: '0.1em' }}>GOD OF RAIN</span>
+            <img
+              src="https://i.postimg.cc/DfcCXhSJ/Indra.png"
+              alt="Indra"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center 20%',
+                filter: 'brightness(0.75) saturate(1.4) contrast(1.1)',
+              }}
+              onError={e => {
+                ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(180deg, transparent 40%, #0a0820 100%)',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'radial-gradient(ellipse at center, rgba(66,153,225,0.18) 0%, transparent 70%)',
+                animation: 'indraLightning 2.5s ease-in-out infinite',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '8px',
+                left: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'Georgia, serif',
+                  color: '#63b3ed',
+                  fontSize: '0.65rem',
+                  opacity: 0.7,
+                  letterSpacing: '0.1em',
+                }}
+              >
+                GOD OF RAIN
+              </span>
             </div>
           </div>
           <div style={{ padding: '14px 16px 16px' }}>
-            <p style={{ fontFamily: 'Georgia, serif', fontSize: '0.82rem', lineHeight: 1.7, color: '#a0c4e8', margin: 0, fontStyle: 'italic' }}>
-              "I used this tool in the 1990s to identify vulnerable areas that needed rain. Now, due to the sins of people, I follow no rules. To rain or not to rain... is simply my choice. You have pleased me today."
+            <p
+              style={{
+                fontFamily: 'Georgia, serif',
+                fontSize: '0.82rem',
+                lineHeight: 1.7,
+                color: '#a0c4e8',
+                margin: 0,
+                fontStyle: 'italic',
+              }}
+            >
+              "I used this tool in the 1990s to identify vulnerable areas that needed rain. Now, due to the sins of
+              people, I follow no rules. To rain or not to rain... is simply my choice. You have pleased me today."
             </p>
             <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowIndra(false)} style={{ fontFamily: 'Georgia, serif', background: 'transparent', border: '1px solid rgba(99,179,237,0.3)', color: '#63b3ed', padding: '5px 16px', borderRadius: '4px', fontSize: '0.75rem', letterSpacing: '0.1em', cursor: 'pointer' }}>Understood</button>
+              <button
+                onClick={() => setShowIndra(false)}
+                style={{
+                  fontFamily: 'Georgia, serif',
+                  background: 'transparent',
+                  border: '1px solid rgba(99,179,237,0.3)',
+                  color: '#63b3ed',
+                  padding: '5px 16px',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.1em',
+                  cursor: 'pointer',
+                }}
+              >
+                Understood
+              </button>
             </div>
           </div>
         </div>

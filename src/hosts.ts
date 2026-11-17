@@ -9,7 +9,21 @@ export const onSite = () => SITE_HOSTS.includes(window.location.hostname)
 export const onApp = () => window.location.hostname === APP_HOST
 
 // Pages that only make sense once you are signed in. Old links to them on the public site are forwarded.
-const APP_PATHS = ['/dashboard', '/sources', '/catalog', '/pdf', '/flow', '/analysis', '/audit', '/team', '/billing', '/docs', '/tunneling', '/auth/callback', '/thank-you']
+const APP_PATHS = [
+  '/dashboard',
+  '/sources',
+  '/catalog',
+  '/pdf',
+  '/flow',
+  '/analysis',
+  '/audit',
+  '/team',
+  '/billing',
+  '/docs',
+  '/tunneling',
+  '/auth/callback',
+  '/thank-you',
+]
 
 // Runs once before the page is drawn. Returns true when it is sending the visitor somewhere else.
 export function hostRedirect(): boolean {

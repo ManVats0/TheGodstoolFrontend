@@ -1,3 +1,5 @@
+// Chart for the Time Series tab of Analyse / Clean. It receives the date column, value column and points.
+
 import { useEffect, useRef } from 'react'
 
 interface Props {
@@ -27,17 +29,17 @@ export default function TimeSeriesChart({ chartData }: Props) {
         gridcolor: 'rgba(255,255,255,0.04)',
         linecolor: 'rgba(255,255,255,0.08)',
         tickfont: { color: '#64748b', size: 10 },
-        showgrid: true
+        showgrid: true,
       },
       yaxis: {
         gridcolor: 'rgba(255,255,255,0.04)',
         linecolor: 'rgba(255,255,255,0.08)',
         tickfont: { color: '#64748b', size: 10 },
         title: { text: chartData.value_col, font: { color: '#94a3b8', size: 11 } },
-        showgrid: true
+        showgrid: true,
       },
       showlegend: false,
-      hovermode: 'x unified'
+      hovermode: 'x unified',
     }
 
     const trace = {
@@ -49,12 +51,12 @@ export default function TimeSeriesChart({ chartData }: Props) {
       fill: 'tozeroy',
       fillcolor: 'rgba(124,58,237,0.08)',
       name: chartData.value_col,
-      hovertemplate: `<b>%{x}</b><br>${chartData.value_col}: %{y}<extra></extra>`
+      hovertemplate: `<b>%{x}</b><br>${chartData.value_col}: %{y}<extra></extra>`,
     }
 
     Plotly.newPlot(ref.current, [trace], layout, {
       responsive: true,
-      displayModeBar: false
+      displayModeBar: false,
     })
 
     return () => {

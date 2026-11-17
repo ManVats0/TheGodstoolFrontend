@@ -9,34 +9,53 @@ const shell = 'dist/index.html'
 if (!existsSync(shell)) throw new Error('run vite build first')
 let html = readFileSync(shell, 'utf8')
 
-const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 const url = c.site.url
 
 // ---------- head ----------
 const offers = [
   { name: 'Free', price: '0', desc: c.pricing.freeLine },
-  ...c.pricing.plans.map((p) => ({ name: p.name, price: p.price, desc: p.features.join(', ') })),
-].map((o) => ({
-  '@type': 'Offer', name: o.name, price: o.price, priceCurrency: 'USD', description: o.desc, url: `${url}/#pricing`,
+  ...c.pricing.plans.map(p => ({ name: p.name, price: p.price, desc: p.features.join(', ') })),
+].map(o => ({
+  '@type': 'Offer',
+  name: o.name,
+  price: o.price,
+  priceCurrency: 'USD',
+  description: o.desc,
+  url: `${url}/#pricing`,
 }))
 
 const ld = [
   {
-    '@context': 'https://schema.org', '@type': 'Organization', name: c.site.name, url,
-    logo: `${url}/the_gods_tool_logo_3d.png`, email: c.site.email,
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: c.site.name,
+    url,
+    logo: `${url}/the_gods_tool_logo_3d.png`,
+    email: c.site.email,
     sameAs: ['https://www.youtube.com/@TheGodsTool-DataPipeline', 'https://x.com/TheGodsToojsg0'],
   },
   { '@context': 'https://schema.org', '@type': 'WebSite', name: c.site.name, url },
   {
-    '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: c.site.name, url,
-    applicationCategory: 'BusinessApplication', applicationSubCategory: 'Data cleaning', operatingSystem: 'Web',
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: c.site.name,
+    url,
+    applicationCategory: 'BusinessApplication',
+    applicationSubCategory: 'Data cleaning',
+    operatingSystem: 'Web',
     description: c.site.description,
-    featureList: c.features.items.map((f) => f.title),
+    featureList: c.features.items.map(f => f.title),
     offers,
   },
   {
-    '@context': 'https://schema.org', '@type': 'FAQPage',
-    mainEntity: c.faq.items.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: c.faq.items.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
   },
 ]
 
@@ -55,17 +74,20 @@ const headTags = `
   <meta name="twitter:title" content="${esc(c.site.ogTitle)}" />
   <meta name="twitter:description" content="${esc(c.site.ogDescription)}" />
   <meta name="twitter:image" content="${url}/og-image.png" />
-${ld.map((o) => `  <script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`).join('\n')}
+${ld.map(o => `  <script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`).join('\n')}
 `
 
 html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(c.site.title)}</title>`)
-html = html.replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${esc(c.site.description)}" />`)
+html = html.replace(
+  /<meta name="description"[^>]*>/,
+  `<meta name="description" content="${esc(c.site.description)}" />`
+)
 if (!html.includes('<!--HEAD_SEO-->')) throw new Error('index.html is missing <!--HEAD_SEO-->')
 html = html.replace('<!--HEAD_SEO-->', headTags)
 
 // ---------- body ----------
-const li = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`
-const card = (it) => `<li><h3>${esc(it.title)}</h3><p>${esc(it.body)}</p></li>`
+const li = items => `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`
+const card = it => `<li><h3>${esc(it.title)}</h3><p>${esc(it.body)}</p></li>`
 const body = `
 <main id="seo-static">
 <nav aria-label="Main"><a href="/">${esc(c.site.name)}</a> · <a href="#features">Features</a> · <a href="#pricing">Pricing</a> · <a href="#quote">Get a quote</a> · <a href="/try">Try it free</a> · <a href="/blog">Blog</a> · <a href="/about.html">About</a> · <a href="/faq.html">FAQ</a> · <a href="/contact">Contact</a></nav>
@@ -82,12 +104,12 @@ ${li(c.hero.sources.map(esc))}
 <section id="how"><h2>${esc(c.steps.h2)}</h2><ol>${c.steps.items.map(card).join('')}</ol></section>
 <section><h2>${esc(c.alerts.h2)}</h2><p>${esc(c.alerts.body)}</p></section>
 <section id="pricing"><h2>${esc(c.pricing.h2)}</h2><p>${esc(c.pricing.sub)}</p>
-<ul>${c.pricing.plans.map((p) => `<li><h3>${esc(p.name)}: $${esc(p.price)} a month</h3>${li(p.features.map(esc))}</li>`).join('')}</ul>
+<ul>${c.pricing.plans.map(p => `<li><h3>${esc(p.name)}: $${esc(p.price)} a month</h3>${li(p.features.map(esc))}</li>`).join('')}</ul>
 <p>${esc(c.pricing.freeLine)}</p><p><strong>${esc(c.pricing.creditsTitle)}</strong> ${esc(c.pricing.creditsBody)}</p><p>${esc(c.pricing.foot)}</p></section>
 <section id="estimate"><h2>${esc(c.estimate.h2)}</h2><p>${esc(c.estimate.body)} ${esc(c.estimate.note)}</p></section>
 <section id="quote"><h2>${esc(c.quote.h2)}</h2><p>${esc(c.quote.body)}</p>${li(c.quote.points.map(esc))}<p>${esc(c.quote.note)} Email <a href="mailto:${c.site.email}">${c.site.email}</a> or use the form on this page.</p></section>
 <section id="private-ai"><h2>${esc(c.privacy.h2)}</h2><p>${esc(c.privacy.body)}</p>${li(c.privacy.points.map(esc))}<p><a href="${c.privacy.href}">${esc(c.privacy.link)}</a></p></section>
-<section id="faq"><h2>${esc(c.faq.h2)}</h2>${c.faq.items.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>
+<section id="faq"><h2>${esc(c.faq.h2)}</h2>${c.faq.items.map(f => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>
 <section><h2>${esc(c.cta.h2)}</h2><p>${esc(c.cta.body)}</p></section>
 <footer><p>Guides: <a href="/csv-data-cleaning-checklist.html">CSV cleaning checklist</a> · <a href="/pdf-table-to-excel-csv.html">PDF table to Excel</a> · <a href="/about.html">About</a> · <a href="/fix-mixed-date-formats-csv.html">Fix mixed dates</a> · <a href="/remove-duplicate-customers-csv.html">Remove duplicate customers</a> · <a href="/fix-numbers-stored-as-text-csv.html">Numbers stored as text</a> · <a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a></p><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/refund.html">Refunds</a> · <a href="/blog">Blog</a></footer>
 </main>`

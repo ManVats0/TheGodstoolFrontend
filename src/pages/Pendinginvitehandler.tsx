@@ -1,3 +1,5 @@
+// Looks like an older copy of TeamSettings (same API calls). Nothing imports it. Safe to delete after review.
+
 import { useState, useEffect } from 'react'
 import { API_BASE } from '../config'
 
@@ -77,7 +79,10 @@ export default function TeamSettings() {
       const orgData = await orgRes.json()
       const membersData = await membersRes.json()
       const invitesData = invitesRes.ok ? await invitesRes.json() : []
-      if (orgData?.error) { setError(orgData.error); return }
+      if (orgData?.error) {
+        setError(orgData.error)
+        return
+      }
       setOrg(orgData.org)
       setMyRole(orgData.role)
       setPermissions(orgData.permissions || {})
@@ -90,7 +95,9 @@ export default function TeamSettings() {
     }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+  }, [])
 
   const canManage = !!permissions['org.manageMembers']
 
@@ -172,24 +179,40 @@ export default function TeamSettings() {
   }
 
   if (loading) {
-    return <div className="p-8 max-w-4xl mx-auto"><p style={{ color: 'rgba(255,255,255,0.4)' }}>Loading team…</p></div>
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <p style={{ color: 'rgba(255,255,255,0.4)' }}>Loading team…</p>
+      </div>
+    )
   }
   if (error) {
-    return <div className="p-8 max-w-4xl mx-auto"><p style={{ color: '#f87171' }}>{error}</p></div>
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <p style={{ color: '#f87171' }}>{error}</p>
+      </div>
+    )
   }
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
       {joinedBanner && (
-        <div className="mb-6 p-4 rounded-2xl" style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)' }}>
+        <div
+          className="mb-6 p-4 rounded-2xl"
+          style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)' }}
+        >
           <p className="text-sm font-bold" style={{ color: '#4ade80' }}>
             You joined {org?.name} as {ROLE_LABELS[myRole] || myRole}.
           </p>
         </div>
       )}
       {joinError && (
-        <div className="mb-6 p-4 rounded-2xl" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
-          <p className="text-sm font-bold" style={{ color: '#f87171' }}>{joinError}</p>
+        <div
+          className="mb-6 p-4 rounded-2xl"
+          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}
+        >
+          <p className="text-sm font-bold" style={{ color: '#f87171' }}>
+            {joinError}
+          </p>
         </div>
       )}
 
@@ -201,7 +224,10 @@ export default function TeamSettings() {
       </div>
 
       {canManage && (
-        <div className="mb-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}>
+        <div
+          className="mb-6 p-5 rounded-2xl"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}
+        >
           <p className="text-sm font-bold text-white mb-3">Invite someone</p>
           <div className="flex gap-2 flex-wrap">
             <input
@@ -219,7 +245,9 @@ export default function TeamSettings() {
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
               {ROLE_OPTIONS.map(r => (
-                <option key={r} value={r} style={{ background: '#0d0a1a' }}>{ROLE_LABELS[r]}</option>
+                <option key={r} value={r} style={{ background: '#0d0a1a' }}>
+                  {ROLE_LABELS[r]}
+                </option>
               ))}
             </select>
             <button
@@ -231,11 +259,23 @@ export default function TeamSettings() {
               {inviteBusy ? 'Sending…' : 'Add to team'}
             </button>
           </div>
-          {inviteMsg && <p className="text-xs mt-2" style={{ color: inviteMsg.startsWith('Added') || inviteMsg.startsWith('Invite sent') ? '#4ade80' : '#f87171' }}>{inviteMsg}</p>}
+          {inviteMsg && (
+            <p
+              className="text-xs mt-2"
+              style={{
+                color: inviteMsg.startsWith('Added') || inviteMsg.startsWith('Invite sent') ? '#4ade80' : '#f87171',
+              }}
+            >
+              {inviteMsg}
+            </p>
+          )}
         </div>
       )}
 
-      <div className="rounded-2xl overflow-hidden mb-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+      <div
+        className="rounded-2xl overflow-hidden mb-6"
+        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+      >
         <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <p className="font-bold text-white">Members ({members.length})</p>
         </div>
@@ -244,7 +284,9 @@ export default function TeamSettings() {
             <div key={m.userId} className="flex items-center justify-between px-6 py-4">
               <div>
                 <p className="text-sm text-white">{m.email || m.userId}</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.status}</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {m.status}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 {canManage && m.roleKey !== 'owner' ? (
@@ -255,11 +297,16 @@ export default function TeamSettings() {
                     style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
                   >
                     {ROLE_OPTIONS.map(r => (
-                      <option key={r} value={r} style={{ background: '#0d0a1a' }}>{ROLE_LABELS[r]}</option>
+                      <option key={r} value={r} style={{ background: '#0d0a1a' }}>
+                        {ROLE_LABELS[r]}
+                      </option>
                     ))}
                   </select>
                 ) : (
-                  <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa' }}>
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full font-semibold"
+                    style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa' }}
+                  >
                     {ROLE_LABELS[m.roleKey] || m.roleKey}
                   </span>
                 )}
@@ -267,7 +314,11 @@ export default function TeamSettings() {
                   <button
                     onClick={() => handleRemove(m)}
                     className="text-xs px-2.5 py-1.5 rounded-lg"
-                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
+                    style={{
+                      background: 'rgba(239,68,68,0.1)',
+                      border: '1px solid rgba(239,68,68,0.2)',
+                      color: '#f87171',
+                    }}
                   >
                     Remove
                   </button>
@@ -279,7 +330,10 @@ export default function TeamSettings() {
       </div>
 
       {canManage && invites.length > 0 && (
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+        >
           <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
             <p className="font-bold text-white">Pending Invites ({invites.length})</p>
           </div>
@@ -288,22 +342,34 @@ export default function TeamSettings() {
               <div key={inv.id} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="text-sm text-white">{inv.email}</p>
-                  <p className="text-xs" style={{ color: inv.status === 'expired' ? '#f87171' : 'rgba(255,255,255,0.35)' }}>
-                    {ROLE_LABELS[inv.roleKey] || inv.roleKey} · {inv.status === 'expired' ? 'expired' : `expires ${new Date(inv.expiresAt).toLocaleDateString()}`}
+                  <p
+                    className="text-xs"
+                    style={{ color: inv.status === 'expired' ? '#f87171' : 'rgba(255,255,255,0.35)' }}
+                  >
+                    {ROLE_LABELS[inv.roleKey] || inv.roleKey} ·{' '}
+                    {inv.status === 'expired' ? 'expired' : `expires ${new Date(inv.expiresAt).toLocaleDateString()}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleResendInvite(inv)}
                     className="text-xs px-2.5 py-1.5 rounded-lg"
-                    style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)', color: '#a78bfa' }}
+                    style={{
+                      background: 'rgba(124,58,237,0.1)',
+                      border: '1px solid rgba(124,58,237,0.25)',
+                      color: '#a78bfa',
+                    }}
                   >
                     Resend
                   </button>
                   <button
                     onClick={() => handleRevokeInvite(inv)}
                     className="text-xs px-2.5 py-1.5 rounded-lg"
-                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
+                    style={{
+                      background: 'rgba(239,68,68,0.1)',
+                      border: '1px solid rgba(239,68,68,0.2)',
+                      color: '#f87171',
+                    }}
                   >
                     Revoke
                   </button>

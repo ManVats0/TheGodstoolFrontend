@@ -1,3 +1,5 @@
+// Step-by-step guide for connecting a private database through the tunnel agent.
+
 import { useState, JSX } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE } from '../config'
@@ -45,7 +47,12 @@ const STEPS_MYSQL = [
 ]
 
 const STEPS_POSTGRES = STEPS_MYSQL.map((s, i) => {
-  if (i === 0) return { ...s, body: 'Open a terminal on the machine that can reach your PostgreSQL database. Run the command below.', code: 'pip install websockets asyncpg' }
+  if (i === 0)
+    return {
+      ...s,
+      body: 'Open a terminal on the machine that can reach your PostgreSQL database. Run the command below.',
+      code: 'pip install websockets asyncpg',
+    }
   if (i === 4) return { ...s, body: s.body.replace('type "mysql"', 'type "postgres"').replace('3306', '5432') }
   if (i === 5) return { ...s, body: s.body.replace('MySQL', 'PostgreSQL') }
   return s
@@ -253,7 +260,10 @@ const renderCode = (code: string): string => {
   const tok = localStorage.getItem('datapro_token') || 'YOUR_LOGIN_TOKEN'
   return code
     .replace('http://localhost:8000', base)
-    .replace('-H "Content-Type: application/json"', `-H "Authorization: Bearer ${tok}" \\\n  -H "Content-Type: application/json"`)
+    .replace(
+      '-H "Content-Type: application/json"',
+      `-H "Authorization: Bearer ${tok}" \\\n  -H "Content-Type: application/json"`
+    )
 }
 
 type DB = 'mysql' | 'postgres' | 'mongodb' | 'bigquery' | 'databricks' | 'redshift' | 'rest'
@@ -272,13 +282,13 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
   const [copied, setCopied] = useState<number | null>(null)
 
   const STEPS_MAP: Record<DB, typeof STEPS_MYSQL> = {
-    mysql:      STEPS_MYSQL,
-    postgres:   STEPS_POSTGRES,
-    mongodb:    STEPS_MONGODB,
-    bigquery:   STEPS_BIGQUERY,
+    mysql: STEPS_MYSQL,
+    postgres: STEPS_POSTGRES,
+    mongodb: STEPS_MONGODB,
+    bigquery: STEPS_BIGQUERY,
     databricks: STEPS_DATABRICKS,
-    redshift:   STEPS_REDSHIFT,
-    rest:       STEPS_REST,
+    redshift: STEPS_REDSHIFT,
+    rest: STEPS_REST,
   }
   const steps = STEPS_MAP[db]
 
@@ -289,41 +299,104 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
     setTimeout(() => setCopied(null), 2000)
   }
 
-  const DB_META: Record<DB, { accent: string; accentBg: string; accentBorder: string; label: string; icon: JSX.Element }> = {
+  const DB_META: Record<
+    DB,
+    { accent: string; accentBg: string; accentBorder: string; label: string; icon: JSX.Element }
+  > = {
     mysql: {
-      accent: '#fbbf24', accentBg: 'rgba(245,158,11,0.2)', accentBorder: 'rgba(245,158,11,0.45)', label: 'MySQL',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="5" rx="9" ry="3" fill="#f59e0b" fillOpacity="0.7"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" stroke="#f59e0b" strokeWidth="1.5" fill="none"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke="#f59e0b" strokeWidth="1.5" fill="none"/></svg>,
+      accent: '#fbbf24',
+      accentBg: 'rgba(245,158,11,0.2)',
+      accentBorder: 'rgba(245,158,11,0.45)',
+      label: 'MySQL',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <ellipse cx="12" cy="5" rx="9" ry="3" fill="#f59e0b" fillOpacity="0.7" />
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" stroke="#f59e0b" strokeWidth="1.5" fill="none" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke="#f59e0b" strokeWidth="1.5" fill="none" />
+        </svg>
+      ),
     },
     postgres: {
-      accent: '#818cf8', accentBg: 'rgba(99,102,241,0.2)', accentBorder: 'rgba(99,102,241,0.45)', label: 'PostgreSQL',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="5" rx="9" ry="3" fill="#6366f1" fillOpacity="0.7"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" stroke="#6366f1" strokeWidth="1.5" fill="none"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke="#6366f1" strokeWidth="1.5" fill="none"/></svg>,
+      accent: '#818cf8',
+      accentBg: 'rgba(99,102,241,0.2)',
+      accentBorder: 'rgba(99,102,241,0.45)',
+      label: 'PostgreSQL',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <ellipse cx="12" cy="5" rx="9" ry="3" fill="#6366f1" fillOpacity="0.7" />
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" stroke="#6366f1" strokeWidth="1.5" fill="none" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" stroke="#6366f1" strokeWidth="1.5" fill="none" />
+        </svg>
+      ),
     },
     mongodb: {
-      accent: '#4ade80', accentBg: 'rgba(34,197,94,0.2)', accentBorder: 'rgba(34,197,94,0.45)', label: 'MongoDB',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2C8 8 8 14 12 22c4-8 4-14 0-20z" fill="#4ade80" fillOpacity="0.8"/></svg>,
+      accent: '#4ade80',
+      accentBg: 'rgba(34,197,94,0.2)',
+      accentBorder: 'rgba(34,197,94,0.45)',
+      label: 'MongoDB',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C8 8 8 14 12 22c4-8 4-14 0-20z" fill="#4ade80" fillOpacity="0.8" />
+        </svg>
+      ),
     },
     bigquery: {
-      accent: '#38bdf8', accentBg: 'rgba(56,189,248,0.2)', accentBorder: 'rgba(56,189,248,0.45)', label: 'BigQuery',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#38bdf8" strokeWidth="1.8"/><path d="M16.5 16.5L21 21" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+      accent: '#38bdf8',
+      accentBg: 'rgba(56,189,248,0.2)',
+      accentBorder: 'rgba(56,189,248,0.45)',
+      label: 'BigQuery',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="7" stroke="#38bdf8" strokeWidth="1.8" />
+          <path d="M16.5 16.5L21 21" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+      ),
     },
     databricks: {
-      accent: '#fb923c', accentBg: 'rgba(251,146,60,0.2)', accentBorder: 'rgba(251,146,60,0.45)', label: 'Databricks',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3L3 8.5V15l9 5.5 9-5.5V8.5z" stroke="#fb923c" strokeWidth="1.6" fill="none"/><path d="M3 8.5l9 5 9-5" stroke="#fb923c" strokeWidth="1.4"/></svg>,
+      accent: '#fb923c',
+      accentBg: 'rgba(251,146,60,0.2)',
+      accentBorder: 'rgba(251,146,60,0.45)',
+      label: 'Databricks',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3L3 8.5V15l9 5.5 9-5.5V8.5z" stroke="#fb923c" strokeWidth="1.6" fill="none" />
+          <path d="M3 8.5l9 5 9-5" stroke="#fb923c" strokeWidth="1.4" />
+        </svg>
+      ),
     },
     rest: {
-      accent: '#2dd4bf', accentBg: 'rgba(45,212,191,0.2)', accentBorder: 'rgba(45,212,191,0.45)', label: 'REST API',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6" stroke="#2dd4bf" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+      accent: '#2dd4bf',
+      accentBg: 'rgba(45,212,191,0.2)',
+      accentBorder: 'rgba(45,212,191,0.45)',
+      label: 'REST API',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M8 6l-5 6 5 6M16 6l5 6-5 6"
+            stroke="#2dd4bf"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
     },
     redshift: {
-      accent: '#f472b6', accentBg: 'rgba(244,114,182,0.2)', accentBorder: 'rgba(244,114,182,0.45)', label: 'Redshift',
-      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 19h20L12 2z" fill="#f472b6" fillOpacity="0.7"/></svg>,
+      accent: '#f472b6',
+      accentBg: 'rgba(244,114,182,0.2)',
+      accentBorder: 'rgba(244,114,182,0.45)',
+      label: 'Redshift',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L2 19h20L12 2z" fill="#f472b6" fillOpacity="0.7" />
+        </svg>
+      ),
     },
   }
   const meta = DB_META[db]
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-
       {/* Header */}
       <div className="flex items-start justify-between mb-8 flex-wrap gap-4">
         <div className="flex items-center gap-3">
@@ -332,7 +405,7 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
             style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.3)' }}
           >
             <svg width="14" height="14" fill="none" stroke="#fbbf24" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </div>
           <div>
@@ -345,18 +418,25 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
         <button
           onClick={() => navigate('/docs', { state: { from: '/tunneling' } })}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.6)',
+          }}
         >
           <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
           </svg>
           Full Docs
         </button>
       </div>
 
       {!canManage && (
-        <div className="rounded-2xl p-4 mb-6" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
+        <div
+          className="rounded-2xl p-4 mb-6"
+          style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}
+        >
           <p className="text-sm" style={{ color: '#fbbf24' }}>
             You can use tunnels your Admin has already set up. Creating new tunnel tokens needs an Admin.
           </p>
@@ -370,26 +450,34 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
       >
         <h2 className="font-bold text-white text-base mb-2">What is tunneling and why do I need it?</h2>
         <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          Most company databases live inside a private network. Behind a VPN, behind a corporate firewall, or on a server with no public IP. The God's Tool server cannot reach those databases directly.
+          Most company databases live inside a private network. Behind a VPN, behind a corporate firewall, or on a
+          server with no public IP. The God's Tool server cannot reach those databases directly.
         </p>
         <p className="text-sm leading-relaxed mt-3" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          The agent is a small Python script you run on a machine that <em>can</em> reach the database. It opens a secure WebSocket connection to your backend and waits. When you run a pipeline or analysis in the browser, the backend sends the SQL query through that connection, the agent runs it locally on your database, and sends the results back. Your database never needs a public IP or an open firewall port.
+          The agent is a small Python script you run on a machine that <em>can</em> reach the database. It opens a
+          secure WebSocket connection to your backend and waits. When you run a pipeline or analysis in the browser, the
+          backend sends the SQL query through that connection, the agent runs it locally on your database, and sends the
+          results back. Your database never needs a public IP or an open firewall port.
         </p>
         <div
           className="mt-4 flex items-center gap-3 text-sm rounded-xl px-4 py-3"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.5)',
+          }}
         >
           <span>Your computer (runs the agent)</span>
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
-            <path d="M1 6h18M13 1l5 5-5 5"/>
+            <path d="M1 6h18M13 1l5 5-5 5" />
           </svg>
           <span style={{ color: '#fbbf24' }}>Secure WebSocket (wss://)</span>
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
-            <path d="M1 6h18M13 1l5 5-5 5"/>
+            <path d="M1 6h18M13 1l5 5-5 5" />
           </svg>
           <span>The God's Tool server</span>
           <svg width="20" height="12" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" viewBox="0 0 20 12">
-            <path d="M1 6h18M13 1l5 5-5 5"/>
+            <path d="M1 6h18M13 1l5 5-5 5" />
           </svg>
           <span>Browser</span>
         </div>
@@ -397,178 +485,218 @@ function TunnelingInner({ canManage }: { canManage: boolean }) {
 
       {/* Mode */}
       <div className="grid gap-3 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
-        {([
-          ['oneclick', 'One click', 'Recommended. Run one command and your computer becomes the connector.'],
-          ['steps', 'Follow the steps', 'Install and configure the agent yourself. Supports every database type.'],
-        ] as const).map(([k, title, sub]) => (
-          <button key={k} onClick={() => setMode(k)} aria-pressed={mode === k} className="text-left rounded-2xl p-4"
-            style={{ background: mode === k ? 'rgba(124,92,255,0.14)' : 'rgba(255,255,255,0.03)', border: `1px solid ${mode === k ? 'rgba(124,92,255,0.6)' : 'rgba(255,255,255,0.08)'}` }}>
-            <div className="font-semibold text-white text-sm">{title}{k === 'oneclick' && <span className="text-xs ml-2" style={{ color: '#a78bfa' }}>Selected by default</span>}</div>
-            <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>{sub}</div>
+        {(
+          [
+            ['oneclick', 'One click', 'Recommended. Run one command and your computer becomes the connector.'],
+            ['steps', 'Follow the steps', 'Install and configure the agent yourself. Supports every database type.'],
+          ] as const
+        ).map(([k, title, sub]) => (
+          <button
+            key={k}
+            onClick={() => setMode(k)}
+            aria-pressed={mode === k}
+            className="text-left rounded-2xl p-4"
+            style={{
+              background: mode === k ? 'rgba(124,92,255,0.14)' : 'rgba(255,255,255,0.03)',
+              border: `1px solid ${mode === k ? 'rgba(124,92,255,0.6)' : 'rgba(255,255,255,0.08)'}`,
+            }}
+          >
+            <div className="font-semibold text-white text-sm">
+              {title}
+              {k === 'oneclick' && (
+                <span className="text-xs ml-2" style={{ color: '#a78bfa' }}>
+                  Selected by default
+                </span>
+              )}
+            </div>
+            <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              {sub}
+            </div>
           </button>
         ))}
       </div>
 
-      {mode === 'oneclick' ? <TunnelOneClick canManage={canManage} onNeedSteps={(d) => { setDb(d as DB); setMode('steps') }} /> : (<>
-      {/* DB selector */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {(Object.keys(DB_META) as DB[]).map(d => {
-          const m = DB_META[d]
-          const active = db === d
-          return (
-            <button
-              key={d}
-              onClick={() => setDb(d)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-              style={{
-                background: active ? m.accentBg : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${active ? m.accentBorder : 'rgba(255,255,255,0.08)'}`,
-                color: active ? m.accent : 'rgba(255,255,255,0.5)',
-              }}
-            >
-              {m.icon}
-              {m.label}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Steps */}
-      <div className="space-y-4">
-        {steps.map((step, i) => (
-          <div
-            key={i}
-            className="rounded-2xl overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
-          >
-            <div
-              className="flex items-center gap-4 px-6 py-4"
-              style={{ borderBottom: step.code || step.body.includes('\n') ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
-            >
-              <div
-                className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                style={{
-                  background: meta.accentBg,
-                  color: meta.accent,
-                  border: `1px solid ${meta.accentBorder}`,
-                }}
-              >
-                {step.n}
-              </div>
-              <h3 className="font-semibold text-white text-sm">{step.title}</h3>
-            </div>
-
-            <div className="px-6 py-4 space-y-3">
-              <div className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                {step.body.split('\n').map((line, li) => (
-                  <span key={li}>
-                    {line}
-                    {li < step.body.split('\n').length - 1 && <br />}
-                  </span>
-                ))}
-              </div>
-
-              {step.n === 2 && (
-                <a
-                  href={`${API_BASE}/download/agent.py`}
-                  download="agent.py"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
-                  style={{ background: meta.accentBg, border: `1px solid ${meta.accentBorder}`, color: meta.accent }}
+      {mode === 'oneclick' ? (
+        <TunnelOneClick
+          canManage={canManage}
+          onNeedSteps={d => {
+            setDb(d as DB)
+            setMode('steps')
+          }}
+        />
+      ) : (
+        <>
+          {/* DB selector */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {(Object.keys(DB_META) as DB[]).map(d => {
+              const m = DB_META[d]
+              const active = db === d
+              return (
+                <button
+                  key={d}
+                  onClick={() => setDb(d)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                  style={{
+                    background: active ? m.accentBg : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${active ? m.accentBorder : 'rgba(255,255,255,0.08)'}`,
+                    color: active ? m.accent : 'rgba(255,255,255,0.5)',
+                  }}
                 >
-                  ⬇ Download agent.py
-                </a>
-              )}
+                  {m.icon}
+                  {m.label}
+                </button>
+              )
+            })}
+          </div>
 
-              {step.code && (
+          {/* Steps */}
+          <div className="space-y-4">
+            {steps.map((step, i) => (
+              <div
+                key={i}
+                className="rounded-2xl overflow-hidden"
+                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+              >
                 <div
-                  className="relative rounded-xl overflow-hidden"
-                  style={{ background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  className="flex items-center gap-4 px-6 py-4"
+                  style={{
+                    borderBottom: step.code || step.body.includes('\n') ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                  }}
                 >
                   <div
-                    className="flex items-center justify-between px-4 py-2"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
+                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{
+                      background: meta.accentBg,
+                      color: meta.accent,
+                      border: `1px solid ${meta.accentBorder}`,
+                    }}
                   >
-                    <span className="text-xs font-bold" style={{ color: meta.accent }}>
-                      bash
-                    </span>
-                    <button
-                      onClick={() => copy(renderCode(step.code!), i)}
-                      className="text-xs px-2 py-0.5 rounded-md font-semibold transition-all"
+                    {step.n}
+                  </div>
+                  <h3 className="font-semibold text-white text-sm">{step.title}</h3>
+                </div>
+
+                <div className="px-6 py-4 space-y-3">
+                  <div className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    {step.body.split('\n').map((line, li) => (
+                      <span key={li}>
+                        {line}
+                        {li < step.body.split('\n').length - 1 && <br />}
+                      </span>
+                    ))}
+                  </div>
+
+                  {step.n === 2 && (
+                    <a
+                      href={`${API_BASE}/download/agent.py`}
+                      download="agent.py"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
                       style={{
-                        background: copied === i ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.08)',
-                        color: copied === i ? '#4ade80' : 'rgba(255,255,255,0.5)',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        background: meta.accentBg,
+                        border: `1px solid ${meta.accentBorder}`,
+                        color: meta.accent,
                       }}
                     >
-                      {copied === i ? '✓ Copied' : 'Copy'}
-                    </button>
-                  </div>
-                  <pre
-                    className="p-4 text-xs leading-relaxed overflow-auto"
-                    style={{ color: '#a5f3fc', fontFamily: "'JetBrains Mono','Fira Code',monospace", margin: 0 }}
-                  >
-                    {renderCode(step.code)}
-                  </pre>
+                      ⬇ Download agent.py
+                    </a>
+                  )}
+
+                  {step.code && (
+                    <div
+                      className="relative rounded-xl overflow-hidden"
+                      style={{ background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    >
+                      <div
+                        className="flex items-center justify-between px-4 py-2"
+                        style={{
+                          borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          background: 'rgba(255,255,255,0.02)',
+                        }}
+                      >
+                        <span className="text-xs font-bold" style={{ color: meta.accent }}>
+                          bash
+                        </span>
+                        <button
+                          onClick={() => copy(renderCode(step.code!), i)}
+                          className="text-xs px-2 py-0.5 rounded-md font-semibold transition-all"
+                          style={{
+                            background: copied === i ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.08)',
+                            color: copied === i ? '#4ade80' : 'rgba(255,255,255,0.5)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                          }}
+                        >
+                          {copied === i ? '✓ Copied' : 'Copy'}
+                        </button>
+                      </div>
+                      <pre
+                        className="p-4 text-xs leading-relaxed overflow-auto"
+                        style={{ color: '#a5f3fc', fontFamily: "'JetBrains Mono','Fira Code',monospace", margin: 0 }}
+                      >
+                        {renderCode(step.code)}
+                      </pre>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+            ))}
+          </div>
+
+          {/* Troubleshooting */}
+          <div
+            className="mt-8 rounded-2xl p-6"
+            style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)' }}
+          >
+            <h2 className="font-bold text-white text-sm mb-4">Common problems</h2>
+            <div className="space-y-3">
+              {[
+                {
+                  problem: '"Invalid token" when the agent connects',
+                  fix: 'The token was not saved correctly. Run the curl command in step 3 again and paste the new token carefully. No extra spaces.',
+                },
+                {
+                  problem: 'Agent connects but queries time out',
+                  fix: 'The agent can reach the backend but not the database. Check that the host, port, username, and password are correct on the machine running the agent, not on the server machine.',
+                },
+                {
+                  problem: '"No agent connected" error in the browser',
+                  fix: 'The agent is not running or has disconnected. Restart agent.py on your machine. The browser and backend reconnect automatically once the agent registers.',
+                },
+                {
+                  problem: 'agent.py says "asyncpg not installed"',
+                  fix: 'Run: pip install asyncpg .  this is required for PostgreSQL only. MySQL uses aiomysql.',
+                },
+                {
+                  problem: 'Connection works but I see wrong tables',
+                  fix: 'Check the database name you typed in step 6 matches exactly what you typed in the agent prompt. Database names are case-sensitive on Linux.',
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl px-4 py-3"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <p className="text-sm font-semibold text-white mb-1">{item.problem}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    {item.fix}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Troubleshooting */}
-      <div
-        className="mt-8 rounded-2xl p-6"
-        style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)' }}
-      >
-        <h2 className="font-bold text-white text-sm mb-4">Common problems</h2>
-        <div className="space-y-3">
-          {[
-            {
-              problem: '"Invalid token" when the agent connects',
-              fix: 'The token was not saved correctly. Run the curl command in step 3 again and paste the new token carefully. No extra spaces.',
-            },
-            {
-              problem: 'Agent connects but queries time out',
-              fix: 'The agent can reach the backend but not the database. Check that the host, port, username, and password are correct on the machine running the agent, not on the server machine.',
-            },
-            {
-              problem: '"No agent connected" error in the browser',
-              fix: 'The agent is not running or has disconnected. Restart agent.py on your machine. The browser and backend reconnect automatically once the agent registers.',
-            },
-            {
-              problem: 'agent.py says "asyncpg not installed"',
-              fix: 'Run: pip install asyncpg .  this is required for PostgreSQL only. MySQL uses aiomysql.',
-            },
-            {
-              problem: 'Connection works but I see wrong tables',
-              fix: 'Check the database name you typed in step 6 matches exactly what you typed in the agent prompt. Database names are case-sensitive on Linux.',
-            },
-          ].map((item, i) => (
-            <div
-              key={i}
-              className="rounded-xl px-4 py-3"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              <p className="text-sm font-semibold text-white mb-1">{item.problem}</p>
-              <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{item.fix}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      </>)}
+        </>
+      )}
 
       {/* Security note */}
       <div
         className="mt-6 rounded-2xl p-5 flex items-start gap-3"
         style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)' }}
       >
-        
         <div>
           <p className="text-sm font-semibold text-white mb-1">Security model</p>
           <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Your database password is entered on your own computer and is never sent to or stored on our server. The WebSocket connection uses TLS (wss://) end-to-end. Tokens are random 32-byte secrets. The agent only executes SELECT queries. It cannot write to your database.
+            Your database password is entered on your own computer and is never sent to or stored on our server. The
+            WebSocket connection uses TLS (wss://) end-to-end. Tokens are random 32-byte secrets. The agent only
+            executes SELECT queries. It cannot write to your database.
           </p>
         </div>
       </div>

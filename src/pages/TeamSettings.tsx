@@ -1,3 +1,5 @@
+// Team settings: members, roles and invites (/api/org/...).
+
 import { useState, useEffect } from 'react'
 import { API_BASE } from '../config'
 import { usePermissions, forbiddenMessage } from '../usePermissions'
@@ -45,7 +47,13 @@ export default function TeamSettings() {
 function TeamSettingsInner() {
   const [org, setOrg] = useState<any>(null)
   const [requireApproval, setRequireApproval] = useState(false)
-  const [seats, setSeats] = useState<{ used: number; limit: number; pending: number; plan: string; enforced: boolean } | null>(null)
+  const [seats, setSeats] = useState<{
+    used: number
+    limit: number
+    pending: number
+    plan: string
+    enforced: boolean
+  } | null>(null)
   const [policyMsg, setPolicyMsg] = useState('')
   const [myRole, setMyRole] = useState('')
   const [permissions, setPermissions] = useState<Record<string, boolean>>({})
@@ -88,7 +96,10 @@ function TeamSettingsInner() {
       const orgData = await orgRes.json()
       const membersData = await membersRes.json()
       const invitesData = invitesRes.ok ? await invitesRes.json() : []
-      if (orgData?.error) { setError(orgData.error); return }
+      if (orgData?.error) {
+        setError(orgData.error)
+        return
+      }
       setOrg(orgData.org)
       setRequireApproval(!!orgData.settings?.requirePipelineApproval)
       setSeats(orgData.seats || null)
@@ -103,7 +114,9 @@ function TeamSettingsInner() {
     }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+  }, [])
 
   const canManage = !!permissions['org.manageMembers']
 
@@ -118,7 +131,7 @@ function TeamSettingsInner() {
         body: JSON.stringify({ requirePipelineApproval: next }),
       })
       if (!res.ok) {
-        const d = await res.json().catch(() => ({} as any))
+        const d = await res.json().catch(() => ({}) as any)
         setRequireApproval(!next)
         setPolicyMsg(d?.error || 'Could not save this setting.')
       }
@@ -139,9 +152,9 @@ function TeamSettingsInner() {
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ email: inviteEmail.trim(), roleKey: inviteRole }),
       })
-      const data = await res.json().catch(() => ({} as any))
+      const data = await res.json().catch(() => ({}) as any)
       if (!res.ok || data.error) {
-        setInviteMsg(res.status === 403 ? forbiddenMessage() : (data.error || 'Could not send invite.'))
+        setInviteMsg(res.status === 403 ? forbiddenMessage() : data.error || 'Could not send invite.')
         if (res.status !== 403) await load()
         return
       }
@@ -195,15 +208,22 @@ function TeamSettingsInner() {
   }
 
   if (loading) {
-    return <div className="p-8 max-w-4xl mx-auto"><p style={{ color: 'rgba(255,255,255,0.4)' }}>Loading team…</p></div>
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <p style={{ color: 'rgba(255,255,255,0.4)' }}>Loading team…</p>
+      </div>
+    )
   }
   if (error) {
-    return <div className="p-8 max-w-4xl mx-auto"><p style={{ color: '#f87171' }}>{error}</p></div>
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <p style={{ color: '#f87171' }}>{error}</p>
+      </div>
+    )
   }
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-1">Team</h1>
         <p className="text-white/40">
@@ -212,21 +232,35 @@ function TeamSettingsInner() {
       </div>
 
       {canManage && (
-        <div className="mb-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}>
+        <div
+          className="mb-6 p-5 rounded-2xl"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}
+        >
           <p className="text-sm font-bold text-white mb-3">Workspace policies</p>
           <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" className="mt-1" checked={requireApproval} onChange={e => toggleApproval(e.target.checked)} />
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={requireApproval}
+              onChange={e => toggleApproval(e.target.checked)}
+            />
             <span>
               <span className="text-sm font-semibold text-white block">Require approval for pipelines</span>
               <span className="text-xs block" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                Pipelines built or changed by Editors wait for a Data Steward, Admin or Owner before they can run or be scheduled.
+                Pipelines built or changed by Editors wait for a Data Steward, Admin or Owner before they can run or be
+                scheduled.
               </span>
             </span>
           </label>
-          {policyMsg && <p className="text-xs mt-2" style={{ color: '#f87171' }}>{policyMsg}</p>}
+          {policyMsg && (
+            <p className="text-xs mt-2" style={{ color: '#f87171' }}>
+              {policyMsg}
+            </p>
+          )}
           {seats && (
             <p className="text-xs mt-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Users: {seats.used} of {seats.limit} on the {seats.plan} plan{seats.pending ? ` (+${seats.pending} pending)` : ''}
+              Users: {seats.used} of {seats.limit} on the {seats.plan} plan
+              {seats.pending ? ` (+${seats.pending} pending)` : ''}
               {seats.enforced ? '' : ' · limit not enforced yet'}
             </p>
           )}
@@ -234,9 +268,14 @@ function TeamSettingsInner() {
       )}
 
       {canManage && (
-        <div className="mb-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}>
+        <div
+          className="mb-6 p-5 rounded-2xl"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.25)' }}
+        >
           <p className="text-sm font-bold text-white mb-1">Invite someone</p>
-          <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Members use your plan's AI limit and login limit.</p>
+          <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Members use your plan's AI limit and login limit.
+          </p>
           <div className="flex gap-2 flex-wrap">
             <input
               type="email"
@@ -253,7 +292,9 @@ function TeamSettingsInner() {
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
               {ROLE_OPTIONS.map(r => (
-                <option key={r} value={r} style={{ background: '#0d0a1a' }}>{ROLE_LABELS[r]}</option>
+                <option key={r} value={r} style={{ background: '#0d0a1a' }}>
+                  {ROLE_LABELS[r]}
+                </option>
               ))}
             </select>
             <button
@@ -265,11 +306,18 @@ function TeamSettingsInner() {
               {inviteBusy ? 'Sending…' : 'Add to team'}
             </button>
           </div>
-          {inviteMsg && <p className="text-xs mt-2" style={{ color: inviteMsg.includes('can join as') ? '#4ade80' : '#f87171' }}>{inviteMsg}</p>}
+          {inviteMsg && (
+            <p className="text-xs mt-2" style={{ color: inviteMsg.includes('can join as') ? '#4ade80' : '#f87171' }}>
+              {inviteMsg}
+            </p>
+          )}
         </div>
       )}
 
-      <div className="rounded-2xl overflow-hidden mb-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+      <div
+        className="rounded-2xl overflow-hidden mb-6"
+        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+      >
         <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <p className="font-bold text-white">Members ({members.length})</p>
         </div>
@@ -278,7 +326,9 @@ function TeamSettingsInner() {
             <div key={m.userId} className="flex items-center justify-between px-6 py-4">
               <div>
                 <p className="text-sm text-white">{m.email || m.userId}</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.status}</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {m.status}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 {canManage && m.roleKey !== 'owner' ? (
@@ -289,11 +339,16 @@ function TeamSettingsInner() {
                     style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
                   >
                     {ROLE_OPTIONS.map(r => (
-                      <option key={r} value={r} style={{ background: '#0d0a1a' }}>{ROLE_LABELS[r]}</option>
+                      <option key={r} value={r} style={{ background: '#0d0a1a' }}>
+                        {ROLE_LABELS[r]}
+                      </option>
                     ))}
                   </select>
                 ) : (
-                  <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa' }}>
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full font-semibold"
+                    style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa' }}
+                  >
                     {ROLE_LABELS[m.roleKey] || m.roleKey}
                   </span>
                 )}
@@ -301,7 +356,11 @@ function TeamSettingsInner() {
                   <button
                     onClick={() => handleRemove(m)}
                     className="text-xs px-2.5 py-1.5 rounded-lg"
-                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
+                    style={{
+                      background: 'rgba(239,68,68,0.1)',
+                      border: '1px solid rgba(239,68,68,0.2)',
+                      color: '#f87171',
+                    }}
                   >
                     Remove
                   </button>
@@ -313,7 +372,10 @@ function TeamSettingsInner() {
       </div>
 
       {canManage && invites.length > 0 && (
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+        >
           <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
             <p className="font-bold text-white">Approved emails - waiting for verification ({invites.length})</p>
           </div>
@@ -322,7 +384,10 @@ function TeamSettingsInner() {
               <div key={inv.id} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="text-sm text-white">{inv.email}</p>
-                  <p className="text-xs" style={{ color: inv.status === 'expired' ? '#f87171' : 'rgba(255,255,255,0.35)' }}>
+                  <p
+                    className="text-xs"
+                    style={{ color: inv.status === 'expired' ? '#f87171' : 'rgba(255,255,255,0.35)' }}
+                  >
                     {ROLE_LABELS[inv.roleKey] || inv.roleKey}
                   </p>
                 </div>
@@ -330,7 +395,11 @@ function TeamSettingsInner() {
                   <button
                     onClick={() => handleRevokeInvite(inv)}
                     className="text-xs px-2.5 py-1.5 rounded-lg"
-                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
+                    style={{
+                      background: 'rgba(239,68,68,0.1)',
+                      border: '1px solid rgba(239,68,68,0.2)',
+                      color: '#f87171',
+                    }}
                   >
                     Revoke
                   </button>

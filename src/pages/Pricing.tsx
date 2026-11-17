@@ -1,3 +1,5 @@
+// Plans and payment: plan cards, credits top-up, and the Razorpay checkout. begin_checkout and purchase events are sent for analytics.
+
 import { track } from '../analytics'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -88,15 +90,24 @@ type Cur = 'INR' | 'USD'
 // India sees rupees, everyone else sees dollars. The browser's time zone and language decide, nothing is sent
 // anywhere, and the visitor can always switch with the buttons on the page.
 function detectCurrency(): Cur {
-  try { const saved = localStorage.getItem('gt_currency'); if (saved === 'INR' || saved === 'USD') return saved } catch { /* no storage */ }
+  try {
+    const saved = localStorage.getItem('gt_currency')
+    if (saved === 'INR' || saved === 'USD') return saved
+  } catch {
+    /* no storage */
+  }
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''
     if (tz === 'Asia/Calcutta' || tz === 'Asia/Kolkata') return 'INR'
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   try {
     const lang = (navigator.language || '').toLowerCase()
     if (lang === 'en-in' || lang.startsWith('hi')) return 'INR'
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return 'USD'
 }
 
@@ -106,12 +117,25 @@ function requiresContactSales(planKey: string, cycle: Cycle, cur: Cur = 'INR') {
   return CONTACT_SALES_ONLY[planKey]?.includes(cycle) ?? false
 }
 
-const isSignedIn = () => { try { return !!localStorage.getItem('datapro_token') } catch { return false } }
+const isSignedIn = () => {
+  try {
+    return !!localStorage.getItem('datapro_token')
+  } catch {
+    return false
+  }
+}
 
 // Signed-out visitors go to sign-up and come back here afterwards, instead of being dropped on the homepage.
 function sendToSignUp(navigate: (to: string) => void) {
-  if (onSite()) { window.location.assign(signInUrl({ after: '/pricing' })); return }
-  try { localStorage.setItem('gt_after_login', '/pricing') } catch { /* ignore */ }
+  if (onSite()) {
+    window.location.assign(signInUrl({ after: '/pricing' }))
+    return
+  }
+  try {
+    localStorage.setItem('gt_after_login', '/pricing')
+  } catch {
+    /* ignore */
+  }
   navigate('/?signin=1')
 }
 
@@ -121,7 +145,14 @@ export default function Pricing() {
   const [error, setError] = useState('')
   const [cycle, setCycle] = useState<Cycle>('monthly')
   const [cur, setCur] = useState<Cur>(detectCurrency)
-  const pickCurrency = (c: Cur) => { setCur(c); try { localStorage.setItem('gt_currency', c) } catch { /* ignore */ } }
+  const pickCurrency = (c: Cur) => {
+    setCur(c)
+    try {
+      localStorage.setItem('gt_currency', c)
+    } catch {
+      /* ignore */
+    }
+  }
   const signedIn = isSignedIn()
   const [customAmount, setCustomAmount] = useState('')
   const [customAmountUSD, setCustomAmountUSD] = useState('')
@@ -135,7 +166,8 @@ export default function Pricing() {
 
   // /pricing#credits jumps straight to the top-up box
   useEffect(() => {
-    if (window.location.hash === '#credits') setTimeout(() => document.getElementById('credits')?.scrollIntoView({ behavior: 'smooth' }), 300)
+    if (window.location.hash === '#credits')
+      setTimeout(() => document.getElementById('credits')?.scrollIntoView({ behavior: 'smooth' }), 300)
   }, [])
 
   // Approximate display-only conversion rate. This is NOT what the person
@@ -168,23 +200,38 @@ export default function Pricing() {
     // ────────────────────────────────────────────────────────────────────
 
     const token = localStorage.getItem('datapro_token')
-    if (!token) { sendToSignUp(navigate); return }
+    if (!token) {
+      sendToSignUp(navigate)
+      return
+    }
     setLoading(planKey)
 
     try {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planKey, billingCycle: cycle, currency: cur })
+        body: JSON.stringify({ planKey, billingCycle: cycle, currency: cur }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Failed to create subscription'); setLoading(null); return }
+      if (!res.ok) {
+        setError(data.error || 'Failed to create subscription')
+        setLoading(null)
+        return
+      }
 
       const { subscriptionId, key } = data
       const shown = PLANS.find(p => p.key === planKey)
-      const value = cur === 'INR' ? Number(String(cycle === 'monthly' ? shown?.monthlyPrice : shown?.yearlyPrice).replace(/[^0-9]/g, '')) || undefined : shown?.usdMonthly || undefined
+      const value =
+        cur === 'INR'
+          ? Number(String(cycle === 'monthly' ? shown?.monthlyPrice : shown?.yearlyPrice).replace(/[^0-9]/g, '')) ||
+            undefined
+          : shown?.usdMonthly || undefined
       track('begin_checkout', { plan: planKey, billing_cycle: cycle, currency: cur, value })
-      try { sessionStorage.setItem('gt_checkout', JSON.stringify({ plan: planKey, cycle, currency: cur, value })) } catch { /* ignore */ }
+      try {
+        sessionStorage.setItem('gt_checkout', JSON.stringify({ plan: planKey, cycle, currency: cur, value }))
+      } catch {
+        /* ignore */
+      }
 
       const rzp = new (window as any).Razorpay({
         key,
@@ -192,26 +239,38 @@ export default function Pricing() {
         name: "The God's Tool",
         description: PLANS.find(p => p.key === planKey)?.name + ' Plan',
         handler: async (response: any) => {
-  const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-payment`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ ...response, planKey, billingCycle: cycle })
-  })
-  const verifyData = await verifyRes.json()
-  if (verifyData.success) {
-    localStorage.setItem('datapro_plan', planKey)
-    // ← CHANGED: Redirect to thank you page instead of home
-    window.location.href = `/thank-you?payment=${encodeURIComponent(response.razorpay_payment_id)}`
-  } else {
-    setError(`We received your payment but could not activate your plan yet. It should activate within a few minutes. If it does not, contact support with payment ID ${response.razorpay_payment_id}.`)
-  }
-  setLoading(null)
-},
-        modal: { ondismiss: () => { track('checkout_closed', { plan: planKey }); setLoading(null) } },
+          const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ ...response, planKey, billingCycle: cycle }),
+          })
+          const verifyData = await verifyRes.json()
+          if (verifyData.success) {
+            localStorage.setItem('datapro_plan', planKey)
+            // ← CHANGED: Redirect to thank you page instead of home
+            window.location.href = `/thank-you?payment=${encodeURIComponent(response.razorpay_payment_id)}`
+          } else {
+            setError(
+              `We received your payment but could not activate your plan yet. It should activate within a few minutes. If it does not, contact support with payment ID ${response.razorpay_payment_id}.`
+            )
+          }
+          setLoading(null)
+        },
+        modal: {
+          ondismiss: () => {
+            track('checkout_closed', { plan: planKey })
+            setLoading(null)
+          },
+        },
         prefill: { email: localStorage.getItem('datapro_email') || '' },
-        theme: { color: '#7c3aed' }
+        theme: { color: '#7c3aed' },
       })
-      rzp.on('payment.failed', (resp: any) => { track('payment_failed', { plan: planKey, reason: String(resp?.error?.reason || resp?.error?.code || 'unknown') }) })
+      rzp.on('payment.failed', (resp: any) => {
+        track('payment_failed', {
+          plan: planKey,
+          reason: String(resp?.error?.reason || resp?.error?.code || 'unknown'),
+        })
+      })
       rzp.open()
     } catch (err) {
       setError('Cannot connect to server.')
@@ -240,20 +299,35 @@ export default function Pricing() {
       return
     }
     const lim = rates[customCurrency]
-    if (amountNum < lim.min) { setCustomError(`The minimum top-up is ${customSym}${lim.min.toLocaleString('en-IN')}.`); return }
-    if (amountNum > lim.max) { setCustomError(`The maximum single top-up is ${customSym}${lim.max.toLocaleString('en-IN')}. For more, contact us.`); return }
+    if (amountNum < lim.min) {
+      setCustomError(`The minimum top-up is ${customSym}${lim.min.toLocaleString('en-IN')}.`)
+      return
+    }
+    if (amountNum > lim.max) {
+      setCustomError(
+        `The maximum single top-up is ${customSym}${lim.max.toLocaleString('en-IN')}. For more, contact us.`
+      )
+      return
+    }
     const token = localStorage.getItem('datapro_token')
-    if (!token) { sendToSignUp(navigate); return }
+    if (!token) {
+      sendToSignUp(navigate)
+      return
+    }
     setCustomLoading(true)
 
     try {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/create-custom-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount: amountNum, currency: customCurrency })
+        body: JSON.stringify({ amount: amountNum, currency: customCurrency }),
       })
       const data = await res.json()
-      if (!res.ok) { setCustomError(data.error || 'Failed to create payment'); setCustomLoading(false); return }
+      if (!res.ok) {
+        setCustomError(data.error || 'Failed to create payment')
+        setCustomLoading(false)
+        return
+      }
 
       const { orderId, key } = data
       track('begin_checkout', { plan: 'credits', currency: customCurrency, value: amountNum })
@@ -267,7 +341,7 @@ export default function Pricing() {
           const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-custom-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify(response)
+            body: JSON.stringify(response),
           })
           const verifyData = await verifyRes.json()
           if (verifyData.success) {
@@ -276,17 +350,29 @@ export default function Pricing() {
             // instead of alert(), matching handleSubscribe's pattern above.
             window.location.href = `/thank-you?type=credits&currency=${customCurrency}&amount=${amountNum}&payment=${encodeURIComponent(response.razorpay_payment_id)}`
           } else {
-            setCustomError(`We received your payment but could not confirm it yet. Your credits will appear shortly. If they do not, contact support with payment ID ${response.razorpay_payment_id}.`)
+            setCustomError(
+              `We received your payment but could not confirm it yet. Your credits will appear shortly. If they do not, contact support with payment ID ${response.razorpay_payment_id}.`
+            )
           }
           setCustomLoading(false)
         },
-        modal: { ondismiss: () => { track('checkout_closed', { plan: 'credits' }); setCustomLoading(false) } },
+        modal: {
+          ondismiss: () => {
+            track('checkout_closed', { plan: 'credits' })
+            setCustomLoading(false)
+          },
+        },
         prefill: { email: localStorage.getItem('datapro_email') || '' },
-        theme: { color: '#7c3aed' }
+        theme: { color: '#7c3aed' },
       })
       rzp.on('payment.failed', (resp: any) => {
-        track('payment_failed', { plan: 'credits', reason: String(resp?.error?.reason || resp?.error?.code || 'unknown') })
-        setCustomError(`Payment failed: ${resp?.error?.description || 'please try again'}. If money was deducted, your bank refunds it automatically, usually within 5 to 7 days.`)
+        track('payment_failed', {
+          plan: 'credits',
+          reason: String(resp?.error?.reason || resp?.error?.code || 'unknown'),
+        })
+        setCustomError(
+          `Payment failed: ${resp?.error?.description || 'please try again'}. If money was deducted, your bank refunds it automatically, usually within 5 to 7 days.`
+        )
         setCustomLoading(false)
       })
       rzp.open()
@@ -297,109 +383,344 @@ export default function Pricing() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
-
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#07050f',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 16px',
+      }}
+    >
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+        <div
+          style={{
+            fontSize: '2.8rem',
+            fontWeight: 900,
+            fontFamily: 'Georgia, serif',
+            background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
           Choose a plan
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
-          Start with the free plan or the 14-day trial. Pay only when you need more.</p>
+        <p
+          style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}
+        >
+          Start with the free plan or the 14-day trial. Pay only when you need more.
+        </p>
       </div>
 
-      <ul style={{ listStyle: 'none', margin: '0 0 24px', padding: 0, display: 'flex', flexWrap: 'wrap', gap: '8px 20px', justifyContent: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', fontFamily: 'monospace', maxWidth: '760px', textAlign: 'center' }}>
+      <ul
+        style={{
+          listStyle: 'none',
+          margin: '0 0 24px',
+          padding: 0,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px 20px',
+          justifyContent: 'center',
+          color: 'rgba(255,255,255,0.6)',
+          fontSize: '0.8rem',
+          fontFamily: 'monospace',
+          maxWidth: '760px',
+          textAlign: 'center',
+        }}
+      >
         <li>14-day trial with every feature, no card needed</li>
         <li>Free plan stays after the trial</li>
         <li>14-day money-back guarantee on paid plans</li>
         <li>Cancel any time</li>
       </ul>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace', fontSize: '0.75rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '12px',
+          color: 'rgba(255,255,255,0.5)',
+          fontFamily: 'monospace',
+          fontSize: '0.75rem',
+        }}
+      >
         Prices in
         {(['INR', 'USD'] as Cur[]).map(c => (
-          <button key={c} onClick={() => pickCurrency(c)} aria-pressed={cur === c}
-            style={{ padding: '4px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.75rem', background: cur === c ? 'rgba(124,58,237,0.5)' : 'transparent', color: cur === c ? 'white' : 'rgba(255,255,255,0.5)' }}>
+          <button
+            key={c}
+            onClick={() => pickCurrency(c)}
+            aria-pressed={cur === c}
+            style={{
+              padding: '4px 12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255,255,255,0.15)',
+              cursor: 'pointer',
+              fontFamily: 'monospace',
+              fontSize: '0.75rem',
+              background: cur === c ? 'rgba(124,58,237,0.5)' : 'transparent',
+              color: cur === c ? 'white' : 'rgba(255,255,255,0.5)',
+            }}
+          >
             {c === 'INR' ? '₹ INR' : '$ USD'}
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '4px' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '32px',
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '10px',
+          padding: '4px',
+        }}
+      >
         <button
           onClick={() => setCycle('monthly')}
-          style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.8rem', letterSpacing: '0.05em', background: cycle === 'monthly' ? 'rgba(124,58,237,0.35)' : 'transparent', color: cycle === 'monthly' ? 'white' : 'rgba(255,255,255,0.5)' }}
+          style={{
+            padding: '8px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: 'monospace',
+            fontSize: '0.8rem',
+            letterSpacing: '0.05em',
+            background: cycle === 'monthly' ? 'rgba(124,58,237,0.35)' : 'transparent',
+            color: cycle === 'monthly' ? 'white' : 'rgba(255,255,255,0.5)',
+          }}
         >
           Monthly
         </button>
         <button
           onClick={() => setCycle('yearly')}
-          style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.8rem', letterSpacing: '0.05em', background: cycle === 'yearly' ? 'rgba(124,58,237,0.35)' : 'transparent', color: cycle === 'yearly' ? 'white' : 'rgba(255,255,255,0.5)' }}
+          style={{
+            padding: '8px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: 'monospace',
+            fontSize: '0.8rem',
+            letterSpacing: '0.05em',
+            background: cycle === 'yearly' ? 'rgba(124,58,237,0.35)' : 'transparent',
+            color: cycle === 'yearly' ? 'white' : 'rgba(255,255,255,0.5)',
+          }}
         >
           Yearly
         </button>
       </div>
 
       {error && (
-        <div style={{ marginBottom: '24px', background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: '10px', padding: '12px 20px', color: '#fca5a5', fontSize: '0.875rem', fontFamily: 'monospace' }}>
+        <div
+          style={{
+            marginBottom: '24px',
+            background: 'rgba(220,38,38,0.12)',
+            border: '1px solid rgba(220,38,38,0.3)',
+            borderRadius: '10px',
+            padding: '12px 20px',
+            color: '#fca5a5',
+            fontSize: '0.875rem',
+            fontFamily: 'monospace',
+          }}
+        >
           {error}
         </div>
       )}
 
-      <div style={{ maxWidth: '1200px', width: '100%', marginBottom: '24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px 20px', padding: '16px 22px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(124,58,237,0.22), rgba(34,211,238,0.12))', border: '1px solid rgba(167,139,250,0.45)' }}>
+      <div
+        style={{
+          maxWidth: '1200px',
+          width: '100%',
+          marginBottom: '24px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px 20px',
+          padding: '16px 22px',
+          borderRadius: '14px',
+          background: 'linear-gradient(135deg, rgba(124,58,237,0.22), rgba(34,211,238,0.12))',
+          border: '1px solid rgba(167,139,250,0.45)',
+        }}
+      >
         <div style={{ flex: '1 1 320px' }}>
-          <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem', fontFamily: 'Georgia, serif' }}>Don't want a monthly plan? Buy credits instead.</div>
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem', marginTop: '4px', fontFamily: 'monospace', lineHeight: 1.5 }}>
-            Add any amount from {cur === 'USD' ? '$' : '₹'}{rates[cur].min.toLocaleString('en-IN')}. One credit pays for one AI action ({cur === 'USD' ? '$' : '₹'}{rates[cur].perCredit} each). No subscription.
+          <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
+            Don't want a monthly plan? Buy credits instead.
+          </div>
+          <div
+            style={{
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '0.8rem',
+              marginTop: '4px',
+              fontFamily: 'monospace',
+              lineHeight: 1.5,
+            }}
+          >
+            Add any amount from {cur === 'USD' ? '$' : '₹'}
+            {rates[cur].min.toLocaleString('en-IN')}. One credit pays for one AI action ({cur === 'USD' ? '$' : '₹'}
+            {rates[cur].perCredit} each). No subscription.
           </div>
         </div>
-        <button onClick={() => document.getElementById('credits')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-          style={{ padding: '11px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', whiteSpace: 'nowrap' }}>
+        <button
+          onClick={() => document.getElementById('credits')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+          style={{
+            padding: '11px 20px',
+            borderRadius: '10px',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: 'monospace',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+            color: 'white',
+            whiteSpace: 'nowrap',
+          }}
+        >
           Add custom credits
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', maxWidth: '1200px', width: '100%' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '20px',
+          maxWidth: '1200px',
+          width: '100%',
+        }}
+      >
         {PLANS.map(plan => (
-          <div key={plan.key} style={{
-            background: plan.highlight ? 'rgba(124,58,237,0.12)' : plan.bg,
-            border: `1px solid ${plan.border}`,
-            borderRadius: '16px',
-            padding: '28px 24px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            position: 'relative',
-            boxShadow: plan.highlight ? '0 0 40px rgba(124,58,237,0.2)' : 'none'
-          }}>
+          <div
+            key={plan.key}
+            style={{
+              background: plan.highlight ? 'rgba(124,58,237,0.12)' : plan.bg,
+              border: `1px solid ${plan.border}`,
+              borderRadius: '16px',
+              padding: '28px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              position: 'relative',
+              boxShadow: plan.highlight ? '0 0 40px rgba(124,58,237,0.2)' : 'none',
+            }}
+          >
             {plan.badge && (
-              <div style={{ position: 'absolute', top: '-13px', left: '50%', transform: 'translateX(-50%)', background: '#22d3ee', color: '#0a0a1a', fontSize: '0.7rem', fontWeight: 700, padding: '3px 12px', borderRadius: '20px', fontFamily: 'monospace', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-13px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: '#22d3ee',
+                  color: '#0a0a1a',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '3px 12px',
+                  borderRadius: '20px',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.08em',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {plan.badge}
               </div>
             )}
 
             <div>
-              <div style={{ color: plan.color, fontWeight: 700, fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{plan.name}</div>
-              <div style={{ color: 'white', fontWeight: 900, fontSize: '1.8rem', fontFamily: 'Georgia, serif', lineHeight: 1.1, marginTop: '6px' }}>
+              <div
+                style={{
+                  color: plan.color,
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {plan.name}
+              </div>
+              <div
+                style={{
+                  color: 'white',
+                  fontWeight: 900,
+                  fontSize: '1.8rem',
+                  fontFamily: 'Georgia, serif',
+                  lineHeight: 1.1,
+                  marginTop: '6px',
+                }}
+              >
                 {cur === 'INR'
-                  ? (cycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice)
-                  : (requiresContactSales(plan.key, cycle, cur) ? 'Custom quote' : `$${plan.usdMonthly}`)}
+                  ? cycle === 'monthly'
+                    ? plan.monthlyPrice
+                    : plan.yearlyPrice
+                  : requiresContactSales(plan.key, cycle, cur)
+                    ? 'Custom quote'
+                    : `$${plan.usdMonthly}`}
                 {!(cur === 'USD' && requiresContactSales(plan.key, cycle, cur)) && (
-                  <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{cycle === 'monthly' ? '/month' : '/year'}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>
+                    {cycle === 'monthly' ? '/month' : '/year'}
+                  </span>
                 )}
               </div>
             </div>
 
-            <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#34d399', fontFamily: 'monospace' }}>
+            <div
+              style={{
+                background: 'rgba(52,211,153,0.08)',
+                border: '1px solid rgba(52,211,153,0.2)',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                fontSize: '0.78rem',
+                color: '#34d399',
+                fontFamily: 'monospace',
+              }}
+            >
               {plan.aiPerDay} AI actions a day
             </div>
 
-            <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#a5b4fc', fontFamily: 'monospace' }}>
+            <div
+              style={{
+                background: 'rgba(99,102,241,0.08)',
+                border: '1px solid rgba(99,102,241,0.2)',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                fontSize: '0.78rem',
+                color: '#a5b4fc',
+                fontFamily: 'monospace',
+              }}
+            >
               {plan.userLimit} {plan.userLimit > 1 ? 'people' : 'person'} signed in at once
             </div>
 
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+            <ul
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                flex: 1,
+              }}
+            >
               {plan.features.map(f => (
-                <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', fontFamily: 'monospace' }}>
+                <li
+                  key={f}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    fontSize: '0.82rem',
+                    color: 'rgba(255,255,255,0.65)',
+                    fontFamily: 'monospace',
+                  }}
+                >
                   <span style={{ color: plan.color, marginTop: '1px' }}>✓</span>
                   {f}
                 </li>
@@ -422,23 +743,67 @@ export default function Pricing() {
                 fontFamily: 'monospace',
                 letterSpacing: '0.05em',
                 opacity: loading === plan.key ? 0.6 : 1,
-                transition: 'opacity 0.2s'
+                transition: 'opacity 0.2s',
               }}
             >
-              {loading === plan.key ? 'Opening...' : (requiresContactSales(plan.key, cycle, cur) ? 'Ask for a quote' : (signedIn ? 'Subscribe' : 'Sign up to subscribe'))}
+              {loading === plan.key
+                ? 'Opening...'
+                : requiresContactSales(plan.key, cycle, cur)
+                  ? 'Ask for a quote'
+                  : signedIn
+                    ? 'Subscribe'
+                    : 'Sign up to subscribe'}
             </button>
           </div>
         ))}
       </div>
 
-      <div id="credits" style={{ marginTop: '40px', background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(167,139,250,0.5)', boxShadow: '0 0 40px rgba(124,58,237,0.18)', borderRadius: '16px', padding: '28px 30px', maxWidth: '520px', width: '100%', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div
+        id="credits"
+        style={{
+          marginTop: '40px',
+          background: 'rgba(124,58,237,0.1)',
+          border: '1px solid rgba(167,139,250,0.5)',
+          boxShadow: '0 0 40px rgba(124,58,237,0.18)',
+          borderRadius: '16px',
+          padding: '28px 30px',
+          maxWidth: '520px',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '14px',
+        }}
+      >
         <div>
-          <div style={{ display: 'inline-block', background: '#22d3ee', color: '#0a0a1a', fontSize: '0.68rem', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', marginBottom: '10px', fontFamily: 'monospace' }}>No subscription</div>
+          <div
+            style={{
+              display: 'inline-block',
+              background: '#22d3ee',
+              color: '#0a0a1a',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              padding: '3px 10px',
+              borderRadius: '999px',
+              marginBottom: '10px',
+              fontFamily: 'monospace',
+            }}
+          >
+            No subscription
+          </div>
           <div style={{ color: 'white', fontWeight: 800, fontSize: '1.3rem', fontFamily: 'Georgia, serif' }}>
             Custom credits: pay only for what you use
           </div>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', marginTop: '6px', lineHeight: 1.5, fontFamily: 'monospace' }}>
-            Add credits on your own terms. No subscription, no lock-in. Built for freelancers covering a single project, agencies managing multiple clients, and corporate teams needing ad-hoc budget without a procurement cycle.
+          <p
+            style={{
+              color: 'rgba(255,255,255,0.45)',
+              fontSize: '0.8rem',
+              marginTop: '6px',
+              lineHeight: 1.5,
+              fontFamily: 'monospace',
+            }}
+          >
+            Add credits on your own terms. No subscription, no lock-in. Built for freelancers covering a single project,
+            agencies managing multiple clients, and corporate teams needing ad-hoc budget without a procurement cycle.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -449,8 +814,17 @@ export default function Pricing() {
               min="1"
               placeholder="₹ amount"
               value={customAmount}
-              onChange={(e) => handleINRChange(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'white', fontFamily: 'monospace', fontSize: '0.9rem', width: '100%' }}
+              onChange={e => handleINRChange(e.target.value)}
+              style={{
+                padding: '10px 12px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(0,0,0,0.3)',
+                color: 'white',
+                fontFamily: 'monospace',
+                fontSize: '0.9rem',
+                width: '100%',
+              }}
             />
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -460,16 +834,34 @@ export default function Pricing() {
               min="1"
               placeholder="$ amount"
               value={customAmountUSD}
-              onChange={(e) => handleUSDChange(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.3)', color: 'white', fontFamily: 'monospace', fontSize: '0.9rem', width: '100%' }}
+              onChange={e => handleUSDChange(e.target.value)}
+              style={{
+                padding: '10px 12px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'rgba(0,0,0,0.3)',
+                color: 'white',
+                fontFamily: 'monospace',
+                fontSize: '0.9rem',
+                width: '100%',
+              }}
             />
           </div>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.68rem', fontFamily: 'monospace' }}>
-          {previewCredits > 0
-            ? <span style={{ color: '#34d399', fontWeight: 700 }}>You get {previewCredits.toLocaleString('en-IN')} AI credits</span>
-            : <span>Minimum {customSym}{rates[customCurrency].min.toLocaleString('en-IN')} · 1 credit = 1 AI action ({customSym}{rates[customCurrency].perCredit} each)</span>}
-          <br />USD shown is an estimate; the exact rate is applied at checkout.
+          {previewCredits > 0 ? (
+            <span style={{ color: '#34d399', fontWeight: 700 }}>
+              You get {previewCredits.toLocaleString('en-IN')} AI credits
+            </span>
+          ) : (
+            <span>
+              Minimum {customSym}
+              {rates[customCurrency].min.toLocaleString('en-IN')} · 1 credit = 1 AI action ({customSym}
+              {rates[customCurrency].perCredit} each)
+            </span>
+          )}
+          <br />
+          USD shown is an estimate; the exact rate is applied at checkout.
         </p>
         {customError && (
           <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>{customError}</div>
@@ -489,35 +881,73 @@ export default function Pricing() {
             cursor: customLoading ? 'not-allowed' : 'pointer',
             fontFamily: 'monospace',
             letterSpacing: '0.05em',
-            opacity: customLoading ? 0.6 : 1
+            opacity: customLoading ? 0.6 : 1,
           }}
         >
           {customLoading ? 'Opening...' : 'Add Credits'}
         </button>
-        <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem', fontFamily: 'monospace', textAlign: 'center' }}>
-          Credits never expire. They are used after your plan's daily AI allowance, or on their own with no subscription. A receipt is emailed and saved under Billing.
+        <p
+          style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem', fontFamily: 'monospace', textAlign: 'center' }}
+        >
+          Credits never expire. They are used after your plan's daily AI allowance, or on their own with no
+          subscription. A receipt is emailed and saved under Billing.
         </p>
       </div>
 
       <div style={{ maxWidth: '760px', width: '100%', marginTop: '40px', fontFamily: 'monospace' }}>
-        <div style={{ color: 'white', fontWeight: 700, fontSize: '1rem', marginBottom: '8px', fontFamily: 'Georgia, serif' }}>Before you pay</div>
+        <div
+          style={{
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '1rem',
+            marginBottom: '8px',
+            fontFamily: 'Georgia, serif',
+          }}
+        >
+          Before you pay
+        </div>
         {[
-          ['Do I have to pay to try it?', 'No. New accounts get 14 days with every feature and no card. After that the free plan stays: 3 sources, CSV files up to 5 MB, 5,000 rows per run and 1 pipeline.'],
-          ['What is an AI action?', 'One credit pays for one AI action, such as asking the AI to write a cleaning step. Plain actions that do not use AI do not use credits. Plans include a daily number of AI actions, and credits cover anything beyond that.'],
-          ['Can I get my money back?', 'Yes. Paid plans have a 14-day money-back guarantee, and you can cancel any time.'],
-          ['Is my data safe?', 'In the default private mode the AI gets your instruction and column names, not your rows. Read the details in the privacy policy before you connect real data. A test on a throwaway file is a good first step.'],
-          ['Why is there a quote button instead of a price?', 'Some options, such as yearly billing in dollars or the Enterprise plan, are priced by hand. Send a request and we will reply by email.'],
+          [
+            'Do I have to pay to try it?',
+            'No. New accounts get 14 days with every feature and no card. After that the free plan stays: 3 sources, CSV files up to 5 MB, 5,000 rows per run and 1 pipeline.',
+          ],
+          [
+            'What is an AI action?',
+            'One credit pays for one AI action, such as asking the AI to write a cleaning step. Plain actions that do not use AI do not use credits. Plans include a daily number of AI actions, and credits cover anything beyond that.',
+          ],
+          [
+            'Can I get my money back?',
+            'Yes. Paid plans have a 14-day money-back guarantee, and you can cancel any time.',
+          ],
+          [
+            'Is my data safe?',
+            'In the default private mode the AI gets your instruction and column names, not your rows. Read the details in the privacy policy before you connect real data. A test on a throwaway file is a good first step.',
+          ],
+          [
+            'Why is there a quote button instead of a price?',
+            'Some options, such as yearly billing in dollars or the Enterprise plan, are priced by hand. Send a request and we will reply by email.',
+          ],
         ].map(([q, a]) => (
           <details key={q} style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '12px 0' }}>
             <summary style={{ cursor: 'pointer', color: 'white', fontWeight: 600, fontSize: '0.85rem' }}>{q}</summary>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', lineHeight: 1.6, margin: '8px 0 0' }}>{a}</p>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', lineHeight: 1.6, margin: '8px 0 0' }}>
+              {a}
+            </p>
           </details>
         ))}
       </div>
 
       <button
         onClick={() => navigate('/')}
-        style={{ marginTop: '32px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'monospace' }}
+        style={{
+          marginTop: '32px',
+          background: 'transparent',
+          border: 'none',
+          color: 'rgba(255,255,255,0.25)',
+          cursor: 'pointer',
+          fontSize: '0.8rem',
+          fontFamily: 'monospace',
+        }}
       >
         {signedIn ? '← Back to app' : '← Back to home'}
       </button>

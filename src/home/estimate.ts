@@ -3,16 +3,24 @@
 export type Cur = 'USD' | 'INR'
 
 export interface Inputs {
-  files: number    // files cleaned per month
-  rows: number     // rows in a typical file
+  files: number // files cleaned per month
+  rows: number // rows in a typical file
   aiPerFile: number // AI actions per file
-  sources: number  // data sources connected
-  seats: number    // people who log in
+  sources: number // data sources connected
+  seats: number // people who log in
   cur: Cur
 }
 
-export interface Line { label: string; detail: string; amount: number }
-export interface Option { name: string; total: number; lines: Line[] }
+export interface Line {
+  label: string
+  detail: string
+  amount: number
+}
+export interface Option {
+  name: string
+  total: number
+  lines: Line[]
+}
 export interface Estimate {
   custom: boolean
   best: Option | null
@@ -55,7 +63,13 @@ export function estimate(raw: Inputs): Estimate {
   const notes: string[] = []
 
   if (i.seats > 15) {
-    return { custom: true, best: null, others: [], actions, notes: ['More than 15 logins needs a custom plan, so we quote it by hand.'] }
+    return {
+      custom: true,
+      best: null,
+      others: [],
+      actions,
+      notes: ['More than 15 logins needs a custom plan, so we quote it by hand.'],
+    }
   }
 
   const needsPaid = i.rows > FREE_LIMITS.rows || i.sources > FREE_LIMITS.sources || i.seats > FREE_LIMITS.seats
@@ -69,12 +83,17 @@ export function estimate(raw: Inputs): Estimate {
 
   if (!needsPaid) {
     if (actions === 0) {
-      options.push({ name: 'Free plan', total: 0, lines: [{ label: 'Free plan', detail: 'No AI actions needed', amount: 0 }] })
+      options.push({
+        name: 'Free plan',
+        total: 0,
+        lines: [{ label: 'Free plan', detail: 'No AI actions needed', amount: 0 }],
+      })
     } else {
       const raw = actions * c
       const total = money(Math.max(raw, MIN_TOPUP[i.cur]), i.cur)
       const lines = [creditLine(actions)]
-      if (raw < MIN_TOPUP[i.cur]) lines.push({ label: 'Minimum top-up', detail: 'Smallest credit purchase', amount: money(total - raw, i.cur) })
+      if (raw < MIN_TOPUP[i.cur])
+        lines.push({ label: 'Minimum top-up', detail: 'Smallest credit purchase', amount: money(total - raw, i.cur) })
       options.push({ name: 'Free plan + credits', total, lines })
       notes.push('Credits never expire, so a first top-up carries over to later months.')
     }
@@ -86,17 +105,24 @@ export function estimate(raw: Inputs): Estimate {
     const overflowDay = Math.max(0, perDay - p.aiPerDay)
     const overflow = Math.ceil(overflowDay * WORKDAYS)
     const price = i.cur === 'USD' ? p.usd : p.inr
-    const lines: Line[] = [{
-      label: `${p.name} plan`,
-      detail: `${p.aiPerDay} AI actions a day included, ${p.seats} login${p.seats > 1 ? 's' : ''}`,
-      amount: price,
-    }]
+    const lines: Line[] = [
+      {
+        label: `${p.name} plan`,
+        detail: `${p.aiPerDay} AI actions a day included, ${p.seats} login${p.seats > 1 ? 's' : ''}`,
+        amount: price,
+      },
+    ]
     let total = price
     if (overflow > 0) {
       const l = creditLine(overflow)
       lines.push({ ...l, detail: `Beyond the daily allowance: ${l.detail}` })
       total += Math.max(l.amount, MIN_TOPUP[i.cur])
-      if (l.amount < MIN_TOPUP[i.cur]) lines.push({ label: 'Minimum top-up', detail: 'Smallest credit purchase', amount: money(MIN_TOPUP[i.cur] - l.amount, i.cur) })
+      if (l.amount < MIN_TOPUP[i.cur])
+        lines.push({
+          label: 'Minimum top-up',
+          detail: 'Smallest credit purchase',
+          amount: money(MIN_TOPUP[i.cur] - l.amount, i.cur),
+        })
     }
     options.push({ name: `${p.name} plan`, total: money(total, i.cur), lines })
   }
@@ -115,4 +141,8 @@ export function estimate(raw: Inputs): Estimate {
 }
 
 export const fmt = (n: number, cur: Cur, pdf = false) =>
-  (cur === 'USD' ? '$' : pdf ? 'Rs ' : '₹') + n.toLocaleString(cur === 'USD' ? 'en-US' : 'en-IN', { minimumFractionDigits: cur === 'USD' && n % 1 ? 2 : 0, maximumFractionDigits: 2 })
+  (cur === 'USD' ? '$' : pdf ? 'Rs ' : '₹') +
+  n.toLocaleString(cur === 'USD' ? 'en-US' : 'en-IN', {
+    minimumFractionDigits: cur === 'USD' && n % 1 ? 2 : 0,
+    maximumFractionDigits: 2,
+  })

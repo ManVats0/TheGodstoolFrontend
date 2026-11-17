@@ -1,14 +1,16 @@
-import React from 'react';
+// Small data viewer component. Nothing imports it at the moment.
+
+import React from 'react'
 
 interface DataViewerProps {
-  data: any;
+  data: any
 }
 
 const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
   // SAFE DATA ACCESS
-  const sampleData = data.sample_data || data.top_500_rows || [];
-  const hasData = sampleData.length > 0;
-  const firstRow = sampleData[0] || {};
+  const sampleData = data.sample_data || data.top_500_rows || []
+  const hasData = sampleData.length > 0
+  const firstRow = sampleData[0] || {}
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -20,7 +22,7 @@ const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
             {data.dataset_info?.rows?.toLocaleString()} total rows
           </span>
         </h3>
-        
+
         {hasData ? (
           <div className="overflow-x-auto rounded-2xl bg-white/5">
             <table className="w-full text-sm">
@@ -76,21 +78,15 @@ const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="p-4 bg-white/10 rounded-xl">
               <span className="text-white/60 block">Total Rows</span>
-              <div className="text-2xl font-black text-white">
-                {data.dataset_info?.rows?.toLocaleString() || 0}
-              </div>
+              <div className="text-2xl font-black text-white">{data.dataset_info?.rows?.toLocaleString() || 0}</div>
             </div>
             <div className="p-4 bg-white/10 rounded-xl">
               <span className="text-white/60 block">Columns</span>
-              <div className="text-2xl font-black text-white">
-                {data.dataset_info?.columns || 0}
-              </div>
+              <div className="text-2xl font-black text-white">{data.dataset_info?.columns || 0}</div>
             </div>
             <div className="p-4 bg-white/10 rounded-xl">
               <span className="text-white/60 block">Memory</span>
-              <div className="text-xl font-bold text-white">
-                {(data.dataset_info?.memory_mb || 0)?.toFixed(1)} MB
-              </div>
+              <div className="text-xl font-bold text-white">{(data.dataset_info?.memory_mb || 0)?.toFixed(1)} MB</div>
             </div>
             <div className="p-4 bg-white/10 rounded-xl">
               <span className="text-white/60 block">Missing Values</span>
@@ -103,7 +99,7 @@ const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
 
         {/* Download */}
         {data.download_url && (
-          <a 
+          <a
             href={data.download_url}
             className="block w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-4 px-8 rounded-3xl text-center shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-300 text-lg"
             download
@@ -113,7 +109,7 @@ const DataViewer: React.FC<DataViewerProps> = ({ data }) => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DataViewer;
+export default DataViewer

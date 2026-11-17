@@ -1,3 +1,6 @@
+// Turns a blog post's content blocks (paragraph, heading, list, quote, tip, diagram) into React elements.
+// rich() handles **bold**, `code` and [links](url) inside a block of text.
+
 import type { ReactNode } from 'react'
 import type { PostBlock } from './posts'
 import { headingId } from './posts'
@@ -7,14 +10,20 @@ import { DIAGRAMS } from './diagrams'
 export function rich(text: string): ReactNode[] {
   const out: ReactNode[] = []
   const re = /\*\*(.+?)\*\*|`(.+?)`|\[(.+?)\]\((https?:\/\/[^\s)]+|\/[^\s)]*)\)/g
-  let last = 0, m: RegExpExecArray | null, i = 0
+  let last = 0,
+    m: RegExpExecArray | null,
+    i = 0
   while ((m = re.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index))
     if (m[1] !== undefined) out.push(<strong key={i++}>{m[1]}</strong>)
     else if (m[2] !== undefined) out.push(<code key={i++}>{m[2]}</code>)
     else {
       const ext = m[4].startsWith('http')
-      out.push(<a key={i++} href={m[4]} {...(ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{m[3]}</a>)
+      out.push(
+        <a key={i++} href={m[4]} {...(ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+          {m[3]}
+        </a>
+      )
     }
     last = m.index + m[0].length
   }
@@ -27,15 +36,39 @@ export function Body({ blocks }: { blocks: PostBlock[] }) {
     <div className="gb-prose">
       {blocks.map((b, i) => {
         switch (b.type) {
-          case 'h': return <h2 key={i} id={headingId(b.text)}>{rich(b.text)}</h2>
-          case 'ul': return <ul key={i}>{b.items.map((it, j) => <li key={j}>{rich(it)}</li>)}</ul>
-          case 'quote': return <blockquote key={i}>{rich(b.text)}</blockquote>
-          case 'tip': return <div key={i} className="gb-tip">{rich(b.text)}</div>
+          case 'h':
+            return (
+              <h2 key={i} id={headingId(b.text)}>
+                {rich(b.text)}
+              </h2>
+            )
+          case 'ul':
+            return (
+              <ul key={i}>
+                {b.items.map((it, j) => (
+                  <li key={j}>{rich(it)}</li>
+                ))}
+              </ul>
+            )
+          case 'quote':
+            return <blockquote key={i}>{rich(b.text)}</blockquote>
+          case 'tip':
+            return (
+              <div key={i} className="gb-tip">
+                {rich(b.text)}
+              </div>
+            )
           case 'diagram': {
             const D = DIAGRAMS[b.id]
-            return D ? <figure key={i} className="gb-fig"><D />{b.caption && <figcaption>{rich(b.caption)}</figcaption>}</figure> : null
+            return D ? (
+              <figure key={i} className="gb-fig">
+                <D />
+                {b.caption && <figcaption>{rich(b.caption)}</figcaption>}
+              </figure>
+            ) : null
           }
-          default: return <p key={i}>{rich(b.text)}</p>
+          default:
+            return <p key={i}>{rich(b.text)}</p>
         }
       })}
     </div>

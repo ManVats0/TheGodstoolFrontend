@@ -1,41 +1,135 @@
+// In-app copy of the privacy policy. The static copy is privacy.html: keep the two in step.
+
 export default function Privacy() {
   return (
-    <div style={{ minHeight: '100vh', background: '#07050f', color: '#e2e8f0', fontFamily: 'Georgia, serif', padding: '60px 24px' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#07050f',
+        color: '#e2e8f0',
+        fontFamily: 'Georgia, serif',
+        padding: '60px 24px',
+      }}
+    >
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '2rem', color: '#a78bfa' }}>Privacy Policy</h1>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', marginBottom: '40px' }}>Last updated: June 2026</p>
-                <p>Welcome to The God's Tool. Protecting your data isn't an afterthought here. It's built into how the platform works, from encrypted credential storage to retention controls you manage yourself. This Privacy Policy explains exactly how we collect, use, and protect your information.</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '24px 0', padding: '16px 20px', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: '12px' }}>
-          {['Encrypted database credentials', 'Self-service data erasure', 'Never sold to third parties', 'Google-verified data handling'].map(item => (
-            <span key={item} style={{ fontSize: '0.8rem', color: '#c4b5fd', fontFamily: 'monospace' }}>{item}</span>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', marginBottom: '40px' }}>
+          Last updated: June 2026
+        </p>
+        <p>
+          Welcome to The God's Tool. Protecting your data isn't an afterthought here. It's built into how the platform
+          works, from encrypted credential storage to retention controls you manage yourself. This Privacy Policy
+          explains exactly how we collect, use, and protect your information.
+        </p>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '12px',
+            margin: '24px 0',
+            padding: '16px 20px',
+            background: 'rgba(124,58,237,0.08)',
+            border: '1px solid rgba(124,58,237,0.2)',
+            borderRadius: '12px',
+          }}
+        >
+          {[
+            'Encrypted database credentials',
+            'Self-service data erasure',
+            'Never sold to third parties',
+            'Google-verified data handling',
+          ].map(item => (
+            <span key={item} style={{ fontSize: '0.8rem', color: '#c4b5fd', fontFamily: 'monospace' }}>
+              {item}
+            </span>
           ))}
         </div>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>1. Information We Collect</h2>
         <p>Email address, name, uploaded data, usage statistics, and payment info via Razorpay.</p>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>2. How We Use It</h2>
         <p>To provide our service, manage your account, send transactional emails, and enforce plan limits.</p>
-<h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>3. Google User Data</h2>
-        <p>If you connect Google Sheets, we only access the specific files you select via Google Picker. We never access your entire Google Drive.</p>
-        <p style={{ marginTop: '12px' }}>We never store your Google credentials or OAuth tokens on our servers beyond your active session.</p>
-        <p style={{ marginTop: '12px' }}>All data transmitted between your Google account and our service is protected using HTTPS/TLS encryption. Google user data is never shared with third parties, sold, or used for advertising purposes.</p>
-        <p style={{ marginTop: '12px' }}>Google Sheets data accessed during a session is used solely to perform the data cleaning or pipeline operation you request, and is not retained on our servers after your session ends.</p>
-        <p style={{ marginTop: '12px' }}>You can revoke The God's Tool's access to your Google account at any time by visiting <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa' }}>myaccount.google.com/permissions</a>.</p>        <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>4. Third-Party Services</h2>
+        <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>3. Google User Data</h2>
+        <p>
+          If you connect Google Sheets, we only access the specific files you select via Google Picker. We never access
+          your entire Google Drive.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          We never store your Google credentials or OAuth tokens on our servers beyond your active session.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          All data transmitted between your Google account and our service is protected using HTTPS/TLS encryption.
+          Google user data is never shared with third parties, sold, or used for advertising purposes.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          Google Sheets data accessed during a session is used solely to perform the data cleaning or pipeline operation
+          you request, and is not retained on our servers after your session ends.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          You can revoke The God's Tool's access to your Google account at any time by visiting{' '}
+          <a
+            href="https://myaccount.google.com/permissions"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#a78bfa' }}
+          >
+            myaccount.google.com/permissions
+          </a>
+          .
+        </p>{' '}
+        <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>4. Third-Party Services</h2>
         <p>Razorpay (payments), Resend (email), Google OAuth (login), Railway (hosting).</p>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>5. Data Sharing</h2>
         <p>We do not sell or share your data with third parties for marketing.</p>
-<h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>6. Data Retention and Deletion</h2>
+        <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>6. Data Retention and Deletion</h2>
         <p>We retain your account data (name, email, subscription status) for as long as your account is active.</p>
-        <p style={{ marginTop: '12px' }}>Google user data (Sheets content accessed during a session) is not stored beyond the active session and is automatically discarded once your operation is complete.</p>
-        <p style={{ marginTop: '12px' }}>Free try (no sign-up): if you use the free try page, your file is read in memory to show the problems and the first 20 rows cleaned, and is not saved. To enforce the hourly limit we keep a short-lived count of tries against your IP address in memory. We record that a try happened, the file type and the result type in our analytics, never the file's contents. The free try does not use AI.</p>
-        <p style={{ marginTop: '12px' }}>Website chat: the support chat on our public pages sends the questions you type to our AI provider (Anthropic) so it can write a reply from the text of our website. We do not save the conversation, and it cannot see your files, rows or account. We keep only short-lived counts per IP address in memory to limit abuse. Please do not type passwords or personal data into it.</p>
-        <p style={{ marginTop: '12px' }}>To request deletion of your account and all associated data, email us at <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>contact@thegodstool.com</a>. We will process deletion requests within 30 days.</p>
+        <p style={{ marginTop: '12px' }}>
+          Google user data (Sheets content accessed during a session) is not stored beyond the active session and is
+          automatically discarded once your operation is complete.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          Free try (no sign-up): if you use the free try page, your file is read in memory to show the problems and the
+          first 20 rows cleaned, and is not saved. To enforce the hourly limit we keep a short-lived count of tries
+          against your IP address in memory. We record that a try happened, the file type and the result type in our
+          analytics, never the file's contents. The free try does not use AI.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          Website chat: the support chat on our public pages sends the questions you type to our AI provider (Anthropic)
+          so it can write a reply from the text of our website. We do not save the conversation, and it cannot see your
+          files, rows or account. We keep only short-lived counts per IP address in memory to limit abuse. Please do not
+          type passwords or personal data into it.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          To request deletion of your account and all associated data, email us at{' '}
+          <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>
+            contact@thegodstool.com
+          </a>
+          . We will process deletion requests within 30 days.
+        </p>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>7. Security Measures</h2>
-        <p>Account passwords are hashed with bcrypt and never stored in plain text. Database and connector credentials you provide (MySQL, MongoDB, cloud service accounts, etc.) are encrypted at rest before being saved, and decrypted only when a pipeline you configured needs to run.</p>
-        <p style={{ marginTop: '12px' }}>All traffic between your browser and our servers is encrypted via HTTPS/TLS. Login sessions use signed tokens with configurable device limits per plan, so you control how many places your account can be active at once.</p>
-        <p style={{ marginTop: '12px' }}>You are never locked into your data with us: every connected source in your Data Sources panel has a "Right to Erasure" control that permanently and immediately deletes that source's data on request. No support ticket required.</p>
+        <p>
+          Account passwords are hashed with bcrypt and never stored in plain text. Database and connector credentials
+          you provide (MySQL, MongoDB, cloud service accounts, etc.) are encrypted at rest before being saved, and
+          decrypted only when a pipeline you configured needs to run.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          All traffic between your browser and our servers is encrypted via HTTPS/TLS. Login sessions use signed tokens
+          with configurable device limits per plan, so you control how many places your account can be active at once.
+        </p>
+        <p style={{ marginTop: '12px' }}>
+          You are never locked into your data with us: every connected source in your Data Sources panel has a "Right to
+          Erasure" control that permanently and immediately deletes that source's data on request. No support ticket
+          required.
+        </p>
         <h2 style={{ color: '#c4b5fd', marginTop: '32px' }}>8. Contact</h2>
-        <p>Email us at <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>contact@thegodstool.com</a></p>
-        <a href="/" style={{ display: 'inline-block', marginTop: '40px', color: '#a78bfa' }}>← Back to The God's Tool</a>
+        <p>
+          Email us at{' '}
+          <a href="mailto:contact@thegodstool.com" style={{ color: '#a78bfa' }}>
+            contact@thegodstool.com
+          </a>
+        </p>
+        <a href="/" style={{ display: 'inline-block', marginTop: '40px', color: '#a78bfa' }}>
+          ← Back to The God's Tool
+        </a>
       </div>
     </div>
   )
