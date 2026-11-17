@@ -1,4 +1,4 @@
-import logo from '../the_gods_tool_logo_3d.png'
+import logo from '../the_gods_tool_logo_128.webp'
 import analysisBeforeImg from './ANALYSIS SHOWCASE.png'
 import postTransformAfterImg from './post transformation overview.png'
 import pipelineBuilderImg from './pipeline builder.png'
@@ -801,7 +801,7 @@ if (!entered || onSite()) return (
         <p style={{ fontSize: 'clamp(0.95rem, 1.6vw, 1.1rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.65, maxWidth: '600px', margin: '0 auto 16px', fontFamily: "'Inter', -apple-system, sans-serif" }}>{content.hero.sub}</p>
         <ul aria-label="Supported data sources" style={{ listStyle: 'none', padding: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 12px', maxWidth: '640px', margin: '0 auto 14px' }}>
           {content.hero.sources.map(src => (
-            <li key={src} style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.74rem', color: 'rgba(167,139,250,0.85)', whiteSpace: 'nowrap' }}>{src}</li>
+            <li key={src} style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', color: 'rgba(167,139,250,0.85)', whiteSpace: 'nowrap' }}>{src}</li>
           ))}
         </ul>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note} <a href={content.privacy.href} style={{ color: '#6ee7b7', textDecoration: 'underline' }}>By default the AI never reads your rows.</a></p>
@@ -816,20 +816,20 @@ if (!entered || onSite()) return (
       {/* ── EXAMPLE: a real kind of before and after, made-up data ── */}
       <div style={{ flex: '1 1 340px', maxWidth: '440px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'left' }}>
         <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>What it does to a messy file</div>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.74rem', color: 'rgba(255,255,255,0.5)', margin: '2px 0 10px' }}>An example with made-up data. Three problems, fixed.</p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', margin: '2px 0 10px' }}>An example with made-up data. Three problems, fixed.</p>
         {[
           { label: 'Before', rows: [['Maya Rao', '03/04/2026', '1,250.00'], ['Dev  Patel', '5 Apr 2026', ''], ['Maya Rao', '03/04/2026', '1,250.00']], bad: [[], [0, 1, 2], [0, 1, 2]] },
           { label: 'After', rows: [['Maya Rao', '2026-04-03', '1250.00'], ['Dev Patel', '2026-04-05', 'blank, flagged']], bad: [[], []] },
         ].map(t => (
           <div key={t.label} style={{ marginBottom: 10 }}>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.7rem', fontWeight: 700, color: t.label === 'After' ? '#6ee7b7' : '#fbbf24', marginBottom: 4 }}>{t.label.toUpperCase()}</div>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', fontWeight: 700, color: t.label === 'After' ? '#6ee7b7' : '#fbbf24', marginBottom: 4 }}>{t.label.toUpperCase()}</div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'monospace', fontSize: '0.72rem', color: '#e2e8f0' }}>
               <thead><tr>{['Customer', 'Date', 'Amount'].map(h => <th key={h} style={{ textAlign: 'left', padding: '4px 6px', color: 'rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.12)', fontWeight: 600 }}>{h}</th>)}</tr></thead>
               <tbody>{t.rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} style={{ padding: '4px 6px', borderBottom: '1px solid rgba(255,255,255,0.06)', color: t.label === 'Before' && (j === 1 && i === 1 || c === '' || i === 2) ? '#fcd34d' : '#e2e8f0' }}>{c || '(empty)'}</td>)}</tr>)}</tbody>
             </table>
           </div>
         ))}
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.74rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.5, margin: 0 }}>A repeated row removed, dates made consistent (day first here), and the missing amount flagged for you, not guessed.</p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, margin: 0 }}>A repeated row removed, dates made consistent (day first here), and the missing amount flagged for you, not guessed.</p>
       </div>
       </div>
     </section>
@@ -891,7 +891,7 @@ if (!entered || onSite()) return (
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
         </div>
         <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={analysisBeforeImg} alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
+          <img loading="lazy" decoding="async" src={analysisBeforeImg} alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
         </div>
       </div>
     </div>
@@ -908,7 +908,7 @@ if (!entered || onSite()) return (
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
         </div>
         <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
+          <img loading="lazy" decoding="async" src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
         </div>
       </div>
     </div>
@@ -931,7 +931,7 @@ if (!entered || onSite()) return (
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
         </div>
         <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={pipelineBuilderImg} alt="Visual pipeline builder showing source to destination flow" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
+          <img loading="lazy" decoding="async" src={pipelineBuilderImg} alt="Visual pipeline builder showing source to destination flow" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
         </div>
       </div>
     </div>
@@ -948,7 +948,7 @@ if (!entered || onSite()) return (
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
         </div>
         <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={transformTypesImg} alt="Transform options: remove duplicates, fill missing, cap outliers, AI custom rules" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
+          <img loading="lazy" decoding="async" src={transformTypesImg} alt="Transform options: remove duplicates, fill missing, cap outliers, AI custom rules" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
         </div>
       </div>
       <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
@@ -958,7 +958,7 @@ if (!entered || onSite()) return (
           <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
         </div>
         <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={cronJobsImg} alt="Pipeline scheduling panel with cron jobs and automation options" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
+          <img loading="lazy" decoding="async" src={cronJobsImg} alt="Pipeline scheduling panel with cron jobs and automation options" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
         </div>
       </div>
     </div>
@@ -1083,16 +1083,16 @@ if (!entered || onSite()) return (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.9L4.2 22H1l8.2-9.3L.8 2h7.3l5 6.4L18.9 2Zm-1.2 18h1.9L7.4 4H5.3l12.4 16Z"/></svg>
         </a>
       </div>
-      <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '28px' }}>
-        <a href="/faq.html" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>FAQ</a>
-        <a href="/privacy" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Privacy Policy</a>
-        <a href="/terms" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Terms of Service</a>
-        <a href="/refund.html" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Refund Policy</a>
-        <a href="/feedback" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Feedback</a>
-<a href="/contact" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Contact</a>
-<a href="/blog" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Blog</a>
-<a href="/status" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Status</a>
-<a href="#quote" onClick={e => { e.preventDefault(); scrollToQuote() }} style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Get a quote</a>
+      <div style={{ display: 'flex', gap: '4px 20px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '28px' }}>
+        <a href="/faq.html" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>FAQ</a>
+        <a href="/privacy" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Privacy Policy</a>
+        <a href="/terms" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Terms of Service</a>
+        <a href="/refund.html" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Refund Policy</a>
+        <a href="/feedback" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Feedback</a>
+<a href="/contact" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Contact</a>
+<a href="/blog" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Blog</a>
+<a href="/status" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Status</a>
+<a href="#quote" onClick={e => { e.preventDefault(); scrollToQuote() }} style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Get a quote</a>
       </div>
       <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
         <a href="/csv-data-cleaning-checklist.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>CSV cleaning checklist</a>
@@ -1103,7 +1103,7 @@ if (!entered || onSite()) return (
         <a href="/fix-numbers-stored-as-text-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Numbers stored as text</a>
         <a href="/bank-statement-pdf-to-excel.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Bank statement PDF to Excel</a>
       </div>
-      <div style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.12)', letterSpacing: '0.08em' }}>© 2026 The God's Tool · Made for anyone who gets handed messy data</div>
+      <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.04em', lineHeight: 1.6 }}>© 2026 The God's Tool · Made for anyone who gets handed messy data</div>
     </footer>
 
     {/* ── LOGIN MODAL ── */}

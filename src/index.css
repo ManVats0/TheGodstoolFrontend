@@ -102,3 +102,17 @@ body {
 .gt-soft-dot { display: inline-block; width: 7px; height: 7px; border-radius: 999px; background: #fbbf24; animation: gt-soft-dot 2.2s ease-in-out infinite; }
 .gt-hint { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 600; color: #ddd6fe; background: rgba(124,58,237,0.16); border: 1px solid rgba(167,139,250,0.35); border-radius: 999px; padding: 3px 10px; }
 @media (prefers-reduced-motion: reduce) { .gt-glow, .gt-soft-dot { animation: none; } }
+
+/* Phones and small screens: header never collides, footer links are easy to tap */
+@media (max-width: 760px) {
+  footer a { display: inline-block; padding: 10px 6px; }
+}
+@media (max-width: 420px) {
+  .gt-nav > div:first-child span { font-size: 0.9rem !important; }
+  .gt-nav > div:last-child { gap: 8px !important; }
+  .gt-nav a.keep { font-size: 0.78rem !important; padding: 10px 4px; }
+  .gt-nav button { padding: 10px 12px !important; font-size: 0.72rem !important; min-height: 40px; }
+}
+@media (max-width: 340px) {
+  .gt-nav > div:first-child span { display: none; }
+}
