@@ -21,6 +21,7 @@ import NotificationPanel from './components/NotificationPanel'
 import { useStore } from './store'
 import { lazy, Suspense } from 'react'
 import Contact from './pages/Contact'
+import Status from './pages/Status'
 import Blog from './pages/Blog'
 import TryFree from './pages/TryFree'
 import tryContent from './home/try-content.json'
@@ -290,6 +291,7 @@ useEffect(() => {
     '/': content.site.title,
     '/pricing': "Pricing | The God's Tool",
     '/contact': "Contact | The God's Tool",
+    '/status': "Status | The God's Tool",
     '/blog': "Blog | The God's Tool",
     '/try': tryContent.title,
     '/try.html': tryContent.title,
@@ -592,6 +594,7 @@ if (location.pathname === '/reset-password') return <Routes><Route path="/reset-
 if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
 if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
 // if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
+if (location.pathname === '/status') return <Routes><Route path="/status" element={<Status />} /></Routes>
 if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
 if (location.pathname === '/blog' || location.pathname.startsWith('/blog/')) return <Routes><Route path="/blog" element={<Blog />} /><Route path="/blog/:slug" element={<BlogPost />} /></Routes>
 if (location.pathname === '/try' || location.pathname === '/try.html') return <Routes><Route path={location.pathname} element={<TryFree />} /></Routes>
@@ -1081,6 +1084,7 @@ if (!entered || onSite()) return (
         <a href="/feedback" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Feedback</a>
 <a href="/contact" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Contact</a>
 <a href="/blog" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Blog</a>
+<a href="/status" style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Status</a>
 <a href="#quote" onClick={e => { e.preventDefault(); scrollToQuote() }} style={{ color: '#6d5fc7', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.7 }}>Get a quote</a>
       </div>
       <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
