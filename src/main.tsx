@@ -7,6 +7,9 @@ import UpgradeNotice from './components/UpgradeNotice'
 import StatusBanner from './components/StatusBanner'
 import './index.css'
 import { hostRedirect } from './hosts'
+import { initAnalytics } from './analytics'
+
+initAnalytics()
 
 if (!hostRedirect()) createRoot(document.getElementById('root')!).render(
   <StrictMode>

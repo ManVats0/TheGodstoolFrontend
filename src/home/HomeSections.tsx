@@ -1,3 +1,4 @@
+import { track } from '../analytics'
 import { useState } from 'react'
 import type { ComponentType, FormEvent } from 'react'
 import content from './content.json'
@@ -135,6 +136,7 @@ export function QuoteSection() {
         setStatus('error')
         return
       }
+      track('quote_submitted', { role: form.role, need: form.need, row_band: form.rowBand })
       setStatus('sent')
     } catch {
       setErr(`Couldn't reach the server. You can email ${content.site.email} instead.`)

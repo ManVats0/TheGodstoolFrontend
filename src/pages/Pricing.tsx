@@ -1,3 +1,4 @@
+import { track } from '../analytics'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCredits } from '../credits'
@@ -180,6 +181,10 @@ export default function Pricing() {
       if (!res.ok) { setError(data.error || 'Failed to create subscription'); setLoading(null); return }
 
       const { subscriptionId, key } = data
+      const shown = PLANS.find(p => p.key === planKey)
+      const value = cur === 'INR' ? Number(String(cycle === 'monthly' ? shown?.monthlyPrice : shown?.yearlyPrice).replace(/[^0-9]/g, '')) || undefined : shown?.usdMonthly || undefined
+      track('begin_checkout', { plan: planKey, billing_cycle: cycle, currency: cur, value })
+      try { sessionStorage.setItem('gt_checkout', JSON.stringify({ plan: planKey, cycle, currency: cur, value })) } catch { /* ignore */ }
 
       const rzp = new (window as any).Razorpay({
         key,

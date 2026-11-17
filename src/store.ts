@@ -1,3 +1,4 @@
+import { track } from './analytics'
 import { create } from 'zustand'
 import { API_BASE } from './config'
 
@@ -307,7 +308,7 @@ export const useStore = create<AppState>((set, get) => ({
   setActivePage: (page) => set({ activePage: page }),
 
   sources: [],
-  addSource: (source) => set((s) => ({ sources: [...s.sources, source] })),
+  addSource: (source) => { track('source_added', { source_type: String((source as any).type || 'unknown') }); set((s) => ({ sources: [...s.sources, source] })) },
   removeSource: (id) => set((s) => ({ sources: s.sources.filter(src => src.id !== id) })),
 
   loadingSourcesFromBackend: false,

@@ -1,4 +1,5 @@
 import { API_BASE } from './config'
+import { track, trackApiCall } from './analytics'
 
 // Sends the login token with every request to our own Python service, so the server always knows who is asking
 // (and therefore which plan applies). Without it, the server must treat the caller as a free visitor.
@@ -28,10 +29,12 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   } catch { /* storage unavailable: send as before */ }
 
   const res = await original(input, nextInit)
+  try { trackApiCall(url, res.ok) } catch { /* ignore */ }
   try {
     if (res.status === 402) {
       res.clone().json().then(d => {
         if (d && d.code === 'upgrade_required') {
+          track('upgrade_prompt_shown', { feature: String(d.feature || 'unknown') }, 5000)
           window.dispatchEvent(new CustomEvent('datapro:upgrade-required', { detail: { message: d.error, feature: d.feature } }))
         }
       }).catch(() => { /* not JSON */ })
