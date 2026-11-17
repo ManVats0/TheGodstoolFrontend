@@ -57,7 +57,7 @@ useEffect(() => {
       const done = sessionStorage.getItem('gt_purchase_tracked')
       if (paymentParam && done !== paymentParam) {
         const c = isCreditsPurchase ? {} : JSON.parse(sessionStorage.getItem('gt_checkout') || '{}')
-        track('purchase', { transaction_id: paymentParam, plan: isCreditsPurchase ? 'credits' : (c.plan || localStorage.getItem('datapro_plan') || 'unknown'), billing_cycle: c.cycle, currency: c.currency, value: c.value })
+        track('purchase', { transaction_id: paymentParam, plan: isCreditsPurchase ? 'credits' : (c.plan || localStorage.getItem('datapro_plan') || 'unknown'), billing_cycle: c.cycle, currency: isCreditsPurchase ? (searchParams.get('currency') || undefined) : c.currency, value: isCreditsPurchase ? (Number(searchParams.get('amount')) || undefined) : c.value })
         sessionStorage.setItem('gt_purchase_tracked', paymentParam)
       }
     } catch { /* ignore */ }
