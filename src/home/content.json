@@ -12,10 +12,10 @@
   "hero": {
     "eyebrow": "For freelancers, analysts, teams and companies",
     "h1": "Clean messy data in minutes, not hours.",
-    "sub": "Drop in a CSV, link a Google Sheet, upload a PDF with a table, or connect a database. The God's Tool finds the duplicates, blanks, broken dates and inconsistent names, then fixes them when you say what you want in plain English. Save your fixes as a pipeline: the same steps, ready to run again on new data in one click.",
-    "note": "14-day trial with every feature included. The free plan stays after that. No card needed.",
+    "sub": "Upload a CSV or a PDF table, link a Google Sheet, or connect a database. It finds duplicates, blanks and broken dates, then fixes them when you describe the change in plain English. Save the steps (we call that a pipeline) and run them again on the next file.",
+    "note": "The free plan stays free. New accounts also get 14 days with every feature, no card needed.",
     "primary": "Clean a file free",
-    "secondary": "Get a quote",
+    "secondary": "Start the 14-day trial",
     "sources": [
       "CSV",
       "PDF tables",
@@ -23,14 +23,10 @@
       "MySQL",
       "PostgreSQL",
       "BigQuery",
-      "MongoDB",
-      "AWS",
-      "Google Cloud Storage",
-      "Cloud SQL",
-      "Databricks",
-      "REST API",
-      "Google Analytics 4"
-    ]
+      "and more databases"
+    ],
+    "tryNote": "No sign-up needed for the first try. Your file is not stored.",
+    "founder": "Built by Aman Sharma, who has worked as a data analyst at a well-known Indian company."
   },
   "problem": {
     "h2": "You know how this goes.",

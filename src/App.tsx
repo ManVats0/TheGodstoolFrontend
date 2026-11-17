@@ -374,40 +374,11 @@ useEffect(() => {
 
   const [heroClipIndex, setHeroClipIndex] = useState(0)
   const heroClips = [heroClipA, heroClipB]
-  const [sideEmail, setSideEmail] = useState('')
-  const [sidePassword, setSidePassword] = useState('')
-  const [sideConfirmPassword, setSideConfirmPassword] = useState('')
-  const [sideName, setSideName] = useState('')
-  const [sideNickname, setSideNickname] = useState('')
-  const [sideFeeling, setSideFeeling] = useState('')
-  const [sideFormError, setSideFormError] = useState('')
   const handleEnter = (mode: 'login' | 'register' = 'register') => {
     setShowLogin(true)
     setIsRegisterMode(mode === 'register')
     setLoginError('')
   }
-  const handleSideFormSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault()
-    if (!sideEmail.trim() || !sidePassword.trim()) {
-      setSideFormError('Please fill in at least email and password.')
-      return
-    }
-    if (sidePassword !== sideConfirmPassword) {
-      setSideFormError('Passwords do not match.')
-      return
-    }
-    setSideFormError('')
-    setLoginEmail(sideEmail)
-    setLoginPassword(sidePassword)
-    setConfirmPassword(sideConfirmPassword)
-    setRegName(sideName)
-    setRegNickname(sideNickname)
-    setRegFeeling(sideFeeling)
-    setIsRegisterMode(true)
-    setShowLogin(true)
-    setLoginError('')
-  }
-
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault()
     if (!loginEmail.trim() || !loginPassword.trim()) {
@@ -682,6 +653,7 @@ if (!entered || onSite()) return (
         text-align: center;
         padding: 24px 16px;
       }
+      @media (max-width: 760px) { .nav-link { display: none !important; } .nav-link.keep { display: inline !important; } nav a, nav span, nav button { white-space: nowrap; } .gt-nav { padding: 12px 16px !important; } .gt-nav > div { gap: 14px !important; } }
       .cta-btn {
         font-family: 'Inter', -apple-system, sans-serif;
         background: #7c3aed;
@@ -777,7 +749,7 @@ if (!entered || onSite()) return (
     `}</style>
 
     {/* ── NAVBAR ── */}
-    <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(5,3,15,0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+    <nav className="gt-nav" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(5,3,15,0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '28px', width: '28px' }} /> 
         <span style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>      </div>
@@ -785,9 +757,7 @@ if (!entered || onSite()) return (
         <span className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</span>
         <span className="nav-link" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>How It Works</span>
         <span className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</span>
-        <span className="nav-link" onClick={scrollToQuote}>Get a quote</span>
-        <a href="/try.html" className="nav-link" style={{ textDecoration: 'none', color: '#c4b5fd', fontWeight: 700 }}>Try free</a>
-<a href="/contact" className="nav-link" style={{ textDecoration: 'none' }}>Contact</a>
+        <a href="/try.html" className="nav-link keep" style={{ textDecoration: 'none', color: '#c4b5fd', fontWeight: 700 }}>Try free</a>
 <a href="/blog" className="nav-link" style={{ textDecoration: 'none' }}>Blog</a>
 <a href="/about.html" className="nav-link" style={{ textDecoration: 'none' }}>About</a>
         <button onClick={() => handleEnter('login')} style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', padding: '8px 20px', borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}
@@ -802,7 +772,7 @@ if (!entered || onSite()) return (
     {/* ── HERO ── */}
     <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: '85px 24px 40px', position: 'relative', overflow: 'hidden' }}>
       {/* Grid bg */}
-      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', animation: 'gridFade 4s ease-in-out infinite' }} xmlns="http://www.w3.org/2000/svg">
+      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.05 }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="hgrid" width="60" height="60" patternUnits="userSpaceOnUse">
             <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#7c3aed" strokeWidth="0.4"/>
@@ -811,8 +781,8 @@ if (!entered || onSite()) return (
         <rect width="100%" height="100%" fill="url(#hgrid)" />
       </svg>
       {/* Orbs */}
-      <div style={{ position: 'absolute', top: '20%', left: '15%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '25%', right: '10%', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '20%', left: '15%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '25%', right: '10%', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '1180px', width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '32px', animation: 'fadeUp 0.8s ease both' }}>
       <div style={{ flex: '1 1 480px', maxWidth: '620px', minWidth: '300px' }}>
@@ -826,63 +796,31 @@ if (!entered || onSite()) return (
         </ul>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note} <a href={content.privacy.href} style={{ color: '#6ee7b7', textDecoration: 'underline' }}>By default the AI never reads your rows.</a></p>
         <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="cta-btn" onClick={() => handleEnter('register')}>{content.hero.primary}</button>
-          <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={scrollToQuote}>{content.hero.secondary}</button>
+          <button className="cta-btn" onClick={() => { window.location.assign('/try.html') }}>{content.hero.primary}</button>
+          <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={() => handleEnter('register')}>{content.hero.secondary}</button>
         </div>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', marginTop: '14px' }}><a href="/try.html" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>Or try it on one file now, no sign-up</a></p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', marginTop: '14px', color: 'rgba(255,255,255,0.55)' }}>{content.hero.tryNote}</p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', marginTop: '10px', color: 'rgba(255,255,255,0.6)' }}>{content.hero.founder} <a href="/about.html" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>About</a></p>
       </div>
 
-      {/* ── SIDE SIGNUP FORM ── */}
-      <form onSubmit={handleSideFormSubmit} style={{ flex: '1 1 340px', maxWidth: '380px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(99,179,237,0.18)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '7px', textAlign: 'left', backdropFilter: 'blur(6px)' }}>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>Start your 14-day free trial</div>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 2px' }}>Full access, no card needed. Fill this once. confirm on the next screen.</p>
-        <input type="email" placeholder="you@example.com" value={sideEmail} onChange={e => setSideEmail(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px' }}>
-          <input type="password" placeholder="Password" value={sidePassword} onChange={e => setSidePassword(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
-          <input type="password" placeholder="Repeat password" value={sideConfirmPassword} onChange={e => setSideConfirmPassword(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} required />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px' }}>
-          <input type="text" placeholder="Name" value={sideName} onChange={e => setSideName(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} />
-          <input type="text" placeholder="Nickname" value={sideNickname} onChange={e => setSideNickname(e.target.value)} className="auth-input" style={{ padding: '8px 12px', fontSize: '0.8rem' }} />
-        </div>
-        <div>
-          <div style={{ fontFamily: 'monospace', fontSize: '0.64rem', color: '#94a3b8', marginBottom: '4px' }}>How are you feeling right now?</div>
-          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-            {[
-              { label: 'Excited' },
-              { label: 'Calm' },
-              { label: 'Nervous' },
-              { label: 'Curious' },
-              { label: 'Determined' },
-            ].map(f => (
-              <button
-                key={f.label}
-                type="button"
-                onClick={() => setSideFeeling(f.label)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '3px',
-                  background: sideFeeling === f.label ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.04)',
-                  border: sideFeeling === f.label ? '1px solid rgba(167,139,250,0.5)' : '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '20px', padding: '3px 8px',
-                  fontFamily: 'monospace', fontSize: '0.6rem', color: '#e2e8f0',
-                  cursor: 'pointer', transition: 'all 0.15s'
-                }}
-              >
-                {f.label}
-              </button>
-            ))}
+      {/* ── EXAMPLE: a real kind of before and after, made-up data ── */}
+      <div style={{ flex: '1 1 340px', maxWidth: '440px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'left' }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>What it does to a messy file</div>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.74rem', color: 'rgba(255,255,255,0.5)', margin: '2px 0 10px' }}>An example with made-up data. Three problems, fixed.</p>
+        {[
+          { label: 'Before', rows: [['Maya Rao', '03/04/2026', '1,250.00'], ['Dev  Patel', '5 Apr 2026', ''], ['Maya Rao', '03/04/2026', '1,250.00']], bad: [[], [0, 1, 2], [0, 1, 2]] },
+          { label: 'After', rows: [['Maya Rao', '2026-04-03', '1250.00'], ['Dev Patel', '2026-04-05', 'blank, flagged']], bad: [[], []] },
+        ].map(t => (
+          <div key={t.label} style={{ marginBottom: 10 }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.7rem', fontWeight: 700, color: t.label === 'After' ? '#6ee7b7' : '#fbbf24', marginBottom: 4 }}>{t.label.toUpperCase()}</div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'monospace', fontSize: '0.72rem', color: '#e2e8f0' }}>
+              <thead><tr>{['Customer', 'Date', 'Amount'].map(h => <th key={h} style={{ textAlign: 'left', padding: '4px 6px', color: 'rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.12)', fontWeight: 600 }}>{h}</th>)}</tr></thead>
+              <tbody>{t.rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} style={{ padding: '4px 6px', borderBottom: '1px solid rgba(255,255,255,0.06)', color: t.label === 'Before' && (j === 1 && i === 1 || c === '' || i === 2) ? '#fcd34d' : '#e2e8f0' }}>{c || '(empty)'}</td>)}</tr>)}</tbody>
+            </table>
           </div>
-        </div>
-        {sideFormError && (
-          <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '6px 10px', color: '#fca5a5', fontSize: '0.68rem', fontFamily: 'monospace' }}>{sideFormError}</div>
-        )}
-        <button type="submit" className="auth-btn-primary" style={{ padding: '9px', fontSize: '0.85rem' }}>CONTINUE →</button>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.56rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>14-day free trial · No credit card required · Takes 30 seconds</p>
-      </form>
+        ))}
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.74rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.5, margin: 0 }}>A repeated row removed, dates made consistent (day first here), and the missing amount flagged for you, not guessed.</p>
       </div>
-      <div onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} style={{ position: 'absolute', bottom: '14px', left: '50%', transform: 'translateX(-50%)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', animation: 'float 2s ease-in-out infinite' }}>
-        <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em' }}>SCROLL TO EXPLORE</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
       </div>
     </section>
 
