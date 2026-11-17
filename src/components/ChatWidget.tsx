@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { API_BASE } from '../config'
-import { SITE_HOSTS } from '../hosts'
+import { APP_HOST, SITE_HOSTS } from '../hosts'
 import { track } from '../analytics'
 
 // Support chat for the public site. It only ever answers from the website's own text (see site_chat.py).
@@ -27,7 +27,10 @@ function linkify(text: string): ReactNode[] {
 }
 
 export default function ChatWidget() {
+  // Public site pages, plus the app address while it is still showing the public landing page to someone who is signed out.
+  const loggedIn = (() => { try { return !!localStorage.getItem('datapro_logged_in') } catch { return false } })()
   const onSite = SITE_HOSTS.includes(window.location.hostname) || import.meta.env.DEV
+    || (window.location.hostname === APP_HOST && window.location.pathname === '/' && !loggedIn)
   const [hidden, setHidden] = useState(() => read('gt_chat_hidden') === '1')
   const [open, setOpen] = useState(false)
   const [msgs, setMsgs] = useState<Msg[]>(() => { try { const j = JSON.parse(read('gt_chat') || '[]'); return Array.isArray(j) && j.length ? j : [GREETING] } catch { return [GREETING] } })
