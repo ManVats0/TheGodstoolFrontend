@@ -1,3 +1,4 @@
+import { track } from '../analytics'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { refreshCredits } from '../credits'
@@ -50,6 +51,16 @@ useEffect(() => {
         sessionStorage.setItem('trackdesk_conversion_fired', 'true')
       }
     }
+
+    // Standard GA4 purchase event: the payment id is the transaction id, so a reload cannot count it twice
+    try {
+      const done = sessionStorage.getItem('gt_purchase_tracked')
+      if (paymentParam && done !== paymentParam) {
+        const c = isCreditsPurchase ? {} : JSON.parse(sessionStorage.getItem('gt_checkout') || '{}')
+        track('purchase', { transaction_id: paymentParam, plan: isCreditsPurchase ? 'credits' : (c.plan || localStorage.getItem('datapro_plan') || 'unknown'), billing_cycle: c.cycle, currency: c.currency, value: c.value })
+        sessionStorage.setItem('gt_purchase_tracked', paymentParam)
+      }
+    } catch { /* ignore */ }
 
     // Fire Google Ads "Subscribe" conversion — guarded to fire only once per payment
     // NOTE: requires the base Google tag (gtag.js) script to already be loaded

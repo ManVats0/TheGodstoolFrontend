@@ -22,6 +22,7 @@ import { useStore } from './store'
 import { lazy, Suspense } from 'react'
 import Contact from './pages/Contact'
 import Status from './pages/Status'
+import { track } from './analytics'
 import Blog from './pages/Blog'
 import TryFree from './pages/TryFree'
 import tryContent from './home/try-content.json'
@@ -325,6 +326,7 @@ useEffect(() => {
       navigate('/', { replace: true })
       return
     }
+    track('login', { method: 'google' })
     localStorage.setItem('datapro_logged_in', '1')
     localStorage.setItem('datapro_token', token)
     localStorage.setItem('datapro_email', email)
@@ -377,6 +379,7 @@ useEffect(() => {
   const [heroClipIndex, setHeroClipIndex] = useState(0)
   const heroClips = [heroClipA, heroClipB]
   const handleEnter = (mode: 'login' | 'register' = 'register') => {
+    if (mode === 'register') track('signup_start')
     setShowLogin(true)
     setIsRegisterMode(mode === 'register')
     setLoginError('')
@@ -417,6 +420,7 @@ useEffect(() => {
         return
       }
       setShowForceLogout(false)
+      track(isRegisterMode ? 'sign_up' : 'login', { method: 'email' })
       localStorage.setItem('datapro_logged_in', '1')
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
@@ -451,6 +455,7 @@ useEffect(() => {
       const data = await res.json()
       if (!res.ok) { setLoginError(data.error || 'Login failed'); return }
       setShowForceLogout(false)
+      track('login', { method: 'email' })
       localStorage.setItem('datapro_logged_in', '1')
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
@@ -518,6 +523,7 @@ useEffect(() => {
           }
           setShowForceLogout(false)
           setSignStage('workspace')
+          track('login', { method: 'google' })
           localStorage.setItem('datapro_logged_in', '1')
           localStorage.setItem('datapro_token', data.token)
           localStorage.setItem('datapro_email', data.email)
@@ -568,6 +574,7 @@ useEffect(() => {
       if (!backendRes.ok) { setLoginError(data.error || 'Google login failed'); return }
       setShowForceLogout(false)
       setPendingGooglePayload(null)
+      track('login', { method: 'google' })
       localStorage.setItem('datapro_logged_in', '1')
       localStorage.setItem('datapro_token', data.token)
       localStorage.setItem('datapro_email', data.email)
@@ -799,8 +806,8 @@ if (!entered || onSite()) return (
         </ul>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note} <a href={content.privacy.href} style={{ color: '#6ee7b7', textDecoration: 'underline' }}>By default the AI never reads your rows.</a></p>
         <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="cta-btn" onClick={() => { window.location.assign('/try.html') }}>{content.hero.primary}</button>
-          <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={() => handleEnter('register')}>{content.hero.secondary}</button>
+          <button className="cta-btn" onClick={() => { track('hero_cta_click', { cta: 'free_file' }); window.location.assign('/try.html') }}>{content.hero.primary}</button>
+          <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={() => { track('hero_cta_click', { cta: 'trial' }); handleEnter('register') }}>{content.hero.secondary}</button>
         </div>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', marginTop: '14px', color: 'rgba(255,255,255,0.55)' }}>{content.hero.tryNote}</p>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', marginTop: '10px', color: 'rgba(255,255,255,0.6)' }}>{content.hero.founder} <a href="/about.html" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>About</a></p>

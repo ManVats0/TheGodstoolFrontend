@@ -1,3 +1,4 @@
+import { track } from '../analytics'
 import { useMemo, useState } from 'react'
 import content from './content.json'
 import { estimate, fmt, type Cur } from './estimate'
@@ -37,6 +38,7 @@ export function EstimateSection() {
     try {
       const { makeEstimatePdf } = await import('./estimatePdf')
       const pdf = await makeEstimatePdf(inputs, who, logo)
+      track('estimate_downloaded', { currency: cur })
       pdf.save()
       if (tell) {
         const text = ['ESTIMATE DOWNLOADED', `Company: ${who.company || '-'}`, `Files/month: ${inputs.files}, rows/file: ${inputs.rows}, AI actions/file: ${inputs.aiPerFile}`,

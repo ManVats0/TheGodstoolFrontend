@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStatus } from '../status'
+import { track } from '../analytics'
 
 // A quiet bar at the bottom of the screen that appears only when something is wrong. It links to /status.
 export default function StatusBanner() {
   const { file, level, liveDown } = useStatus()
+  useEffect(() => { if (level !== 'operational') track('status_banner_shown', { level }, 600000) }, [level])
   const [hidden, setHidden] = useState<string>(() => { try { return sessionStorage.getItem('gt_status_hidden') || '' } catch { return '' } })
   if (window.location.pathname === '/status' || level === 'operational') return null
   const key = `${level}:${file.message}:${liveDown}`
