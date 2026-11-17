@@ -116,3 +116,8 @@ body {
 @media (max-width: 340px) {
   .gt-nav > div:first-child span { display: none; }
 }
+
+/* Support chat: sits above the status bar when that is showing, hidden when printing, calm for reduced motion */
+body:has([role=status]) .gt-chat { bottom: 84px !important; }
+@media print { .gt-chat { display: none !important; } }
+@media (max-width: 480px) { .gt-chat { right: 10px !important; bottom: 10px !important; } .gt-chat-panel { width: calc(100vw - 20px) !important; } }

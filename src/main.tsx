@@ -5,6 +5,7 @@ import './authFetch'
 import App from './App'
 import UpgradeNotice from './components/UpgradeNotice'
 import StatusBanner from './components/StatusBanner'
+import ChatWidget from './components/ChatWidget'
 import './index.css'
 import { hostRedirect } from './hosts'
 import { initAnalytics } from './analytics'
@@ -17,6 +18,7 @@ if (!hostRedirect()) createRoot(document.getElementById('root')!).render(
       <App /> 
       <UpgradeNotice />
       <StatusBanner />
+      <ChatWidget />
     </BrowserRouter>
   </StrictMode>
 )
