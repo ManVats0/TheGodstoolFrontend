@@ -73,6 +73,8 @@ const body = `
 <h1>${esc(c.hero.h1)}</h1>
 <p>${esc(c.hero.sub)}</p>
 ${li(c.hero.sources.map(esc))}
+<p>${esc(c.hero.tryNote)}</p>
+<p>${esc(c.hero.founder)} <a href="/about.html">About</a></p>
 <p>${esc(c.hero.note)} <a href="${c.privacy.href}">By default the AI never reads your rows.</a></p>
 <section><h2>${esc(c.problem.h2)}</h2><p>${esc(c.problem.intro)}</p><ul>${c.problem.items.map(card).join('')}</ul><p>${esc(c.problem.fix)}</p></section>
 <section><h2>${esc(c.audience.h2)}</h2><ul>${c.audience.items.map(card).join('')}</ul></section>
