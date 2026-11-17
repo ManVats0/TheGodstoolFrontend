@@ -243,6 +243,13 @@
       "2 to 5 people",
       "6 to 15 people",
       "More than 15 people"
+    ],
+    "rowBands": [
+      "Under 5,000 rows",
+      "5,000 to 100,000 rows",
+      "100,000 to 1 million rows",
+      "More than 1 million rows",
+      "Not sure"
     ]
   },
   "faq": {

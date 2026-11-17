@@ -98,7 +98,7 @@ export function StepsSection({ Icon, onRegister }: { Icon: IconType; onRegister:
 
 export function QuoteSection() {
   const q = content.quote
-  const [form, setForm] = useState({ name: '', email: '', role: q.roles[0], need: q.needs[0], volume: q.volumes[0], team: q.teams[0], details: '', website: '' })
+  const [form, setForm] = useState({ name: '', email: '', role: q.roles[0], need: q.needs[0], volume: q.volumes[0], rowBand: q.rowBands[0], team: q.teams[0], details: '', website: '' })
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [err, setErr] = useState('')
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
@@ -118,6 +118,7 @@ export function QuoteSection() {
       `I am: ${form.role}`,
       `Looking for: ${form.need}`,
       `Volume: ${form.volume}`,
+      `Rows in a typical file: ${form.rowBand}`,
       `Team size: ${form.team}`,
       '',
       form.details.trim() || '(no details given)',
@@ -175,6 +176,11 @@ export function QuoteSection() {
             <label>Volume
               <select value={form.volume} onChange={e => set('volume', e.target.value)}>
                 {q.volumes.map(r => <option key={r}>{r}</option>)}
+              </select>
+            </label>
+            <label>Rows in a typical file
+              <select value={form.rowBand} onChange={e => set('rowBand', e.target.value)}>
+                {q.rowBands.map(r => <option key={r}>{r}</option>)}
               </select>
             </label>
             <label>Team size
