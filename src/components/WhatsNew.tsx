@@ -52,6 +52,7 @@ function token(): string {
 }
 
 const MAX_SHOWN = 4
+const REFRESH_MS = 12 * 60 * 60 * 1000
 const AWAY_DAYS = 7 // after this long we also say "welcome back"
 
 export default function WhatsNewCard() {
@@ -70,7 +71,8 @@ export default function WhatsNewCard() {
         if (!d.seenAt) return void markSeen() // first time: nothing to compare with yet
         const since = new Date(d.seenAt).getTime()
         const news = ALL_UPDATES.filter(u => new Date(u.date).getTime() > since)
-        if (news.length === 0) return void markSeen()
+        // Nothing new: only refresh the date now and then (at most about twice a day) so the database is barely touched.
+        if (news.length === 0) return void (Date.now() - since > REFRESH_MS && markSeen())
         setAwayDays(Math.floor((Date.now() - since) / 86400000))
         setFresh(news)
       })
