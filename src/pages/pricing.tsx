@@ -1,3 +1,6 @@
+// Older copy of the pricing page. The app uses Pricing.tsx (capital P); nothing imports this file.
+// On computers that ignore letter case, the two names clash. Safe to delete after review.
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -63,16 +66,23 @@ export default function Pricing() {
     setError('')
     setLoading(planKey)
     const token = localStorage.getItem('datapro_token')
-    if (!token) { navigate('/'); return }
+    if (!token) {
+      navigate('/')
+      return
+    }
 
     try {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planKey })
+        body: JSON.stringify({ planKey }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Failed to create subscription'); setLoading(null); return }
+      if (!res.ok) {
+        setError(data.error || 'Failed to create subscription')
+        setLoading(null)
+        return
+      }
 
       const { subscriptionId, key } = data
 
@@ -85,7 +95,7 @@ export default function Pricing() {
           const verifyRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/verify-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ ...response, planKey })
+            body: JSON.stringify({ ...response, planKey }),
           })
           const verifyData = await verifyRes.json()
           if (verifyData.success) {
@@ -99,7 +109,7 @@ export default function Pricing() {
         },
         modal: { ondismiss: () => setLoading(null) },
         prefill: { email: localStorage.getItem('datapro_email') || '' },
-        theme: { color: '#7c3aed' }
+        theme: { color: '#7c3aed' },
       })
       rzp.open()
     } catch (err) {
@@ -109,58 +119,170 @@ export default function Pricing() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#07050f',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 16px',
+      }}
+    >
       <script src="https://checkout.razorpay.com/v1/checkout.js" />
 
       <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-        <div style={{ fontSize: '2.8rem', fontWeight: 900, fontFamily: 'Georgia, serif', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+        <div
+          style={{
+            fontSize: '2.8rem',
+            fontWeight: 900,
+            fontFamily: 'Georgia, serif',
+            background: 'linear-gradient(135deg, #e9d5ff, #a78bfa, #7c3aed)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
           Choose a plan
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}>
+        <p
+          style={{ color: 'rgba(255,255,255,0.4)', marginTop: '12px', fontSize: '1rem', fontFamily: 'Georgia, serif' }}
+        >
           Choose a plan to access AI-powered data cleaning
         </p>
       </div>
 
       {error && (
-        <div style={{ marginBottom: '24px', background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: '10px', padding: '12px 20px', color: '#fca5a5', fontSize: '0.875rem', fontFamily: 'monospace' }}>
+        <div
+          style={{
+            marginBottom: '24px',
+            background: 'rgba(220,38,38,0.12)',
+            border: '1px solid rgba(220,38,38,0.3)',
+            borderRadius: '10px',
+            padding: '12px 20px',
+            color: '#fca5a5',
+            fontSize: '0.875rem',
+            fontFamily: 'monospace',
+          }}
+        >
           {error}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '20px', maxWidth: '1000px', width: '100%' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+          gap: '20px',
+          maxWidth: '1000px',
+          width: '100%',
+        }}
+      >
         {PLANS.map(plan => (
-          <div key={plan.key} style={{
-            background: plan.highlight ? 'rgba(124,58,237,0.12)' : plan.bg,
-            border: `1px solid ${plan.border}`,
-            borderRadius: '16px',
-            padding: '28px 24px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            position: 'relative',
-            boxShadow: plan.highlight ? '0 0 40px rgba(124,58,237,0.2)' : 'none'
-          }}>
+          <div
+            key={plan.key}
+            style={{
+              background: plan.highlight ? 'rgba(124,58,237,0.12)' : plan.bg,
+              border: `1px solid ${plan.border}`,
+              borderRadius: '16px',
+              padding: '28px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              position: 'relative',
+              boxShadow: plan.highlight ? '0 0 40px rgba(124,58,237,0.2)' : 'none',
+            }}
+          >
             {plan.badge && (
-              <div style={{ position: 'absolute', top: '-13px', left: '50%', transform: 'translateX(-50%)', background: '#22d3ee', color: '#0a0a1a', fontSize: '0.7rem', fontWeight: 700, padding: '3px 12px', borderRadius: '20px', fontFamily: 'monospace', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-13px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: '#22d3ee',
+                  color: '#0a0a1a',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '3px 12px',
+                  borderRadius: '20px',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.08em',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {plan.badge}
               </div>
             )}
 
             <div>
-              <div style={{ color: plan.color, fontWeight: 700, fontSize: '0.85rem', fontFamily: 'monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{plan.name}</div>
-              <div style={{ color: 'white', fontWeight: 900, fontSize: '2rem', fontFamily: 'Georgia, serif', lineHeight: 1.1, marginTop: '6px' }}>
+              <div
+                style={{
+                  color: plan.color,
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  fontFamily: 'monospace',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {plan.name}
+              </div>
+              <div
+                style={{
+                  color: 'white',
+                  fontWeight: 900,
+                  fontSize: '2rem',
+                  fontFamily: 'Georgia, serif',
+                  lineHeight: 1.1,
+                  marginTop: '6px',
+                }}
+              >
                 {plan.price}
-                <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>{plan.period}</span>
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.9rem' }}>
+                  {plan.period}
+                </span>
               </div>
             </div>
 
-            <div style={{ background: plan.ai ? 'rgba(52,211,153,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${plan.ai ? 'rgba(52,211,153,0.2)' : 'rgba(239,68,68,0.2)'}`, borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: plan.ai ? '#34d399' : '#f87171', fontFamily: 'monospace' }}>
+            <div
+              style={{
+                background: plan.ai ? 'rgba(52,211,153,0.08)' : 'rgba(239,68,68,0.08)',
+                border: `1px solid ${plan.ai ? 'rgba(52,211,153,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                borderRadius: '8px',
+                padding: '8px 12px',
+                fontSize: '0.78rem',
+                color: plan.ai ? '#34d399' : '#f87171',
+                fontFamily: 'monospace',
+              }}
+            >
               {plan.aiLabel}
             </div>
 
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+            <ul
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                flex: 1,
+              }}
+            >
               {plan.features.map(f => (
-                <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)', fontFamily: 'monospace' }}>
+                <li
+                  key={f}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    fontSize: '0.82rem',
+                    color: 'rgba(255,255,255,0.65)',
+                    fontFamily: 'monospace',
+                  }}
+                >
                   <span style={{ color: plan.color, marginTop: '1px' }}>✓</span>
                   {f}
                 </li>
@@ -183,7 +305,7 @@ export default function Pricing() {
                 fontFamily: 'monospace',
                 letterSpacing: '0.05em',
                 opacity: loading === plan.key ? 0.6 : 1,
-                transition: 'opacity 0.2s'
+                transition: 'opacity 0.2s',
               }}
             >
               {loading === plan.key ? 'Opening...' : 'Subscribe'}
@@ -194,7 +316,15 @@ export default function Pricing() {
 
       <button
         onClick={() => navigate('/')}
-        style={{ marginTop: '32px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'monospace' }}
+        style={{
+          marginTop: '32px',
+          background: 'transparent',
+          border: 'none',
+          color: 'rgba(255,255,255,0.25)',
+          cursor: 'pointer',
+          fontSize: '0.8rem',
+          fontFamily: 'monospace',
+        }}
       >
         ← Back to app
       </button>

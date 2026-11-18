@@ -14,7 +14,11 @@ function urlOf(input: RequestInfo | URL): string {
 
 window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   let url = ''
-  try { url = urlOf(input) } catch { /* ignore */ }
+  try {
+    url = urlOf(input)
+  } catch {
+    /* ignore */
+  }
   const ours = !!url && url.startsWith(API_BASE)
   if (!ours) return original(input, init)
 
@@ -26,35 +30,67 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       if (!headers.has('Authorization')) headers.set('Authorization', `Bearer ${tok}`)
       nextInit = { ...init, headers }
     }
-  } catch { /* storage unavailable: send as before */ }
+  } catch {
+    /* storage unavailable: send as before */
+  }
 
   const res = await original(input, nextInit)
-  try { trackApiCall(url, res.ok) } catch { /* ignore */ }
+  try {
+    trackApiCall(url, res.ok)
+  } catch {
+    /* ignore */
+  }
   try {
     if (res.status === 402) {
-      res.clone().json().then(d => {
-        if (d && d.code === 'upgrade_required') {
-          track('upgrade_prompt_shown', { feature: String(d.feature || 'unknown') }, 5000)
-          window.dispatchEvent(new CustomEvent('datapro:upgrade-required', { detail: { message: d.error, feature: d.feature } }))
-        }
-      }).catch(() => { /* not JSON */ })
+      res
+        .clone()
+        .json()
+        .then(d => {
+          if (d && d.code === 'upgrade_required') {
+            track('upgrade_prompt_shown', { feature: String(d.feature || 'unknown') }, 5000)
+            window.dispatchEvent(
+              new CustomEvent('datapro:upgrade-required', { detail: { message: d.error, feature: d.feature } })
+            )
+          }
+        })
+        .catch(() => {
+          /* not JSON */
+        })
     } else if (res.status === 401) {
       // The server says this login was ended (signed out elsewhere, or pushed out by the login limit).
-      res.clone().json().then(d => {
-        if (d && d.code === 'session_ended') {
-          try {
-            ['datapro_token', 'datapro_logged_in', 'datapro_plan', 'datapro_plan_expires'].forEach(k => localStorage.removeItem(k))
-          } catch { /* ignore */ }
-          window.location.assign('/?signin=1&mode=login&ended=1')
-        }
-      }).catch(() => { /* not JSON */ })
+      res
+        .clone()
+        .json()
+        .then(d => {
+          if (d && d.code === 'session_ended') {
+            try {
+              ;['datapro_token', 'datapro_logged_in', 'datapro_plan', 'datapro_plan_expires'].forEach(k =>
+                localStorage.removeItem(k)
+              )
+            } catch {
+              /* ignore */
+            }
+            window.location.assign('/?signin=1&mode=login&ended=1')
+          }
+        })
+        .catch(() => {
+          /* not JSON */
+        })
     } else if (res.ok && (url.includes('/api/clean-data') || url.includes('/api/sql-clean'))) {
-      res.clone().json().then(d => {
-        if (d && d.row_limit && d.row_limit.truncated) {
-          window.dispatchEvent(new CustomEvent('datapro:row-limit', { detail: d.row_limit }))
-        }
-      }).catch(() => { /* not JSON */ })
+      res
+        .clone()
+        .json()
+        .then(d => {
+          if (d && d.row_limit && d.row_limit.truncated) {
+            window.dispatchEvent(new CustomEvent('datapro:row-limit', { detail: d.row_limit }))
+          }
+        })
+        .catch(() => {
+          /* not JSON */
+        })
     }
-  } catch { /* never let a notice break a request */ }
+  } catch {
+    /* never let a notice break a request */
+  }
   return res
 }

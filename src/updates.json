@@ -1,0 +1,29 @@
+[
+  {
+    "id": "whats-new",
+    "date": "2026-11-18T09:00:00Z",
+    "title": "A short list of what changed when you come back",
+    "text": "When you sign in after being away, the Dashboard now shows the changes we made while you were gone.",
+    "youCan": "Open the full list any time to see everything we have changed.",
+    "link": "/whats-new",
+    "linkLabel": "See all updates"
+  },
+  {
+    "id": "status-page",
+    "date": "2026-11-17T09:00:00Z",
+    "title": "A status page",
+    "text": "There is now a status page that shows whether sign-in and the data cleaning engine are answering, and lists any problem we are working on.",
+    "youCan": "If something feels slow or stops working, check the status page before you retry.",
+    "link": "/status",
+    "linkLabel": "Open the status page"
+  },
+  {
+    "id": "help-chat",
+    "date": "2026-11-17T09:00:00Z",
+    "title": "A help chat in the corner",
+    "text": "A small help chat now sits in the corner of the website. It answers questions about features, plans and privacy from the text of our website and the in-app documentation. It cannot see your account or your data.",
+    "youCan": "Ask it how a feature works, or open the full documentation.",
+    "link": "/docs",
+    "linkLabel": "Open the documentation"
+  }
+]

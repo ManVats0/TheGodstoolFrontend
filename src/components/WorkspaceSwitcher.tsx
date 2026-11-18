@@ -1,3 +1,5 @@
+// Dropdown for switching between workspaces (/api/workspaces and /api/workspaces/switch).
+
 import { useEffect, useState } from 'react'
 import { API_BASE } from '../config'
 
@@ -18,7 +20,10 @@ export default function WorkspaceSwitcher() {
     if (!localStorage.getItem('datapro_token')) return
     try {
       const res = await fetch(`${API_BASE}/api/workspaces`, { credentials: 'include', headers: authHeaders() })
-      if (!res.ok) { setItems([]); return }
+      if (!res.ok) {
+        setItems([])
+        return
+      }
       const data = await res.json()
       setItems(Array.isArray(data.workspaces) ? data.workspaces : [])
     } catch {
@@ -28,7 +33,9 @@ export default function WorkspaceSwitcher() {
 
   useEffect(() => {
     load()
-    const reload = () => { load() }
+    const reload = () => {
+      load()
+    }
     window.addEventListener('datapro:team-joined', reload)
     window.addEventListener('focus', reload)
     return () => {
@@ -61,7 +68,9 @@ export default function WorkspaceSwitcher() {
 
   return (
     <div className="px-3 pb-2">
-      <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Workspace</p>
+      <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+        Workspace
+      </p>
       <select
         value={active.orgId}
         disabled={busy}

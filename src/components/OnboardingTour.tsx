@@ -1,3 +1,5 @@
+// First-visit tour over the sidebar items. Nothing imports it at the moment.
+
 import { useEffect, useState } from 'react'
 import { SIDEBAR_NAV_ITEMS } from './Sidebar'
 
@@ -115,23 +117,20 @@ export default function OnboardingTour({ onStepChange, onExpandNeeded }: Onboard
         <p className="text-white/60 text-xs leading-relaxed mb-4">{step.description}</p>
 
         <div className="flex items-center justify-between">
-          <button
-            onClick={finish}
-            className="text-xs text-white/40 hover:text-white/70 transition-colors"
-          >
+          <button onClick={finish} className="text-xs text-white/40 hover:text-white/70 transition-colors">
             Skip tour
           </button>
           <div className="flex gap-2">
             {stepIndex > 0 && (
               <button
-                onClick={() => setStepIndex((i) => i - 1)}
+                onClick={() => setStepIndex(i => i - 1)}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium text-white/70 hover:bg-white/10 transition-colors"
               >
                 Back
               </button>
             )}
             <button
-              onClick={() => (isLast ? finish() : setStepIndex((i) => i + 1))}
+              onClick={() => (isLast ? finish() : setStepIndex(i => i + 1))}
               className="px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-600 text-white hover:bg-purple-500 transition-colors"
             >
               {isLast ? 'Done' : 'Next'}

@@ -169,7 +169,9 @@ export function installForbiddenHandler() {
       if (res.status === 403) {
         const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
         const method = (
-          init?.method || (typeof input === 'string' || input instanceof URL ? 'GET' : input.method) || 'GET'
+          init?.method ||
+          (typeof input === 'string' || input instanceof URL ? 'GET' : input.method) ||
+          'GET'
         ).toUpperCase()
         if (url.startsWith(API_BASE) && method !== 'GET' && Date.now() - lastShown > 3000) {
           lastShown = Date.now()

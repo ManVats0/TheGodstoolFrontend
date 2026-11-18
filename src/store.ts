@@ -64,7 +64,21 @@ export interface AnalysisResult {
 export interface DataSource {
   id: string
   name: string
-  type: 'csv' | 'sheets' | 'db' | 'catalog' | 'mysql' | 'postgres' | 'bigquery' | 'mongodb' | 'aws' | 'ga4' | 'gcs' | 'cloudsql' | 'databricks' | 'rest'
+  type:
+    | 'csv'
+    | 'sheets'
+    | 'db'
+    | 'catalog'
+    | 'mysql'
+    | 'postgres'
+    | 'bigquery'
+    | 'mongodb'
+    | 'aws'
+    | 'ga4'
+    | 'gcs'
+    | 'cloudsql'
+    | 'databricks'
+    | 'rest'
   file?: File
   filename?: string
   sheetId?: string
@@ -78,9 +92,9 @@ export interface DataSource {
   // Which object inside the connection this source points at
   table?: string
   collection?: string
-  objectPath?: string   // GCS file / S3 key
-  endpoint?: string     // REST
-  report?: string       // GA4
+  objectPath?: string // GCS file / S3 key
+  endpoint?: string // REST
+  report?: string // GA4
 }
 
 export interface Transformation {
@@ -134,8 +148,13 @@ function authHeaders(): Record<string, string> {
 // Stable key for analysis_results / catalog. connectionId alone is NOT enough:
 // one connection has many tables, so include the object name.
 export function sourceKeyOf(s: {
-  name: string; connectionId?: string; table?: string; collection?: string
-  objectPath?: string; endpoint?: string; report?: string
+  name: string
+  connectionId?: string
+  table?: string
+  collection?: string
+  objectPath?: string
+  endpoint?: string
+  report?: string
 }): string {
   if (!s.connectionId) return s.name
   const sub = s.table || s.collection || s.objectPath || s.endpoint || s.report || ''
@@ -157,47 +176,51 @@ function expandConnectionToSources(conn: BackendConnection): DataSource[] {
     ...extra,
   })
   // config may hold a list (tables) or a single value (table)
-  const list = (arr?: any, one?: any): string[] =>
-    Array.isArray(arr) && arr.length ? arr : (one ? [one] : [])
+  const list = (arr?: any, one?: any): string[] => (Array.isArray(arr) && arr.length ? arr : one ? [one] : [])
 
   switch (type) {
     case 'mysql':
     case 'postgres':
       return list(config.tables, config.table).map((t, i) =>
-        mk(i, `${config.database}.${t}@${config.host}`, { table: t }))
+        mk(i, `${config.database}.${t}@${config.host}`, { table: t })
+      )
     case 'cloudsql':
       return list(config.tables, config.table).map((t, i) =>
-        mk(i, `${config.database}.${t}@cloudsql.${config.project}`, { table: t }))
+        mk(i, `${config.database}.${t}@cloudsql.${config.project}`, { table: t })
+      )
     case 'bigquery':
       return list(config.tables, config.table).map((t, i) =>
-        mk(i, `${config.project}.${config.dataset}.${t}`, { table: t }))
+        mk(i, `${config.project}.${config.dataset}.${t}`, { table: t })
+      )
     case 'mongodb':
       return list(config.collections, config.collection).map((c, i) =>
-        mk(i, `${config.database}.${c}@mongo`, { collection: c }))
+        mk(i, `${config.database}.${c}@mongo`, { collection: c })
+      )
     case 'gcs':
-      return list(config.files, config.file).map((f, i) =>
-        mk(i, `gcs://${config.bucket}/${f}`, { objectPath: f }))
+      return list(config.files, config.file).map((f, i) => mk(i, `gcs://${config.bucket}/${f}`, { objectPath: f }))
     case 'databricks':
       return list(config.tables, config.table).map((t, i) =>
-        mk(i, `${config.catalog}.${config.schema}.${t}@${config.host}`, { table: t }))
+        mk(i, `${config.catalog}.${config.schema}.${t}@${config.host}`, { table: t })
+      )
     case 'rest': {
       const host = (config.base_url || '').replace(/https?:\/\//, '')
-      return list(config.endpoints, config.endpoint).map((ep, i) =>
-        mk(i, `rest:${host}${ep}`, { endpoint: ep }))
+      return list(config.endpoints, config.endpoint).map((ep, i) => mk(i, `rest:${host}${ep}`, { endpoint: ep }))
     }
     case 'ga4': {
       const pid = config.property_id || config.propertyId
-      return list(config.reports, config.report || 'report').map((r, i) =>
-        mk(i, `ga4:${pid}/${r}`, { report: r }))
+      return list(config.reports, config.report || 'report').map((r, i) => mk(i, `ga4:${pid}/${r}`, { report: r }))
     }
     case 'aws': {
       const svc = config.service
       return list(config.tables, config.table).map((item, i) => {
         const name =
-          svc === 's3' ? `s3://${config.bucket}/${item}` :
-          svc === 'dynamodb' ? `${item}@dynamodb.${config.region}` :
-          svc === 'cost-explorer' ? `cost-explorer:${item}@${config.region}` :
-          `${config.database}.${item}@${config.host}`
+          svc === 's3'
+            ? `s3://${config.bucket}/${item}`
+            : svc === 'dynamodb'
+              ? `${item}@dynamodb.${config.region}`
+              : svc === 'cost-explorer'
+                ? `cost-explorer:${item}@${config.region}`
+                : `${config.database}.${item}@${config.host}`
         return mk(i, name, { table: item })
       })
     }
@@ -236,7 +259,7 @@ interface AppState {
     name: string,
     type: string,
     config: Record<string, any>,
-    credentials: Record<string, any>,
+    credentials: Record<string, any>
   ) => Promise<string | undefined>
 
   catalog: CatalogItem[]
@@ -305,11 +328,14 @@ interface AppState {
 
 export const useStore = create<AppState>((set, get) => ({
   activePage: 'sources',
-  setActivePage: (page) => set({ activePage: page }),
+  setActivePage: page => set({ activePage: page }),
 
   sources: [],
-  addSource: (source) => { track('source_added', { source_type: String((source as any).type || 'unknown') }); set((s) => ({ sources: [...s.sources, source] })) },
-  removeSource: (id) => set((s) => ({ sources: s.sources.filter(src => src.id !== id) })),
+  addSource: source => {
+    track('source_added', { source_type: String((source as any).type || 'unknown') })
+    set(s => ({ sources: [...s.sources, source] }))
+  },
+  removeSource: id => set(s => ({ sources: s.sources.filter(src => src.id !== id) })),
 
   loadingSourcesFromBackend: false,
   connections: [],
@@ -331,7 +357,7 @@ export const useStore = create<AppState>((set, get) => ({
         set({ loadingSourcesFromBackend: false })
         return
       }
-      set((s) => {
+      set(s => {
         const backendIds = new Set(conns.map(c => c._id))
         // keep local-only sources (CSV, catalog) and still-valid backend ones
         const next = s.sources.filter(src => !src.connectionId || backendIds.has(src.connectionId))
@@ -384,75 +410,109 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   catalog: [
-    { id: 'cat-1', name: 'Global_Sales_2023', description: 'Verified sales records from all regions', columns: 24, rows: 150000, tags: ['verified', 'finance'], owner: 'Data Team', lastUpdated: '2023-11-10' },
-    { id: 'cat-2', name: 'User_Activity_Logs', description: 'Raw clickstream and event data', columns: 12, rows: 8000000, tags: ['raw', 'product'], owner: 'Engineering', lastUpdated: '2023-11-12' },
-    { id: 'cat-3', name: 'Customer_Demographics', description: 'Aggregated user demographic profiles', columns: 8, rows: 45000, tags: ['marketing', 'clean'], owner: 'Marketing', lastUpdated: '2023-11-15' }
+    {
+      id: 'cat-1',
+      name: 'Global_Sales_2023',
+      description: 'Verified sales records from all regions',
+      columns: 24,
+      rows: 150000,
+      tags: ['verified', 'finance'],
+      owner: 'Data Team',
+      lastUpdated: '2023-11-10',
+    },
+    {
+      id: 'cat-2',
+      name: 'User_Activity_Logs',
+      description: 'Raw clickstream and event data',
+      columns: 12,
+      rows: 8000000,
+      tags: ['raw', 'product'],
+      owner: 'Engineering',
+      lastUpdated: '2023-11-12',
+    },
+    {
+      id: 'cat-3',
+      name: 'Customer_Demographics',
+      description: 'Aggregated user demographic profiles',
+      columns: 8,
+      rows: 45000,
+      tags: ['marketing', 'clean'],
+      owner: 'Marketing',
+      lastUpdated: '2023-11-15',
+    },
   ],
 
   savedFlows: [],
-  saveFlow: (flow) => set((s) => ({ savedFlows: [...s.savedFlows, flow] })),
-  applyFlow: (flowId) => set((s) => {
-    const flow = s.savedFlows.find(f => f.id === flowId)
-    return flow ? { transformations: [...flow.transformations] } : {}
-  }),
+  saveFlow: flow => set(s => ({ savedFlows: [...s.savedFlows, flow] })),
+  applyFlow: flowId =>
+    set(s => {
+      const flow = s.savedFlows.find(f => f.id === flowId)
+      return flow ? { transformations: [...flow.transformations] } : {}
+    }),
 
   analysis: null,
-  setAnalysis: (a) => set({ analysis: a }),
+  setAnalysis: a => set({ analysis: a }),
 
   activeFile: null,
-  setActiveFile: (f) => set({ activeFile: f }),
+  setActiveFile: f => set({ activeFile: f }),
 
   activeSourceName: '',
-  setActiveSourceName: (n) => set({ activeSourceName: n }),
+  setActiveSourceName: n => set({ activeSourceName: n }),
 
-  switchActiveSource: (file, name) => set({
-    activeFile: file,
-    activeSourceName: name,
-    analysis: null,
-    analysisTab: 'preview',
-  }),
+  switchActiveSource: (file, name) =>
+    set({
+      activeFile: file,
+      activeSourceName: name,
+      analysis: null,
+      analysisTab: 'preview',
+    }),
 
-  loadCachedAnalysis: (name, a) => set({
-    activeFile: null,
-    activeSourceName: name,
-    analysis: a,
-    analysisTab: (a && (a.total_problems > 0 || (a.problems?.length ?? 0) > 0)) ? 'problems' : 'preview',
-  }),
+  loadCachedAnalysis: (name, a) =>
+    set({
+      activeFile: null,
+      activeSourceName: name,
+      analysis: a,
+      analysisTab: a && (a.total_problems > 0 || (a.problems?.length ?? 0) > 0) ? 'problems' : 'preview',
+    }),
 
   activeDestinationName: '',
-  setActiveDestinationName: (n) => set({ activeDestinationName: n }),
+  setActiveDestinationName: n => set({ activeDestinationName: n }),
 
   notifications: [],
-  addNotifications: (newOnes) => set((s) => {
-    const existingKeys = new Set(s.notifications.map(n => `${n.type}|${n.title}|${n.message}`))
-    const deduped = newOnes.filter(n => !existingKeys.has(`${n.type}|${n.title}|${n.message}`))
-    return {
-      notifications: [...deduped.map(n => ({ ...n, timestamp: Date.now() })), ...s.notifications],
-    }
-  }),
+  addNotifications: newOnes =>
+    set(s => {
+      const existingKeys = new Set(s.notifications.map(n => `${n.type}|${n.title}|${n.message}`))
+      const deduped = newOnes.filter(n => !existingKeys.has(`${n.type}|${n.title}|${n.message}`))
+      return {
+        notifications: [...deduped.map(n => ({ ...n, timestamp: Date.now() })), ...s.notifications],
+      }
+    }),
 
   readIds: new Set(),
-  markRead: (id) => set((s) => ({ readIds: new Set([...s.readIds, id]) })),
-  markAllRead: () => set((s) => ({ readIds: new Set(s.notifications.map(n => n.id)) })),
+  markRead: id => set(s => ({ readIds: new Set([...s.readIds, id]) })),
+  markAllRead: () => set(s => ({ readIds: new Set(s.notifications.map(n => n.id)) })),
 
   notifyEmail: '',
-  setNotifyEmail: (e) => set({ notifyEmail: e }),
+  setNotifyEmail: e => set({ notifyEmail: e }),
 
   savedEmails: {},
-  saveEmailForSource: (sourceName, email) => set((s) => ({
-    savedEmails: { ...s.savedEmails, [sourceName]: email },
-    notifyEmail: email
-  })),
-  removeEmailForSource: (sourceName) => set((s) => {
-    const updated = { ...s.savedEmails }
-    delete updated[sourceName]
-    return { savedEmails: updated, notifyEmail: '' }
-  }),
+  saveEmailForSource: (sourceName, email) =>
+    set(s => ({
+      savedEmails: { ...s.savedEmails, [sourceName]: email },
+      notifyEmail: email,
+    })),
+  removeEmailForSource: sourceName =>
+    set(s => {
+      const updated = { ...s.savedEmails }
+      delete updated[sourceName]
+      return { savedEmails: updated, notifyEmail: '' }
+    }),
 
   alertConditions: { staleness: true, schema: true, anomalies: true, flow: true },
-  setAlertCondition: (key, val) => set((s) => ({
-    alertConditions: { ...s.alertConditions, [key]: val }
-  })),
+  setAlertCondition: (key, val) =>
+    set(s => ({
+      alertConditions: { ...s.alertConditions, [key]: val },
+    })),
 
   lastSourcesScanAt: 0,
   setLastSourcesScanAt: (t: number) => set({ lastSourcesScanAt: t }),
@@ -461,41 +521,48 @@ export const useStore = create<AppState>((set, get) => ({
     try {
       const saved = localStorage.getItem('datapipe_audit_logs')
       return saved ? JSON.parse(saved) : []
-    } catch { return [] }
+    } catch {
+      return []
+    }
   })(),
-  addAuditLog: (log) => set((s) => {
-    // Cap at 500 entries so localStorage doesn't grow unbounded — audit
-    // logs are meant as a rolling recent-activity view, not permanent
-    // storage (that's what the backend /api/pipelines execute history is for).
-    const updated = [log, ...s.auditLogs].slice(0, 500)
-    try { localStorage.setItem('datapipe_audit_logs', JSON.stringify(updated)) } catch {}
-    return { auditLogs: updated }
-  }),
+  addAuditLog: log =>
+    set(s => {
+      // Cap at 500 entries so localStorage doesn't grow unbounded — audit
+      // logs are meant as a rolling recent-activity view, not permanent
+      // storage (that's what the backend /api/pipelines execute history is for).
+      const updated = [log, ...s.auditLogs].slice(0, 500)
+      try {
+        localStorage.setItem('datapipe_audit_logs', JSON.stringify(updated))
+      } catch {}
+      return { auditLogs: updated }
+    }),
 
   transformations: [],
-  addTransformation: (t) => set((s) => ({ transformations: [...s.transformations, t] })),
-  removeTransformation: (id) => set((s) => ({ transformations: s.transformations.filter(t => t.id !== id) })),
+  addTransformation: t => set(s => ({ transformations: [...s.transformations, t] })),
+  removeTransformation: id => set(s => ({ transformations: s.transformations.filter(t => t.id !== id) })),
   clearTransformations: () => set({ transformations: [] }),
-  setTransformations: (t) => set({ transformations: t }),
+  setTransformations: t => set({ transformations: t }),
 
   analysisTab: 'preview',
-  setAnalysisTab: (t) => set({ analysisTab: t }),
+  setAnalysisTab: t => set({ analysisTab: t }),
 
   pendingCleanOptions: null,
-  setPendingCleanOptions: (opts) => set({ pendingCleanOptions: opts }),
+  setPendingCleanOptions: opts => set({ pendingCleanOptions: opts }),
   pipelineSteps: [],
-  setPipelineSteps: (steps) => set({ pipelineSteps: steps }),
+  setPipelineSteps: steps => set({ pipelineSteps: steps }),
   lastPipelineRunAt: null,
-  setLastPipelineRunAt: (t) => set({ lastPipelineRunAt: t }),
+  setLastPipelineRunAt: t => set({ lastPipelineRunAt: t }),
   pipelineOutputFile: null,
-  setPipelineOutputFile: (f) => set({ pipelineOutputFile: f }),
+  setPipelineOutputFile: f => set({ pipelineOutputFile: f }),
   gsheetsDestination: (() => {
     try {
       const saved = localStorage.getItem('datapro_gsheets_dest')
       return saved ? JSON.parse(saved) : null
-    } catch { return null }
+    } catch {
+      return null
+    }
   })(),
-  setGsheetsDestination: (g) => {
+  setGsheetsDestination: g => {
     if (g) localStorage.setItem('datapro_gsheets_dest', JSON.stringify(g))
     else localStorage.removeItem('datapro_gsheets_dest')
     set({ gsheetsDestination: g })

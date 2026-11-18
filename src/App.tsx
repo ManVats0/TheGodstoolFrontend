@@ -1,3 +1,10 @@
+// App.tsx: the front door of the site.
+//  1. Early returns near the top render the public pages that have their own route (/try, /status, /contact, /blog, /pricing, ...).
+//  2. The landing page: navbar, hero, showcases, pricing, final call to action and footer.
+//  3. The login / register modal (email and Google sign-in, device limit handling).
+//  4. Once signed in, the app shell: Sidebar plus the routes to Dashboard, Data Sources, Analyse / Clean, Flow and the rest.
+// Search for the "── SECTION ──" comments to jump between the landing page parts.
+
 import logo from '../the_gods_tool_logo_128.webp'
 import analysisBeforeImg from './ANALYSIS SHOWCASE.png'
 import postTransformAfterImg from './post transformation overview.png'
@@ -28,11 +35,27 @@ import TryFree from './pages/TryFree'
 import tryContent from './home/try-content.json'
 import BlogPost from './pages/BlogPost'
 import Feedback from './pages/Feedback'
+import Updates from './pages/Updates'
 import { API_BASE } from './config'
 import content from './home/content.json'
 import { EstimateSection } from './home/EstimateSection'
-import { ProblemSection, AudienceSection, FeaturesSection, StepsSection, QuoteSection, FaqSection, PrivacySection, scrollToQuote } from './home/HomeSections'
-import { clearPermissionsCache, loadPermissions, installForbiddenHandler, refreshPermissions, usePermissions } from './usePermissions'
+import {
+  ProblemSection,
+  AudienceSection,
+  FeaturesSection,
+  StepsSection,
+  QuoteSection,
+  FaqSection,
+  PrivacySection,
+  scrollToQuote,
+} from './home/HomeSections'
+import {
+  clearPermissionsCache,
+  loadPermissions,
+  installForbiddenHandler,
+  refreshPermissions,
+  usePermissions,
+} from './usePermissions'
 
 const GOOGLE_CLIENT_ID = '973595012454-ojh9i31u6ocq5l12t8gccer8dlc8gaim.apps.googleusercontent.com'
 
@@ -61,22 +84,31 @@ const AuditLogs = lazy(pageLoaders.audit)
 const Documentation = lazy(pageLoaders.docs)
 const Tunneling = lazy(pageLoaders.tunneling)
 const TeamGate = lazy(pageLoaders.team)
-const PdfStatements = lazy(pageLoaders.pdf)  // the PDF to data page
+const PdfStatements = lazy(pageLoaders.pdf) // the PDF to data page
 let preloaded = false
 function preloadAppPages() {
   if (preloaded) return
   preloaded = true
-  Object.values(pageLoaders).forEach(load => { load().catch(() => { preloaded = false }) })
+  Object.values(pageLoaders).forEach(load => {
+    load().catch(() => {
+      preloaded = false
+    })
+  })
 }
 
 // Sign-in speed: the plan lookup runs at the same time as the permissions lookup, not after it.
 let planPrefetch: { token: string; p: Promise<any> } | null = null
 function fetchPlanJson(token: string): Promise<any> {
-  if (planPrefetch && planPrefetch.token === token) { const p = planPrefetch.p; planPrefetch = null; return p }
-  return fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
+  if (planPrefetch && planPrefetch.token === token) {
+    const p = planPrefetch.p
+    planPrefetch = null
+    return p
+  }
+  return fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${token}` } }).then(r =>
+    r.json()
+  )
 }
 let lastLoginAt = 0
-
 
 function SigningInOverlay({ stage }: { stage: 'verify' | 'workspace' | 'redirect' }) {
   const [slow, setSlow] = useState(false)
@@ -86,21 +118,61 @@ function SigningInOverlay({ stage }: { stage: 'verify' | 'workspace' | 'redirect
   }, [])
   const steps = ['Google', 'Your account', 'Your workspace']
   const active = stage === 'redirect' ? 0 : stage === 'verify' ? 1 : 2
-  const label = stage === 'redirect' ? 'Taking you to Google...' : stage === 'verify' ? 'Verifying your account...' : 'Loading your workspace...'
+  const label =
+    stage === 'redirect'
+      ? 'Taking you to Google...'
+      : stage === 'verify'
+        ? 'Verifying your account...'
+        : 'Loading your workspace...'
   return (
-    <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(5,3,15,0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 24, textAlign: 'center' }}>
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 400,
+        background: 'rgba(5,3,15,0.95)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 18,
+        padding: 24,
+        textAlign: 'center',
+      }}
+    >
       <span className="btn-spinner" style={{ width: 38, height: 38, borderWidth: 3 }} />
       <div style={{ fontSize: '1.05rem', color: 'rgba(255,255,255,0.92)', fontWeight: 600 }}>{label}</div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
         {steps.map((t, i) => (
-          <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: i <= active ? '#c4b5fd' : 'rgba(255,255,255,0.35)' }}>
-            <span style={{ width: 8, height: 8, borderRadius: 99, background: i < active ? '#4ade80' : i === active ? '#a78bfa' : 'rgba(255,255,255,0.2)' }} />
-            {t}{i < steps.length - 1 && <span style={{ margin: '0 4px', opacity: 0.4 }}>&rarr;</span>}
+          <span
+            key={t}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: '0.78rem',
+              color: i <= active ? '#c4b5fd' : 'rgba(255,255,255,0.35)',
+            }}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 99,
+                background: i < active ? '#4ade80' : i === active ? '#a78bfa' : 'rgba(255,255,255,0.2)',
+              }}
+            />
+            {t}
+            {i < steps.length - 1 && <span style={{ margin: '0 4px', opacity: 0.4 }}>&rarr;</span>}
           </span>
         ))}
       </div>
       <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', minHeight: 18 }}>
-        {slow ? 'Still working. Thanks for waiting, this can take a few seconds on a first sign-in.' : 'This only takes a few seconds.'}
+        {slow
+          ? 'Still working. Thanks for waiting, this can take a few seconds on a first sign-in.'
+          : 'This only takes a few seconds.'}
       </div>
     </div>
   )
@@ -113,7 +185,7 @@ function redirectToGoogleOAuth() {
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'openid email profile',
-    prompt: 'select_account'
+    prompt: 'select_account',
   })
   window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
 }
@@ -142,31 +214,126 @@ async function bootstrapSession(token: string) {
   await loadPermissions()
 }
 function fetchPlanRaw(token: string): Promise<any> {
-  return fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
+  return fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${token}` } }).then(r =>
+    r.json()
+  )
 }
 
 function LineIcon({ name, size = 32, color = '#a78bfa' }: { name: string; size?: number; color?: string }) {
   const paths: Record<string, JSX.Element> = {
     zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
-    link: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>,
-    refresh: <><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" /></>,
-    chart: <><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></>,
-    lock: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
+    link: (
+      <>
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+      </>
+    ),
+    refresh: (
+      <>
+        <polyline points="23 4 23 10 17 10" />
+        <polyline points="1 20 1 14 7 14" />
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+      </>
+    ),
+    chart: (
+      <>
+        <line x1="18" y1="20" x2="18" y2="10" />
+        <line x1="12" y1="20" x2="12" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="14" />
+      </>
+    ),
+    lock: (
+      <>
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </>
+    ),
     shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
-    database: <><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" /></>,
-    clock: <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>,
-    alert: <><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></>,
+    database: (
+      <>
+        <ellipse cx="12" cy="5" rx="9" ry="3" />
+        <path d="M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3" />
+        <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" />
+      </>
+    ),
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </>
+    ),
+    alert: (
+      <>
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </>
+    ),
     filter: <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />,
-    book: <><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></>,
-    upload: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></>,
-    cpu: <><rect x="4" y="4" width="16" height="16" rx="2" ry="2" /><rect x="9" y="9" width="6" height="6" /><line x1="9" y1="1" x2="9" y2="4" /><line x1="15" y1="1" x2="15" y2="4" /><line x1="9" y1="20" x2="9" y2="23" /><line x1="15" y1="20" x2="15" y2="23" /><line x1="20" y1="9" x2="23" y2="9" /><line x1="20" y1="14" x2="23" y2="14" /><line x1="1" y1="9" x2="4" y2="9" /><line x1="1" y1="14" x2="4" y2="14" /></>,
-    check: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></>,
-    trendDown: <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6" /><polyline points="17 18 23 18 23 12" /></>,
-    layers: <><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></>,
-    mail: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>,
+    book: (
+      <>
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </>
+    ),
+    upload: (
+      <>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </>
+    ),
+    cpu: (
+      <>
+        <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+        <rect x="9" y="9" width="6" height="6" />
+        <line x1="9" y1="1" x2="9" y2="4" />
+        <line x1="15" y1="1" x2="15" y2="4" />
+        <line x1="9" y1="20" x2="9" y2="23" />
+        <line x1="15" y1="20" x2="15" y2="23" />
+        <line x1="20" y1="9" x2="23" y2="9" />
+        <line x1="20" y1="14" x2="23" y2="14" />
+        <line x1="1" y1="9" x2="4" y2="9" />
+        <line x1="1" y1="14" x2="4" y2="14" />
+      </>
+    ),
+    check: (
+      <>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </>
+    ),
+    trendDown: (
+      <>
+        <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+        <polyline points="17 18 23 18 23 12" />
+      </>
+    ),
+    layers: (
+      <>
+        <polygon points="12 2 2 7 12 12 22 7 12 2" />
+        <polyline points="2 17 12 22 22 17" />
+        <polyline points="2 12 12 17 22 12" />
+      </>
+    ),
+    mail: (
+      <>
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <polyline points="22,6 12,13 2,6" />
+      </>
+    ),
   }
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       {paths[name]}
     </svg>
   )
@@ -179,130 +346,146 @@ export default function App() {
   const [sidebarExpanded, setSidebarExpanded] = useState(true)
   const location = useLocation()
 
-const [entered, setEntered] = useState(() => !!localStorage.getItem('datapro_logged_in'))
-const [userPlan, setUserPlan] = useState<string>(() => {
-  const stored = localStorage.getItem('datapro_plan')
-  return stored || 'none'
-})
-const [showLogin, setShowLogin] = useState(false)
-const [loginEmail, setLoginEmail] = useState('')
-const [loginPassword, setLoginPassword] = useState('')
-const [loginError, setLoginError] = useState('')
-const [isRegisterMode, setIsRegisterMode] = useState(false)
-const [showForgot, setShowForgot] = useState(false)
-const [forgotEmail, setForgotEmail] = useState('')
-const [forgotMsg, setForgotMsg] = useState('')
-const [forgotError, setForgotError] = useState('')
-const [isGoogleLoading, setIsGoogleLoading] = useState(false)
-const [signStage, setSignStage] = useState<'' | 'google' | 'verify' | 'workspace' | 'redirect'>('')
-const [isLoginLoading, setIsLoginLoading] = useState(false)
-const [showForceLogout, setShowForceLogout] = useState(false)
-const [pendingGooglePayload, setPendingGooglePayload] = useState<{ credential: string } | null>(null)
-const [regName, setRegName] = useState('')
-const [regNickname, setRegNickname] = useState('')
-const [confirmPassword, setConfirmPassword] = useState('')
-const [showTrialWelcome, setShowTrialWelcome] = useState(false)
-const [regFeeling, setRegFeeling] = useState('')
-const forceLogoutRef = useRef<HTMLButtonElement>(null)
-const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
-const [planTick, setPlanTick] = useState(0)   // bumped whenever the plan is re-read from the server
+  const [entered, setEntered] = useState(() => !!localStorage.getItem('datapro_logged_in'))
+  const [userPlan, setUserPlan] = useState<string>(() => {
+    const stored = localStorage.getItem('datapro_plan')
+    return stored || 'none'
+  })
+  const [showLogin, setShowLogin] = useState(false)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [isRegisterMode, setIsRegisterMode] = useState(false)
+  const [showForgot, setShowForgot] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotMsg, setForgotMsg] = useState('')
+  const [forgotError, setForgotError] = useState('')
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [signStage, setSignStage] = useState<'' | 'google' | 'verify' | 'workspace' | 'redirect'>('')
+  const [isLoginLoading, setIsLoginLoading] = useState(false)
+  const [showForceLogout, setShowForceLogout] = useState(false)
+  const [pendingGooglePayload, setPendingGooglePayload] = useState<{ credential: string } | null>(null)
+  const [regName, setRegName] = useState('')
+  const [regNickname, setRegNickname] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showTrialWelcome, setShowTrialWelcome] = useState(false)
+  const [regFeeling, setRegFeeling] = useState('')
+  const forceLogoutRef = useRef<HTMLButtonElement>(null)
+  const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null)
+  const [planTick, setPlanTick] = useState(0) // bumped whenever the plan is re-read from the server
 
-useEffect(() => {
-  if (userPlan !== 'trial') { setTrialDaysLeft(null); return }
-  const expiresStr = localStorage.getItem('datapro_plan_expires')
-  if (!expiresStr) { setTrialDaysLeft(null); return }
-  const msLeft = new Date(expiresStr).getTime() - Date.now()
-  setTrialDaysLeft(Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24))))
-}, [userPlan, planTick])
+  useEffect(() => {
+    if (userPlan !== 'trial') {
+      setTrialDaysLeft(null)
+      return
+    }
+    const expiresStr = localStorage.getItem('datapro_plan_expires')
+    if (!expiresStr) {
+      setTrialDaysLeft(null)
+      return
+    }
+    const msLeft = new Date(expiresStr).getTime() - Date.now()
+    setTrialDaysLeft(Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24))))
+  }, [userPlan, planTick])
 
-useEffect(() => {
-  if (showForceLogout && forceLogoutRef.current) {
-    forceLogoutRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }
-}, [showForceLogout])
+  useEffect(() => {
+    if (showForceLogout && forceLogoutRef.current) {
+      forceLogoutRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [showForceLogout])
 
-useEffect(() => {
-  if (location.pathname !== '/docs') {
-    localStorage.setItem('datapro_last_page', location.pathname)
-  }
-}, [location.pathname]) // Default to true if you prefer it open
+  useEffect(() => {
+    if (location.pathname !== '/docs') {
+      localStorage.setItem('datapro_last_page', location.pathname)
+    }
+  }, [location.pathname]) // Default to true if you prefer it open
 
-// Logout (or any time we're signed out): drop cached permissions.
-useEffect(() => {
-  if (!entered) clearPermissionsCache()
-}, [entered])
+  // Logout (or any time we're signed out): drop cached permissions.
+  useEffect(() => {
+    if (!entered) clearPermissionsCache()
+  }, [entered])
 
-// Signed in: keep the org's connections + my role live, so teammates' changes appear
-// without a reload and role changes / removal take effect quickly.
-useEffect(() => {
-  if (!entered) return
-  const sync = () => {
-    if (document.hidden) return
-    if (Date.now() - lastLoginAt < 15000) return   // just signed in: permissions and sources were fetched a moment ago
-    refreshPermissions()
-    useStore.getState().loadSourcesFromBackend()
-    // Keep the plan and trial days in step with the server, so the top banner matches the dashboard.
-    const tk = localStorage.getItem('datapro_token')
-    if (tk) {
-      fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${tk}` } })
-        .then(r => r.json())
-        .then(p => {
-          if (!p || !p.plan) return
-          localStorage.setItem('datapro_plan', p.plan)
+  // Signed in: keep the org's connections + my role live, so teammates' changes appear
+  // without a reload and role changes / removal take effect quickly.
+  useEffect(() => {
+    if (!entered) return
+    const sync = () => {
+      if (document.hidden) return
+      if (Date.now() - lastLoginAt < 15000) return // just signed in: permissions and sources were fetched a moment ago
+      refreshPermissions()
+      useStore.getState().loadSourcesFromBackend()
+      // Keep the plan and trial days in step with the server, so the top banner matches the dashboard.
+      const tk = localStorage.getItem('datapro_token')
+      if (tk) {
+        fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${tk}` } })
+          .then(r => r.json())
+          .then(p => {
+            if (!p || !p.plan) return
+            localStorage.setItem('datapro_plan', p.plan)
+            if (p.planExpiresAt) localStorage.setItem('datapro_plan_expires', p.planExpiresAt)
+            else localStorage.removeItem('datapro_plan_expires')
+            setUserPlan(p.plan)
+            setPlanTick(n => n + 1)
+          })
+          .catch(() => {
+            /* keep what we have */
+          })
+      }
+    }
+    sync()
+    const t = setInterval(sync, 45000)
+    window.addEventListener('focus', sync)
+    return () => {
+      clearInterval(t)
+      window.removeEventListener('focus', sync)
+    }
+  }, [entered])
+
+  // TeamGate finished a join: reload permissions, plan and the org's connections, then go to Sources.
+  useEffect(() => {
+    const onJoined = async () => {
+      clearPermissionsCache()
+      await loadPermissions()
+      const authToken = localStorage.getItem('datapro_token')
+      if (authToken) {
+        try {
+          const r = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          })
+          const p = await r.json()
+          const plan = p.plan || 'none'
+          localStorage.setItem('datapro_plan', plan)
           if (p.planExpiresAt) localStorage.setItem('datapro_plan_expires', p.planExpiresAt)
           else localStorage.removeItem('datapro_plan_expires')
-          setUserPlan(p.plan)
-          setPlanTick(n => n + 1)
-        })
-        .catch(() => { /* keep what we have */ })
+          setUserPlan(plan)
+        } catch {
+          /* ignore */
+        }
+      }
+      useStore.getState().loadSourcesFromBackend()
+      navigate('/sources')
     }
-  }
-  sync()
-  const t = setInterval(sync, 45000)
-  window.addEventListener('focus', sync)
-  return () => { clearInterval(t); window.removeEventListener('focus', sync) }
-}, [entered])
+    window.addEventListener('datapro:team-joined', onJoined)
+    return () => window.removeEventListener('datapro:team-joined', onJoined)
+  }, [])
 
-// TeamGate finished a join: reload permissions, plan and the org's connections, then go to Sources.
-useEffect(() => {
-  const onJoined = async () => {
-    clearPermissionsCache()
-    await loadPermissions()
-    const authToken = localStorage.getItem('datapro_token')
-    if (authToken) {
-      try {
-        const r = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/plan`, { headers: { Authorization: `Bearer ${authToken}` } })
-        const p = await r.json()
-        const plan = p.plan || 'none'
-        localStorage.setItem('datapro_plan', plan)
-        if (p.planExpiresAt) localStorage.setItem('datapro_plan_expires', p.planExpiresAt)
-        else localStorage.removeItem('datapro_plan_expires')
-        setUserPlan(plan)
-      } catch { /* ignore */ }
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      '/': content.site.title,
+      '/pricing': "Pricing | The God's Tool",
+      '/contact': "Contact | The God's Tool",
+      '/status': "Status | The God's Tool",
+      '/blog': "Blog | The God's Tool",
+      '/try': tryContent.title,
+      '/try.html': tryContent.title,
+      '/terms': "Terms of Service | The God's Tool",
+      '/feedback': "Feedback | The God's Tool",
+      '/whats-new': "What's new | The God's Tool",
     }
-    useStore.getState().loadSourcesFromBackend()
-    navigate('/sources')
-  }
-  window.addEventListener('datapro:team-joined', onJoined)
-  return () => window.removeEventListener('datapro:team-joined', onJoined)
-}, [])
-
-useEffect(() => {
-  const titles: Record<string, string> = {
-    '/': content.site.title,
-    '/pricing': "Pricing | The God's Tool",
-    '/contact': "Contact | The God's Tool",
-    '/status': "Status | The God's Tool",
-    '/blog': "Blog | The God's Tool",
-    '/try': tryContent.title,
-    '/try.html': tryContent.title,
-    '/terms': "Terms of Service | The God's Tool",
-    '/feedback': "Feedback | The God's Tool",
-  }
-  // Blog pages set their own title (and share-card tags) for search engines.
-  if (location.pathname.startsWith('/blog')) return
-  document.title = titles[location.pathname] || "The God's Tool"
-}, [location.pathname])
+    // Blog pages set their own title (and share-card tags) for search engines.
+    if (location.pathname.startsWith('/blog')) return
+    document.title = titles[location.pathname] || "The God's Tool"
+  }, [location.pathname])
   const notifications = useStore(s => s.notifications)
   const readIds = useStore(s => s.readIds)
   const unread = notifications.filter(n => !readIds.has(n.id)).length
@@ -310,7 +493,7 @@ useEffect(() => {
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === 'GOOGLE_TOKEN' && (window as any)._googleLoginCallback) {
-        (window as any)._googleLoginCallback(e.data.token)
+        ;(window as any)._googleLoginCallback(e.data.token)
       }
     }
     window.addEventListener('message', handler)
@@ -339,7 +522,9 @@ useEffect(() => {
         else localStorage.removeItem('datapro_plan_expires')
         setUserPlan(plan)
       })
-      .catch(() => { /* ignore */ })
+      .catch(() => {
+        /* ignore */
+      })
       .finally(() => {
         setEntered(true)
         navigate('/', { replace: true })
@@ -351,12 +536,25 @@ useEffect(() => {
     const q = new URLSearchParams(location.search)
     if (q.get('signin')) {
       const after = q.get('after')
-      if (entered) { navigate(after && after.startsWith('/') && !after.startsWith('//') ? after : '/dashboard', { replace: true }); return }
-      if (after && after.startsWith('/') && !after.startsWith('//')) { try { localStorage.setItem('gt_after_login', after) } catch { /* ignore */ } }
-      setShowLogin(true); setIsRegisterMode(q.get('mode') !== 'login'); setLoginError('')
+      if (entered) {
+        navigate(after && after.startsWith('/') && !after.startsWith('//') ? after : '/dashboard', { replace: true })
+        return
+      }
+      if (after && after.startsWith('/') && !after.startsWith('//')) {
+        try {
+          localStorage.setItem('gt_after_login', after)
+        } catch {
+          /* ignore */
+        }
+      }
+      setShowLogin(true)
+      setIsRegisterMode(q.get('mode') !== 'login')
+      setLoginError('')
     } else if (onApp() && !entered) {
       // Someone opening the app address while signed out goes straight to the sign-in form.
-      setShowLogin(true); setIsRegisterMode(false); setLoginError('')
+      setShowLogin(true)
+      setIsRegisterMode(false)
+      setLoginError('')
     }
   }, [location.pathname, location.search])
 
@@ -372,8 +570,13 @@ useEffect(() => {
     if (!entered) return
     try {
       const to = localStorage.getItem('gt_after_login')
-      if (to && to.startsWith('/')) { localStorage.removeItem('gt_after_login'); navigate(to) }
-    } catch { /* ignore */ }
+      if (to && to.startsWith('/')) {
+        localStorage.removeItem('gt_after_login')
+        navigate(to)
+      }
+    } catch {
+      /* ignore */
+    }
   }, [entered])
 
   const [heroClipIndex, setHeroClipIndex] = useState(0)
@@ -406,7 +609,7 @@ useEffect(() => {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -434,7 +637,9 @@ useEffect(() => {
         else localStorage.removeItem('datapro_plan_expires')
         setUserPlan(plan)
         if (isRegisterMode && plan === 'trial') setShowTrialWelcome(true)
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       setEntered(true)
       setShowLogin(false)
     } catch (err) {
@@ -450,10 +655,13 @@ useEffect(() => {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword, forceLogout: true })
+        body: JSON.stringify({ email: loginEmail, password: loginPassword, forceLogout: true }),
       })
       const data = await res.json()
-      if (!res.ok) { setLoginError(data.error || 'Login failed'); return }
+      if (!res.ok) {
+        setLoginError(data.error || 'Login failed')
+        return
+      }
       setShowForceLogout(false)
       track('login', { method: 'email' })
       localStorage.setItem('datapro_logged_in', '1')
@@ -464,7 +672,9 @@ useEffect(() => {
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       setEntered(true)
       setShowLogin(false)
     } catch {
@@ -475,15 +685,21 @@ useEffect(() => {
   }
 
   const handleForgotPassword = async () => {
-    if (!forgotEmail.trim()) { setForgotError('Please enter your email.'); return }
+    if (!forgotEmail.trim()) {
+      setForgotError('Please enter your email.')
+      return
+    }
     try {
       const res = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotEmail })
+        body: JSON.stringify({ email: forgotEmail }),
       })
       const data = await res.json()
-      if (!res.ok) { setForgotError(data.error || 'Failed'); return }
+      if (!res.ok) {
+        setForgotError(data.error || 'Failed')
+        return
+      }
       setForgotMsg('Reset link sent! Check your email.')
       setForgotError('')
     } catch {
@@ -491,11 +707,15 @@ useEffect(() => {
     }
   }
 
- const handleGoogleLogin = () => {
-   if (onSite()) { window.location.assign(signInUrl()); return }
+  const handleGoogleLogin = () => {
+    if (onSite()) {
+      window.location.assign(signInUrl())
+      return
+    }
     setIsGoogleLoading(true)
     setSignStage('google')
-    if (!(window as any).google?.accounts?.id) {   // Google's script has not loaded yet: use the redirect sign-in right away
+    if (!(window as any).google?.accounts?.id) {
+      // Google's script has not loaded yet: use the redirect sign-in right away
       setSignStage('redirect')
       redirectToGoogleOAuth()
       return
@@ -508,7 +728,7 @@ useEffect(() => {
           const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ credential: response.credential })
+            body: JSON.stringify({ credential: response.credential }),
           })
           const data = await backendRes.json()
           if (!backendRes.ok) {
@@ -533,7 +753,9 @@ useEffect(() => {
             const plan = planData.plan || 'none'
             localStorage.setItem('datapro_plan', plan)
             setUserPlan(plan)
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
           setEntered(true)
           setShowLogin(false)
           setSignStage('')
@@ -542,7 +764,7 @@ useEffect(() => {
           setIsGoogleLoading(false)
           setSignStage('')
         }
-      }
+      },
     })
     ;(window as any).google.accounts.id.prompt((notification: any) => {
       if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
@@ -552,7 +774,8 @@ useEffect(() => {
       }
       if (notification?.isDismissedMoment?.()) {
         const why = notification.getDismissedReason?.()
-        if (why !== 'credential_returned') {   // closed without choosing an account
+        if (why !== 'credential_returned') {
+          // closed without choosing an account
           setIsGoogleLoading(false)
           setSignStage('')
         }
@@ -568,10 +791,13 @@ useEffect(() => {
       const backendRes = await fetch(`${import.meta.env.VITE_AUTH_URL}/api/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: pendingGooglePayload.credential, forceLogout: true })
+        body: JSON.stringify({ credential: pendingGooglePayload.credential, forceLogout: true }),
       })
       const data = await backendRes.json()
-      if (!backendRes.ok) { setLoginError(data.error || 'Google login failed'); return }
+      if (!backendRes.ok) {
+        setLoginError(data.error || 'Google login failed')
+        return
+      }
       setShowForceLogout(false)
       setPendingGooglePayload(null)
       track('login', { method: 'google' })
@@ -584,7 +810,9 @@ useEffect(() => {
         const plan = planData.plan || 'none'
         localStorage.setItem('datapro_plan', plan)
         setUserPlan(plan)
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       setEntered(true)
       setShowLogin(false)
     } catch {
@@ -595,32 +823,107 @@ useEffect(() => {
     }
   }
 
-if (location.pathname === '/privacy.html' || location.pathname === '/privacy' || location.pathname === '/terms.html') return null
+  if (location.pathname === '/privacy.html' || location.pathname === '/privacy' || location.pathname === '/terms.html')
+    return null
 
-if (location.pathname === '/reset-password') return <Routes><Route path="/reset-password" element={<ResetPassword />} /></Routes>
-if (location.pathname === '/pricing') return <Routes><Route path="/pricing" element={<Pricing />} /></Routes>
-if (location.pathname === '/terms') return <Routes><Route path="/terms" element={<Terms />} /></Routes>
-// if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
-if (location.pathname === '/status') return <Routes><Route path="/status" element={<Status />} /></Routes>
-if (location.pathname === '/contact') return <Routes><Route path="/contact" element={<Contact />} /></Routes>
-if (location.pathname === '/blog' || location.pathname.startsWith('/blog/')) return <Routes><Route path="/blog" element={<Blog />} /><Route path="/blog/:slug" element={<BlogPost />} /></Routes>
-if (location.pathname === '/try' || location.pathname === '/try.html') return <Routes><Route path={location.pathname} element={<TryFree />} /></Routes>
-if (location.pathname === '/feedback') return <Routes><Route path="/feedback" element={<Feedback />} /></Routes>
-if (location.pathname === '/thank-you') return <Routes><Route path="/thank-you" element={<ThankYou />} /></Routes>
+  if (location.pathname === '/reset-password')
+    return (
+      <Routes>
+        <Route path="/reset-password" element={<ResetPassword />} />
+      </Routes>
+    )
+  if (location.pathname === '/pricing')
+    return (
+      <Routes>
+        <Route path="/pricing" element={<Pricing />} />
+      </Routes>
+    )
+  if (location.pathname === '/terms')
+    return (
+      <Routes>
+        <Route path="/terms" element={<Terms />} />
+      </Routes>
+    )
+  // if (location.pathname === '/faq') return <Routes><Route path="/faq" element={<Faq />} /></Routes>
+  if (location.pathname === '/status')
+    return (
+      <Routes>
+        <Route path="/status" element={<Status />} />
+      </Routes>
+    )
+  if (location.pathname === '/contact')
+    return (
+      <Routes>
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    )
+  if (location.pathname === '/blog' || location.pathname.startsWith('/blog/'))
+    return (
+      <Routes>
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+      </Routes>
+    )
+  if (location.pathname === '/try' || location.pathname === '/try.html')
+    return (
+      <Routes>
+        <Route path={location.pathname} element={<TryFree />} />
+      </Routes>
+    )
+  if (location.pathname === '/feedback')
+    return (
+      <Routes>
+        <Route path="/feedback" element={<Feedback />} />
+      </Routes>
+    )
+  if (location.pathname === '/thank-you')
+    return (
+      <Routes>
+        <Route path="/thank-you" element={<ThankYou />} />
+      </Routes>
+    )
 
-if (location.pathname === '/auth/callback') return (
-  <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1rem' }}>
-    Signing you in…
-  </div>
-)
+  if (location.pathname === '/auth/callback')
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: '#05030f',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          fontSize: '1rem',
+        }}
+      >
+        Signing you in…
+      </div>
+    )
 
-// The public site always shows the public pages, even if an old session is still stored on this address.
-if (!entered || onSite()) return (
-  <div style={{ minHeight: '100vh', background: '#05030f', color: 'white', fontFamily: "'Inter', -apple-system, sans-serif", overflowX: 'hidden' }}>
-    {(signStage === 'verify' || signStage === 'workspace' || signStage === 'redirect' || location.pathname === '/auth/callback') && (
-      <SigningInOverlay stage={location.pathname === '/auth/callback' ? 'workspace' : signStage as 'verify' | 'workspace' | 'redirect'} />
-    )}
-    <style>{`
+  // The public site always shows the public pages, even if an old session is still stored on this address.
+  if (!entered || onSite())
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: '#05030f',
+          color: 'white',
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          overflowX: 'hidden',
+        }}
+      >
+        {(signStage === 'verify' ||
+          signStage === 'workspace' ||
+          signStage === 'redirect' ||
+          location.pathname === '/auth/callback') && (
+          <SigningInOverlay
+            stage={
+              location.pathname === '/auth/callback' ? 'workspace' : (signStage as 'verify' | 'workspace' | 'redirect')
+            }
+          />
+        )}
+        <style>{`
       @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
       @keyframes fadeUp { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
       @keyframes pulseGlow { 0%,100%{box-shadow:0 0 40px rgba(124,58,237,0.3)} 50%{box-shadow:0 0 80px rgba(124,58,237,0.7)} }
@@ -758,599 +1061,2494 @@ if (!entered || onSite()) return (
       @keyframes float-up { 0%{transform:translateY(0);opacity:0.18} 100%{transform:translateY(-80px);opacity:0} }
     `}</style>
 
-    {/* ── NAVBAR ── */}
-    <nav className="gt-nav" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(5,3,15,0.85)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '28px', width: '28px' }} /> 
-        <span style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-        <span className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</span>
-        <span className="nav-link" onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}>How It Works</span>
-        <span className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</span>
-        <a href="/try.html" className="nav-link keep" style={{ textDecoration: 'none', color: '#c4b5fd', fontWeight: 700 }}>Try free</a>
-<a href="/blog" className="nav-link" style={{ textDecoration: 'none' }}>Blog</a>
-<a href="/about.html" className="nav-link" style={{ textDecoration: 'none' }}>About</a>
-        <button onClick={() => handleEnter('login')} style={{ fontFamily: 'monospace', background: 'transparent', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa', padding: '8px 20px', borderRadius: '4px', fontSize: '0.8rem', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.2)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
-          SIGN IN
-        </button>
-      </div>
-    </nav>
-
-    <main>
-    {/* ── HERO ── */}
-    <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: '85px 24px 40px', position: 'relative', overflow: 'hidden' }}>
-      {/* Grid bg */}
-      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.05 }} xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="hgrid" width="60" height="60" patternUnits="userSpaceOnUse">
-            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#7c3aed" strokeWidth="0.4"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#hgrid)" />
-      </svg>
-      {/* Orbs */}
-      <div style={{ position: 'absolute', top: '20%', left: '15%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '25%', right: '10%', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
-
-      <div style={{ position: 'relative', zIndex: 2, maxWidth: '1180px', width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '32px', animation: 'fadeUp 0.8s ease both' }}>
-      <div style={{ flex: '1 1 480px', maxWidth: '620px', minWidth: '300px' }}>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: '#a78bfa', letterSpacing: '0.08em', marginBottom: '14px', textTransform: 'uppercase', fontWeight: 600 }}>{content.hero.eyebrow}</p>
-        <h1 className="hero-title" style={{ margin: '0 0 16px' }}>{content.hero.h1}</h1>
-        <p style={{ fontSize: 'clamp(0.95rem, 1.6vw, 1.1rem)', color: 'rgba(255,255,255,0.7)', lineHeight: 1.65, maxWidth: '600px', margin: '0 auto 16px', fontFamily: "'Inter', -apple-system, sans-serif" }}>{content.hero.sub}</p>
-        <ul aria-label="Supported data sources" style={{ listStyle: 'none', padding: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 12px', maxWidth: '640px', margin: '0 auto 14px' }}>
-          {content.hero.sources.map(src => (
-            <li key={src} style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', color: 'rgba(167,139,250,0.85)', whiteSpace: 'nowrap' }}>{src}</li>
-          ))}
-        </ul>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '18px' }}>{content.hero.note} <a href={content.privacy.href} style={{ color: '#6ee7b7', textDecoration: 'underline' }}>By default the AI never reads your rows.</a></p>
-        <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="cta-btn" onClick={() => { track('hero_cta_click', { cta: 'free_file' }); window.location.assign('/try.html') }}>{content.hero.primary}</button>
-          <button className="cta-btn-outline" style={{ padding: '13px 30px', fontSize: '0.9rem', letterSpacing: 0, textTransform: 'none', fontWeight: 600 }} onClick={() => { track('hero_cta_click', { cta: 'trial' }); handleEnter('register') }}>{content.hero.secondary}</button>
-        </div>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.82rem', marginTop: '14px', color: 'rgba(255,255,255,0.55)' }}>{content.hero.tryNote}</p>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', marginTop: '10px', color: 'rgba(255,255,255,0.6)' }}>{content.hero.founder} <a href="/about.html" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>About</a></p>
-      </div>
-
-      {/* ── EXAMPLE: a real kind of before and after, made-up data ── */}
-      <div style={{ flex: '1 1 340px', maxWidth: '440px', minWidth: '280px', background: 'rgba(10,15,28,0.85)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '14px', padding: '16px', textAlign: 'left' }}>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>What it does to a messy file</div>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', margin: '2px 0 10px' }}>An example with made-up data. Three problems, fixed.</p>
-        {[
-          { label: 'Before', rows: [['Maya Rao', '03/04/2026', '1,250.00'], ['Dev  Patel', '5 Apr 2026', ''], ['Maya Rao', '03/04/2026', '1,250.00']], bad: [[], [0, 1, 2], [0, 1, 2]] },
-          { label: 'After', rows: [['Maya Rao', '2026-04-03', '1250.00'], ['Dev Patel', '2026-04-05', 'blank, flagged']], bad: [[], []] },
-        ].map(t => (
-          <div key={t.label} style={{ marginBottom: 10 }}>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.78rem', fontWeight: 700, color: t.label === 'After' ? '#6ee7b7' : '#fbbf24', marginBottom: 4 }}>{t.label.toUpperCase()}</div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'monospace', fontSize: '0.72rem', color: '#e2e8f0' }}>
-              <thead><tr>{['Customer', 'Date', 'Amount'].map(h => <th key={h} style={{ textAlign: 'left', padding: '4px 6px', color: 'rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.12)', fontWeight: 600 }}>{h}</th>)}</tr></thead>
-              <tbody>{t.rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j} style={{ padding: '4px 6px', borderBottom: '1px solid rgba(255,255,255,0.06)', color: t.label === 'Before' && (j === 1 && i === 1 || c === '' || i === 2) ? '#fcd34d' : '#e2e8f0' }}>{c || '(empty)'}</td>)}</tr>)}</tbody>
-            </table>
+        {/* ── NAVBAR ── */}
+        <nav
+          className="gt-nav"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 100,
+            padding: '16px 48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: 'rgba(5,3,15,0.85)',
+            backdropFilter: 'blur(12px)',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img
+              src={logo}
+              alt="The God's Tool - AI data cleaning and ETL platform"
+              style={{ height: '28px', width: '28px' }}
+            />
+            <span
+              style={{
+                fontFamily: "'Inter', -apple-system, sans-serif",
+                fontWeight: 700,
+                fontSize: '1rem',
+                letterSpacing: '-0.01em',
+                background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              The God's Tool
+            </span>{' '}
           </div>
-        ))}
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, margin: 0 }}>A repeated row removed, dates made consistent (day first here), and the missing amount flagged for you, not guessed.</p>
-      </div>
-      </div>
-    </section>
-
-    <ProblemSection />
-    <AudienceSection onRegister={() => handleEnter('register')} />
-    <FeaturesSection Icon={LineIcon} />
-    <StepsSection Icon={LineIcon} onRegister={() => handleEnter('register')} />
-
-{/* ── LIVE DEMO REEL ── */}
-<section style={{ padding: '80px 24px 20px', maxWidth: '900px', margin: '0 auto' }}>
-  <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-    <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Watch it work</div>
-    <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 3.2vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>Watch a cleanup run, start to finish</h2>
-  </div>
-  <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.25)', background: '#0a0714', boxShadow: '0 12px 50px rgba(124,58,237,0.2)', maxWidth: '760px', margin: '0 auto' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-      <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
-      <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
-      <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
-    </div>
-    <video
-      key={heroClipIndex}
-      autoPlay
-      muted
-      playsInline
-      onEnded={() => setHeroClipIndex(i => (i + 1) % heroClips.length)}
-      style={{ width: '100%', display: 'block', aspectRatio: '16 / 9', objectFit: 'cover', background: '#05030f' }}
-    >
-      <source src={heroClips[heroClipIndex]} type="video/mp4" />
-    </video>
-  </div>
-</section>
-
-{/* ── BEFORE / AFTER SHOWCASE ── */}
-<section style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
-  <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-    <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Real Output</div>
-    <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>{content.showcase.h2}</h2>
-    <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.58)', marginTop: '12px' }}>{content.showcase.caption}</p>
-  </div>
-
-  <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '28px' }}>
-    {/* Center divider arrow — desktop only */}
-    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 3, width: '44px', height: '44px', borderRadius: '50%', background: '#0d0a1a', border: '1px solid rgba(167,139,250,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(124,58,237,0.4)' }}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </div>
-
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#f87171', display: 'inline-block' }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#f87171', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Before: 221 problems found</span>
-      </div>
-      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)', background: '#0a0714', boxShadow: '0 12px 40px rgba(0,0,0,0.4)' }}>
-        {/* Fake browser chrome bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
-        </div>
-        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img loading="lazy" decoding="async" src={analysisBeforeImg} alt="Analysis dashboard showing 221 data quality problems before cleaning" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>After: 100% dataset quality</span>
-      </div>
-      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
-        </div>
-        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img loading="lazy" decoding="async" src={postTransformAfterImg} alt="Post-transform preview showing cleaned data with duplicate rows removed" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '28px', marginTop: '28px' }}>
-    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 3, width: '44px', height: '44px', borderRadius: '50%', background: '#0d0a1a', border: '1px solid rgba(167,139,250,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 24px rgba(124,58,237,0.4)' }}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </div>
-
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#a78bfa', display: 'inline-block' }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#a78bfa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Build: visual pipeline flow</span>
-      </div>
-      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(167,139,250,0.15)', background: '#0a0714', boxShadow: '0 12px 40px rgba(0,0,0,0.4)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
-        </div>
-        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img loading="lazy" decoding="async" src={pipelineBuilderImg} alt="Visual pipeline builder showing source to destination flow" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
-        </div>
-      </div>
-    </div>
-
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
-        <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#4ade80', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Then: pick a transform &amp; schedule it</span>
-      </div>
-      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
-        </div>
-        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img loading="lazy" decoding="async" src={transformTypesImg} alt="Transform options: remove duplicates, fill missing, cap outliers, AI custom rules" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
-        </div>
-      </div>
-      <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(124,58,237,0.35)', background: '#0a0714', boxShadow: '0 12px 40px rgba(124,58,237,0.15)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }} />
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }} />
-        </div>
-        <div style={{ width: '100%', aspectRatio: '16 / 10', overflow: 'hidden', background: '#05030f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img loading="lazy" decoding="async" src={cronJobsImg} alt="Pipeline scheduling panel with cron jobs and automation options" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} loading="lazy" />
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-    {/* ── ALERT SECTION ── */}
-    <section style={{ padding: '100px 24px', maxWidth: '820px', margin: '0 auto' }}>
-      <div style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: '20px', padding: '56px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '220px', height: '220px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '20px', padding: '6px 18px', marginBottom: '28px', fontFamily: 'monospace', fontSize: '0.72rem', color: '#f87171', letterSpacing: '0.15em' }}>
-            ALERTS
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <span
+              className="nav-link"
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Features
+            </span>
+            <span
+              className="nav-link"
+              onClick={() => document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              How It Works
+            </span>
+            <span
+              className="nav-link"
+              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Pricing
+            </span>
+            <a
+              href="/try.html"
+              className="nav-link keep"
+              style={{ textDecoration: 'none', color: '#c4b5fd', fontWeight: 700 }}
+            >
+              Try free
+            </a>
+            <a href="/blog" className="nav-link" style={{ textDecoration: 'none' }}>
+              Blog
+            </a>
+            <a href="/about.html" className="nav-link" style={{ textDecoration: 'none' }}>
+              About
+            </a>
+            <button
+              onClick={() => handleEnter('login')}
+              style={{
+                fontFamily: 'monospace',
+                background: 'transparent',
+                border: '1px solid rgba(167,139,250,0.4)',
+                color: '#a78bfa',
+                padding: '8px 20px',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                letterSpacing: '0.1em',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(124,58,237,0.2)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent'
+              }}
+            >
+              SIGN IN
+            </button>
           </div>
-          <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 700, margin: '0 0 20px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
-            {content.alerts.h2}
-          </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, maxWidth: '580px', margin: '0 auto 40px' }}>
-            {content.alerts.body}
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '40px', textAlign: 'left' }}>
-            {[
-              { icon: 'trendDown', title: 'Data drift detected', desc: 'Row counts that suddenly drop, blanks that spike, values that shift. You get told as it happens.' },
-              { icon: 'link', title: 'Pipeline failures', desc: 'A connection went quiet or a scheduled run missed its slot. You hear about it first.' },
-              { icon: 'layers', title: 'Schema anomalies', desc: 'A column got renamed or dropped upstream. The alert tells you first, so your client never has to.' },
-            ].map((item, i) => (
-              <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(167,139,250,0.1)', borderRadius: '12px', padding: '20px' }}>
-                <div style={{ marginBottom: '10px' }}><LineIcon name={item.icon} size={22} /></div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.92rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginBottom: '6px' }}>{item.title}</div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.58)', lineHeight: 1.7 }}>{item.desc}</div>
+        </nav>
+
+        <main>
+          {/* ── HERO ── */}
+          <section
+            style={{
+              minHeight: '100vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              textAlign: 'center',
+              padding: '85px 24px 40px',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Grid bg */}
+            <svg
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                opacity: 0.05,
+              }}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <pattern id="hgrid" width="60" height="60" patternUnits="userSpaceOnUse">
+                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#7c3aed" strokeWidth="0.4" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#hgrid)" />
+            </svg>
+            {/* Orbs */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '20%',
+                left: '15%',
+                width: '300px',
+                height: '300px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%)',
+                pointerEvents: 'none',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '25%',
+                right: '10%',
+                width: '250px',
+                height: '250px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%)',
+                pointerEvents: 'none',
+              }}
+            />
+
+            <div
+              style={{
+                position: 'relative',
+                zIndex: 2,
+                maxWidth: '1180px',
+                width: '100%',
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '32px',
+                animation: 'fadeUp 0.8s ease both',
+              }}
+            >
+              <div style={{ flex: '1 1 480px', maxWidth: '620px', minWidth: '300px' }}>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '0.78rem',
+                    color: '#a78bfa',
+                    letterSpacing: '0.08em',
+                    marginBottom: '14px',
+                    textTransform: 'uppercase',
+                    fontWeight: 600,
+                  }}
+                >
+                  {content.hero.eyebrow}
+                </p>
+                <h1 className="hero-title" style={{ margin: '0 0 16px' }}>
+                  {content.hero.h1}
+                </h1>
+                <p
+                  style={{
+                    fontSize: 'clamp(0.95rem, 1.6vw, 1.1rem)',
+                    color: 'rgba(255,255,255,0.7)',
+                    lineHeight: 1.65,
+                    maxWidth: '600px',
+                    margin: '0 auto 16px',
+                    fontFamily: "'Inter', -apple-system, sans-serif",
+                  }}
+                >
+                  {content.hero.sub}
+                </p>
+                <ul
+                  aria-label="Supported data sources"
+                  style={{
+                    listStyle: 'none',
+                    padding: 0,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    gap: '4px 12px',
+                    maxWidth: '640px',
+                    margin: '0 auto 14px',
+                  }}
+                >
+                  {content.hero.sources.map(src => (
+                    <li
+                      key={src}
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: '0.8rem',
+                        color: 'rgba(167,139,250,0.85)',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {src}
+                    </li>
+                  ))}
+                </ul>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '0.78rem',
+                    color: 'rgba(255,255,255,0.5)',
+                    marginBottom: '18px',
+                  }}
+                >
+                  {content.hero.note}{' '}
+                  <a href={content.privacy.href} style={{ color: '#6ee7b7', textDecoration: 'underline' }}>
+                    By default the AI never reads your rows.
+                  </a>
+                </p>
+                <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    className="cta-btn"
+                    onClick={() => {
+                      track('hero_cta_click', { cta: 'free_file' })
+                      window.location.assign('/try.html')
+                    }}
+                  >
+                    {content.hero.primary}
+                  </button>
+                  <button
+                    className="cta-btn-outline"
+                    style={{
+                      padding: '13px 30px',
+                      fontSize: '0.9rem',
+                      letterSpacing: 0,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                    }}
+                    onClick={() => {
+                      track('hero_cta_click', { cta: 'trial' })
+                      handleEnter('register')
+                    }}
+                  >
+                    {content.hero.secondary}
+                  </button>
+                </div>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '0.82rem',
+                    marginTop: '14px',
+                    color: 'rgba(255,255,255,0.55)',
+                  }}
+                >
+                  {content.hero.tryNote}
+                </p>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '0.8rem',
+                    marginTop: '10px',
+                    color: 'rgba(255,255,255,0.6)',
+                  }}
+                >
+                  {content.hero.founder}{' '}
+                  <a href="/about.html" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>
+                    About
+                  </a>
+                </p>
               </div>
-            ))}
-          </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', background: 'rgba(10,15,28,0.7)', border: '1px solid rgba(99,179,237,0.2)', borderRadius: '10px', padding: '16px 24px', fontFamily: 'monospace', fontSize: '0.8rem', color: '#94a3b8', textAlign: 'left' }}>
-            <span style={{ flexShrink: 0 }}><LineIcon name="mail" size={20} /></span>
-            <span><span style={{ color: '#38bdf8' }}>alert@thegodstool.com</span> → <span style={{ color: '#86efac' }}>you@company.com</span><br/><span style={{ opacity: 0.55, fontSize: '0.72rem' }}>Sat 07:14 AM · "Row count in orders_fact dropped 94% since last run."</span></span>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    {/* ── PRICING ── */}
-    <section id="pricing" style={{ padding: '100px 24px', background: 'linear-gradient(180deg, rgba(124,58,237,0.05) 0%, rgba(251,191,36,0.02) 100%)', borderTop: '1px solid rgba(167,139,250,0.08)', borderBottom: '1px solid rgba(167,139,250,0.08)' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-          <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#7c3aed', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '16px' }}>Pricing</div>
-          <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.03em', lineHeight: 1.15 }}>{content.pricing.h2}</h2>
-          <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: '#fbbf24', marginTop: '16px', letterSpacing: '0.05em' }}>
-            {content.pricing.sub}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {content.pricing.plans.map(pl => ({ ...pl, price: '$' + pl.price, period: '/month' })).map((plan, i) => (
-            <div key={i} className={`pricing-card${plan.featured ? ' featured' : ''}`}>
-              {plan.featured && <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontFamily: 'monospace', fontSize: '0.65rem', letterSpacing: '0.15em', padding: '4px 16px', borderRadius: '20px', whiteSpace: 'nowrap' }}>MOST POPULAR</div>}
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.1rem', fontWeight: 700, marginBottom: '8px' }}>{plan.name}</div>
-              <div style={{ marginBottom: '24px' }}>
-                <span style={{ fontSize: '2.2rem', fontWeight: 900, background: 'linear-gradient(135deg, #e9d5ff, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{plan.price}</span>
-                <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginLeft: '4px' }}>{plan.period}</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-                {plan.features.map(f => (
-                  <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                    <span style={{ color: '#7c3aed', flexShrink: 0 }}>✓</span>{f}
+              {/* ── EXAMPLE: a real kind of before and after, made-up data ── */}
+              <div
+                style={{
+                  flex: '1 1 340px',
+                  maxWidth: '440px',
+                  minWidth: '280px',
+                  background: 'rgba(10,15,28,0.85)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '14px',
+                  padding: '16px',
+                  textAlign: 'left',
+                }}
+              >
+                <div
+                  style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}
+                >
+                  What it does to a messy file
+                </div>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '0.8rem',
+                    color: 'rgba(255,255,255,0.55)',
+                    margin: '2px 0 10px',
+                  }}
+                >
+                  An example with made-up data. Three problems, fixed.
+                </p>
+                {[
+                  {
+                    label: 'Before',
+                    rows: [
+                      ['Maya Rao', '03/04/2026', '1,250.00'],
+                      ['Dev  Patel', '5 Apr 2026', ''],
+                      ['Maya Rao', '03/04/2026', '1,250.00'],
+                    ],
+                    bad: [[], [0, 1, 2], [0, 1, 2]],
+                  },
+                  {
+                    label: 'After',
+                    rows: [
+                      ['Maya Rao', '2026-04-03', '1250.00'],
+                      ['Dev Patel', '2026-04-05', 'blank, flagged'],
+                    ],
+                    bad: [[], []],
+                  },
+                ].map(t => (
+                  <div key={t.label} style={{ marginBottom: 10 }}>
+                    <div
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        color: t.label === 'After' ? '#6ee7b7' : '#fbbf24',
+                        marginBottom: 4,
+                      }}
+                    >
+                      {t.label.toUpperCase()}
+                    </div>
+                    <table
+                      style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                        fontFamily: 'monospace',
+                        fontSize: '0.72rem',
+                        color: '#e2e8f0',
+                      }}
+                    >
+                      <thead>
+                        <tr>
+                          {['Customer', 'Date', 'Amount'].map(h => (
+                            <th
+                              key={h}
+                              style={{
+                                textAlign: 'left',
+                                padding: '4px 6px',
+                                color: 'rgba(255,255,255,0.5)',
+                                borderBottom: '1px solid rgba(255,255,255,0.12)',
+                                fontWeight: 600,
+                              }}
+                            >
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {t.rows.map((r, i) => (
+                          <tr key={i}>
+                            {r.map((c, j) => (
+                              <td
+                                key={j}
+                                style={{
+                                  padding: '4px 6px',
+                                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                                  color:
+                                    t.label === 'Before' && ((j === 1 && i === 1) || c === '' || i === 2)
+                                      ? '#fcd34d'
+                                      : '#e2e8f0',
+                                }}
+                              >
+                                {c || '(empty)'}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 ))}
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '0.8rem',
+                    color: 'rgba(255,255,255,0.6)',
+                    lineHeight: 1.5,
+                    margin: 0,
+                  }}
+                >
+                  A repeated row removed, dates made consistent (day first here), and the missing amount flagged for
+                  you, not guessed.
+                </p>
               </div>
-              <button onClick={() => handleEnter('register')} style={{ width: '100%', padding: '11px', borderRadius: '6px', border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.12)', background: plan.featured ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'rgba(255,255,255,0.04)', color: 'white', fontFamily: "'Inter', -apple-system, sans-serif", fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'opacity 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
-                {plan.name === 'Free' ? 'Start Free' : plan.featured ? 'Start Pro Trial' : 'Get Started'}
+            </div>
+          </section>
+
+          <ProblemSection />
+          <AudienceSection onRegister={() => handleEnter('register')} />
+          <FeaturesSection Icon={LineIcon} />
+          <StepsSection Icon={LineIcon} onRegister={() => handleEnter('register')} />
+
+          {/* ── LIVE DEMO REEL ── */}
+          <section style={{ padding: '80px 24px 20px', maxWidth: '900px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+              <div
+                style={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.72rem',
+                  color: '#7c3aed',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  marginBottom: '16px',
+                }}
+              >
+                Watch it work
+              </div>
+              <h2
+                style={{
+                  fontFamily: "'Inter', -apple-system, sans-serif",
+                  fontSize: 'clamp(1.6rem, 3.2vw, 2.4rem)',
+                  fontWeight: 700,
+                  margin: 0,
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.15,
+                }}
+              >
+                Watch a cleanup run, start to finish
+              </h2>
+            </div>
+            <div
+              style={{
+                borderRadius: '14px',
+                overflow: 'hidden',
+                border: '1px solid rgba(167,139,250,0.25)',
+                background: '#0a0714',
+                boxShadow: '0 12px 50px rgba(124,58,237,0.2)',
+                maxWidth: '760px',
+                margin: '0 auto',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 14px',
+                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(255,255,255,0.02)',
+                }}
+              >
+                <span
+                  style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }}
+                />
+                <span
+                  style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }}
+                />
+                <span
+                  style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }}
+                />
+              </div>
+              <video
+                key={heroClipIndex}
+                autoPlay
+                muted
+                playsInline
+                onEnded={() => setHeroClipIndex(i => (i + 1) % heroClips.length)}
+                style={{
+                  width: '100%',
+                  display: 'block',
+                  aspectRatio: '16 / 9',
+                  objectFit: 'cover',
+                  background: '#05030f',
+                }}
+              >
+                <source src={heroClips[heroClipIndex]} type="video/mp4" />
+              </video>
+            </div>
+          </section>
+
+          {/* ── BEFORE / AFTER SHOWCASE ── */}
+          <section style={{ padding: '100px 24px', maxWidth: '1100px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+              <div
+                style={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.72rem',
+                  color: '#7c3aed',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  marginBottom: '16px',
+                }}
+              >
+                Real Output
+              </div>
+              <h2
+                style={{
+                  fontFamily: "'Inter', -apple-system, sans-serif",
+                  fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+                  fontWeight: 700,
+                  margin: 0,
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.15,
+                }}
+              >
+                {content.showcase.h2}
+              </h2>
+              <p
+                style={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.85rem',
+                  color: 'rgba(255,255,255,0.58)',
+                  marginTop: '12px',
+                }}
+              >
+                {content.showcase.caption}
+              </p>
+            </div>
+
+            <div
+              style={{
+                position: 'relative',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+                gap: '28px',
+              }}
+            >
+              {/* Center divider arrow — desktop only */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 3,
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  background: '#0d0a1a',
+                  border: '1px solid rgba(167,139,250,0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 24px rgba(124,58,237,0.4)',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.5">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <span
+                    style={{
+                      width: '9px',
+                      height: '9px',
+                      borderRadius: '50%',
+                      background: '#f87171',
+                      display: 'inline-block',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.75rem',
+                      color: '#f87171',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Before: 221 problems found
+                  </span>
+                </div>
+                <div
+                  style={{
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(167,139,250,0.15)',
+                    background: '#0a0714',
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  {/* Fake browser chrome bar */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 14px',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.02)',
+                    }}
+                  >
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '16 / 10',
+                      overflow: 'hidden',
+                      background: '#05030f',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={analysisBeforeImg}
+                      alt="Analysis dashboard showing 221 data quality problems before cleaning"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <span
+                    style={{
+                      width: '9px',
+                      height: '9px',
+                      borderRadius: '50%',
+                      background: '#4ade80',
+                      display: 'inline-block',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.75rem',
+                      color: '#4ade80',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    After: 100% dataset quality
+                  </span>
+                </div>
+                <div
+                  style={{
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(124,58,237,0.35)',
+                    background: '#0a0714',
+                    boxShadow: '0 12px 40px rgba(124,58,237,0.15)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 14px',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.02)',
+                    }}
+                  >
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '16 / 10',
+                      overflow: 'hidden',
+                      background: '#05030f',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={postTransformAfterImg}
+                      alt="Post-transform preview showing cleaned data with duplicate rows removed"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                position: 'relative',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+                gap: '28px',
+                marginTop: '28px',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 3,
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  background: '#0d0a1a',
+                  border: '1px solid rgba(167,139,250,0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 24px rgba(124,58,237,0.4)',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.5">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <span
+                    style={{
+                      width: '9px',
+                      height: '9px',
+                      borderRadius: '50%',
+                      background: '#a78bfa',
+                      display: 'inline-block',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.75rem',
+                      color: '#a78bfa',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Build: visual pipeline flow
+                  </span>
+                </div>
+                <div
+                  style={{
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(167,139,250,0.15)',
+                    background: '#0a0714',
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 14px',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.02)',
+                    }}
+                  >
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '16 / 10',
+                      overflow: 'hidden',
+                      background: '#05030f',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={pipelineBuilderImg}
+                      alt="Visual pipeline builder showing source to destination flow"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span
+                    style={{
+                      width: '9px',
+                      height: '9px',
+                      borderRadius: '50%',
+                      background: '#4ade80',
+                      display: 'inline-block',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.75rem',
+                      color: '#4ade80',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Then: pick a transform &amp; schedule it
+                  </span>
+                </div>
+                <div
+                  style={{
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(124,58,237,0.35)',
+                    background: '#0a0714',
+                    boxShadow: '0 12px 40px rgba(124,58,237,0.15)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 14px',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.02)',
+                    }}
+                  >
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '16 / 10',
+                      overflow: 'hidden',
+                      background: '#05030f',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={transformTypesImg}
+                      alt="Transform options: remove duplicates, fill missing, cap outliers, AI custom rules"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <div
+                  style={{
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(124,58,237,0.35)',
+                    background: '#0a0714',
+                    boxShadow: '0 12px 40px rgba(124,58,237,0.15)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 14px',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      background: 'rgba(255,255,255,0.02)',
+                    }}
+                  >
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#eab308', opacity: 0.6 }}
+                    />
+                    <span
+                      style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#22c55e', opacity: 0.6 }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      aspectRatio: '16 / 10',
+                      overflow: 'hidden',
+                      background: '#05030f',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={cronJobsImg}
+                      alt="Pipeline scheduling panel with cron jobs and automation options"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── ALERT SECTION ── */}
+          <section style={{ padding: '100px 24px', maxWidth: '820px', margin: '0 auto' }}>
+            <div
+              style={{
+                background: 'rgba(124,58,237,0.06)',
+                border: '1px solid rgba(167,139,250,0.18)',
+                borderRadius: '20px',
+                padding: '56px 48px',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-60px',
+                  right: '-60px',
+                  width: '220px',
+                  height: '220px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%)',
+                  pointerEvents: 'none',
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '-40px',
+                  left: '-40px',
+                  width: '160px',
+                  height: '160px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%)',
+                  pointerEvents: 'none',
+                }}
+              />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: 'rgba(239,68,68,0.1)',
+                    border: '1px solid rgba(239,68,68,0.25)',
+                    borderRadius: '20px',
+                    padding: '6px 18px',
+                    marginBottom: '28px',
+                    fontFamily: 'monospace',
+                    fontSize: '0.72rem',
+                    color: '#f87171',
+                    letterSpacing: '0.15em',
+                  }}
+                >
+                  ALERTS
+                </div>
+                <h2
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: 'clamp(1.8rem, 4vw, 2.6rem)',
+                    fontWeight: 700,
+                    margin: '0 0 20px',
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1.15,
+                  }}
+                >
+                  {content.alerts.h2}
+                </h2>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: 'clamp(1rem, 2vw, 1.15rem)',
+                    color: 'rgba(255,255,255,0.55)',
+                    lineHeight: 1.7,
+                    maxWidth: '580px',
+                    margin: '0 auto 40px',
+                  }}
+                >
+                  {content.alerts.body}
+                </p>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '16px',
+                    marginBottom: '40px',
+                    textAlign: 'left',
+                  }}
+                >
+                  {[
+                    {
+                      icon: 'trendDown',
+                      title: 'Data drift detected',
+                      desc: 'Row counts that suddenly drop, blanks that spike, values that shift. You get told as it happens.',
+                    },
+                    {
+                      icon: 'link',
+                      title: 'Pipeline failures',
+                      desc: 'A connection went quiet or a scheduled run missed its slot. You hear about it first.',
+                    },
+                    {
+                      icon: 'layers',
+                      title: 'Schema anomalies',
+                      desc: 'A column got renamed or dropped upstream. The alert tells you first, so your client never has to.',
+                    },
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(167,139,250,0.1)',
+                        borderRadius: '12px',
+                        padding: '20px',
+                      }}
+                    >
+                      <div style={{ marginBottom: '10px' }}>
+                        <LineIcon name={item.icon} size={22} />
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: '0.92rem',
+                          fontWeight: 600,
+                          color: 'rgba(255,255,255,0.85)',
+                          marginBottom: '6px',
+                        }}
+                      >
+                        {item.title}
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: 'monospace',
+                          fontSize: '0.75rem',
+                          color: 'rgba(255,255,255,0.58)',
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        {item.desc}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    background: 'rgba(10,15,28,0.7)',
+                    border: '1px solid rgba(99,179,237,0.2)',
+                    borderRadius: '10px',
+                    padding: '16px 24px',
+                    fontFamily: 'monospace',
+                    fontSize: '0.8rem',
+                    color: '#94a3b8',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span style={{ flexShrink: 0 }}>
+                    <LineIcon name="mail" size={20} />
+                  </span>
+                  <span>
+                    <span style={{ color: '#38bdf8' }}>alert@thegodstool.com</span> →{' '}
+                    <span style={{ color: '#86efac' }}>you@company.com</span>
+                    <br />
+                    <span style={{ opacity: 0.55, fontSize: '0.72rem' }}>
+                      Sat 07:14 AM · "Row count in orders_fact dropped 94% since last run."
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── PRICING ── */}
+          <section
+            id="pricing"
+            style={{
+              padding: '100px 24px',
+              background: 'linear-gradient(180deg, rgba(124,58,237,0.05) 0%, rgba(251,191,36,0.02) 100%)',
+              borderTop: '1px solid rgba(167,139,250,0.08)',
+              borderBottom: '1px solid rgba(167,139,250,0.08)',
+            }}
+          >
+            <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+                <div
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '0.72rem',
+                    color: '#7c3aed',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    marginBottom: '16px',
+                  }}
+                >
+                  Pricing
+                </div>
+                <h2
+                  style={{
+                    fontFamily: "'Inter', -apple-system, sans-serif",
+                    fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+                    fontWeight: 700,
+                    margin: 0,
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1.15,
+                  }}
+                >
+                  {content.pricing.h2}
+                </h2>
+                <p
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '0.78rem',
+                    color: '#fbbf24',
+                    marginTop: '16px',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {content.pricing.sub}
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                {content.pricing.plans
+                  .map(pl => ({ ...pl, price: '$' + pl.price, period: '/month' }))
+                  .map((plan, i) => (
+                    <div key={i} className={`pricing-card${plan.featured ? ' featured' : ''}`}>
+                      {plan.featured && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '-14px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                            color: 'white',
+                            fontFamily: 'monospace',
+                            fontSize: '0.65rem',
+                            letterSpacing: '0.15em',
+                            padding: '4px 16px',
+                            borderRadius: '20px',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          MOST POPULAR
+                        </div>
+                      )}
+                      <div
+                        style={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          marginBottom: '8px',
+                        }}
+                      >
+                        {plan.name}
+                      </div>
+                      <div style={{ marginBottom: '24px' }}>
+                        <span
+                          style={{
+                            fontSize: '2.2rem',
+                            fontWeight: 900,
+                            background: 'linear-gradient(135deg, #e9d5ff, #7c3aed)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }}
+                        >
+                          {plan.price}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: 'monospace',
+                            fontSize: '0.78rem',
+                            color: 'rgba(255,255,255,0.35)',
+                            marginLeft: '4px',
+                          }}
+                        >
+                          {plan.period}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+                        {plan.features.map(f => (
+                          <div
+                            key={f}
+                            style={{
+                              fontFamily: 'monospace',
+                              fontSize: '0.75rem',
+                              color: 'rgba(255,255,255,0.55)',
+                              display: 'flex',
+                              gap: '8px',
+                              alignItems: 'flex-start',
+                            }}
+                          >
+                            <span style={{ color: '#7c3aed', flexShrink: 0 }}>✓</span>
+                            {f}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => handleEnter('register')}
+                        style={{
+                          width: '100%',
+                          padding: '11px',
+                          borderRadius: '6px',
+                          border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.12)',
+                          background: plan.featured
+                            ? 'linear-gradient(135deg, #7c3aed, #4f46e5)'
+                            : 'rgba(255,255,255,0.04)',
+                          color: 'white',
+                          fontFamily: "'Inter', -apple-system, sans-serif",
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          transition: 'opacity 0.2s',
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.opacity = '0.85'
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.opacity = '1'
+                        }}
+                      >
+                        {plan.name === 'Free' ? 'Start Free' : plan.featured ? 'Start Pro Trial' : 'Get Started'}
+                      </button>
+                    </div>
+                  ))}
+              </div>
+              <p
+                style={{
+                  textAlign: 'center',
+                  fontFamily: 'monospace',
+                  fontSize: '0.78rem',
+                  color: 'rgba(255,255,255,0.4)',
+                  marginTop: '32px',
+                }}
+              >
+                {content.pricing.foot}
+              </p>
+              <p
+                style={{
+                  textAlign: 'center',
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '0.84rem',
+                  color: 'rgba(255,255,255,0.55)',
+                  marginTop: '18px',
+                }}
+              >
+                {content.pricing.freeLine}
+              </p>
+              <div className="hm-credits">
+                <strong>{content.pricing.creditsTitle}</strong>
+                <span>{content.pricing.creditsBody}</span>
+              </div>
+              <p
+                style={{
+                  textAlign: 'center',
+                  fontFamily: 'monospace',
+                  fontSize: '0.78rem',
+                  color: 'rgba(255,255,255,0.4)',
+                  marginTop: '12px',
+                }}
+              >
+                Need more than Team?{' '}
+                <a
+                  href="#quote"
+                  onClick={e => {
+                    e.preventDefault()
+                    scrollToQuote()
+                  }}
+                  style={{ color: '#a78bfa', textDecoration: 'underline' }}
+                >
+                  Get a quote →
+                </a>
+              </p>
+            </div>
+          </section>
+
+          <EstimateSection />
+          <QuoteSection />
+          <PrivacySection />
+          <FaqSection />
+
+          {/* ── FINAL CTA ── */}
+          <section style={{ padding: '80px 24px', textAlign: 'center', borderTop: '1px solid rgba(167,139,250,0.08)' }}>
+            <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+              <h2
+                style={{
+                  fontFamily: "'Inter', -apple-system, sans-serif",
+                  fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)',
+                  fontWeight: 700,
+                  margin: '0 0 16px',
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.15,
+                }}
+              >
+                {content.cta.h2}
+              </h2>
+              <p
+                style={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.85rem',
+                  color: 'rgba(255,255,255,0.45)',
+                  marginBottom: '32px',
+                }}
+              >
+                {content.cta.body}
+              </p>
+              <button className="cta-btn" onClick={() => handleEnter('register')}>
+                {content.cta.button}
               </button>
             </div>
-          ))}
-        </div>
-        <p style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '32px' }}>
-         {content.pricing.foot}
-        </p>
-        <p style={{ textAlign: 'center', fontFamily: "'Inter', sans-serif", fontSize: '0.84rem', color: 'rgba(255,255,255,0.55)', marginTop: '18px' }}>{content.pricing.freeLine}</p>
-        <div className="hm-credits"><strong>{content.pricing.creditsTitle}</strong><span>{content.pricing.creditsBody}</span></div>
-        <p style={{ textAlign: 'center', fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: '12px' }}>
-          Need more than Team? <a href="#quote" onClick={e => { e.preventDefault(); scrollToQuote() }} style={{ color: '#a78bfa', textDecoration: 'underline' }}>Get a quote →</a>
-        </p>
-      </div>
-    </section>
+          </section>
+        </main>
 
-    <EstimateSection />
-    <QuoteSection />
-    <PrivacySection />
-    <FaqSection />
+        {/* ── FOOTER ── */}
+        <footer
+          style={{ padding: '48px 24px 32px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              marginBottom: '24px',
+            }}
+          >
+            <img
+              src={logo}
+              alt="The God's Tool - AI data cleaning and ETL platform"
+              style={{ height: '24px', width: '24px' }}
+            />
+            <span
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 900,
+                fontSize: '0.95rem',
+                background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              The God's Tool
+            </span>
+          </div>
+          <p
+            style={{
+              fontFamily: 'monospace',
+              fontSize: '0.72rem',
+              color: 'rgba(255,255,255,0.4)',
+              marginBottom: '20px',
+              lineHeight: 1.8,
+            }}
+          >
+            Google Sign-In is used solely for account authentication. Google Sheets access is optional and only
+            activated when you explicitly connect a sheet. We do not access, store, or share any Google data without
+            your action.
+          </p>
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '24px' }}>
+            <a
+              href="https://www.youtube.com/@TheGodsTool-DataPipeline"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s', display: 'inline-flex' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = '#a78bfa'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = 'rgba(255,255,255,0.4)'
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.51 3.5 12 3.5 12 3.5s-7.51 0-9.38.56A3.02 3.02 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.12 2.14c1.87.56 9.38.56 9.38.56s7.51 0 9.38-.56a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8ZM9.75 15.5v-7l6.27 3.5-6.27 3.5Z" />
+              </svg>
+            </a>
+            <a
+              href="https://x.com/TheGodsToojsg0"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s', display: 'inline-flex' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = '#a78bfa'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = 'rgba(255,255,255,0.4)'
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.9L4.2 22H1l8.2-9.3L.8 2h7.3l5 6.4L18.9 2Zm-1.2 18h1.9L7.4 4H5.3l12.4 16Z" />
+              </svg>
+            </a>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              gap: '4px 20px',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              marginBottom: '28px',
+            }}
+          >
+            <a
+              href="/faq.html"
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              FAQ
+            </a>
+            <a
+              href="/privacy"
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              Privacy Policy
+            </a>
+            <a
+              href="/terms"
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              Terms of Service
+            </a>
+            <a
+              href="/refund.html"
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              Refund Policy
+            </a>
+            <a
+              href="/feedback"
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              Feedback
+            </a>
+            <a
+              href="/contact"
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              Contact
+            </a>
+            <a
+              href="/blog"
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              Blog
+            </a>
+            <a
+              href="/status"
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              Status
+            </a>
+            <a
+              href="#quote"
+              onClick={e => {
+                e.preventDefault()
+                scrollToQuote()
+              }}
+              style={{
+                color: '#6d5fc7',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+                opacity: 0.9,
+              }}
+            >
+              Get a quote
+            </a>
+          </div>
+          <div
+            style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}
+          >
+            <a
+              href="/csv-data-cleaning-checklist.html"
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+              }}
+            >
+              CSV cleaning checklist
+            </a>
+            <a
+              href="/pdf-table-to-excel-csv.html"
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+              }}
+            >
+              PDF table to Excel
+            </a>
+            <a
+              href="/about.html"
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+              }}
+            >
+              About
+            </a>
+            <a
+              href="/fix-mixed-date-formats-csv.html"
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+              }}
+            >
+              Fix mixed dates
+            </a>
+            <a
+              href="/remove-duplicate-customers-csv.html"
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+              }}
+            >
+              Remove duplicate customers
+            </a>
+            <a
+              href="/fix-numbers-stored-as-text-csv.html"
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+              }}
+            >
+              Numbers stored as text
+            </a>
+            <a
+              href="/bank-statement-pdf-to-excel.html"
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+              }}
+            >
+              Bank statement PDF to Excel
+            </a>
+          </div>
+          <div
+            style={{
+              fontFamily: 'monospace',
+              fontSize: '0.72rem',
+              color: 'rgba(255,255,255,0.4)',
+              letterSpacing: '0.04em',
+              lineHeight: 1.6,
+            }}
+          >
+            © 2026 The God's Tool · Made for anyone who gets handed messy data
+          </div>
+        </footer>
 
-    {/* ── FINAL CTA ── */}
-    <section style={{ padding: '80px 24px', textAlign: 'center', borderTop: '1px solid rgba(167,139,250,0.08)' }}>
-      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-        <h2 style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>{content.cta.h2}</h2>
-        <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', marginBottom: '32px' }}>{content.cta.body}</p>
-        <button className="cta-btn" onClick={() => handleEnter('register')}>{content.cta.button}</button>
-      </div>
-    </section>
-
-    </main>
-
-    {/* ── FOOTER ── */}
-    <footer style={{ padding: '48px 24px 32px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
-        <img src={logo} alt="The God's Tool - AI data cleaning and ETL platform" style={{ height: '24px', width: '24px' }} />
-        <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: '0.95rem', background: 'linear-gradient(135deg, #e9d5ff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The God's Tool</span>
-      </div>
-      <p style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginBottom: '20px', lineHeight: 1.8 }}>
-        Google Sign-In is used solely for account authentication. Google Sheets access is optional and only activated when you explicitly connect a sheet. We do not access, store, or share any Google data without your action.
-      </p>
-      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '24px' }}>
-        <a href="https://www.youtube.com/@TheGodsTool-DataPipeline" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s', display: 'inline-flex' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#a78bfa' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.51 3.5 12 3.5 12 3.5s-7.51 0-9.38.56A3.02 3.02 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.12 2.14c1.87.56 9.38.56 9.38.56s7.51 0 9.38-.56a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8ZM9.75 15.5v-7l6.27 3.5-6.27 3.5Z"/></svg>
-        </a>
-        <a href="https://x.com/TheGodsToojsg0" target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s', display: 'inline-flex' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#a78bfa' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.6-6.9L4.2 22H1l8.2-9.3L.8 2h7.3l5 6.4L18.9 2Zm-1.2 18h1.9L7.4 4H5.3l12.4 16Z"/></svg>
-        </a>
-      </div>
-      <div style={{ display: 'flex', gap: '4px 20px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '28px' }}>
-        <a href="/faq.html" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>FAQ</a>
-        <a href="/privacy" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Privacy Policy</a>
-        <a href="/terms" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Terms of Service</a>
-        <a href="/refund.html" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Refund Policy</a>
-        <a href="/feedback" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Feedback</a>
-<a href="/contact" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Contact</a>
-<a href="/blog" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Blog</a>
-<a href="/status" style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Status</a>
-<a href="#quote" onClick={e => { e.preventDefault(); scrollToQuote() }} style={{ color: '#6d5fc7', fontSize: '0.8rem', fontFamily: 'monospace', textDecoration: 'none', opacity: 0.9 }}>Get a quote</a>
-      </div>
-      <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
-        <a href="/csv-data-cleaning-checklist.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>CSV cleaning checklist</a>
-        <a href="/pdf-table-to-excel-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>PDF table to Excel</a>
-        <a href="/about.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>About</a>
-        <a href="/fix-mixed-date-formats-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Fix mixed dates</a>
-        <a href="/remove-duplicate-customers-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Remove duplicate customers</a>
-        <a href="/fix-numbers-stored-as-text-csv.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Numbers stored as text</a>
-        <a href="/bank-statement-pdf-to-excel.html" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem', fontFamily: 'monospace', textDecoration: 'none' }}>Bank statement PDF to Excel</a>
-      </div>
-      <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.04em', lineHeight: 1.6 }}>© 2026 The God's Tool · Made for anyone who gets handed messy data</div>
-    </footer>
-
-    {/* ── LOGIN MODAL ── */}
-    {showLogin && (
-      <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(5,8,15,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
-        <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '400px', margin: '0 16px', background: 'rgba(10,15,28,0.95)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '12px', padding: '36px 32px', display: 'flex', flexDirection: 'column', gap: '18px', maxHeight: '90vh', overflowY: 'auto' }}>
-          {/* Floating SQL particles */}
-          {/* {['SELECT *','JOIN','GROUP BY','WHERE','AVG()','COUNT(*)'].map((word, i) => (
+        {/* ── LOGIN MODAL ── */}
+        {showLogin && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 200,
+              background: 'rgba(5,8,15,0.92)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <div
+              style={{
+                position: 'relative',
+                zIndex: 2,
+                width: '100%',
+                maxWidth: '400px',
+                margin: '0 16px',
+                background: 'rgba(10,15,28,0.95)',
+                border: '1px solid rgba(99,179,237,0.15)',
+                borderRadius: '12px',
+                padding: '36px 32px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '18px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+              }}
+            >
+              {/* Floating SQL particles */}
+              {/* {['SELECT *','JOIN','GROUP BY','WHERE','AVG()','COUNT(*)'].map((word, i) => (
             <div key={i} style={{ position: 'absolute', left: `${8 + (i * 15) % 80}%`, top: `${65 + (i * 8) % 30}%`, fontFamily: 'monospace', fontSize: '0.65rem', color: '#38bdf8', opacity: 0.1, pointerEvents: 'none', animation: `float-up ${3 + (i % 3)}s ease-in ${i * 0.6}s infinite`, userSelect: 'none' }}>{word}</div>
           ))} */}
-          <div style={{ textAlign: 'center', marginBottom: '4px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(30,64,175,0.25)', border: '1px solid rgba(99,179,237,0.2)', marginBottom: '14px' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
-              </svg>
-            </div>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: '#e2e8f0', letterSpacing: '0.04em' }}>The God's Tool</div>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#38bdf8', letterSpacing: '0.2em', marginTop: '6px', opacity: 0.7 }}>DATA · INTELLIGENCE · PIPELINE</div>
-          </div>
-          <div style={{ borderTop: '1px solid rgba(99,179,237,0.1)' }} />
-          <button onClick={handleGoogleLogin} onPointerEnter={preloadAppPages} onFocus={preloadAppPages} className="auth-btn-google" disabled={isGoogleLoading}>
-            {isGoogleLoading ? <span className="btn-spinner" /> : (<>
-              <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-              Continue with Google
-            </>)}
-          </button>
-          {signStage === 'google' && (
-            <div role="status" aria-live="polite" style={{ marginTop: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.3)', color: '#bfdbfe', fontSize: '0.82rem', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="btn-spinner" style={{ flexShrink: 0 }} />
-              <span style={{ flex: 1 }}>Waiting for Google. Choose your account in the Google window or sign-in box.</span>
-              <button type="button" onClick={() => { setSignStage(''); setIsGoogleLoading(false) }} style={{ background: 'none', border: 'none', color: '#93c5fd', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.8rem' }}>Cancel</button>
-            </div>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
-            <span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>OR</span>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
-          </div>
-          <input type="email" placeholder="you@example.com" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="auth-input" />
-          <input type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} className="auth-input" />
+              <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '10px',
+                    background: 'rgba(30,64,175,0.25)',
+                    border: '1px solid rgba(99,179,237,0.2)',
+                    marginBottom: '14px',
+                  }}
+                >
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#60a5fa"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <ellipse cx="12" cy="5" rx="9" ry="3" />
+                    <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" />
+                    <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3" />
+                  </svg>
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    color: '#e2e8f0',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  The God's Tool
+                </div>
+                <div
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '0.72rem',
+                    color: '#38bdf8',
+                    letterSpacing: '0.2em',
+                    marginTop: '6px',
+                    opacity: 0.7,
+                  }}
+                >
+                  DATA · INTELLIGENCE · PIPELINE
+                </div>
+              </div>
+              <div style={{ borderTop: '1px solid rgba(99,179,237,0.1)' }} />
+              <button
+                onClick={handleGoogleLogin}
+                onPointerEnter={preloadAppPages}
+                onFocus={preloadAppPages}
+                className="auth-btn-google"
+                disabled={isGoogleLoading}
+              >
+                {isGoogleLoading ? (
+                  <span className="btn-spinner" />
+                ) : (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 48 48">
+                      <path
+                        fill="#EA4335"
+                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                      />
+                      <path
+                        fill="#4285F4"
+                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                      />
+                    </svg>
+                    Continue with Google
+                  </>
+                )}
+              </button>
+              {signStage === 'google' && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  style={{
+                    marginTop: 10,
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: 'rgba(96,165,250,0.1)',
+                    border: '1px solid rgba(96,165,250,0.3)',
+                    color: '#bfdbfe',
+                    fontSize: '0.82rem',
+                    lineHeight: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                  }}
+                >
+                  <span className="btn-spinner" style={{ flexShrink: 0 }} />
+                  <span style={{ flex: 1 }}>
+                    Waiting for Google. Choose your account in the Google window or sign-in box.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSignStage('')
+                      setIsGoogleLoading(false)
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#93c5fd',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
+                <span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>OR</span>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(99,179,237,0.12)' }} />
+              </div>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={loginEmail}
+                onChange={e => setLoginEmail(e.target.value)}
+                className="auth-input"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={loginPassword}
+                onChange={e => setLoginPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                className="auth-input"
+              />
 
-          {isRegisterMode && (
-            <>
-              <input type="text" placeholder="Your name (What do your stakeholders call you?)" value={regName} onChange={e => setRegName(e.target.value)} className="auth-input" />
-              <input type="text" placeholder="Nickname (What does your mom call you?)" value={regNickname} onChange={e => setRegNickname(e.target.value)} className="auth-input" />
-              <input type="password" placeholder="Repeat password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="auth-input" />
+              {isRegisterMode && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Your name (What do your stakeholders call you?)"
+                    value={regName}
+                    onChange={e => setRegName(e.target.value)}
+                    className="auth-input"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Nickname (What does your mom call you?)"
+                    value={regNickname}
+                    onChange={e => setRegNickname(e.target.value)}
+                    className="auth-input"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Repeat password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    className="auth-input"
+                  />
 
-              {loginPassword && (
-                <div style={{ marginTop: '-8px' }}>
-                  <div style={{ height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${getPasswordStrength(loginPassword).pct}%`, background: getPasswordStrength(loginPassword).color, transition: 'width 0.25s ease, background 0.25s ease' }} />
+                  {loginPassword && (
+                    <div style={{ marginTop: '-8px' }}>
+                      <div
+                        style={{
+                          height: '4px',
+                          borderRadius: '2px',
+                          background: 'rgba(255,255,255,0.08)',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: '100%',
+                            width: `${getPasswordStrength(loginPassword).pct}%`,
+                            background: getPasswordStrength(loginPassword).color,
+                            transition: 'width 0.25s ease, background 0.25s ease',
+                          }}
+                        />
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: 'monospace',
+                          fontSize: '0.7rem',
+                          color: getPasswordStrength(loginPassword).color,
+                          marginTop: '4px',
+                        }}
+                      >
+                        {getPasswordStrength(loginPassword).label}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {loginError && (
+                <div
+                  style={{
+                    background: 'rgba(220,38,38,0.1)',
+                    border: '1px solid rgba(220,38,38,0.25)',
+                    borderRadius: '6px',
+                    padding: '10px 14px',
+                    color: '#fca5a5',
+                    fontSize: '0.82rem',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {loginError}
+                </div>
+              )}
+              {showForceLogout && (
+                <>
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      color: '#fca5a5',
+                      fontSize: '0.78rem',
+                      fontFamily: 'monospace',
+                      marginBottom: '-6px',
+                    }}
+                  >
+                    Click below again to confirm and log in here
                   </div>
-                  <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: getPasswordStrength(loginPassword).color, marginTop: '4px' }}>
-                    {getPasswordStrength(loginPassword).label}
+                  <button
+                    ref={forceLogoutRef}
+                    onClick={() => (pendingGooglePayload ? handleForceGoogleLogin() : handleForceLogin())}
+                    className="auth-btn-primary"
+                    disabled={isLoginLoading || isGoogleLoading}
+                    style={{ background: 'linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%)' }}
+                  >
+                    {isLoginLoading || isGoogleLoading ? (
+                      <span className="btn-spinner" />
+                    ) : (
+                      'Log out oldest device & sign in here'
+                    )}
+                  </button>
+                </>
+              )}
+              <button onClick={() => handleLogin()} className="auth-btn-primary" disabled={isLoginLoading}>
+                {isLoginLoading ? (
+                  <span className="btn-spinner" />
+                ) : isRegisterMode ? (
+                  'CREATE ACCOUNT'
+                ) : (
+                  'ACCESS THE TOOL'
+                )}
+              </button>
+              {!isRegisterMode && !showForgot && (
+                <div style={{ textAlign: 'center' }}>
+                  <span
+                    onClick={() => {
+                      setShowForgot(true)
+                      setForgotMsg('')
+                      setForgotError('')
+                    }}
+                    style={{
+                      color: '#38bdf8',
+                      fontSize: '0.78rem',
+                      fontFamily: 'monospace',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    Forgot password?
+                  </span>
+                </div>
+              )}
+              {showForgot && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    background: 'rgba(30,64,175,0.08)',
+                    border: '1px solid rgba(99,179,237,0.15)',
+                    borderRadius: '8px',
+                    padding: '16px',
+                  }}
+                >
+                  <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontFamily: 'monospace' }}>
+                    Enter your email to receive a reset link:
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={forgotEmail}
+                    onChange={e => setForgotEmail(e.target.value)}
+                    className="auth-input"
+                  />
+                  {forgotError && (
+                    <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>{forgotError}</div>
+                  )}
+                  {forgotMsg && (
+                    <div style={{ color: '#86efac', fontSize: '0.78rem', fontFamily: 'monospace' }}>✓ {forgotMsg}</div>
+                  )}
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={handleForgotPassword}
+                      className="auth-btn-primary"
+                      style={{ flex: 1, padding: '10px' }}
+                    >
+                      Send Reset Link
+                    </button>
+                    <button
+                      onClick={() => setShowForgot(false)}
+                      style={{
+                        flex: 1,
+                        padding: '10px',
+                        background: 'transparent',
+                        border: '1px solid rgba(99,179,237,0.2)',
+                        borderRadius: '6px',
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        fontFamily: 'monospace',
+                        fontSize: '0.85rem',
+                      }}
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
               )}
-            </>
-          )}
+              <div style={{ textAlign: 'center' }}>
+                {isRegisterMode ? (
+                  <>
+                    <span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>
+                      Already have an account?{' '}
+                    </span>
+                    <span
+                      onClick={() => {
+                        setIsRegisterMode(false)
+                        setLoginError('')
+                      }}
+                      style={{
+                        color: '#38bdf8',
+                        fontSize: '0.78rem',
+                        fontFamily: 'monospace',
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      Sign in
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>
+                      Don't have an account?{' '}
+                    </span>
+                    <span
+                      onClick={() => {
+                        setIsRegisterMode(true)
+                        setLoginError('')
+                      }}
+                      style={{
+                        color: '#38bdf8',
+                        fontSize: '0.78rem',
+                        fontFamily: 'monospace',
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      Register
+                    </span>
+                  </>
+                )}
+              </div>
+              <p
+                style={{
+                  color: '#334155',
+                  fontSize: '0.72rem',
+                  textAlign: 'center',
+                  margin: 0,
+                  fontFamily: 'monospace',
+                  lineHeight: 1.6,
+                }}
+              >
+                By continuing you agree to The God's Tool's{' '}
+                <a href="/terms" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a href="/privacy" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>
+                  Privacy Policy
+                </a>
+              </p>
+              <button
+                onClick={() => setShowLogin(false)}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.3)',
+                  fontSize: '1.2rem',
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  if (entered && userPlan === 'none')
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: '#07050f',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          gap: '24px',
+          padding: '24px',
+        }}
+      >
+        <div style={{ textAlign: 'center', maxWidth: '480px' }}>
+          <img src={logo} alt="logo" style={{ height: '64px', width: '64px', marginBottom: '16px' }} />
+          <div
+            style={{
+              fontFamily: "'Inter', -apple-system, sans-serif",
+              fontSize: '1.8rem',
+              fontWeight: 700,
+              color: 'white',
+              marginBottom: '8px',
+            }}
+          >
+            Welcome to The God's Tool
+          </div>
+          <div
+            style={{
+              color: 'rgba(255,255,255,0.4)',
+              fontFamily: 'monospace',
+              fontSize: '0.85rem',
+              marginBottom: '32px',
+            }}
+          >
+            Start free, upgrade when you need more
+          </div>
 
-          {loginError && (
-            <div style={{ background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: '6px', padding: '10px 14px', color: '#fca5a5', fontSize: '0.82rem', fontFamily: 'monospace' }}>{loginError}</div>
-          )}
-          {showForceLogout && (
-            <>
-              <div style={{ textAlign: 'center', color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace', marginBottom: '-6px' }}>
-                Click below again to confirm and log in here
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+            {/* Free tier */}
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '12px',
+                padding: '20px 24px',
+                textAlign: 'left',
+              }}
+            >
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}
+              >
+                <span
+                  style={{
+                    color: 'white',
+                    fontWeight: 700,
+                    fontFamily: "'Inter', -apple-system, sans-serif",
+                    fontSize: '1rem',
+                  }}
+                >
+                  Free
+                </span>
+                <span
+                  style={{
+                    color: '#4ade80',
+                    fontFamily: 'monospace',
+                    fontSize: '0.78rem',
+                    background: 'rgba(74,222,128,0.1)',
+                    padding: '2px 10px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(74,222,128,0.2)',
+                  }}
+                >
+                  No credit card
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
+                {[
+                  '✓ CSV files (up to 5 MB) and Google Sheets',
+                  '✓ Clean the first 5,000 rows of every file',
+                  '✓ Download your cleaned data',
+                  '✓ 1 saved pipeline, run by hand',
+                  '✗ AI cleaning: pay per use with credits',
+                  '✗ Databases, cloud, schedules and teammates (paid)',
+                ].map(f => (
+                  <div
+                    key={f}
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.78rem',
+                      color: f.startsWith('✗') ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)',
+                    }}
+                  >
+                    {f}
+                  </div>
+                ))}
               </div>
               <button
-                ref={forceLogoutRef}
-                onClick={() => (pendingGooglePayload ? handleForceGoogleLogin() : handleForceLogin())}
-                className="auth-btn-primary"
-                disabled={isLoginLoading || isGoogleLoading}
-                style={{ background: 'linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%)' }}
+                onClick={() => {
+                  localStorage.setItem('datapro_plan', 'free')
+                  setUserPlan('free')
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  fontFamily: "'Inter', -apple-system, sans-serif",
+                }}
               >
-              {(isLoginLoading || isGoogleLoading) ? <span className="btn-spinner" /> : 'Log out oldest device & sign in here'}
+                Continue Free
               </button>
-            </>
-          )}
-          <button onClick={() => handleLogin()} className="auth-btn-primary" disabled={isLoginLoading}>{isLoginLoading ? <span className="btn-spinner" /> : (isRegisterMode ? 'CREATE ACCOUNT' : 'ACCESS THE TOOL')}</button>
-          {!isRegisterMode && !showForgot && (
-            <div style={{ textAlign: 'center' }}>
-              <span onClick={() => { setShowForgot(true); setForgotMsg(''); setForgotError('') }} style={{ color: '#38bdf8', fontSize: '0.78rem', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>Forgot password?</span>
             </div>
-          )}
-          {showForgot && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: 'rgba(30,64,175,0.08)', border: '1px solid rgba(99,179,237,0.15)', borderRadius: '8px', padding: '16px' }}>
-              <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontFamily: 'monospace' }}>Enter your email to receive a reset link:</div>
-              <input type="email" placeholder="you@example.com" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} className="auth-input" />
-              {forgotError && <div style={{ color: '#fca5a5', fontSize: '0.78rem', fontFamily: 'monospace' }}>{forgotError}</div>}
-              {forgotMsg && <div style={{ color: '#86efac', fontSize: '0.78rem', fontFamily: 'monospace' }}>✓ {forgotMsg}</div>}
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={handleForgotPassword} className="auth-btn-primary" style={{ flex: 1, padding: '10px' }}>Send Reset Link</button>
-                <button onClick={() => setShowForgot(false)} style={{ flex: 1, padding: '10px', background: 'transparent', border: '1px solid rgba(99,179,237,0.2)', borderRadius: '6px', color: '#94a3b8', cursor: 'pointer', fontFamily: 'monospace', fontSize: '0.85rem' }}>Cancel</button>
+
+            {/* Paid tier */}
+            <div
+              style={{
+                background: 'rgba(124,58,237,0.1)',
+                border: '2px solid rgba(124,58,237,0.4)',
+                borderRadius: '12px',
+                padding: '20px 24px',
+                textAlign: 'left',
+              }}
+            >
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}
+              >
+                <span
+                  style={{
+                    color: 'white',
+                    fontWeight: 700,
+                    fontFamily: "'Inter', -apple-system, sans-serif",
+                    fontSize: '1rem',
+                  }}
+                >
+                  Paid Plans
+                </span>
               </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
+                {[
+                  '✓ All data sources (MySQL, Postgres, BigQuery…)',
+                  '✓ AI-powered data cleaning',
+                  '✓ Unlimited pipeline automation',
+                  '✓ Priority support',
+                ].map(f => (
+                  <div
+                    key={f}
+                    style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.65)' }}
+                  >
+                    {f}
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => navigate('/pricing')}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                  color: 'white',
+                  fontWeight: 700,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  fontFamily: "'Inter', -apple-system, sans-serif",
+                }}
+              >
+                View Plans →
+              </button>
             </div>
-          )}
-          <div style={{ textAlign: 'center' }}>
-            {isRegisterMode ? (
-              <><span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>Already have an account? </span><span onClick={() => { setIsRegisterMode(false); setLoginError('') }} style={{ color: '#38bdf8', fontSize: '0.78rem', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>Sign in</span></>
-            ) : (
-              <><span style={{ color: '#475569', fontSize: '0.78rem', fontFamily: 'monospace' }}>Don't have an account? </span><span onClick={() => { setIsRegisterMode(true); setLoginError('') }} style={{ color: '#38bdf8', fontSize: '0.78rem', fontFamily: 'monospace', cursor: 'pointer', textDecoration: 'underline' }}>Register</span></>
-            )}
           </div>
-          <p style={{ color: '#334155', fontSize: '0.72rem', textAlign: 'center', margin: 0, fontFamily: 'monospace', lineHeight: 1.6 }}>
-            By continuing you agree to The God's Tool's{' '}
-            <a href="/terms" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Terms of Service</a>{' '}and{' '}
-            <a href="/privacy" target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>Privacy Policy</a>
-          </p>
-          <button onClick={() => setShowLogin(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '1.2rem', cursor: 'pointer', lineHeight: 1 }}>✕</button>
+
+          <span
+            onClick={() => {
+              const token = localStorage.getItem('datapro_token')
+              if (token)
+                fetch(`${import.meta.env.VITE_AUTH_URL}/api/logout`, {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${token}` },
+                }).catch(() => {})
+              localStorage.removeItem('datapro_logged_in')
+              localStorage.removeItem('datapro_plan')
+              setUserPlan('none')
+              setEntered(false)
+              setShowLogin(false)
+            }}
+            style={{
+              color: '#475569',
+              fontFamily: 'monospace',
+              fontSize: '0.78rem',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+            }}
+          >
+            Sign out
+          </span>
         </div>
       </div>
-    )}
-  </div>
-)
-  if (entered && userPlan === 'none') return (
-    <div style={{ minHeight: '100vh', background: '#07050f', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '24px', padding: '24px' }}>
-      <div style={{ textAlign: 'center', maxWidth: '480px' }}>
-        <img src={logo} alt="logo" style={{ height: '64px', width: '64px', marginBottom: '16px' }} />
-        <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1.8rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>Welcome to The God's Tool</div>
-        <div style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', fontSize: '0.85rem', marginBottom: '32px' }}>Start free, upgrade when you need more</div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-          {/* Free tier */}
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '20px 24px', textAlign: 'left' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ color: 'white', fontWeight: 700, fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1rem' }}>Free</span>
-              <span style={{ color: '#4ade80', fontFamily: 'monospace', fontSize: '0.78rem', background: 'rgba(74,222,128,0.1)', padding: '2px 10px', borderRadius: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>No credit card</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
-              {['✓ CSV files (up to 5 MB) and Google Sheets', '✓ Clean the first 5,000 rows of every file', '✓ Download your cleaned data', '✓ 1 saved pipeline, run by hand', '✗ AI cleaning: pay per use with credits', '✗ Databases, cloud, schedules and teammates (paid)'].map(f => (
-                <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: f.startsWith('✗') ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)' }}>{f}</div>
-              ))}
-            </div>
-            <button
-              onClick={() => { localStorage.setItem('datapro_plan', 'free'); setUserPlan('free'); }}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)', color: 'white', fontWeight: 600, fontSize: '0.88rem', cursor: 'pointer', fontFamily: "'Inter', -apple-system, sans-serif" }}
-            >
-              Continue Free
-            </button>
-          </div>
-
-          {/* Paid tier */}
-          <div style={{ background: 'rgba(124,58,237,0.1)', border: '2px solid rgba(124,58,237,0.4)', borderRadius: '12px', padding: '20px 24px', textAlign: 'left' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-  <span style={{ color: 'white', fontWeight: 700, fontFamily: "'Inter', -apple-system, sans-serif", fontSize: '1rem' }}>Paid Plans</span>
-</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '16px' }}>
-              {['✓ All data sources (MySQL, Postgres, BigQuery…)', '✓ AI-powered data cleaning', '✓ Unlimited pipeline automation', '✓ Priority support'].map(f => (
-                <div key={f} style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'rgba(255,255,255,0.65)' }}>{f}</div>
-              ))}
-            </div>
-            <button
-              onClick={() => navigate('/pricing')}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', fontFamily: "'Inter', -apple-system, sans-serif" }}
-            >
-              View Plans →
-            </button>
-          </div>
-        </div>
-
-        <span onClick={() => {
-          const token = localStorage.getItem('datapro_token')
-          if (token) fetch(`${import.meta.env.VITE_AUTH_URL}/api/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {})
-          localStorage.removeItem('datapro_logged_in'); localStorage.removeItem('datapro_plan'); setUserPlan('none'); setEntered(false); setShowLogin(false);
-        }} style={{ color: '#475569', fontFamily: 'monospace', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}>
-          Sign out
-        </span>
-      </div>
-    </div>
-  )
+    )
 
   return (
     <div className="flex min-h-screen" style={{ background: '#07050f' }}>
-      <Sidebar 
-  onOpenNotif={() => setShowNotif(true)} 
-  unread={unread} 
-  isExpanded={sidebarExpanded}
-  onToggleExpand={() => setSidebarExpanded(!sidebarExpanded)}
-  onLogout={() => {
-    const token = localStorage.getItem('datapro_token')
-    if (token) fetch(`${import.meta.env.VITE_AUTH_URL}/api/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {})
-    localStorage.removeItem('datapro_logged_in'); localStorage.removeItem('datapro_plan'); setUserPlan('none'); setEntered(false); setShowLogin(false);
-  }}
-/>
-      
-      <main className={`flex-1 min-h-screen overflow-auto transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-16'}`}>
+      <Sidebar
+        onOpenNotif={() => setShowNotif(true)}
+        unread={unread}
+        isExpanded={sidebarExpanded}
+        onToggleExpand={() => setSidebarExpanded(!sidebarExpanded)}
+        onLogout={() => {
+          const token = localStorage.getItem('datapro_token')
+          if (token)
+            fetch(`${import.meta.env.VITE_AUTH_URL}/api/logout`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${token}` },
+            }).catch(() => {})
+          localStorage.removeItem('datapro_logged_in')
+          localStorage.removeItem('datapro_plan')
+          setUserPlan('none')
+          setEntered(false)
+          setShowLogin(false)
+        }}
+      />
+
+      <main
+        className={`flex-1 min-h-screen overflow-auto transition-all duration-300 ${sidebarExpanded ? 'ml-64' : 'ml-16'}`}
+      >
         {/* The floating hamburger menu that used to be here has been removed and moved inside the Sidebar */}
-        
+
         {orgName && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 16px', fontFamily: 'monospace', fontSize: '0.72rem' }}>
-            <span style={{ padding: '4px 12px', borderRadius: '999px', background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(167,139,250,0.25)', color: '#c4b5fd' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              padding: '8px 16px',
+              fontFamily: 'monospace',
+              fontSize: '0.72rem',
+            }}
+          >
+            <span
+              style={{
+                padding: '4px 12px',
+                borderRadius: '999px',
+                background: 'rgba(124,58,237,0.12)',
+                border: '1px solid rgba(167,139,250,0.25)',
+                color: '#c4b5fd',
+              }}
+            >
               {orgName} · {roleLabel}
             </span>
           </div>
         )}
         {trialDaysLeft !== null && (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            padding: '10px 16px', background: trialDaysLeft <= 3 ? 'rgba(239,68,68,0.1)' : 'rgba(124,58,237,0.1)',
-            borderBottom: `1px solid ${trialDaysLeft <= 3 ? 'rgba(239,68,68,0.25)' : 'rgba(167,139,250,0.2)'}`,
-            fontFamily: 'monospace', fontSize: '0.78rem',
-            color: trialDaysLeft <= 3 ? '#fca5a5' : '#c4b5fd',
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: trialDaysLeft <= 3 ? 'rgba(239,68,68,0.1)' : 'rgba(124,58,237,0.1)',
+              borderBottom: `1px solid ${trialDaysLeft <= 3 ? 'rgba(239,68,68,0.25)' : 'rgba(167,139,250,0.2)'}`,
+              fontFamily: 'monospace',
+              fontSize: '0.78rem',
+              color: trialDaysLeft <= 3 ? '#fca5a5' : '#c4b5fd',
+            }}
+          >
             <span>
               {trialDaysLeft === 0
                 ? ' Your free trial ends today'
                 : ` Free trial: ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left`}
             </span>
-            <a href="/pricing" style={{ color: trialDaysLeft <= 3 ? '#f87171' : '#a78bfa', fontWeight: 700, textDecoration: 'underline' }}>
+            <a
+              href="/pricing"
+              style={{
+                color: trialDaysLeft <= 3 ? '#f87171' : '#a78bfa',
+                fontWeight: 700,
+                textDecoration: 'underline',
+              }}
+            >
               Upgrade now →
             </a>
           </div>
         )}
 
-        <Suspense fallback={<div style={{ padding: 40, color: 'rgba(255,255,255,0.5)', fontFamily: 'Inter, sans-serif' }}>Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/sources" element={<DataSources />} />
-          <Route path="/catalog" element={<DataCatalog />} />
-          <Route path="/pdf" element={<PdfStatements />} />
-          <Route path="/flow" element={<Flow />} />
-          <Route path="/analysis" element={<Analysis />} />
-          <Route path="/audit" element={<AuditLogs />} />
-          <Route path="/team" element={<TeamGate />} />
-          <Route path="/billing" element={<Billing />} />
-          <Route path="/billing/:id" element={<Billing />} />
-          <Route path="/docs" element={<Documentation />} />
-          <Route path="/tunneling" element={<Tunneling />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/pricing" element={<Pricing />} />
-        </Routes>
+        <Suspense
+          fallback={
+            <div style={{ padding: 40, color: 'rgba(255,255,255,0.5)', fontFamily: 'Inter, sans-serif' }}>
+              Loading...
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/sources" element={<DataSources />} />
+            <Route path="/catalog" element={<DataCatalog />} />
+            <Route path="/pdf" element={<PdfStatements />} />
+            <Route path="/flow" element={<Flow />} />
+            <Route path="/analysis" element={<Analysis />} />
+            <Route path="/audit" element={<AuditLogs />} />
+            <Route path="/team" element={<TeamGate />} />
+            <Route path="/billing" element={<Billing />} />
+            <Route path="/billing/:id" element={<Billing />} />
+            <Route path="/docs" element={<Documentation />} />
+            <Route path="/whats-new" element={<Updates />} />
+            <Route path="/tunneling" element={<Tunneling />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/pricing" element={<Pricing />} />
+          </Routes>
         </Suspense>
       </main>
-      
+
       {showNotif && <NotificationPanel onClose={() => setShowNotif(false)} />}
       {showTrialWelcome && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(5,8,15,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}
-          onClick={() => setShowTrialWelcome(false)}>
-          <div style={{ maxWidth: '420px', margin: '0 16px', background: 'rgba(10,15,28,0.97)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: '16px', padding: '32px 28px', textAlign: 'center' }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 700, color: 'white', marginBottom: '8px' }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 300,
+            background: 'rgba(5,8,15,0.92)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backdropFilter: 'blur(8px)',
+          }}
+          onClick={() => setShowTrialWelcome(false)}
+        >
+          <div
+            style={{
+              maxWidth: '420px',
+              margin: '0 16px',
+              background: 'rgba(10,15,28,0.97)',
+              border: '1px solid rgba(167,139,250,0.3)',
+              borderRadius: '16px',
+              padding: '32px 28px',
+              textAlign: 'center',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '1.3rem',
+                fontWeight: 700,
+                color: 'white',
+                marginBottom: '8px',
+              }}
+            >
               Your 14-day free trial has started
             </div>
-            <p style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: '24px' }}>
-              Every data source and AI feature is included for the next 14 days. No credit card needed. Connect a real database and see how it feels before you decide on a plan.
+            <p
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '0.8rem',
+                color: 'rgba(255,255,255,0.55)',
+                lineHeight: 1.6,
+                marginBottom: '24px',
+              }}
+            >
+              Every data source and AI feature is included for the next 14 days. No credit card needed. Connect a real
+              database and see how it feels before you decide on a plan.
             </p>
             <button onClick={() => setShowTrialWelcome(false)} className="cta-btn" style={{ width: '100%' }}>
               Let's go →

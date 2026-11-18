@@ -1,3 +1,5 @@
+// Message shown in place of a page when the signed-in person's role does not allow it.
+
 export default function NoAccess() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -5,7 +7,6 @@ export default function NoAccess() {
         className="text-center py-24 rounded-2xl"
         style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}
       >
-        
         <p className="text-white font-medium">Your role doesn't have access to this page.</p>
       </div>
     </div>

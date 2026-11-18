@@ -1,3 +1,6 @@
+// Sections of the public homepage (problem, audience, features, steps, quote form, FAQ, privacy).
+// The words come from content.json, which scripts/home-static.mjs also writes into the static homepage for search engines.
+
 import { track } from '../analytics'
 import { useState } from 'react'
 import type { ComponentType, FormEvent } from 'react'
@@ -48,7 +51,9 @@ export function AudienceSection({ onRegister }: { onRegister: () => void }) {
           <div key={it.title} className="hm-card">
             <h3>{it.title}</h3>
             <p>{it.body}</p>
-            <button className="hm-link" onClick={it.action === 'quote' ? scrollToQuote : onRegister}>{it.cta} →</button>
+            <button className="hm-link" onClick={it.action === 'quote' ? scrollToQuote : onRegister}>
+              {it.cta} →
+            </button>
           </div>
         ))}
       </div>
@@ -64,7 +69,9 @@ export function FeaturesSection({ Icon }: { Icon: IconType }) {
       <div className="hm-grid hm-grid-4">
         {f.items.map(it => (
           <div key={it.title} className="hm-card">
-            <div className="hm-icon"><Icon name={it.icon} size={26} /></div>
+            <div className="hm-icon">
+              <Icon name={it.icon} size={26} />
+            </div>
             <h3>{it.title}</h3>
             <p>{it.body}</p>
           </div>
@@ -85,13 +92,19 @@ export function StepsSection({ Icon, onRegister }: { Icon: IconType; onRegister:
             <li key={it.title}>
               <span className="hm-num">{i + 1}</span>
               <div>
-                <h3><Icon name={it.icon} size={18} color="#a78bfa" /> {it.title}</h3>
+                <h3>
+                  <Icon name={it.icon} size={18} color="#a78bfa" /> {it.title}
+                </h3>
                 <p>{it.body}</p>
               </div>
             </li>
           ))}
         </ol>
-        <div className="hm-center"><button className="cta-btn" onClick={onRegister}>{content.hero.primary}</button></div>
+        <div className="hm-center">
+          <button className="cta-btn" onClick={onRegister}>
+            {content.hero.primary}
+          </button>
+        </div>
       </div>
     </section>
   )
@@ -99,14 +112,27 @@ export function StepsSection({ Icon, onRegister }: { Icon: IconType; onRegister:
 
 export function QuoteSection() {
   const q = content.quote
-  const [form, setForm] = useState({ name: '', email: '', role: q.roles[0], need: q.needs[0], volume: q.volumes[0], rowBand: q.rowBands[0], team: q.teams[0], details: '', website: '' })
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    role: q.roles[0],
+    need: q.needs[0],
+    volume: q.volumes[0],
+    rowBand: q.rowBands[0],
+    team: q.teams[0],
+    details: '',
+    website: '',
+  })
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [err, setErr] = useState('')
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (form.website) { setStatus('sent'); return } // honeypot, bots only
+    if (form.website) {
+      setStatus('sent')
+      return
+    } // honeypot, bots only
     if (!form.name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setErr('Please add your name and a valid email.')
       setStatus('error')
@@ -151,52 +177,100 @@ export function QuoteSection() {
           <h2 id="hm-quote">{q.h2}</h2>
           <p className="hm-lead">{q.body}</p>
           <ul className="hm-points">
-            {q.points.map(p => <li key={p}>{p}</li>)}
+            {q.points.map(p => (
+              <li key={p}>{p}</li>
+            ))}
           </ul>
           <p className="hm-small">{q.note}</p>
         </div>
         {status === 'sent' ? (
-          <div className="hm-form hm-thanks" role="status">{q.thanks}</div>
+          <div className="hm-form hm-thanks" role="status">
+            {q.thanks}
+          </div>
         ) : (
           <form className="hm-form" onSubmit={submit} noValidate>
-            <label>Name
+            <label>
+              Name
               <input value={form.name} onChange={e => set('name', e.target.value)} autoComplete="name" required />
             </label>
-            <label>Email
-              <input type="email" value={form.email} onChange={e => set('email', e.target.value)} autoComplete="email" required />
+            <label>
+              Email
+              <input
+                type="email"
+                value={form.email}
+                onChange={e => set('email', e.target.value)}
+                autoComplete="email"
+                required
+              />
             </label>
-            <label>I am a
+            <label>
+              I am a
               <select value={form.role} onChange={e => set('role', e.target.value)}>
-                {q.roles.map(r => <option key={r}>{r}</option>)}
+                {q.roles.map(r => (
+                  <option key={r}>{r}</option>
+                ))}
               </select>
             </label>
-            <label>Looking for
+            <label>
+              Looking for
               <select value={form.need} onChange={e => set('need', e.target.value)}>
-                {q.needs.map(r => <option key={r}>{r}</option>)}
+                {q.needs.map(r => (
+                  <option key={r}>{r}</option>
+                ))}
               </select>
             </label>
-            <label>Volume
+            <label>
+              Volume
               <select value={form.volume} onChange={e => set('volume', e.target.value)}>
-                {q.volumes.map(r => <option key={r}>{r}</option>)}
+                {q.volumes.map(r => (
+                  <option key={r}>{r}</option>
+                ))}
               </select>
             </label>
-            <label>Rows in a typical file
+            <label>
+              Rows in a typical file
               <select value={form.rowBand} onChange={e => set('rowBand', e.target.value)}>
-                {q.rowBands.map(r => <option key={r}>{r}</option>)}
+                {q.rowBands.map(r => (
+                  <option key={r}>{r}</option>
+                ))}
               </select>
             </label>
-            <label>Team size
+            <label>
+              Team size
               <select value={form.team} onChange={e => set('team', e.target.value)}>
-                {q.teams.map(r => <option key={r}>{r}</option>)}
+                {q.teams.map(r => (
+                  <option key={r}>{r}</option>
+                ))}
               </select>
             </label>
-            <label><span>What does your data look like? <span className="hm-opt">(optional)</span></span>
-              <textarea rows={4} value={form.details} maxLength={1500} onChange={e => set('details', e.target.value)}
-                placeholder="e.g. about 20 client CSVs a month, 50k rows each, mostly dates and duplicate customers" />
+            <label>
+              <span>
+                What does your data look like? <span className="hm-opt">(optional)</span>
+              </span>
+              <textarea
+                rows={4}
+                value={form.details}
+                maxLength={1500}
+                onChange={e => set('details', e.target.value)}
+                placeholder="e.g. about 20 client CSVs a month, 50k rows each, mostly dates and duplicate customers"
+              />
             </label>
-            <input className="hm-hp" tabIndex={-1} autoComplete="off" aria-hidden="true" value={form.website} onChange={e => set('website', e.target.value)} />
-            {status === 'error' && <div className="hm-err" role="alert">{err}</div>}
-            <button className="cta-btn" type="submit" disabled={status === 'sending'}>{status === 'sending' ? 'Sending...' : q.button}</button>
+            <input
+              className="hm-hp"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              value={form.website}
+              onChange={e => set('website', e.target.value)}
+            />
+            {status === 'error' && (
+              <div className="hm-err" role="alert">
+                {err}
+              </div>
+            )}
+            <button className="cta-btn" type="submit" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending...' : q.button}
+            </button>
           </form>
         )}
       </div>
@@ -230,10 +304,18 @@ export function PrivacySection() {
           <span className="hm-eyebrow">{p.eyebrow}</span>
           <h2 id="hm-privacy">{p.h2}</h2>
           <p>{p.body}</p>
-          <ul>{p.points.map(x => <li key={x}>{x}</li>)}</ul>
-          <a className="hm-priv-link" href={p.href}>{p.link} →</a>
+          <ul>
+            {p.points.map(x => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+          <a className="hm-priv-link" href={p.href}>
+            {p.link} →
+          </a>
         </div>
-        <div className="hm-priv-fig"><DiagramJourney /></div>
+        <div className="hm-priv-fig">
+          <DiagramJourney />
+        </div>
       </div>
     </section>
   )

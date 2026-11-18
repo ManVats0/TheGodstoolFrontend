@@ -1,0 +1,8 @@
+dist
+node_modules
+meta
+*.html
+*.json
+*.md
+package-lock.json
+Package-lock.json

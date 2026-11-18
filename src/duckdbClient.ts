@@ -11,7 +11,7 @@ async function getDB(): Promise<duckdb.AsyncDuckDB> {
   dbPromise = (async () => {
     const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
       mvp: { mainModule: duckdb_wasm_mvp, mainWorker: mvp_worker },
-      eh:  { mainModule: duckdb_wasm_eh, mainWorker: eh_worker },
+      eh: { mainModule: duckdb_wasm_eh, mainWorker: eh_worker },
     }
     const bundle = await duckdb.selectBundle(MANUAL_BUNDLES)
     const worker = new Worker(bundle.mainWorker!)
@@ -27,8 +27,17 @@ async function getDB(): Promise<duckdb.AsyncDuckDB> {
 // This is defense-in-depth, not the real security boundary (the browser
 // sandbox is); the real boundary is that this never touches your server.
 const BLOCKED_KEYWORDS = [
-  'attach ', 'pragma ', 'copy ', 'install ', 'load ', 'create ',
-  'insert ', 'update ', 'delete ', 'drop ', 'call ',
+  'attach ',
+  'pragma ',
+  'copy ',
+  'install ',
+  'load ',
+  'create ',
+  'insert ',
+  'update ',
+  'delete ',
+  'drop ',
+  'call ',
 ]
 
 function validateReadOnlySQL(sql: string): string | null {
@@ -59,11 +68,7 @@ export interface SqlPreviewResult {
  * Mirrors the shape of the backend's /api/sql-clean (preview_only=true) response
  * so callers don't need to change how they read the result.
  */
-export async function runSQLPreviewWasm(
-  file: File,
-  sql: string,
-  previewRows = 100
-): Promise<SqlPreviewResult> {
+export async function runSQLPreviewWasm(file: File, sql: string, previewRows = 100): Promise<SqlPreviewResult> {
   const validationError = validateReadOnlySQL(sql)
   if (validationError) return { success: false, error: validationError }
 

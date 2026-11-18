@@ -1,3 +1,5 @@
+// GuidedTour: the step-by-step highlight tour used inside Flow.
+
 import { useState, useEffect, useCallback, CSSProperties } from 'react'
 
 export type TourStep = {
@@ -33,13 +35,18 @@ export default function GuidedTour({
       const seen = localStorage.getItem(storageKey)
       if (!seen) t = setTimeout(() => setActive(true), startDelay)
     } catch {}
-    return () => { if (t) clearTimeout(t) }
+    return () => {
+      if (t) clearTimeout(t)
+    }
   }, [storageKey, startDelay])
 
   const currentStep = steps[stepIndex]
 
   const updateRect = useCallback(() => {
-    if (!currentStep?.target) { setRect(null); return }
+    if (!currentStep?.target) {
+      setRect(null)
+      return
+    }
     setRect(getRect(currentStep.target))
   }, [currentStep])
 
@@ -62,14 +69,18 @@ export default function GuidedTour({
   }, [active, stepIndex, currentStep])
 
   const finish = useCallback(() => {
-    try { localStorage.setItem(storageKey, 'true') } catch {}
+    try {
+      localStorage.setItem(storageKey, 'true')
+    } catch {}
     setActive(false)
     onFinish?.()
   }, [storageKey, onFinish])
 
   useEffect(() => {
     if (!active) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') finish() }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') finish()
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [active, finish])
@@ -134,11 +145,28 @@ export default function GuidedTour({
         }}
       >
         <div className="flex items-center justify-between mb-2">
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#a78bfa', textTransform: 'uppercase' }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              color: '#a78bfa',
+              textTransform: 'uppercase',
+            }}
+          >
             Step {stepIndex + 1} of {steps.length}
           </span>
           <div className="flex items-center gap-3">
-            <button onClick={finish} style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, background: 'none', border: 'none', cursor: 'pointer' }}>
+            <button
+              onClick={finish}
+              style={{
+                color: 'rgba(255,255,255,0.35)',
+                fontSize: 12,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
               Skip tour
             </button>
             <button
@@ -146,30 +174,64 @@ export default function GuidedTour({
               aria-label="Close tour"
               title="Close (Esc)"
               style={{
-                width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 6, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: 13, lineHeight: 1, flexShrink: 0,
+                width: 22,
+                height: 22,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 6,
+                color: 'rgba(255,255,255,0.5)',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                cursor: 'pointer',
+                fontSize: 13,
+                lineHeight: 1,
+                flexShrink: 0,
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; e.currentTarget.style.color = '#f87171' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(239,68,68,0.15)'
+                e.currentTarget.style.color = '#f87171'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                e.currentTarget.style.color = 'rgba(255,255,255,0.5)'
+              }}
             >
               ✕
             </button>
           </div>
         </div>
         <p style={{ color: 'white', fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{currentStep.title}</p>
-        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, lineHeight: 1.5, marginBottom: 16 }}>{currentStep.body}</p>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, lineHeight: 1.5, marginBottom: 16 }}>
+          {currentStep.body}
+        </p>
         <div className="flex items-center justify-between">
           <button
             onClick={prev}
             disabled={stepIndex === 0}
-            style={{ fontSize: 12, fontWeight: 600, color: stepIndex === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: stepIndex === 0 ? 'default' : 'pointer' }}
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: stepIndex === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)',
+              background: 'none',
+              border: 'none',
+              cursor: stepIndex === 0 ? 'default' : 'pointer',
+            }}
           >
             ← Back
           </button>
           <button
             onClick={next}
-            style={{ fontSize: 13, fontWeight: 700, color: 'white', background: 'linear-gradient(135deg, #7c3aed, #2563eb)', border: 'none', borderRadius: 10, padding: '8px 18px', cursor: 'pointer' }}
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: 'white',
+              background: 'linear-gradient(135deg, #7c3aed, #2563eb)',
+              border: 'none',
+              borderRadius: 10,
+              padding: '8px 18px',
+              cursor: 'pointer',
+            }}
           >
             {stepIndex === steps.length - 1 ? 'Got it →' : 'Next →'}
           </button>

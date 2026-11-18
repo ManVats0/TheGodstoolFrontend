@@ -27,14 +27,22 @@ export async function refreshCredits(): Promise<void> {
       const res = await fetch(`${AUTH_BASE}/api/plan`, { headers: { Authorization: `Bearer ${t}` } })
       if (res.ok) {
         const d = await res.json()
-        state = { credits: Number(d.credits) || 0, plan: d.plan || 'none', rates: d.creditRates || state.rates, loaded: true }
+        state = {
+          credits: Number(d.credits) || 0,
+          plan: d.plan || 'none',
+          rates: d.creditRates || state.rates,
+          loaded: true,
+        }
         emit()
         return
       }
     }
     if (!state.rates) {
       const r = await fetch(`${AUTH_BASE}/api/credit-rates`)
-      if (r.ok) { state = { ...state, rates: await r.json() }; emit() }
+      if (r.ok) {
+        state = { ...state, rates: await r.json() }
+        emit()
+      }
     }
   } catch {
     /* offline / not signed in: the badge simply keeps its last value */
@@ -47,7 +55,9 @@ export function useCredits() {
     const l = () => tick(n => n + 1)
     listeners.add(l)
     refreshCredits()
-    const again = () => { refreshCredits() }
+    const again = () => {
+      refreshCredits()
+    }
     window.addEventListener('focus', again)
     window.addEventListener('datapro:credits-changed', again)
     window.addEventListener('datapro:team-joined', again)
@@ -58,7 +68,13 @@ export function useCredits() {
       window.removeEventListener('datapro:team-joined', again)
     }
   }, [])
-  return { credits: state.credits, plan: state.plan, rates: state.rates || DEFAULT_RATES, loaded: state.loaded, refresh: refreshCredits }
+  return {
+    credits: state.credits,
+    plan: state.plan,
+    rates: state.rates || DEFAULT_RATES,
+    loaded: state.loaded,
+    refresh: refreshCredits,
+  }
 }
 
 export type AiCheck = { ok: boolean; source?: 'plan' | 'credits'; credits?: number; message?: string; code?: string }
@@ -70,9 +86,12 @@ export async function checkAiAllowance(): Promise<AiCheck> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
     })
-    const d = await res.json().catch(() => ({} as any))
+    const d = await res.json().catch(() => ({}) as any)
     if (res.ok && d.allowed) {
-      if (typeof d.credits === 'number') { state = { ...state, credits: d.credits }; emit() }
+      if (typeof d.credits === 'number') {
+        state = { ...state, credits: d.credits }
+        emit()
+      }
       return { ok: true, source: d.source, credits: d.credits }
     }
     return { ok: false, code: d.error, message: d.message || 'AI is not available right now.' }
