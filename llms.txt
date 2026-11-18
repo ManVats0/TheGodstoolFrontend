@@ -28,6 +28,7 @@ It is made for freelancers, analysts, small teams and companies who regularly re
 ## Pages
 - [Home](https://thegodstool.com/): what it does, who it is for, pricing, quote form and FAQ
 - [FAQ](https://thegodstool.com/faq.html): common questions
+- [Guides](https://thegodstool.com/guides.html): all the data cleaning guides on one page
 - [Bank statement PDF to Excel](https://thegodstool.com/bank-statement-pdf-to-excel.html): how the row-by-row balance check works, what it cannot do
 - [Fix mixed and ambiguous dates in a CSV](https://thegodstool.com/fix-mixed-date-formats-csv.html): how to find a CSV's day and month order, convert to YYYY-MM-DD, and what to do when the file can't tell you
 - [Remove duplicate customers in a CSV](https://thegodstool.com/remove-duplicate-customers-csv.html): merging customers spelled differently, with a review step and a check for record versus transaction rows

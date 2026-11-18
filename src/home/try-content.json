@@ -84,6 +84,11 @@
       "href": "/fix-mixed-date-formats-csv.html",
       "title": "Mixed date formats",
       "desc": "is 03/04 March or April?"
+    },
+    {
+      "href": "/guides.html",
+      "title": "All cleaning guides",
+      "desc": "every guide on one page"
     }
   ],
   "account": {

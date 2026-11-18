@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Data Cleaning Guides: CSV, Dates, Duplicates, PDFs</title>
+<meta name="description" content="Step-by-step guides to cleaning messy data: fix dates and numbers in a CSV, remove duplicate customers, and get clean tables out of PDFs." />
+<link rel="canonical" href="https://thegodstool.com/guides.html" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Data Cleaning Guides: CSV, Dates, Duplicates, PDFs" />
+<meta property="og:description" content="Step-by-step guides to cleaning messy data: fix dates and numbers in a CSV, remove duplicate customers, and get clean tables out of PDFs." />
+<meta property="og:url" content="https://thegodstool.com/guides.html" />
+<meta property="og:image" content="https://thegodstool.com/og-image.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #05030f; color: #e2e8f0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.7; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 28px 20px 90px; }
+  nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 44px; font-size: 0.92rem; }
+  nav a { color: #c4b5fd; text-decoration: none; font-weight: 600; }
+  nav .brand { color: #fff; font-weight: 800; }
+  nav span { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 16px; }
+  nav { gap: 8px 16px; flex-wrap: wrap; }
+  .crumbs { margin: -26px 0 22px; font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+  .crumbs a { color: #c4b5fd; text-decoration: none; }
+  footer .fl { margin-top: 8px; }
+  footer a { color: #c4b5fd; text-decoration: none; }
+  nav span { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 16px; }
+  nav { gap: 8px 16px; flex-wrap: wrap; }
+  .crumbs { margin: -26px 0 22px; font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+  .crumbs a { color: #c4b5fd; text-decoration: none; }
+  footer .fl { margin-top: 8px; }
+  footer a { color: #c4b5fd; text-decoration: none; }
+  .tag { font-family: monospace; font-size: 0.72rem; color: #a78bfa; letter-spacing: 0.1em; text-transform: uppercase; }
+  h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); line-height: 1.15; margin: 8px 0 16px; color: #fff; font-weight: 800; }
+  h2 { font-size: 1.45rem; margin: 52px 0 10px; color: #fff; font-weight: 800; }
+  h3 { font-size: 1.05rem; margin: 22px 0 4px; color: #fff; }
+  p, li { color: rgba(255,255,255,0.74); font-size: 1.02rem; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 6px 0; }
+  a { color: #a78bfa; }
+  .lead { font-size: 1.15rem; color: rgba(255,255,255,0.82); max-width: 720px; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; margin: 26px 0 6px; }
+  .btn { display: inline-block; padding: 12px 22px; border-radius: 12px; font-weight: 700; text-decoration: none; }
+  .btn.main { background: linear-gradient(135deg, #7c3aed, #a78bfa); color: #fff; }
+  .btn.alt { border: 1px solid rgba(255,255,255,0.2); color: #fff; }
+  .small { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+  figure { margin: 34px 0 0; }
+  figure img { width: 100%; height: auto; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); display: block; }
+  figcaption { font-size: 0.85rem; color: rgba(255,255,255,0.55); margin-top: 8px; }
+  .box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 4px 20px 14px; margin-top: 14px; }
+  .warn { border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.06); }
+  details { border-top: 1px solid rgba(255,255,255,0.1); padding: 14px 0; }
+  details:last-of-type { border-bottom: 1px solid rgba(255,255,255,0.1); }
+  summary { cursor: pointer; font-weight: 700; color: #fff; }
+  details p { margin: 10px 0 0; }
+  footer { margin-top: 60px; font-size: 0.85rem; color: rgba(255,255,255,0.45); }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.93rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.78); vertical-align: top; }
+  th { color: #fff; font-weight: 700; }
+  code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.88rem; }
+  code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+  pre { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; overflow-x: auto; color: #e2e8f0; }
+  .tblwrap { overflow-x: auto; }
+  .note { font-size: 0.9rem; color: rgba(255,255,255,0.55); }
+</style>
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@graph": [{"@type": "CollectionPage", "@id": "https://thegodstool.com/guides.html", "url": "https://thegodstool.com/guides.html", "name": "Data Cleaning Guides: CSV, Dates, Duplicates, PDFs", "description": "Step-by-step guides to cleaning messy data: fix dates and numbers in a CSV, remove duplicate customers, and get clean tables out of PDFs.", "inLanguage": "en", "dateModified": "2026-11-18", "isPartOf": {"@id": "https://thegodstool.com/#org"}}, {"@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CSV data cleaning checklist", "url": "https://thegodstool.com/csv-data-cleaning-checklist.html"}, {"@type": "ListItem", "position": 2, "name": "Fix mixed and ambiguous dates in a CSV", "url": "https://thegodstool.com/fix-mixed-date-formats-csv.html"}, {"@type": "ListItem", "position": 3, "name": "Remove duplicate customers in a CSV", "url": "https://thegodstool.com/remove-duplicate-customers-csv.html"}, {"@type": "ListItem", "position": 4, "name": "Fix numbers stored as text in a CSV", "url": "https://thegodstool.com/fix-numbers-stored-as-text-csv.html"}, {"@type": "ListItem", "position": 5, "name": "PDF table to Excel or CSV", "url": "https://thegodstool.com/pdf-table-to-excel-csv.html"}, {"@type": "ListItem", "position": 6, "name": "Bank statement PDF to Excel", "url": "https://thegodstool.com/bank-statement-pdf-to-excel.html"}]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://thegodstool.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://thegodstool.com/guides.html"}]}]}
+</script>
+</head>
+<body>
+<div class="wrap">
+<nav><a class="brand" href="/">The God's Tool</a><span><a href="/try.html">Free try</a><a href="/guides.html">Guides</a><a href="/pricing">Pricing</a><a href="/blog">Blog</a></span></nav>
+<div class="crumbs"><a href="/">Home</a> &rsaquo; Guides</div>
+<div class="tag">Guides</div>
+<h1>Guides to cleaning messy data</h1>
+<p class="lead">Messy data means a spreadsheet or a table where the same thing is written in different ways, some cells are blank, and numbers or dates will not behave. These guides show how to fix the most common problems, step by step, and say clearly where a fix cannot be certain.</p>
+
+<h2>Fix a CSV or spreadsheet</h2>
+<h3><a href="/csv-data-cleaning-checklist.html">CSV data cleaning checklist</a></h3>
+<p>Start here if you are not sure what is wrong. Ten checks in the right order, from file encoding to a final comparison against the original.</p>
+<h3><a href="/fix-mixed-date-formats-csv.html">Fix mixed and ambiguous dates in a CSV</a></h3>
+<p>Is 03/04 March or April? How to find out which day and month order a file uses, and convert every date to one format.</p>
+<h3><a href="/remove-duplicate-customers-csv.html">Remove duplicate customers in a CSV</a></h3>
+<p>Remove Duplicates only catches exact copies. How to find the same customer written three ways, merge them safely and keep a record.</p>
+<h3><a href="/fix-numbers-stored-as-text-csv.html">Fix numbers stored as text in a CSV</a></h3>
+<p>Why a column of numbers will not add up, and what to do with N/A, dashes, brackets and decimal commas.</p>
+
+<h2>Get clean data out of a PDF</h2>
+<h3><a href="/pdf-table-to-excel-csv.html">PDF table to Excel or CSV</a></h3>
+<p>Why copying a table out of a PDF breaks it, how the table is read back into rows and columns, and what to fix afterwards. Text PDFs only, no scans.</p>
+<h3><a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a></h3>
+<p>Turn a bank statement into a table and see which rows the statement's own balances prove. Rows that do not add up are flagged, never fixed quietly.</p>
+
+<h2>Worth reading next</h2>
+<ul>
+<li><a href="/blog/pdf-to-excel-wrong-numbers-bank-statements">Why PDF to Excel gets bank statements wrong, and how to check yours</a>: what goes wrong, and a check you can run in Excel.</li>
+<li><a href="/blog/is-my-data-safe">Is my data actually safe on this platform?</a>: what leaves your hands and what does not.</li>
+<li><a href="/blog/how-ai-cleaning-keeps-your-data-private">How AI cleaning works without ever seeing your data</a>: what the AI sees and what it never does.</li>
+</ul>
+
+<h2>Want to see it on your own file?</h2>
+<p>Drop in one PDF table or CSV and see what is wrong with it. Nothing is stored and you do not need an account.</p>
+<div class="cta">
+  <a class="btn main" href="/try.html">Try one file free</a>
+  <a class="btn alt" href="/pricing">See plans</a>
+</div>
+<div class="small">No sign-up for the free try. Text PDFs and CSV files up to 5 MB.</div>
+
+<footer>The God's Tool &middot; <a href="/">Home</a> &middot; <a href="/try.html">Free try</a> &middot; <a href="/guides.html">Guides</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/faq.html">FAQ</a> &middot; <a href="/about.html">About</a> &middot; <a href="/blog">Blog</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a> &middot; <a href="/refund.html">Refunds</a><div class="fl">Guides: <a href="/csv-data-cleaning-checklist.html">CSV data cleaning checklist</a> &middot; <a href="/fix-mixed-date-formats-csv.html">Fix mixed and ambiguous dates in a CSV</a> &middot; <a href="/remove-duplicate-customers-csv.html">Remove duplicate customers in a CSV</a> &middot; <a href="/fix-numbers-stored-as-text-csv.html">Fix numbers stored as text in a CSV</a> &middot; <a href="/pdf-table-to-excel-csv.html">PDF table to Excel or CSV</a> &middot; <a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a></div></footer>
+</div>
+</body>
+</html>

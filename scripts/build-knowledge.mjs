@@ -123,6 +123,7 @@ parts.push(
 
 const pages = [
   ['faq.html', 'FAQ'],
+  ['guides.html', 'Guides'],
   ['about.html', 'About'],
   ['privacy.html', 'Privacy policy'],
   ['terms.html', 'Terms of service'],

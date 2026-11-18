@@ -78,7 +78,7 @@ html = html.replace('<!--HEAD_SEO-->', head)
 
 const body = `
 <main id="seo-try">
-<nav aria-label="Main"><a href="/">${esc(site.name)}</a> · <a href="/pricing">Pricing</a> · <a href="/blog">Blog</a> · <a href="/about.html">About</a></nav>
+<nav aria-label="Main"><a href="/">${esc(site.name)}</a> · <a href="/guides.html">Guides</a> · <a href="/pricing">Pricing</a> · <a href="/faq.html">FAQ</a> · <a href="/blog">Blog</a> · <a href="/about.html">About</a></nav>
 <p>${esc(t.badge)}</p>
 <h1>${esc(t.h1)}</h1>
 <p>${esc(t.answer)}</p>
@@ -87,7 +87,7 @@ const body = `
 <section><h2>${esc(t.limits.h2)}</h2><p>${esc(t.limits.body)}</p></section>
 <section><h2>${esc(t.faq.h2)}</h2>${t.faq.items.map(f => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}</section>
 <section><h2>Keep reading</h2><ul>${t.related.map(r => `<li><a href="${r.href}">${esc(r.title)}</a>: ${esc(r.desc)}</li>`).join('')}</ul></section>
-<footer><p><a href="/">Home</a> · <a href="/pricing">Pricing</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></p></footer>
+<footer><p><a href="/">Home</a> · <a href="/guides.html">Guides</a> · <a href="/faq.html">FAQ</a> · <a href="/about.html">About</a> · <a href="/pricing">Pricing</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></p></footer>
 </main>`
 if (!/<div id="root"><\/div>/.test(html)) throw new Error('root div not found in dist/index.html')
 html = html.replace('<div id="root"></div>', `<div id="root">${body}</div>`)
