@@ -69,6 +69,58 @@ if (plans.length)
         .join('\n')
   )
 
+// What each screen of the app does, taken from the in-app documentation (src/pages/Documentation.tsx), so the chat can
+// answer "how do I ..." questions. The DOCS object only holds plain text, so it can be read as it is.
+function appDocs() {
+  const src = readFileSync('src/pages/Documentation.tsx', 'utf8')
+  const start = src.indexOf('const DOCS')
+  if (start < 0) return ''
+  const open = src.indexOf('= {', start) + 2
+  let depth = 0
+  let end = open
+  let quote = ''
+  for (let i = open; i < src.length; i++) {
+    const c = src[i]
+    if (quote) {
+      if (c === '\\') i++
+      else if (c === quote) quote = ''
+    } else if (c === "'" || c === '"' || c === '`') quote = c
+    else if (c === '{') depth++
+    else if (c === '}' && --depth === 0) {
+      end = i + 1
+      break
+    }
+  }
+  let docs
+  try {
+    docs = new Function('return (' + src.slice(open, end) + ')')()
+  } catch (e) {
+    console.warn('knowledge: could not read the in-app documentation (' + e.message + ')')
+    return ''
+  }
+  const out = [
+    `## How the app works (the in-app Documentation page, app.thegodstool.com/docs after signing in)`,
+  ]
+  for (const [path, d] of Object.entries(docs)) {
+    out.push(`### ${d.title} (app page ${path})`)
+    for (const sec of d.sections) {
+      out.push(`**${sec.heading}.** ${sec.body}`)
+      for (const k of ['tip', 'note', 'warning']) if (sec[k]) out.push(`${k[0].toUpperCase() + k.slice(1)}: ${sec[k]}`)
+      for (const e of sec.errors || []) out.push(`Problem "${e.code}": ${e.cause} Fix: ${e.fix}`)
+    }
+  }
+  return out.join('\n')
+}
+const docsText = appDocs()
+if (docsText) parts.push(docsText)
+
+// Product updates (src/updates.json), newest first, so the chat can say what changed and when.
+const updates = JSON.parse(readFileSync('src/updates.json', 'utf8')).sort((a, b) => b.date.localeCompare(a.date))
+parts.push(
+  '## Product updates (newest first)\n' +
+    updates.map(u => `- ${u.date.slice(0, 10)}: ${u.title}. ${u.text} ${u.youCan}`).join('\n')
+)
+
 const pages = [
   ['faq.html', 'FAQ'],
   ['about.html', 'About'],

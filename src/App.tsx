@@ -35,6 +35,7 @@ import TryFree from './pages/TryFree'
 import tryContent from './home/try-content.json'
 import BlogPost from './pages/BlogPost'
 import Feedback from './pages/Feedback'
+import Updates from './pages/Updates'
 import { API_BASE } from './config'
 import content from './home/content.json'
 import { EstimateSection } from './home/EstimateSection'
@@ -479,6 +480,7 @@ export default function App() {
       '/try.html': tryContent.title,
       '/terms': "Terms of Service | The God's Tool",
       '/feedback': "Feedback | The God's Tool",
+      '/whats-new': "What's new | The God's Tool",
     }
     // Blog pages set their own title (and share-card tags) for search engines.
     if (location.pathname.startsWith('/blog')) return
@@ -3490,6 +3492,7 @@ export default function App() {
             <Route path="/billing" element={<Billing />} />
             <Route path="/billing/:id" element={<Billing />} />
             <Route path="/docs" element={<Documentation />} />
+            <Route path="/whats-new" element={<Updates />} />
             <Route path="/tunneling" element={<Tunneling />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pricing" element={<Pricing />} />

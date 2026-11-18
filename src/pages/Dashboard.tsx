@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { API_BASE, AUTH_BASE } from '../config'
+import WhatsNewCard from '../components/WhatsNew'
 import { usePermissions } from '../usePermissions'
 
 // The first page after login. Two faces:
@@ -287,6 +288,7 @@ export default function Dashboard() {
   if (isNew)
     return (
       <div className="p-8 max-w-5xl mx-auto" style={{ display: 'grid', gap: 20 }}>
+        <WhatsNewCard />
         <TrialBanner />
         <div
           style={{
@@ -414,6 +416,8 @@ export default function Dashboard() {
           {can('pipeline.create') && <Btn to="/flow">New pipeline</Btn>}
         </div>
       </div>
+
+      <WhatsNewCard />
 
       <TrialBanner />
 

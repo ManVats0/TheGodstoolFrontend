@@ -21,6 +21,7 @@ npx serve -s dist
 | `src/pages/` | One file per app screen (Flow, Analysis, Data Sources, Pricing, ...). |
 | `src/components/` | Shared pieces: Sidebar, ChatWidget, StatusBanner, ... |
 | `src/home/` | Homepage sections, price calculator and the words in `content.json`. |
+| `src/updates.json` | The "What's new" list shown to signed-in people and read by the support chat. |
 | `src/blog/` | Blog posts (`posts.ts`) and how they are drawn. |
 | `scripts/` | Build steps that write static pages for search engines. |
 | `*.html` at the top | Static pages (about, faq, guides, privacy, terms) that must work without JavaScript. |
@@ -29,7 +30,7 @@ npx serve -s dist
 `npm run build` compiles the app, copies the static pages, then runs `try-static.mjs` (the /try.html page), `build-knowledge.mjs` (the text the support chat answers from), `home-static.mjs` (static homepage) and `blog-feeds.mjs` (sitemap and RSS).
 
 ## Related notes
-`STATUS_HOWTO.md` (how to post a status update), `llms.txt` and `sitemap.xml` (for AI and search engines).
+`UPDATES_HOWTO.md` (how to post a "What's new" update), `STATUS_HOWTO.md` (how to post a status update), `llms.txt` and `sitemap.xml` (for AI and search engines).
 
 ## Code style
 Prettier, settings in `.prettierrc.json`: `npx prettier --write "src/**/*.{ts,tsx,css}"`.
