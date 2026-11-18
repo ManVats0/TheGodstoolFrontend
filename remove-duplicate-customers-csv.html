@@ -20,6 +20,12 @@
   nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 44px; font-size: 0.92rem; }
   nav a { color: #c4b5fd; text-decoration: none; font-weight: 600; }
   nav .brand { color: #fff; font-weight: 800; }
+  nav span { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 16px; }
+  nav { gap: 8px 16px; flex-wrap: wrap; }
+  .crumbs { margin: -26px 0 22px; font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+  .crumbs a { color: #c4b5fd; text-decoration: none; }
+  footer .fl { margin-top: 8px; }
+  footer a { color: #c4b5fd; text-decoration: none; }
   .tag { font-family: monospace; font-size: 0.72rem; color: #a78bfa; letter-spacing: 0.1em; text-transform: uppercase; }
   h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); line-height: 1.15; margin: 8px 0 16px; color: #fff; font-weight: 800; }
   h2 { font-size: 1.45rem; margin: 52px 0 10px; color: #fff; font-weight: 800; }
@@ -54,12 +60,13 @@
   .note { font-size: 0.9rem; color: rgba(255,255,255,0.55); }
 </style>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@graph": [{"@type": "Article", "@id": "https://thegodstool.com/remove-duplicate-customers-csv.html", "url": "https://thegodstool.com/remove-duplicate-customers-csv.html", "headline": "Remove duplicate customers in a CSV, including the ones spelled differently", "description": "Remove Duplicates only catches exact copies. How to find Acme Inc, ACME INC. and Acme, Inc in a CSV, merge them safely and keep a record of what you removed.", "inLanguage": "en", "dateModified": "2026-11-04", "datePublished": "2026-11-04", "author": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}, "publisher": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://thegodstool.com/"}, {"@type": "ListItem", "position": 2, "name": "Remove duplicate customers in a CSV", "item": "https://thegodstool.com/remove-duplicate-customers-csv.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does Excel's Remove Duplicates find near matches?", "acceptedAnswer": {"@type": "Answer", "text": "No. It compares cell contents. Differences such as a trailing space, a full stop or a different suffix make two names count as different. Build a cleaned matching key column first and remove duplicates on that."}}, {"@type": "Question", "name": "How do I find duplicates with slightly different spelling?", "acceptedAnswer": {"@type": "Answer", "text": "Clean the text into a key (lower case, no punctuation, single spaces), flag duplicates on the key, then rank the remaining pairs with a similarity score and review them by hand using a second field such as email or tax ID."}}, {"@type": "Question", "name": "What similarity threshold should I use?", "acceptedAnswer": {"@type": "Answer", "text": "There is no universal number. Look at real pairs from your file near the cut-off. A lower threshold merges different companies by mistake, a higher one leaves real duplicates behind."}}, {"@type": "Question", "name": "Is it safe to delete duplicate rows?", "acceptedAnswer": {"@type": "Answer", "text": "Only after you know whether rows are records or transactions. Two identical order rows can be two real orders. Move removed rows to another sheet so the change can be explained later."}}, {"@type": "Question", "name": "Can I deduplicate a CSV for free?", "acceptedAnswer": {"@type": "Answer", "text": "The free plan handles CSV files up to 5 MB and 5,000 rows per run, and new accounts get a 14-day trial with every feature included."}}]}]}
+{"@context": "https://schema.org", "@graph": [{"@type": "Article", "@id": "https://thegodstool.com/remove-duplicate-customers-csv.html", "url": "https://thegodstool.com/remove-duplicate-customers-csv.html", "headline": "Remove duplicate customers in a CSV, including the ones spelled differently", "description": "Remove Duplicates only catches exact copies. How to find Acme Inc, ACME INC. and Acme, Inc in a CSV, merge them safely and keep a record of what you removed.", "inLanguage": "en", "dateModified": "2026-11-04", "datePublished": "2026-11-04", "author": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}, "publisher": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://thegodstool.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://thegodstool.com/guides.html"}, {"@type": "ListItem", "position": 3, "name": "Remove duplicate customers in a CSV", "item": "https://thegodstool.com/remove-duplicate-customers-csv.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does Excel's Remove Duplicates find near matches?", "acceptedAnswer": {"@type": "Answer", "text": "No. It compares cell contents. Differences such as a trailing space, a full stop or a different suffix make two names count as different. Build a cleaned matching key column first and remove duplicates on that."}}, {"@type": "Question", "name": "How do I find duplicates with slightly different spelling?", "acceptedAnswer": {"@type": "Answer", "text": "Clean the text into a key (lower case, no punctuation, single spaces), flag duplicates on the key, then rank the remaining pairs with a similarity score and review them by hand using a second field such as email or tax ID."}}, {"@type": "Question", "name": "What similarity threshold should I use?", "acceptedAnswer": {"@type": "Answer", "text": "There is no universal number. Look at real pairs from your file near the cut-off. A lower threshold merges different companies by mistake, a higher one leaves real duplicates behind."}}, {"@type": "Question", "name": "Is it safe to delete duplicate rows?", "acceptedAnswer": {"@type": "Answer", "text": "Only after you know whether rows are records or transactions. Two identical order rows can be two real orders. Move removed rows to another sheet so the change can be explained later."}}, {"@type": "Question", "name": "Can I deduplicate a CSV for free?", "acceptedAnswer": {"@type": "Answer", "text": "The free plan handles CSV files up to 5 MB and 5,000 rows per run, and new accounts get a 14-day trial with every feature included."}}]}]}
 </script>
 </head>
 <body>
 <div class="wrap">
-<nav><a class="brand" href="/">The God's Tool</a><span><a href="/pricing">Pricing</a> &nbsp; <a href="/blog">Blog</a></span></nav>
+<nav><a class="brand" href="/">The God's Tool</a><span><a href="/try.html">Free try</a><a href="/guides.html">Guides</a><a href="/pricing">Pricing</a><a href="/blog">Blog</a></span></nav>
+<div class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/guides.html">Guides</a> &rsaquo; Remove duplicate customers in a CSV</div>
 
 <div class="tag">Data cleaning guide</div>
 <h1>Remove duplicate customers in a CSV, including the ones spelled differently</h1>
@@ -132,7 +139,7 @@ difflib.SequenceMatcher(None, "acme inc", "gamma llc").ratio()         # 0.24</p
   <a class="btn main" href="/">Start the 14-day trial</a>
   <a class="btn alt" href="/pricing">See plans</a>
 </div>
-<div class="small">No card needed for the trial. After it, the free plan stays: CSV files up to 5 MB and 5,000 rows per run.</div>
+<div class="small">No card needed for the trial. After it, the free plan stays: CSV files up to 5 MB and 5,000 rows per run. Want to look first? <a href="/try.html">Try one file with no sign-up</a>.</div>
 
 <h2>Questions people ask</h2>
 <details><summary>Does Excel's Remove Duplicates find near matches?</summary><p>No. It compares cell contents. Differences such as a trailing space, a full stop or a different suffix make two names count as different. Build a cleaned matching key column first and remove duplicates on that.</p></details>
@@ -143,12 +150,14 @@ difflib.SequenceMatcher(None, "acme inc", "gamma llc").ratio()         # 0.24</p
 
 <h2>Keep reading</h2>
 <ul>
-<li><a href="/csv-data-cleaning-checklist.html">CSV cleaning checklist</a>: where deduplication fits in the order of checks</li>
-<li><a href="/fix-mixed-date-formats-csv.html">Fix mixed date formats</a>: is 03/04 March or April?</li>
-<li><a href="/fix-numbers-stored-as-text-csv.html">Numbers stored as text</a>: N/A, dashes and brackets in amount columns</li>
+<li><a href="/csv-data-cleaning-checklist.html">CSV data cleaning checklist</a>: the order to do these checks in</li>
+<li><a href="/fix-mixed-date-formats-csv.html">Fix mixed and ambiguous dates in a CSV</a>: make dates one format before you compare rows</li>
+<li><a href="/fix-numbers-stored-as-text-csv.html">Fix numbers stored as text in a CSV</a>: N/A, dashes and brackets in amount columns</li>
+<li><a href="/try.html">Free try</a>: drop in one PDF table or CSV, no sign-up, and see what is wrong with it</li>
+<li><a href="/guides.html">All guides</a>: every cleaning guide on one page</li>
 </ul>
 
-<footer>The God's Tool &middot; <a href="/">Home</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></footer>
+<footer>The God's Tool &middot; <a href="/">Home</a> &middot; <a href="/try.html">Free try</a> &middot; <a href="/guides.html">Guides</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/faq.html">FAQ</a> &middot; <a href="/about.html">About</a> &middot; <a href="/blog">Blog</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a> &middot; <a href="/refund.html">Refunds</a><div class="fl">Guides: <a href="/csv-data-cleaning-checklist.html">CSV data cleaning checklist</a> &middot; <a href="/fix-mixed-date-formats-csv.html">Fix mixed and ambiguous dates in a CSV</a> &middot; <a href="/remove-duplicate-customers-csv.html">Remove duplicate customers in a CSV</a> &middot; <a href="/fix-numbers-stored-as-text-csv.html">Fix numbers stored as text in a CSV</a> &middot; <a href="/pdf-table-to-excel-csv.html">PDF table to Excel or CSV</a> &middot; <a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a></div></footer>
 </div>
 </body>
 </html>

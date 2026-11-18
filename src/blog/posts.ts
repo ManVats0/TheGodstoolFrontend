@@ -111,6 +111,10 @@ export const PUBLISHED: Post[] = [
         type: 'tip',
         text: `Whatever you use, ask one question of any converter: how will I know which rows are wrong? If the answer is "it is very accurate", add your own check.`,
       },
+      {
+        type: 'p',
+        text: `Related: the [bank statement PDF to Excel guide](/bank-statement-pdf-to-excel.html) shows the balance check in the tool, the [PDF table to Excel or CSV guide](/pdf-table-to-excel-csv.html) covers other PDFs, and you can [try a PDF table or CSV free with no sign-up](/try.html).`,
+      },
     ],
   },
   {
@@ -160,6 +164,10 @@ export const PUBLISHED: Post[] = [
       {
         type: 'p',
         text: `The 14-day trial needs no card, so you can do all of this before paying. If something here doesn't match what you see in the app, tell us. We'd rather fix the page than have you guess.`,
+      },
+      {
+        type: 'p',
+        text: `Related: [how AI cleaning works without seeing your data](/blog/how-ai-cleaning-keeps-your-data-private), the [privacy policy](/privacy.html), the table of [where your data goes](/about.html) and the [FAQ](/faq.html).`,
       },
     ],
   },
@@ -250,6 +258,10 @@ export const PUBLISHED: Post[] = [
       {
         type: 'p',
         text: `Open the AI window in the app. Under the input box there's a line saying whether private mode is on, and what gets sent. Everything in this post is also written down in the [privacy policy](/privacy.html). If something there ever disagrees with what you see, tell us at contact@thegodstool.com and we'll fix it.`,
+      },
+      {
+        type: 'p',
+        text: `Related: [Is my data actually safe on this platform?](/blog/is-my-data-safe) covers the rest, the [FAQ](/faq.html) has short answers, and you can [try one file with no sign-up](/try.html) to see what the tool does.`,
       },
     ],
   },

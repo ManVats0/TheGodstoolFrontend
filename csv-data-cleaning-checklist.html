@@ -20,6 +20,12 @@
   nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 44px; font-size: 0.92rem; }
   nav a { color: #c4b5fd; text-decoration: none; font-weight: 600; }
   nav .brand { color: #fff; font-weight: 800; }
+  nav span { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 16px; }
+  nav { gap: 8px 16px; flex-wrap: wrap; }
+  .crumbs { margin: -26px 0 22px; font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+  .crumbs a { color: #c4b5fd; text-decoration: none; }
+  footer .fl { margin-top: 8px; }
+  footer a { color: #c4b5fd; text-decoration: none; }
   .tag { font-family: monospace; font-size: 0.72rem; color: #a78bfa; letter-spacing: 0.1em; text-transform: uppercase; }
   h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); line-height: 1.15; margin: 8px 0 16px; color: #fff; font-weight: 800; }
   h2 { font-size: 1.45rem; margin: 52px 0 10px; color: #fff; font-weight: 800; }
@@ -54,12 +60,13 @@
   .note { font-size: 0.9rem; color: rgba(255,255,255,0.55); }
 </style>
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@graph": [{"@type": "Article", "@id": "https://thegodstool.com/csv-data-cleaning-checklist.html", "url": "https://thegodstool.com/csv-data-cleaning-checklist.html", "headline": "A CSV data cleaning checklist: ten checks, in the right order", "description": "A practical checklist for cleaning a CSV before you use it: encoding, types, dates, numbers, blanks, duplicates and a final reconciliation, in the right order.", "inLanguage": "en", "dateModified": "2026-11-04", "datePublished": "2026-11-04", "author": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}, "publisher": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://thegodstool.com/"}, {"@type": "ListItem", "position": 2, "name": "CSV data cleaning checklist", "item": "https://thegodstool.com/csv-data-cleaning-checklist.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What order should I clean a CSV in?", "acceptedAnswer": {"@type": "Answer", "text": "Encoding and structure first, then whitespace, types, dates, blanks and text values, then duplicates, and finish by reconciling row counts and totals against the original."}}, {"@type": "Question", "name": "Why clean dates before removing duplicates?", "acceptedAnswer": {"@type": "Answer", "text": "The same record written with two date formats will not match itself, so it survives deduplication. Normalise values first, then compare."}}, {"@type": "Question", "name": "How do I know I did not lose data?", "acceptedAnswer": {"@type": "Answer", "text": "Write down the row count and the totals of key columns before you start, and compare afterwards. Every difference should be explained by a change you made on purpose."}}, {"@type": "Question", "name": "Why does my CSV show strange characters?", "acceptedAnswer": {"@type": "Answer", "text": "The file's encoding does not match how it was read. Re-import and choose UTF-8 instead of editing the garbled text by hand."}}, {"@type": "Question", "name": "Can I clean a CSV for free?", "acceptedAnswer": {"@type": "Answer", "text": "The free plan handles CSV files up to 5 MB and 5,000 rows per run, and new accounts get a 14-day trial with every feature included."}}]}]}
+{"@context": "https://schema.org", "@graph": [{"@type": "Article", "@id": "https://thegodstool.com/csv-data-cleaning-checklist.html", "url": "https://thegodstool.com/csv-data-cleaning-checklist.html", "headline": "A CSV data cleaning checklist: ten checks, in the right order", "description": "A practical checklist for cleaning a CSV before you use it: encoding, types, dates, numbers, blanks, duplicates and a final reconciliation, in the right order.", "inLanguage": "en", "dateModified": "2026-11-04", "datePublished": "2026-11-04", "author": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}, "publisher": {"@type": "Organization", "name": "The God's Tool", "url": "https://thegodstool.com/"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://thegodstool.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://thegodstool.com/guides.html"}, {"@type": "ListItem", "position": 3, "name": "CSV data cleaning checklist", "item": "https://thegodstool.com/csv-data-cleaning-checklist.html"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What order should I clean a CSV in?", "acceptedAnswer": {"@type": "Answer", "text": "Encoding and structure first, then whitespace, types, dates, blanks and text values, then duplicates, and finish by reconciling row counts and totals against the original."}}, {"@type": "Question", "name": "Why clean dates before removing duplicates?", "acceptedAnswer": {"@type": "Answer", "text": "The same record written with two date formats will not match itself, so it survives deduplication. Normalise values first, then compare."}}, {"@type": "Question", "name": "How do I know I did not lose data?", "acceptedAnswer": {"@type": "Answer", "text": "Write down the row count and the totals of key columns before you start, and compare afterwards. Every difference should be explained by a change you made on purpose."}}, {"@type": "Question", "name": "Why does my CSV show strange characters?", "acceptedAnswer": {"@type": "Answer", "text": "The file's encoding does not match how it was read. Re-import and choose UTF-8 instead of editing the garbled text by hand."}}, {"@type": "Question", "name": "Can I clean a CSV for free?", "acceptedAnswer": {"@type": "Answer", "text": "The free plan handles CSV files up to 5 MB and 5,000 rows per run, and new accounts get a 14-day trial with every feature included."}}]}]}
 </script>
 </head>
 <body>
 <div class="wrap">
-<nav><a class="brand" href="/">The God's Tool</a><span><a href="/pricing">Pricing</a> &nbsp; <a href="/blog">Blog</a></span></nav>
+<nav><a class="brand" href="/">The God's Tool</a><span><a href="/try.html">Free try</a><a href="/guides.html">Guides</a><a href="/pricing">Pricing</a><a href="/blog">Blog</a></span></nav>
+<div class="crumbs"><a href="/">Home</a> &rsaquo; <a href="/guides.html">Guides</a> &rsaquo; CSV data cleaning checklist</div>
 
 <div class="tag">Data cleaning guide</div>
 <h1>A CSV data cleaning checklist: ten checks, in the right order</h1>
@@ -119,7 +126,7 @@
   <a class="btn main" href="/">Start the 14-day trial</a>
   <a class="btn alt" href="/pricing">See plans</a>
 </div>
-<div class="small">No card needed for the trial. After it, the free plan stays: CSV files up to 5 MB and 5,000 rows per run.</div>
+<div class="small">No card needed for the trial. After it, the free plan stays: CSV files up to 5 MB and 5,000 rows per run. Want to look first? <a href="/try.html">Try one file with no sign-up</a>.</div>
 
 <h2>Questions people ask</h2>
 <details><summary>What order should I clean a CSV in?</summary><p>Encoding and structure first, then whitespace, types, dates, blanks and text values, then duplicates, and finish by reconciling row counts and totals against the original.</p></details>
@@ -130,13 +137,16 @@
 
 <h2>Keep reading</h2>
 <ul>
-<li><a href="/fix-mixed-date-formats-csv.html">Fix mixed date formats</a>: is 03/04 March or April?</li>
-<li><a href="/remove-duplicate-customers-csv.html">Remove duplicate customers</a>: including the ones spelled differently</li>
-<li><a href="/fix-numbers-stored-as-text-csv.html">Numbers stored as text</a>: N/A, dashes and brackets in amount columns</li>
-<li><a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a>: a row-by-row balance check</li>
+<li><a href="/fix-mixed-date-formats-csv.html">Fix mixed and ambiguous dates in a CSV</a>: is 03/04 March or April, and how to convert every date safely</li>
+<li><a href="/remove-duplicate-customers-csv.html">Remove duplicate customers in a CSV</a>: including the ones spelled differently</li>
+<li><a href="/fix-numbers-stored-as-text-csv.html">Fix numbers stored as text in a CSV</a>: N/A, dashes and brackets in amount columns</li>
+<li><a href="/pdf-table-to-excel-csv.html">PDF table to Excel or CSV</a>: why copying from a PDF breaks, and what to fix afterwards</li>
+<li><a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a>: a row-by-row check against the statement's own balances</li>
+<li><a href="/try.html">Free try</a>: drop in one PDF table or CSV, no sign-up, and see what is wrong with it</li>
+<li><a href="/guides.html">All guides</a>: every cleaning guide on one page</li>
 </ul>
 
-<footer>The God's Tool &middot; <a href="/">Home</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></footer>
+<footer>The God's Tool &middot; <a href="/">Home</a> &middot; <a href="/try.html">Free try</a> &middot; <a href="/guides.html">Guides</a> &middot; <a href="/pricing">Pricing</a> &middot; <a href="/faq.html">FAQ</a> &middot; <a href="/about.html">About</a> &middot; <a href="/blog">Blog</a> &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a> &middot; <a href="/refund.html">Refunds</a><div class="fl">Guides: <a href="/csv-data-cleaning-checklist.html">CSV data cleaning checklist</a> &middot; <a href="/fix-mixed-date-formats-csv.html">Fix mixed and ambiguous dates in a CSV</a> &middot; <a href="/remove-duplicate-customers-csv.html">Remove duplicate customers in a CSV</a> &middot; <a href="/fix-numbers-stored-as-text-csv.html">Fix numbers stored as text in a CSV</a> &middot; <a href="/pdf-table-to-excel-csv.html">PDF table to Excel or CSV</a> &middot; <a href="/bank-statement-pdf-to-excel.html">Bank statement PDF to Excel</a></div></footer>
 </div>
 </body>
 </html>

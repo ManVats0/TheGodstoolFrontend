@@ -1126,6 +1126,9 @@ export default function App() {
             >
               Try free
             </a>
+            <a href="/guides.html" className="nav-link" style={{ textDecoration: 'none' }}>
+              Guides
+            </a>
             <a href="/blog" className="nav-link" style={{ textDecoration: 'none' }}>
               Blog
             </a>
@@ -2637,6 +2640,17 @@ export default function App() {
           <div
             style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}
           >
+            <a
+              href="/guides.html"
+              style={{
+                color: 'rgba(255,255,255,0.45)',
+                fontSize: '0.75rem',
+                fontFamily: 'monospace',
+                textDecoration: 'none',
+              }}
+            >
+              All guides
+            </a>
             <a
               href="/csv-data-cleaning-checklist.html"
               style={{
