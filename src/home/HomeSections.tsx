@@ -295,6 +295,29 @@ export function FaqSection() {
   )
 }
 
+export function BankSection() {
+  const b = content.bank
+  return (
+    <section id="bank-statements" className="hm-sec" aria-labelledby="hm-bank">
+      <div className="hm-priv">
+        <div className="hm-priv-text">
+          <span className="hm-eyebrow">{b.eyebrow}</span>
+          <h2 id="hm-bank">{b.h2}</h2>
+          <p>{b.body}</p>
+          <ul>
+            {b.points.map(x => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+          <a className="hm-priv-link" href={b.href}>
+            {b.link} →
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function PrivacySection() {
   const p = content.privacy
   return (

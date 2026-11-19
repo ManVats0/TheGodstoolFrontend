@@ -4,15 +4,15 @@
     "url": "https://thegodstool.com",
     "email": "contact@thegodstool.com",
     "title": "AI Data Cleaning for CSV, Google Sheets & Databases",
-    "description": "Fix duplicates, blanks and messy dates in CSV files, Google Sheets and databases. Describe the fix in plain English, review it, and repeat it. Free plan.",
+    "description": "Fix duplicates, blanks and messy dates in CSV files, Google Sheets and databases. Describe the fix in plain English, re-run it on a schedule. Free plan.",
     "ogTitle": "Clean messy data in minutes, not hours",
     "ogDescription": "Upload a CSV, link a Google Sheet or connect a database. It finds the problems, you approve the fixes. Free plan, no card needed.",
     "updated": "2026-11-01"
   },
   "hero": {
-    "eyebrow": "For freelancers, analysts, teams and companies",
+    "eyebrow": "For bookkeepers, accountants, freelancers and small teams with messy exports",
     "h1": "Clean messy data in minutes, not hours.",
-    "sub": "Upload a CSV or a PDF table, link a Google Sheet, or connect a database. It finds duplicates, blanks and broken dates, then fixes them when you describe the change in plain English. Save the steps (we call that a pipeline) and run them again on the next file.",
+    "sub": "Upload a CSV or a PDF table, link a Google Sheet, or connect a database. It finds duplicates, blanks and broken dates, then fixes them when you describe the change in plain English. Describe the fix once, save the steps (we call that a pipeline), and run them again on every new file or on a schedule.",
     "note": "The free plan stays free. New accounts also get 14 days with every feature, no card needed.",
     "primary": "Clean a file free",
     "secondary": "Start the 14-day trial",
@@ -51,8 +51,8 @@
     "h2": "Built for people who get handed bad data.",
     "items": [
       {
-        "title": "Freelancers and analysts",
-        "body": "Spend less of the week on cleanup. Stay on the free plan, or buy credits only for the days you need the AI. No monthly commitment.",
+        "title": "Bookkeepers, accountants, freelancers and analysts",
+        "body": "Spend less of the week on cleanup, and stop redoing the same fixes on every new export. Stay on the free plan, or buy credits only for the days you need the AI. No monthly commitment.",
         "cta": "Start free",
         "action": "register"
       },
@@ -72,7 +72,7 @@
   },
   "features": {
     "h2": "What you actually get",
-    "intro": "Connect it, clean it, set it to repeat. That's most of it.",
+    "intro": "Connect it, clean it, set it to repeat. That's most of it. In ETL terms: pull data in from a CSV, Sheet or database, fix it, and send it on, with no code.",
     "items": [
       {
         "icon": "zap",
@@ -328,5 +328,18 @@
     ],
     "link": "See how it works, with pictures",
     "href": "/blog/how-ai-cleaning-keeps-your-data-private"
+  },
+  "bank": {
+    "eyebrow": "Bank statements",
+    "h2": "Bank statement PDF to Excel, with every row checked.",
+    "body": "Upload a bank statement PDF and get a CSV back. Each row is checked against the statement's own running balances, so you can see which rows are proven and which need a look. Rows that don't add up are flagged, never fixed quietly.",
+    "points": [
+      "Reads text PDFs made by a bank or program, not scans or photos",
+      "Needs a running balance on the statement to check against",
+      "Outputs a CSV. It does not import into accounting software",
+      "Available on the trial and paid plans"
+    ],
+    "link": "See how the check works",
+    "href": "/bank-statement-pdf-to-excel.html"
   }
 }

@@ -101,6 +101,7 @@ ${li(c.hero.sources.map(esc))}
 <section><h2>${esc(c.problem.h2)}</h2><p>${esc(c.problem.intro)}</p><ul>${c.problem.items.map(card).join('')}</ul><p>${esc(c.problem.fix)}</p></section>
 <section><h2>${esc(c.audience.h2)}</h2><ul>${c.audience.items.map(card).join('')}</ul></section>
 <section id="features"><h2>${esc(c.features.h2)}</h2><p>${esc(c.features.intro)}</p><ul>${c.features.items.map(card).join('')}</ul></section>
+<section id="bank-statements"><h2>${esc(c.bank.h2)}</h2><p>${esc(c.bank.body)}</p>${li(c.bank.points.map(esc))}<p><a href="${c.bank.href}">${esc(c.bank.link)}</a></p></section>
 <section id="how"><h2>${esc(c.steps.h2)}</h2><ol>${c.steps.items.map(card).join('')}</ol></section>
 <section><h2>${esc(c.alerts.h2)}</h2><p>${esc(c.alerts.body)}</p></section>
 <section id="pricing"><h2>${esc(c.pricing.h2)}</h2><p>${esc(c.pricing.sub)}</p>
