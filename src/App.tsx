@@ -47,6 +47,7 @@ import {
   QuoteSection,
   FaqSection,
   PrivacySection,
+  BankSection,
   scrollToQuote,
 } from './home/HomeSections'
 import {
@@ -1485,6 +1486,7 @@ export default function App() {
           <ProblemSection />
           <AudienceSection onRegister={() => handleEnter('register')} />
           <FeaturesSection Icon={LineIcon} />
+          <BankSection />
           <StepsSection Icon={LineIcon} onRegister={() => handleEnter('register')} />
 
           {/* ── LIVE DEMO REEL ── */}
