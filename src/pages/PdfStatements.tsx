@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE } from '../config'
+import PdfPassword from '../components/PdfPassword'
 
 // PDF bank statement -> table you can trust.
 // The server reads the PDF's own text (no AI, nothing is stored) and checks every row against the statement's
@@ -172,8 +173,9 @@ export default function PdfStatements({ embedded = false }: { embedded?: boolean
   const [onlyCheck, setOnlyCheck] = useState(false)
   const [saving, setSaving] = useState(false)
   const [drag, setDrag] = useState(false)
+  const [pwKind, setPwKind] = useState<'required' | 'wrong' | null>(null)
 
-  const run = async (f: File, order?: string) => {
+  const run = async (f: File, order?: string, password?: string) => {
     setBusy(true)
     setError('')
     setRes(null)
@@ -183,16 +185,23 @@ export default function PdfStatements({ embedded = false }: { embedded?: boolean
       const fd = new FormData()
       fd.append('file', f)
       if (order) fd.append('date_order', order)
+      if (password) fd.append('password', password)
       const r = await fetch(`${API_BASE}/api/pdf/extract`, { method: 'POST', credentials: 'include', body: fd })
       const j: Ok | Fail | { error?: string } = await r.json().catch(() => ({}))
       if (r.status === 402) {
         setError('PDF to table is part of the paid plans.')
         return
       }
+      const code = (j as Fail).code
+      if (code === 'password_required' || code === 'password_wrong') {
+        setPwKind(code === 'password_wrong' ? 'wrong' : 'required')
+        return
+      }
       if (!r.ok || (j as Fail).ok === false) {
         setError((j as any).error || `Something went wrong (${r.status}).`)
         return
       }
+      setPwKind(null)
       const ok = j as Ok
       setRes(ok)
       setRows(ok.rows)
@@ -212,6 +221,7 @@ export default function PdfStatements({ embedded = false }: { embedded?: boolean
       return
     }
     setFile(f)
+    setPwKind(null)
     run(f)
   }
 
@@ -247,6 +257,47 @@ export default function PdfStatements({ embedded = false }: { embedded?: boolean
     a.download = `${stem}.csv`
     a.click()
     setTimeout(() => URL.revokeObjectURL(a.href), 2000)
+  }
+
+  const [xlsxBusy, setXlsxBusy] = useState(false)
+  const downloadXlsx = async () => {
+    setXlsxBusy(true)
+    setError('')
+    try {
+      const label = (st: Status) => (st === 'verified' ? 'verified' : st === 'flagged' ? 'needs review' : 'not checked')
+      const r = await fetch(`${API_BASE}/api/pdf/xlsx`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sheet: stem,
+          columns: [
+            { name: 'Date', type: 'date' },
+            { name: 'Description', type: 'text' },
+            { name: 'Ref', type: 'text' },
+            { name: 'Debit', type: 'number' },
+            { name: 'Credit', type: 'number' },
+            { name: 'Balance', type: 'number' },
+            { name: 'Check', type: 'text' },
+          ],
+          rows: rows.map(x => [x.date, x.description, x.ref, x.debit, x.credit, x.balance, label(x.status)]),
+        }),
+      })
+      if (!r.ok) {
+        setError('Could not make the Excel file. Download the CSV instead, or try again.')
+        return
+      }
+      const blob = await r.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `${stem}.xlsx`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000)
+    } catch {
+      setError('Could not reach the server. Check your connection and try again.')
+    } finally {
+      setXlsxBusy(false)
+    }
   }
 
   const saveAsSource = async () => {
@@ -361,6 +412,8 @@ export default function PdfStatements({ embedded = false }: { embedded?: boolean
         )}
       </div>
 
+      {pwKind && file && <PdfPassword kind={pwKind} busy={busy} onSubmit={pw => run(file, undefined, pw)} />}
+
       {error && (
         <div
           style={{
@@ -414,6 +467,22 @@ export default function PdfStatements({ embedded = false }: { embedded?: boolean
                   }}
                 >
                   Download CSV
+                </button>
+                <button
+                  onClick={downloadXlsx}
+                  disabled={xlsxBusy}
+                  style={{
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    color: 'white',
+                    borderRadius: 10,
+                    padding: '9px 16px',
+                    fontWeight: 700,
+                    cursor: xlsxBusy ? 'default' : 'pointer',
+                    opacity: xlsxBusy ? 0.6 : 1,
+                  }}
+                >
+                  {xlsxBusy ? 'Making Excel…' : 'Download Excel'}
                 </button>
                 <button
                   onClick={saveAsSource}
