@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE } from '../config'
+import PdfPassword from '../components/PdfPassword'
 
 // Any text-based PDF -> a plain table -> a few one-click cleanups -> download.
 // The server reads the PDF's own text (no AI, nothing stored). Every cleanup is done here in the browser and
@@ -209,6 +210,7 @@ export default function PdfTables() {
   const [header, setHeader] = useState(true)
   const [saving, setSaving] = useState(false)
   const [drag, setDrag] = useState(false)
+  const [pwKind, setPwKind] = useState<'required' | 'wrong' | null>(null)
 
   const load = (t: Tbl) => {
     setTid(t.id)
@@ -217,23 +219,29 @@ export default function PdfTables() {
     setLog([])
   }
 
-  const run = async (f: File) => {
+  const run = async (f: File, password?: string) => {
     setBusy(true)
     setError('')
     setRes(null)
     try {
       const fd = new FormData()
       fd.append('file', f)
+      if (password) fd.append('password', password)
       const r = await fetch(`${API_BASE}/api/pdf/tables`, { method: 'POST', credentials: 'include', body: fd })
       const j = await r.json().catch(() => ({}) as any)
       if (r.status === 402) {
         setError('PDF to data is part of the paid plans.')
         return
       }
+      if (j.code === 'password_required' || j.code === 'password_wrong') {
+        setPwKind(j.code === 'password_wrong' ? 'wrong' : 'required')
+        return
+      }
       if (!r.ok || j.ok === false) {
         setError(j.error || `Something went wrong (${r.status}).`)
         return
       }
+      setPwKind(null)
       const ok = j as Ok
       setRes(ok)
       load(ok.tables[0])
@@ -251,6 +259,7 @@ export default function PdfTables() {
       return
     }
     setFile(f)
+    setPwKind(null)
     run(f)
   }
 
@@ -373,6 +382,8 @@ export default function PdfTables() {
           </div>
         )}
       </div>
+
+      {pwKind && file && <PdfPassword kind={pwKind} busy={busy} onSubmit={pw => run(file, pw)} />}
 
       {error && (
         <div
